@@ -6,7 +6,8 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { config, redirectUri } from './src/config.js';
 import * as ca from './src/contaAzul.js';
-import { montarPainel } from './src/painel.js';
+import { dadosDeVendas } from './src/vendas.js';
+import { planilhaConfigurada } from './src/planilha.js';
 
 const raiz = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -31,16 +32,16 @@ function exigeLogin(req, res, next) {
 }
 
 const paginaLogin = (erro = '') => `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1"><title>Painel Comercial Visu</title>
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>Painel de Vendas Visu</title>
 <link rel="icon" href="/logo.png"><style>
 body{margin:0;min-height:100vh;display:grid;place-items:center;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
-background:radial-gradient(120% 120% at 0% 0%,#ff4fb0 0%,#e6007e 45%,#8a0a55 100%);color:#2a0f22}
+background:radial-gradient(120% 140% at 100% 0%,#2F2963 0%,#241E48 60%);color:#241E48}
 form{background:#fff;padding:32px 28px;border-radius:18px;width:min(340px,90vw);box-shadow:0 20px 50px rgba(60,0,40,.35);text-align:center}
-img{width:84px;height:84px;border-radius:50%;object-fit:cover}h1{font-size:18px;margin:14px 0 4px}p{margin:0 0 18px;color:#7a5b6f;font-size:13px}
-input{width:100%;box-sizing:border-box;padding:11px 12px;border:1px solid #e8cfe0;border-radius:10px;font:inherit}
-button{margin-top:12px;width:100%;padding:11px;border:0;border-radius:10px;background:#e6007e;color:#fff;font:600 15px system-ui;cursor:pointer}
+img{width:170px;height:auto;display:block;margin:0 auto;background:#241E48;padding:14px 18px;border-radius:12px}h1{font-size:18px;margin:14px 0 4px}p{margin:0 0 18px;color:#8A86A0;font-size:13px}
+input{width:100%;box-sizing:border-box;padding:11px 12px;border:1px solid #CFCCDD;border-radius:10px;font:inherit}
+button{margin-top:12px;width:100%;padding:11px;border:0;border-radius:10px;background:#E8780C;color:#fff;font:600 15px system-ui;cursor:pointer}
 .e{color:#c0153a;font-size:13px;margin-top:10px}</style></head><body>
-<form method="post" action="/login"><img src="/logo.png" alt="Visu"><h1>Painel Comercial</h1><p>Acesso restrito</p>
+<form method="post" action="/login"><img src="/logo-visu.png" alt="Visu Design"><h1>Painel de Vendas</h1><p>Acesso restrito</p>
 <input type="password" name="senha" placeholder="Senha" autofocus required><button>Entrar</button>
 ${erro ? `<div class="e">${erro}</div>` : ''}</form></body></html>`;
 
@@ -61,7 +62,7 @@ app.get('/sair', (req, res) => {
 });
 
 app.get('/saude', (req, res) => res.json({ ok: true }));
-app.get('/logo.png', (req, res) => res.sendFile(path.join(raiz, 'public', 'logo.png')));
+app.get(['/logo.png', '/logo-visu.png'], (req, res) => res.sendFile(path.join(raiz, 'public', req.path.slice(1))));
 
 // ---------- conexão com a Conta Azul ----------
 app.get('/conectar', exigeLogin, (req, res) => {
@@ -91,13 +92,23 @@ app.get('/api/status', exigeLogin, async (req, res) => {
   res.json({ ...(await ca.statusConexao()), demo: config.demo, redirect_uri: redirectUri(), credenciais_ok: !!(config.clientId && config.clientSecret) });
 });
 
-app.get('/api/painel', exigeLogin, async (req, res) => {
+// Base de vendas (linhas da planilha já padronizadas). Os indicadores são calculados no navegador,
+// para os filtros responderem na hora.
+app.get('/api/vendas', exigeLogin, async (req, res) => {
   try {
-    res.json(await montarPainel({ ano: req.query.ano, mes: req.query.mes, forcar: req.query.forcar === '1' }));
+    res.json(await dadosDeVendas(req.query.forcar === '1'));
   } catch (e) {
-    console.error('[painel]', e);
-    res.status(e.naoConectado ? 409 : 502).json({ erro: e.message });
+    console.error('[vendas]', e);
+    res.status(502).json({ erro: e.message });
   }
+});
+
+// Mapeamento de colunas e inconsistências da planilha, sem as linhas
+app.get('/api/planilha', exigeLogin, async (req, res) => {
+  try {
+    const d = await dadosDeVendas(req.query.forcar === '1');
+    res.json({ fonte: d.fonte, planilha_configurada: planilhaConfigurada(), linhas: d.linhas.length, qualidade: d.qualidade });
+  } catch (e) { res.status(502).json({ erro: e.message }); }
 });
 
 // Mostra a estrutura crua da API para conferir nomes de campos (usar uma vez após conectar)

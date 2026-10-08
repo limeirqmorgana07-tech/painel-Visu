@@ -1,73 +1,80 @@
-// Dados fictícios para visualizar o painel antes da conexão com a Conta Azul.
-// Nomes genéricos de propósito: nada aqui representa clientes ou vendas reais da Visu.
+// Dados FICTÍCIOS no formato da planilha de vendas, para ver o painel antes de ligar a planilha real.
+// Produtos e tecidos vêm do catálogo da Visu; clientes, vendedores e valores são inventados.
+// Algumas grafias erradas são colocadas de propósito para a página "Qualidade dos dados" ter o que mostrar.
 function prng(seed) {
   let s = seed >>> 0;
   return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 2 ** 32);
 }
 
-const VENDEDORES = ['Vendedor 1', 'Vendedor 2', 'Vendedor 3', 'Vendedor 4', 'Venda direta'];
-const PESO_VEND = [0.32, 0.26, 0.2, 0.14, 0.08];
-const PRODUTOS = Array.from({ length: 14 }, (_, i) => ({ nome: `Produto ${String.fromCharCode(65 + i)}`, preco: 180 + ((i * 397) % 1900) }));
-const CLIENTES = Array.from({ length: 70 }, (_, i) => `Cliente ${String(i + 1).padStart(3, '0')}`);
-
-function escolher(r, lista, pesos) {
-  if (!pesos) return lista[Math.floor(r() * lista.length)];
-  let x = r();
-  for (let i = 0; i < lista.length; i++) { if ((x -= pesos[i]) <= 0) return lista[i]; }
-  return lista[lista.length - 1];
+function escolher(r, lista) {
+  const total = lista.reduce((s, x) => s + x[1], 0);
+  let x = r() * total;
+  for (const [v, p] of lista) { if ((x -= p) <= 0) return v; }
+  return lista[lista.length - 1][0];
 }
 
-export function gerarDemo() {
+const PRODUTOS = [
+  ['Camiseta básica', 40, 38], ['Camiseta gola polo', 12, 62], ['Baby look', 10, 40], ['Regata machão', 9, 36],
+  ['Regata cavada', 6, 34], ['Cropped', 5, 39], ['Ecobag', 4, 28], ['Sacola esportiva', 4, 32],
+  ['Headband', 3, 18], ['Munhequeira', 3, 16], ['Bandeira', 4, 160],
+];
+const MATERIAIS = [['Poliamida', 44], ['Dry-fit poliéster', 24], ['100% algodão', 22], ['Dry-fit poliamida', 10]];
+const CORES = [['Preto', 36], ['Branco', 26], ['Azul marinho', 12], ['Cinza', 8], ['Vermelho', 6], ['Verde', 6], ['Rosa', 6]];
+const VENDEDORES = [['Vendedora A', 34], ['Vendedor B', 28], ['Vendedora C', 22], ['Vendedor D', 16]];
+const CLIENTES_FIXOS = ['Cliente Indústria 01', 'Academia Exemplo', 'Escola Modelo', 'Assessoria Corrida X', 'Clínica Exemplo', 'Igreja Exemplo'];
+
+export function gerarDemoPlanilha() {
   const r = prng(20261008);
   const agora = new Date(Date.now() - 3 * 3600e3);
-  const vendas = [];
-  const itens = new Map();
-  let numero = 1000;
-  for (let m = 11; m >= 0; m--) {
-    const dt = new Date(Date.UTC(agora.getUTCFullYear(), agora.getUTCMonth() - m, 1));
-    const dias = new Date(Date.UTC(dt.getUTCFullYear(), dt.getUTCMonth() + 1, 0)).getUTCDate();
-    const sazonal = 1 + 0.18 * Math.sin((dt.getUTCMonth() + 2) / 12 * 2 * Math.PI) + (11 - m) * 0.012;
-    const qtd = Math.round((38 + r() * 14) * sazonal);
-    for (let k = 0; k < qtd; k++) {
+  const linhas = [];
+  const jaComprou = new Set();
+  let cod = 4100;
+  let novos = 0;
+  for (let m = 13; m >= 0; m--) {
+    const ini = new Date(Date.UTC(agora.getUTCFullYear(), agora.getUTCMonth() - m, 1));
+    const dias = new Date(Date.UTC(ini.getUTCFullYear(), ini.getUTCMonth() + 1, 0)).getUTCDate();
+    const sazonal = 1 + 0.2 * Math.sin(((ini.getUTCMonth() + 3) / 12) * 2 * Math.PI) + (13 - m) * 0.015;
+    const pedidos = Math.round((44 + r() * 12) * sazonal);
+    for (let k = 0; k < pedidos; k++) {
       const dia = 1 + Math.floor(r() * dias);
-      const data = new Date(Date.UTC(dt.getUTCFullYear(), dt.getUTCMonth(), dia));
+      const data = new Date(Date.UTC(ini.getUTCFullYear(), ini.getUTCMonth(), dia));
       if (data > agora) continue;
-      const id = `demo-${numero}`;
-      const linhas = [];
-      const n = 1 + Math.floor(r() * 3);
-      for (let j = 0; j < n; j++) {
-        const p = PRODUTOS[Math.floor(Math.pow(r(), 1.7) * PRODUTOS.length)];
-        const q = 1 + Math.floor(r() * 4);
-        linhas.push({ nome: p.nome, quantidade: q, total: Math.round(p.preco * q * (0.9 + r() * 0.2) * 100) / 100 });
+      const iso = data.toISOString().slice(0, 10);
+      // cliente: 28% de chance de ser alguém novo
+      let cliente;
+      if (r() < 0.28 || jaComprou.size < 12) cliente = `Cliente ${String(++novos).padStart(3, '0')}`;
+      else cliente = r() < 0.25 ? CLIENTES_FIXOS[Math.floor(r() * CLIENTES_FIXOS.length)] : [...jaComprou][Math.floor(Math.pow(r(), 1.3) * jaComprou.size)];
+      const marcadoNovo = !jaComprou.has(cliente);
+      jaComprou.add(cliente);
+      let nomeLancado = cliente;
+      if (cliente === 'Cliente Indústria 01' && r() < 0.6) nomeLancado = `Cliente Indústria 01 lote ${1 + Math.floor(r() * 3)}`;
+      if (cliente === 'Academia Exemplo' && r() < 0.15) nomeLancado = 'academia exemplo';
+      const vendedor = escolher(r, VENDEDORES);
+      const tipoVenda = r() < 0.82 ? 'B2B' : 'B2C';
+      const itens = 1 + Math.floor(r() * r() * 3);
+      cod++;
+      for (let i = 0; i < itens; i++) {
+        const nomeProd = escolher(r, PRODUTOS.map((p) => [p[0], p[1]]));
+        const prod = PRODUTOS.find((p) => p[0] === nomeProd);
+        let material = escolher(r, MATERIAIS);
+        let cor = material === 'Dry-fit poliéster' && r() < 0.7 ? 'Branco' : material === 'Poliamida' && r() < 0.5 ? 'Preto' : escolher(r, CORES);
+        const especificacao = material === 'Dry-fit poliéster' ? 'Sublimação' : r() < 0.6 ? 'Silk' : 'Bordado';
+        if (material === 'Poliamida' && r() < 0.1) material = 'poliamida ';
+        if (cor === 'Preto' && r() < 0.08) cor = 'PRETO';
+        if (cor === 'Azul marinho' && r() < 0.2) cor = 'Azul Marinho';
+        const qtd = prod[0] === 'Bandeira' ? 1 + Math.floor(r() * 3) : 10 + Math.floor(Math.pow(r(), 1.6) * 140);
+        const unit = Math.round(prod[2] * (0.92 + r() * 0.2) * 100) / 100;
+        linhas.push({
+          linha: linhas.length + 2, data: iso, mes: iso.slice(0, 7),
+          cliente: nomeLancado.replace(/\s*lote\s*\d+$/i, ''), cliente_original: nomeLancado,
+          pedido: `VS-${cod}`, pedido_informado: true, vendedor, tipo_venda: tipoVenda,
+          novo_recompra: r() < 0.03 ? '' : marcadoNovo ? 'novo' : 'recompra',
+          tipo_produto: prod[0], material, especificacao, cor,
+          quantidade: qtd, total: Math.round(qtd * unit * 100) / 100,
+          pag1: 0, pag2: 0, pago_100: false, forma_pagamento: '', prazo_entrega: '', frete: '', segmento: '',
+        });
       }
-      const total = linhas.reduce((s, l) => s + l.total, 0);
-      const x = r();
-      const situacao = x < 0.06 ? 'CANCELADO' : x < 0.16 ? 'ORCAMENTO' : x < 0.24 ? 'EM_ANDAMENTO' : x < 0.62 ? 'FATURADO' : 'APROVADO';
-      vendas.push({
-        id, numero: String(numero++), data: data.toISOString().slice(0, 10),
-        cliente: CLIENTES[Math.floor(Math.pow(r(), 1.4) * CLIENTES.length)],
-        vendedor: escolher(r, VENDEDORES, PESO_VEND), situacao, total,
-      });
-      itens.set(id, linhas);
     }
   }
-  const hoje = agora.toISOString().slice(0, 10);
-  const receber = vendas
-    .filter((v) => v.situacao === 'FATURADO' || v.situacao === 'APROVADO')
-    .flatMap((v) => {
-      const parcelas = v.total > 3000 ? 3 : 1;
-      return Array.from({ length: parcelas }, (_, i) => {
-        const venc = new Date(new Date(v.data).getTime() + (30 * (i + 1)) * 864e5).toISOString().slice(0, 10);
-        const valor = v.total / parcelas;
-        const idadeDias = (Date.parse(hoje) - Date.parse(venc)) / 864e5;
-        const pagoNoPrazo = venc < hoje && r() > (idadeDias > 60 ? 0.02 : 0.15);
-        return {
-          id: `${v.id}-${i}`, descricao: `Venda ${v.numero} (${i + 1}/${parcelas})`, cliente: v.cliente,
-          vencimento: venc, valor,
-          status: pagoNoPrazo ? 'RECEBIDO' : venc < hoje ? 'ATRASADO' : 'EM_ABERTO',
-          pago: pagoNoPrazo ? valor : 0, aberto: pagoNoPrazo ? 0 : valor,
-        };
-      });
-    });
-  return { vendas, receber, itens, erroReceber: null };
+  return { linhas, mapa: { linha_cabecalho: 1, reconhecidas: {}, nao_encontradas: [], obrigatorias_faltando: [], colunas_da_planilha: [], demonstracao: true } };
 }

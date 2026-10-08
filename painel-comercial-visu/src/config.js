@@ -10,8 +10,8 @@ export const config = {
   clientSecret: (env.CONTA_AZUL_CLIENT_SECRET || '').trim(),
 
   // Endereços da API v2 (podem ser trocados por variável de ambiente se a Conta Azul mudar)
-  urlLogin: env.CONTA_AZUL_URL_LOGIN || 'https://auth.contaazul.com/login',
-  urlToken: env.CONTA_AZUL_URL_TOKEN || 'https://auth.contaazul.com/oauth2/token',
+  urlLogin: env.CONTA_AZUL_URL_LOGIN || 'https://login.contaazul.com/#/oauth/authorize',
+  urlToken: env.CONTA_AZUL_URL_TOKEN || 'https://api-v2.contaazul.com/oauth/token',
   urlApi: (env.CONTA_AZUL_URL_API || 'https://api-v2.contaazul.com').replace(/\/$/, ''),
   escopo: env.CONTA_AZUL_ESCOPO || 'openid profile aws.cognito.signin.user.admin',
 
@@ -25,6 +25,11 @@ export const config = {
 
   // Regras do painel
   metaMensal: Number(env.META_MENSAL || 0),
+  // Ponto de equilíbrio apurado na DRE (reunião de 06/10/2026: R$ 176 mil). Atualizar quando a estrutura de custos mudar.
+  pontoEquilibrio: Number(env.PONTO_EQUILIBRIO ?? 176000),
+  // Comissão sobre faturamento: começa a pagar a partir de R$ 15 mil vendidos no mês e chega a 5% a partir de R$ 50 mil
+  comissaoInicio: Number(env.COMISSAO_INICIO || 15000),
+  comissaoTeto: Number(env.COMISSAO_TETO || 50000),
   cacheSegundos: Number(env.CACHE_SEGUNDOS || 300),
   mesesHistorico: Number(env.MESES_HISTORICO || 12),
   maxVendasComItens: Number(env.MAX_VENDAS_COM_ITENS || 300),
