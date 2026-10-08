@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: painel-comercial-visu
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /saude
+    autoDeploy: false
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: URL_PUBLICA
+        sync: false
+      - key: CONTA_AZUL_CLIENT_ID
+        sync: false
+      - key: CONTA_AZUL_CLIENT_SECRET
+        sync: false
+      - key: PAINEL_SENHA
+        sync: false
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: DATABASE_URL
+        sync: false
+      - key: META_MENSAL
+        value: "0"
