@@ -5,11 +5,21 @@ import { config, redirectUri } from './config.js';
 import { lerToken, salvarToken, apagarToken } from './tokenStore.js';
 
 // ---------- OAuth ----------
-const estadosPendentes = new Map(); // state -> criado em (ms)
+// O "state" é assinado (não fica na memória), então continua válido mesmo se o
+// servidor reiniciar entre o clique em "Conectar" e a volta da Conta Azul.
+const assinarState = (base) => crypto.createHmac('sha256', config.segredoSessao).update(base).digest('hex').slice(0, 32);
+
+function stateValido(state) {
+  const [ts, rand, sig] = String(state || '').split('.');
+  if (!ts || !rand || !sig) return false;
+  const esperado = assinarState(`${ts}.${rand}`);
+  if (sig.length !== esperado.length || !crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(esperado))) return false;
+  return Date.now() - Number(ts) < 30 * 60 * 1000;
+}
 
 export function urlDeAutorizacao() {
-  const state = crypto.randomBytes(16).toString('hex');
-  estadosPendentes.set(state, Date.now());
+  const base = `${Date.now()}.${crypto.randomBytes(8).toString('hex')}`;
+  const state = `${base}.${assinarState(base)}`;
   const q = new URLSearchParams({
     response_type: 'code',
     client_id: config.clientId,
@@ -42,9 +52,7 @@ async function pedirToken(corpo) {
 }
 
 export async function trocarCodigo(code, state) {
-  const criado = estadosPendentes.get(state);
-  estadosPendentes.delete(state);
-  if (!criado || Date.now() - criado > 15 * 60 * 1000) throw new Error('Link de autorização expirado. Tente conectar de novo.');
+  if (!stateValido(state)) throw new Error('Link de autorização expirado ou inválido. Clique em "Conectar Conta Azul" de novo.');
   const t = await pedirToken({ grant_type: 'authorization_code', code, redirect_uri: redirectUri() });
   await salvarToken(t);
   return t;

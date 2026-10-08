@@ -3,11 +3,11 @@ const env = process.env;
 
 export const config = {
   porta: Number(env.PORT || 3000),
-  urlPublica: (env.URL_PUBLICA || `http://localhost:${env.PORT || 3000}`).replace(/\/$/, ''),
+  urlPublica: (env.URL_PUBLICA?.trim() || `http://localhost:${env.PORT || 3000}`).replace(/\/$/, ''),
 
   // Credenciais do aplicativo criado no Portal do Desenvolvedor da Conta Azul
-  clientId: env.CONTA_AZUL_CLIENT_ID || '',
-  clientSecret: env.CONTA_AZUL_CLIENT_SECRET || '',
+  clientId: (env.CONTA_AZUL_CLIENT_ID || '').trim(),
+  clientSecret: (env.CONTA_AZUL_CLIENT_SECRET || '').trim(),
 
   // Endereços da API v2 (podem ser trocados por variável de ambiente se a Conta Azul mudar)
   urlLogin: env.CONTA_AZUL_URL_LOGIN || 'https://auth.contaazul.com/login',
