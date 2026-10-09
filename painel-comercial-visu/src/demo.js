@@ -53,6 +53,11 @@ export function gerarDemoPlanilha() {
       const tipoVenda = r() < 0.82 ? 'B2B' : 'B2C';
       const itens = 1 + Math.floor(r() * r() * 3);
       cod++;
+      const prazo = new Date(data.getTime() + (10 + Math.floor(r() * 12)) * 864e5).toISOString().slice(0, 10);
+      const entregue = prazo < agora.toISOString().slice(0, 10);
+      const xp = r();
+      const pagto = xp < 0.3 ? { p1: 1, p2: 0, ok: true, fp: 'Cartão de crédito' } : { p1: 1, p2: entregue ? 1 : 0, ok: entregue || xp > 0.9, fp: 'Pix: sinal de 60% e saldo na entrega' };
+      if (r() < 0.06) { pagto.p1 = 0; pagto.ok = false; }
       for (let i = 0; i < itens; i++) {
         const nomeProd = escolher(r, PRODUTOS.map((p) => [p[0], p[1]]));
         const prod = PRODUTOS.find((p) => p[0] === nomeProd);
@@ -71,10 +76,37 @@ export function gerarDemoPlanilha() {
           novo_recompra: r() < 0.03 ? '' : marcadoNovo ? 'novo' : 'recompra',
           tipo_produto: prod[0], material, especificacao, cor,
           quantidade: qtd, total: Math.round(qtd * unit * 100) / 100,
-          pag1: 0, pag2: 0, pago_100: false, forma_pagamento: '', prazo_entrega: '', frete: '', segmento: '',
+          pag1: pagto.p1, pag2: pagto.p2, pago_100: pagto.ok, forma_pagamento: pagto.fp, prazo_entrega: prazo, frete: '', segmento: '',
         });
       }
     }
   }
   return { linhas, mapa: { linha_cabecalho: 1, reconhecidas: {}, nao_encontradas: [], obrigatorias_faltando: [], colunas_da_planilha: [], demonstracao: true } };
+}
+
+// Vendas FICTÍCIAS "do sistema", derivadas dos pedidos da planilha de exemplo, com as diferenças
+// típicas entre planilha e Conta Azul: pedido não lançado, venda ainda em andamento,
+// lançamento com data do mês seguinte e valor ajustado (frete ou peças extras).
+export function gerarDemoContaAzul(linhasPlanilha) {
+  const r = prng(777);
+  const pedidos = new Map();
+  for (const l of linhasPlanilha) {
+    const p = pedidos.get(l.pedido) || { data: l.data, cliente: l.cliente, vendedor: l.vendedor, total: 0 };
+    p.total += l.total; pedidos.set(l.pedido, p);
+  }
+  const vendas = [];
+  let n = 9000;
+  for (const [cod, p] of pedidos) {
+    const x = r();
+    if (x < 0.05) continue; // não lançado no sistema
+    let data = p.data, situacao = 'APROVADO', total = p.total;
+    if (x < 0.1) situacao = 'EM_ANDAMENTO';
+    else if (x < 0.14) { const d = new Date(p.data); d.setUTCDate(d.getUTCDate() + 12); data = d.toISOString().slice(0, 10); }
+    else if (x < 0.2) total = Math.round(p.total * (1 + (r() * 0.08 - 0.03)) * 100) / 100;
+    if (r() < 0.02) situacao = 'CANCELADO';
+    if (data > new Date(Date.now() - 3 * 3600e3).toISOString().slice(0, 10)) continue;
+    const criado = x >= 0.14 && x < 0.17 ? new Date(new Date(data).getTime() + 35 * 864e5).toISOString().slice(0, 10) : data;
+    vendas.push({ id: `ca-${cod}`, numero: n++, data, criado_em: criado, cliente: p.cliente, vendedor: p.vendedor, situacao, total, versao: 1 });
+  }
+  return vendas;
 }

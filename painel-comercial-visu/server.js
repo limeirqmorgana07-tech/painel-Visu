@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { config, redirectUri } from './src/config.js';
 import * as ca from './src/contaAzul.js';
 import { dadosDeVendas } from './src/vendas.js';
+import { dadosFinanceiros } from './src/financeiro.js';
 import { planilhaConfigurada } from './src/planilha.js';
 
 const raiz = path.dirname(fileURLToPath(import.meta.url));
@@ -32,7 +33,7 @@ function exigeLogin(req, res, next) {
 }
 
 const paginaLogin = (erro = '') => `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1"><title>Painel de Vendas Visu</title>
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>Painel de Gestão Visu</title>
 <link rel="icon" href="/logo.png"><style>
 body{margin:0;min-height:100vh;display:grid;place-items:center;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
 background:radial-gradient(120% 140% at 100% 0%,#2F2963 0%,#241E48 60%);color:#241E48}
@@ -41,7 +42,7 @@ img{width:170px;height:auto;display:block;margin:0 auto;background:#241E48;paddi
 input{width:100%;box-sizing:border-box;padding:11px 12px;border:1px solid #CFCCDD;border-radius:10px;font:inherit}
 button{margin-top:12px;width:100%;padding:11px;border:0;border-radius:10px;background:#E8780C;color:#fff;font:600 15px system-ui;cursor:pointer}
 .e{color:#c0153a;font-size:13px;margin-top:10px}</style></head><body>
-<form method="post" action="/login"><img src="/logo-visu.png" alt="Visu Design"><h1>Painel de Vendas</h1><p>Acesso restrito</p>
+<form method="post" action="/login"><img src="/logo-visu.png" alt="Visu Design"><h1>Painel de Gestão</h1><p>Acesso restrito</p>
 <input type="password" name="senha" placeholder="Senha" autofocus required><button>Entrar</button>
 ${erro ? `<div class="e">${erro}</div>` : ''}</form></body></html>`;
 
@@ -63,6 +64,7 @@ app.get('/sair', (req, res) => {
 
 app.get('/saude', (req, res) => res.json({ ok: true }));
 app.get(['/logo.png', '/logo-visu.png'], (req, res) => res.sendFile(path.join(raiz, 'public', req.path.slice(1))));
+app.use('/vitrine', express.static(path.join(raiz, 'public', 'vitrine'), { maxAge: '7d' }));
 
 // ---------- conexão com a Conta Azul ----------
 app.get('/conectar', exigeLogin, (req, res) => {
@@ -101,6 +103,12 @@ app.get('/api/vendas', exigeLogin, async (req, res) => {
     console.error('[vendas]', e);
     res.status(502).json({ erro: e.message });
   }
+});
+
+// Gestão financeira (DRE, caixa, contas a receber/pagar, saldos) pela API da Conta Azul
+app.get('/api/financeiro', exigeLogin, async (req, res) => {
+  try { res.json(await dadosFinanceiros(req.query.forcar === '1')); }
+  catch (e) { console.error('[financeiro]', e); res.status(502).json({ erro: e.message }); }
 });
 
 // Mapeamento de colunas e inconsistências da planilha, sem as linhas

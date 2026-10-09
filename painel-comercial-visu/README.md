@@ -1,4 +1,4 @@
-# Painel de Vendas Visu
+# Painel de Gestão Visu (comercial e financeiro)
 
 Painel de vendas da Visu Indústria Têxtil, desenvolvido pela Seja Expert. Segue a **Especificação do Painel de Vendas** (Tiago Sobral, 08/10/2026), escrita a partir da reunião presencial de 06/10/2026 com o Egberto.
 
@@ -6,13 +6,16 @@ Código no GitHub, publicação no Render (a hospedagem definitiva será decidid
 
 ## Páginas
 
-| Página | Conteúdo | Requisitos |
+| Página | Conteúdo | Fonte |
 |---|---|---|
-| **Visão geral** | Faturamento, pedidos, ticket médio e peças, comparados com o período anterior. Novas vendas x recompra em R$, pedidos e clientes. Evolução de 12 meses dividida entre novos e recompra. | R1, R2, R3 (C1: linha do ponto de equilíbrio) |
-| **Produtos** | Ranking de material + cor, tipo de produto, material/tecido e cor, em peças ou em R$. Ticket médio por tecido. | R4, R2 |
-| **Clientes** *(a validar)* | Curva ABC, 10 maiores clientes, pedidos por faixa de valor e maior pedido, segmento (quando existir a coluna). | C3, C5, C6 |
-| **Vendedores** *(a validar)* | Faturamento, participação, pedidos, ticket, vendas para clientes novos e régua da comissão (R$ 15 mil e R$ 50 mil). | C7, C8, R3 |
-| **Qualidade dos dados** | Colunas reconhecidas na planilha, campos em branco, clientes com mais de um nome e grafias diferentes de produto, material, cor e vendedor. | Seção 5 |
+| **Visão geral** | Vitrine com os produtos do catálogo e as peças vendidas, faturamento, pedidos (R1), ticket médio (R2), novas vendas x recompra (R3) e evolução de 12 meses com o ponto de equilíbrio (C1). | Planilha ou Conta Azul |
+| **Produtos** | Mix por material + cor, tipo de produto, material e cor, em peças ou R$ (R4); ticket médio por tecido (R2). | Planilha ou itens das vendas na Conta Azul |
+| **Clientes** *(a validar)* | Curva ABC e top 10 (C3), faixas de valor e maior pedido (C5), segmento (C6). | Planilha ou Conta Azul |
+| **Vendedores** *(a validar)* | Faturamento, pedidos, ticket, vendas para clientes novos e régua da comissão (C7, C8). | Planilha ou Conta Azul (vendedor da venda) |
+| **Pedidos e entregas** | Ciclo do pedido: quitados, com sinal e sem pagamento (C4). Entregas das próximas 3 semanas. | Planilha |
+| **Financeiro** | Receita, despesas, resultado e ponto de equilíbrio; DRE gerencial por competência; regime de caixa; contas a receber e a pagar em aberto; saldos bancários. | Conta Azul |
+| **Planilha × sistema** | Explica por que o total do mês difere entre a planilha do comercial e a Conta Azul: pedidos não lançados, vendas em andamento, data de outro mês, diferenças de valor. | Planilha + Conta Azul |
+| **Qualidade dos dados** | Colunas reconhecidas, campos em branco, clientes com mais de um nome e grafias diferentes. | Planilha |
 
 **Filtros em todas as páginas:** período (mês, ano até o mês, últimos 12 meses), mês, vendedor, tipo de venda (B2B/B2C), novo ou recompra, tipo de produto, material e cor.
 
@@ -72,10 +75,25 @@ Quem tiver o link B consegue ver os dados. Use essa forma só para testes.
 | `PONTO_EQUILIBRIO` | Padrão `176000` (DRE de agosto/2026). Atualizar quando vier do painel financeiro. |
 | `META_MENSAL` | Meta de vendas do mês, se a Visu tiver (C2). `0` = sem meta. |
 | `COMISSAO_INICIO` / `COMISSAO_TETO` | Padrão `15000` e `50000` |
-| `DATABASE_URL` | Opcional: Postgres para guardar o token da Conta Azul entre reinícios |
+| `DATABASE_URL` | **Recomendado:** Postgres para guardar a conexão da Conta Azul e o cache de itens entre reinícios |
+| `FONTE_VENDAS` | `auto` (padrão: planilha quando ligada, senão Conta Azul), `planilha` ou `conta_azul` |
 | `CACHE_SEGUNDOS` | Padrão `300`. A tela também se atualiza sozinha a cada 5 minutos. |
 
 ## Conta Azul
+
+**O que é lido pela API v2:**
+- **Vendas:** endpoint `/v1/venda/busca`. Só entram como vendidas as vendas **Aprovadas** e **Faturadas**. "Esperando aprovação", em andamento, orçamento e cancelada ficam de fora e aparecem na conciliação. O mês é o da **data da venda**.
+- **Vendedor:** a listagem de vendas não traz o vendedor. O painel lê `/v1/venda/vendedores` e associa as vendas de cada um.
+- **Produtos:** endpoint `/v1/venda/{id}/itens`. Tipo, material e cor saem do nome do produto cadastrado, pelos termos do catálogo. Os termos podem ser ajustados com `PRODUTOS_TERMOS_JSON`. Os itens são buscados aos poucos, por causa do limite de 50 chamadas por minuto, e ficam guardados.
+- **Financeiro:** contas a receber e a pagar (competência, pagamento e vencimento), estrutura da DRE (`/v1/financeiro/categorias-dre`) e saldo das contas financeiras.
+
+### Manter a conexão depois de reiniciar (importante)
+No plano gratuito do Render, os arquivos do servidor são apagados a cada deploy ou reinício. A conexão com a Conta Azul se perde junto, e o painel volta para os dados de demonstração. Escolha uma destas soluções:
+1. **Banco Postgres gratuito no Neon** (neon.tech). Crie um projeto, copie a *connection string* e cole em `DATABASE_URL` no Render. O token e o cache de itens passam a ficar no banco.
+2. **Render Starter + disco.** Mude o serviço para o plano Starter, adicione um **Disk** montado em `/var/data` e crie `ARQUIVO_TOKEN=/var/data/token.json`.
+
+Depois disso, conecte a Conta Azul uma última vez.
+
 
 - A aplicação precisa ser de **Produção** no Portal do Desenvolvedor. A de "Desenvolvimento" só funciona com a conta teste.
 - URL de redirecionamento: `https://SEU-ENDERECO/callback`.
@@ -99,7 +117,10 @@ src/planilha.js      leitura da planilha (CSV ou conta de serviço), mapeamento 
 src/vendas.js        escolha da fonte, padronização de grafias, relatório de qualidade, cache
 src/contaAzul.js     OAuth da Conta Azul, renovação de token, leitura de vendas
 src/tokenStore.js    onde o token fica guardado (Postgres ou arquivo)
-src/demo.js          dados fictícios no formato da planilha
+src/financeiro.js    DRE, caixa, contas em aberto e saldos (Conta Azul)
+src/produtos.js      tipo, material e cor a partir do nome do produto
+src/demo.js          dados fictícios (planilha, sistema e financeiro)
+public/vitrine/      camisetas e fotos recortadas do catálogo para a vitrine
 src/config.js        variáveis de ambiente
 public/painel.html   a tela do painel (os indicadores são calculados no navegador, para os filtros responderem na hora)
 public/logo-visu.png logo do catálogo

@@ -51,3 +51,26 @@ export async function apagarToken() {
   if (p) return p.query('DELETE FROM conta_azul_token WHERE id = 1');
   await fs.rm(config.arquivoToken, { force: true });
 }
+
+// Armazenamento genérico (ex.: cache dos itens das vendas, para não buscar tudo de novo a cada reinício)
+export async function lerKV(chave) {
+  const p = await db();
+  if (p) {
+    await p.query('CREATE TABLE IF NOT EXISTS painel_kv (chave TEXT PRIMARY KEY, dados JSONB NOT NULL, atualizado_em TIMESTAMPTZ DEFAULT now())');
+    const r = await p.query('SELECT dados FROM painel_kv WHERE chave = $1', [chave]);
+    return r.rows[0]?.dados ?? null;
+  }
+  try { return JSON.parse(await fs.readFile(path.join(path.dirname(config.arquivoToken), `${chave}.json`), 'utf8')); } catch { return null; }
+}
+
+export async function salvarKV(chave, dados) {
+  const p = await db();
+  if (p) {
+    await p.query('CREATE TABLE IF NOT EXISTS painel_kv (chave TEXT PRIMARY KEY, dados JSONB NOT NULL, atualizado_em TIMESTAMPTZ DEFAULT now())');
+    await p.query(`INSERT INTO painel_kv (chave, dados, atualizado_em) VALUES ($1, $2, now())
+      ON CONFLICT (chave) DO UPDATE SET dados = EXCLUDED.dados, atualizado_em = now()`, [chave, JSON.stringify(dados)]);
+    return;
+  }
+  await fs.mkdir(path.dirname(config.arquivoToken), { recursive: true });
+  await fs.writeFile(path.join(path.dirname(config.arquivoToken), `${chave}.json`), JSON.stringify(dados));
+}

@@ -32,7 +32,7 @@ export const config = {
   comissaoTeto: Number(env.COMISSAO_TETO || 50000),
   cacheSegundos: Number(env.CACHE_SEGUNDOS || 300),
   mesesHistorico: Number(env.MESES_HISTORICO || 12),
-  maxVendasComItens: Number(env.MAX_VENDAS_COM_ITENS || 300),
+  maxVendasComItens: Number(env.MAX_VENDAS_COM_ITENS || 2500),
   intervaloMs: Number(env.INTERVALO_ENTRE_CHAMADAS_MS || 1250), // ~48 chamadas/min (limite da API: 50/min)
 
   demo: env.DEMO === '1',
