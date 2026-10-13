@@ -98,7 +98,7 @@ function agendarItens(vendas) {
     itensCache.fila = itensCache.fila.then(async () => {
       try {
         const itens = await ca.buscarItensDaVenda(v.id);
-        cache[v.id] = { v: v.versao, i: itens.map((x) => [x.nome, x.quantidade, Math.round(x.total * 100) / 100, x.descricao]) };
+        cache[v.id] = { v: v.versao, i: itens.map((x) => [x.nome, x.quantidade, Math.round(x.total * 100) / 100, x.descricao, Math.round((x.custo || 0) * 100) / 100]) };
         itensCache.versao++;
       } catch {
         delete cache[v.id];
@@ -148,8 +148,8 @@ function linhasDeVendasCA(vendas, cacheItens) {
       comItens++;
       const soma = itens.reduce((s, x) => s + x[2], 0) || 1;
       const fator = v.total ? v.total / soma : 1; // distribui desconto/frete proporcionalmente
-      for (const [nome, q, t, desc] of itens) {
-        linhas.push({ ...base, ...lerAtributos(nome, desc), produto: nome, quantidade: q, total: t * fator });
+      for (const [nome, q, t, desc, custo] of itens) {
+        linhas.push({ ...base, ...lerAtributos(nome, desc), produto: nome, quantidade: q, total: t * fator, custo: custo || 0 });
       }
     } else {
       linhas.push({ ...base, tipo_produto: '', material: '', especificacao: '', cor: '', produto: '', quantidade: 0, total: v.total });
@@ -237,7 +237,7 @@ async function montar(bruto) {
     vendedores_cadastrados: vendedoresCA.map((v) => v.nome),
     linhas: linhas.map((l) => ({
       m: l.mes, d: l.data, c: l.cliente, p: l.pedido, v: l.vendedor, tv: l.tipo_venda, nr: l.novo_recompra,
-      tp: l.tipo_produto, mt: l.material, es: l.especificacao, cr: l.cor, pr: l.produto || '', q: l.quantidade, t: Math.round(l.total * 100) / 100,
+      tp: l.tipo_produto, mt: l.material, es: l.especificacao, cr: l.cor, pr: l.produto || '', q: l.quantidade, t: Math.round(l.total * 100) / 100, cu: Math.round((l.custo || 0) * 100) / 100,
       p1: l.pag1, p2: l.pag2, ok: l.pago_100, fp: l.forma_pagamento, pz: l.prazo_entrega, sg: l.segmento,
     })),
     // vendas do sistema, para a conciliação (data da venda, situação, cliente, valor)

@@ -51,6 +51,8 @@ nav.abas{max-width:1320px;margin:0 auto;padding-inline:20px;display:flex;gap:4px
 nav.abas button{background:none;border:0;color:rgba(255,255,255,.72);padding:10px 14px 12px;cursor:pointer;font-weight:600;font-size:13.5px;border-bottom:3px solid transparent;white-space:nowrap;display:flex;gap:7px;align-items:center}
 nav.abas button:hover{color:#fff}
 nav.abas button[aria-selected="true"]{color:#fff;border-bottom-color:#EA780C}
+nav.abas .grupo{align-self:center;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#EA780C;padding:0 2px 0 12px;border-left:1px solid rgba(255,255,255,.18);margin-left:6px;white-space:nowrap}
+nav.abas button{padding-inline:11px}
 nav.abas .tag{font-size:10px;font-weight:700;letter-spacing:.04em;padding:1px 6px;border-radius:5px;background:rgba(255,255,255,.14);color:rgba(255,255,255,.85)}
 
 .filtros{position:sticky;top:env(safe-area-inset-top,0px);z-index:6;background:var(--bg);border-bottom:1px solid var(--line)}
@@ -189,6 +191,53 @@ tr.tot td{font-weight:700;border-top:1px solid var(--line2)}
 .ponte{display:flex;flex-direction:column;gap:6px;font-size:13px}
 .ponte .ln{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;padding:6px 0;border-bottom:1px dashed var(--line)}
 .ponte .ln.tt{border-bottom:0;border-top:1px solid var(--line2);font-weight:700;padding-top:9px}
+.versoes{position:relative;margin:0;padding:0;list-style:none}
+.versoes>li{position:relative;padding:0 0 22px 30px;border-left:2px solid var(--line);margin-left:9px}
+.versoes>li:last-child{border-left-color:transparent;padding-bottom:0}
+.versoes>li::before{content:"";position:absolute;left:-8px;top:2px;width:14px;height:14px;border-radius:50%;background:var(--panel);border:3px solid var(--ink3)}
+.versoes>li.atual::before{border-color:var(--orange,#EA780C);background:var(--orange,#EA780C)}
+.v-cab{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.v-num{font-family:Outfit,sans-serif;font-weight:700;font-size:18px;color:var(--ink)}
+.v-tit{font-weight:600;color:var(--ink)}
+.v-data{font-size:12px;color:var(--ink3)}
+.v-tag{font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;background:#EA780C;color:#fff}
+.v-arq{font-size:12px;color:var(--ink3);margin-top:2px}
+.versoes ul{margin:8px 0 0;padding-left:18px;font-size:13.5px;line-height:1.55;color:var(--ink2)}
+.bloco{display:flex;align-items:baseline;gap:6px 12px;flex-wrap:wrap;margin:30px 0 12px;padding-top:16px;border-top:2px solid var(--line);scroll-margin-top:70px}
+.bloco h2{font-family:var(--display);font-weight:600;font-size:19px;margin:0;letter-spacing:-.01em}
+.bloco>span{font-size:12.5px;color:var(--ink3)}
+.atalhos{display:flex;gap:6px;flex-wrap:wrap}
+.atalhos button{border:1px solid var(--line2);background:var(--panel);color:var(--ink2);border-radius:999px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer}
+.atalhos button:hover{border-color:var(--orange);color:var(--ink)}
+.kpis.kmini .kpi{padding:12px 14px}.kpis.kmini .kpi .v{font-size:clamp(18px,1.7vw,22px)}
+.termo{padding:26px 0 6px}
+.termo .trk{position:relative;height:22px;border-radius:6px;background:var(--barSoft)}
+.termo .trk i{position:absolute;inset:0 auto 0 0;border-radius:6px}
+.termo .trk i.fe{background:var(--s1)}
+.termo .trk i.pj{background:repeating-linear-gradient(135deg,var(--s1) 0 3px,transparent 3px 7px);opacity:.45}
+.termo .trk u{position:absolute;top:-8px;bottom:-8px;width:2px;background:var(--ink);text-decoration:none}
+.termo .trk u.mt{background:var(--orange)}
+.termo .trk u b{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);font-size:11px;white-space:nowrap;margin-bottom:2px}
+.tlin{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:16px}
+.tlin>div{display:flex;flex-direction:column;gap:2px;border-left:3px solid var(--line);padding-left:10px}
+.tlin span{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3)}
+.tlin b{font-family:var(--display);font-weight:600;font-size:20px}
+.tlin em{font-style:normal;font-size:12px;color:var(--ink2)}
+@media (max-width:640px){.tlin{grid-template-columns:minmax(0,1fr)}}
+table.quadro td{padding:6px 8px;vertical-align:middle}
+table.quadro tr.grp td{font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--orange);padding-top:14px;border-bottom:1px solid var(--line2)}
+table.quadro svg{display:block}
+.eu{font-size:12px;color:rgba(255,255,255,.8);display:inline-flex;gap:6px;align-items:center}
+.eu b{color:#fff;font-weight:600}.eu i{font-style:normal;font-size:10.5px;font-weight:700;letter-spacing:.06em;padding:1px 7px;border-radius:999px;background:#EA780C;color:#fff}
+.eu i.dir{background:#5ABAB4;color:#241E48}
+.us-form{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1.5fr) minmax(0,.8fr) auto auto;gap:8px;align-items:end}
+.us-form input,.us-form select{background:var(--panel);border:1px solid var(--line2);border-radius:8px;padding:7px 9px;font:inherit;font-size:13px;width:100%;color:var(--ink)}
+@media (max-width:760px){.us-form{grid-template-columns:minmax(0,1fr)}}
+.bt2{border:1px solid var(--line2);background:var(--panel);color:var(--ink);border-radius:8px;padding:6px 11px;font-size:12.5px;font-weight:600;cursor:pointer;white-space:nowrap}
+.bt2:hover{border-color:var(--orange)}.bt2.pri{background:var(--orange);border-color:var(--orange);color:#fff}.bt2.del{color:var(--red)}
+.linkbox{margin-top:10px;border:1px solid var(--orange);background:var(--orangeSoft);border-radius:10px;padding:12px}
+.linkbox input{width:100%;font:inherit;font-size:12.5px;padding:7px 9px;border:1px solid var(--line2);border-radius:8px;background:var(--panel);color:var(--ink)}
+.linkbox .ac{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
 .rod{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:11.5px;color:var(--ink3);border-top:1px solid var(--line);padding-top:12px}
 @media (max-width:640px){.marca img{height:34px}.marca .div{display:none}.f select{max-width:150px}}
 </style>
@@ -201,20 +250,18 @@ tr.tot td{font-weight:700;border-top:1px solid var(--line2)}
       <div><h1>Painel de Gestão</h1><div class="s">Visu Indústria Têxtil · comercial e financeiro · Seja Expert</div></div>
     </div>
     <div class="acoes">
+      <span class="eu" id="eu" hidden></span>
       <span class="chip" id="chip"><i></i><span id="chipTxt">—</span></span>
       <button class="bt" id="atualizar" type="button">Atualizar</button>
       <a class="bt" id="sair" href="/sair">Sair</a>
     </div>
   </div>
   <nav class="abas" role="tablist" aria-label="Páginas do painel">
-    <button role="tab" data-pg="geral" aria-selected="true">Visão geral</button>
-    <button role="tab" data-pg="produtos" aria-selected="false">Produtos</button>
-    <button role="tab" data-pg="clientes" aria-selected="false">Clientes <span class="tag">A VALIDAR</span></button>
-    <button role="tab" data-pg="vendedores" aria-selected="false">Vendedores <span class="tag">A VALIDAR</span></button>
-    <button role="tab" data-pg="pedidos" aria-selected="false">Pedidos e entregas</button>
-    <button role="tab" data-pg="financeiro" aria-selected="false">Financeiro</button>
-    <button role="tab" data-pg="conciliacao" aria-selected="false">Planilha × sistema</button>
-    <button role="tab" data-pg="dados" aria-selected="false">Qualidade dos dados</button>
+    <button role="tab" data-pg="resumo" aria-selected="true">Visão geral</button>
+    <button role="tab" data-pg="comercial" aria-selected="false">Comercial</button>
+    <button role="tab" data-pg="financas" aria-selected="false">Financeiro</button>
+    <button role="tab" data-pg="controle" aria-selected="false">Controle</button>
+    <button role="tab" data-pg="usuarios" aria-selected="false" hidden id="abaUsuarios">Usuários</button>
   </nav>
   <div class="fio"></div>
 </header>
@@ -222,12 +269,12 @@ tr.tot td{font-weight:700;border-top:1px solid var(--line2)}
 <div class="filtros"><div class="in">
   <div class="f"><label for="fPeriodo">Período</label><select id="fPeriodo"><option value="mes">Mês</option><option value="ano">Ano até o mês</option><option value="12m">Últimos 12 meses</option></select></div>
   <div class="f"><label for="fMes">Mês</label><select id="fMes"></select></div>
-  <div class="f"><label for="fVendedor">Vendedor</label><select id="fVendedor" data-campo="v"></select></div>
-  <div class="f"><label for="fTipoVenda">Tipo de venda</label><select id="fTipoVenda" data-campo="tv"></select></div>
-  <div class="f"><label for="fNR">Novo ou recompra</label><select id="fNR" data-campo="nr"></select></div>
-  <div class="f"><label for="fProduto">Tipo de produto</label><select id="fProduto" data-campo="tp"></select></div>
-  <div class="f"><label for="fMaterial">Material</label><select id="fMaterial" data-campo="mt"></select></div>
-  <div class="f"><label for="fCor">Cor</label><select id="fCor" data-campo="cr"></select></div>
+  <div class="f com"><label for="fVendedor">Vendedor</label><select id="fVendedor" data-campo="v"></select></div>
+  <div class="f com"><label for="fTipoVenda">Tipo de venda</label><select id="fTipoVenda" data-campo="tv"></select></div>
+  <div class="f com"><label for="fNR">Novo ou recompra</label><select id="fNR" data-campo="nr"></select></div>
+  <div class="f com"><label for="fProduto">Tipo de produto</label><select id="fProduto" data-campo="tp"></select></div>
+  <div class="f com"><label for="fMaterial">Material</label><select id="fMaterial" data-campo="mt"></select></div>
+  <div class="f com"><label for="fCor">Cor</label><select id="fCor" data-campo="cr"></select></div>
   <button class="limpar" id="limpar" type="button" hidden>Limpar filtros</button>
 </div></div>
 
@@ -235,20 +282,38 @@ tr.tot td{font-weight:700;border-top:1px solid var(--line2)}
   <div class="aviso" id="avisoFonte" hidden></div>
   <div class="aviso erro" id="avisoErro" hidden></div>
 
-  <section data-pagina="geral">
+  <section data-pagina="resumo">
     <div class="vitrine" id="vitrine" aria-label="Produtos Visu Design">
       <div class="txt"><div class="k">Visu Design</div><h3>O que mais saiu da fábrica</h3><p id="vitrineSub">Modelos do catálogo com o volume vendido no período</p></div>
       <div class="palco"><div class="trilho" id="trilho"></div></div>
       <div class="fio2"></div>
     </div>
-    <div class="pagina-titulo" style="margin-top:18px"><div><div class="eyebrow" id="geralEyebrow">—</div><h2>Visão geral</h2><p>Pedidos, ticket médio e de onde veio a receita</p></div></div>
-    <div class="kpis" id="kpis" style="margin-top:14px"></div>
+    <div class="pagina-titulo" style="margin-top:18px"><div><div class="eyebrow" id="resEyebrow">—</div><h2>Visão geral</h2><p>O mês da Visu em uma tela: vendas, resultado, caixa e o que pede decisão</p></div></div>
+    <div class="kpis" id="resKpis" style="margin-top:14px"></div>
+    <div class="g2e" style="margin-top:16px">
+      <div class="card"><div class="hd"><div><h3>Mês em andamento contra o ponto de equilíbrio<span class="req">C1 · C2</span></h3><div class="sub" id="termoSub">—</div></div></div><div id="termo"></div></div>
+      <div class="card"><div class="hd"><div><h3>Do faturamento ao resultado</h3><div class="sub" id="cascSub">Competência · margem de contribuição e estrutura fixa</div></div></div><div id="cascata"></div></div>
+    </div>
     <div class="g2" style="margin-top:16px">
+      <div class="card"><div class="hd"><div><h3>Vendas e resultado nos últimos 12 meses</h3><div class="sub">Vendas contra o ponto de equilíbrio e resultado líquido de cada mês</div></div></div><div id="resGraf"></div>
+        <div class="leg"><span><i style="background:var(--s1)"></i>Vendas</span><span><i style="background:var(--green)"></i>Resultado positivo</span><span><i style="background:var(--red)"></i>Resultado negativo</span><span><i style="background:var(--ink2);height:2px"></i>Ponto de equilíbrio</span></div></div>
+      <div class="card"><div class="hd"><div><h3>Pontos de atenção</h3><div class="sub">Calculados a cada atualização</div></div></div><ul class="motivos" id="alertas"></ul></div>
+    </div>
+    <div class="card" style="margin-top:16px"><div class="hd"><div><h3>Quadro de indicadores</h3><div class="sub" id="quadroSub">—</div></div></div><div class="tw" id="quadro"></div></div>
+  </section>
+
+  <section data-pagina="comercial" hidden>
+    <div class="pagina-titulo"><div><div class="eyebrow" id="comEyebrow">—</div><h2>Comercial</h2><p>Indicadores da especificação do Painel de Vendas: R1 a R4 e complementares C1 a C8</p></div>
+      <nav class="atalhos" aria-label="Ir para"><button data-ir="b-vendas">Vendas</button><button data-ir="b-produtos">Produtos</button><button data-ir="b-clientes">Clientes</button><button data-ir="b-vendedores">Vendedores</button><button data-ir="b-pedidos">Pedidos</button></nav></div>
+    <div class="kpis" id="kpis" style="margin-top:14px"></div>
+
+    <div class="bloco" id="b-vendas"><h2>Vendas</h2><span>pedidos, ticket e de onde veio a receita</span></div>
+    <div class="g2">
       <div class="card">
-        <div class="hd"><div><h3>Evolução mensal<span class="req">R1 · R3</span></h3><div class="sub" id="evolSub">—</div></div>
+        <div class="hd"><div><h3>Evolução mensal<span class="req">R1 · R3 · C1</span></h3><div class="sub" id="evolSub">—</div></div>
           <div class="seg" role="group" aria-label="Medida do gráfico"><button type="button" data-evol="valor" aria-pressed="true">R$</button><button type="button" data-evol="pedidos" aria-pressed="false">Pedidos</button></div></div>
         <div id="evolucao"></div>
-        <div class="leg"><span><i style="background:var(--s2)"></i>Novos</span><span><i style="background:var(--s1)"></i>Recompra</span><span><i style="background:var(--sNone)"></i>Sem classificação</span><span id="legPE" hidden><i style="background:var(--ink2);height:2px"></i>Ponto de equilíbrio · complementar</span></div>
+        <div class="leg"><span><i style="background:var(--s2)"></i>Novos</span><span><i style="background:var(--s1)"></i>Recompra</span><span><i style="background:var(--sNone)"></i>Sem classificação</span><span id="legPE" hidden><i style="background:var(--ink2);height:2px"></i>Ponto de equilíbrio</span></div>
         <details class="tabela"><summary>Ver em tabela</summary><div class="tw" id="evolTabela"></div></details>
       </div>
       <div class="card">
@@ -256,30 +321,26 @@ tr.tot td{font-weight:700;border-top:1px solid var(--line2)}
         <div id="novoRec"></div>
       </div>
     </div>
-  </section>
 
-  <section data-pagina="produtos" hidden>
-    <div class="pagina-titulo"><div><div class="eyebrow" id="prodEyebrow">—</div><h2>Mix de produtos</h2><p>Tipo de produto, material e cor, para decidir a compra de matéria-prima com dados</p></div>
-      <div class="seg" role="group" aria-label="Medida dos rankings"><button type="button" data-med="pecas" aria-pressed="true">Peças</button><button type="button" data-med="valor" aria-pressed="false">R$</button></div></div>
-    <div class="card" style="margin-top:14px">
-      <div class="hd"><div><h3>Material e cor mais vendidos<span class="req">R4</span></h3><div class="sub">A combinação que puxa a compra de tecido · troque o período para "Ano até o mês" para ver o ranking do ano</div></div></div>
-      <div class="rank" id="rkMatCor"></div>
-    </div>
-    <div class="g3" style="margin-top:16px">
+    <div class="bloco" id="b-produtos"><h2>Produtos</h2><span>mix por tipo, tecido e cor para decidir a compra de matéria-prima</span>
+      <div class="seg" role="group" aria-label="Medida dos rankings" style="margin-left:auto"><button type="button" data-med="pecas" aria-pressed="true">Peças</button><button type="button" data-med="valor" aria-pressed="false">R$</button></div></div>
+    <div class="g3">
       <div class="card"><div class="hd"><div><h3>Tipo de produto<span class="req">R4</span></h3></div></div><div class="rank" id="rkProduto"></div></div>
       <div class="card"><div class="hd"><div><h3>Material / tecido<span class="req">R4</span></h3></div></div><div class="rank" id="rkMaterial"></div></div>
       <div class="card"><div class="hd"><div><h3>Cor<span class="req">R4</span></h3></div></div><div class="rank" id="rkCor"></div></div>
     </div>
-    <div class="card" style="margin-top:16px">
-      <div class="hd"><div><h3>Ticket médio por tecido<span class="req">R2</span></h3><div class="sub">Faturamento do tecido ÷ pedidos que levaram esse tecido</div></div></div>
-      <div class="tw"><table><thead><tr><th>Material</th><th class="v">Pedidos</th><th class="v">Peças</th><th class="v">Faturamento</th><th class="v">Ticket médio</th><th class="v">Preço médio/peça</th></tr></thead><tbody id="tbTecido"></tbody></table></div>
+    <div class="g2e" style="margin-top:16px">
+      <div class="card"><div class="hd"><div><h3>Material e cor mais vendidos<span class="req">R4</span></h3><div class="sub">A combinação que puxa a compra de tecido</div></div></div><div class="rank" id="rkMatCor"></div></div>
+      <div class="card"><div class="hd"><div><h3>Ticket médio por tecido<span class="req">R2</span></h3><div class="sub">Faturamento do tecido ÷ pedidos que levaram esse tecido</div></div></div>
+        <div class="tw"><table><thead><tr><th>Material</th><th class="v">Pedidos</th><th class="v">Peças</th><th class="v">Faturamento</th><th class="v">Ticket</th><th class="v">R$/peça</th></tr></thead><tbody id="tbTecido"></tbody></table></div></div>
     </div>
-  </section>
+    <div class="card" style="margin-top:16px">
+      <div class="hd"><div><h3>Curva ABC e margem dos produtos<span class="req">C3</span></h3><div class="sub" id="abcProdSub">Faturamento, peças e margem bruta por produto</div></div></div>
+      <div class="tw" id="abcProd"></div>
+    </div>
 
-  <section data-pagina="clientes" hidden>
-    <div class="pagina-titulo"><div><div class="eyebrow" id="cliEyebrow">—</div><h2>Clientes</h2><p>Concentração do faturamento e perfil dos pedidos</p></div>
-      <div class="valida">Indicadores complementares (C3, C5 e C6), visíveis para a validação com a Visu. Podem mudar.</div></div>
-    <div class="g2e" style="margin-top:14px">
+    <div class="bloco" id="b-clientes"><h2>Clientes</h2><span>concentração, faixas de valor, segmento e quem parou de comprar</span></div>
+    <div class="g2e">
       <div class="card"><div class="hd"><div><h3>Curva ABC<span class="req">C3</span></h3><div class="sub" id="abcSub">—</div></div></div><div id="abc"></div></div>
       <div class="card"><div class="hd"><div><h3>Pedidos por faixa de valor<span class="req">C5</span></h3><div class="sub" id="fxSub">—</div></div></div><div id="faixas"></div></div>
     </div>
@@ -287,62 +348,108 @@ tr.tot td{font-weight:700;border-top:1px solid var(--line2)}
       <div class="card"><div class="hd"><div><h3>10 maiores clientes<span class="req">C3</span></h3><div class="sub">Por faturamento no período</div></div></div><div class="rank" id="rkClientes"></div></div>
       <div class="card"><div class="hd"><div><h3>Segmento de cliente<span class="req">C6</span></h3><div class="sub">Depende da coluna "Segmento" na planilha</div></div></div><div class="rank" id="rkSegmento"></div></div>
     </div>
-  </section>
+    <div class="card" style="margin-top:16px"><div class="hd"><div><h3>Clientes que pararam de comprar</h3><div class="sub">Compraram nos últimos 12 meses e estão há mais de 90 dias sem pedido · foco da Visu em clientes novos e recompra</div></div></div><div class="tw" id="inativos"></div></div>
 
-  <section data-pagina="vendedores" hidden>
-    <div class="pagina-titulo"><div><div class="eyebrow" id="vendEyebrow">—</div><h2>Vendedores</h2><p>Faturamento, pedidos e quanto cada um trouxe de clientes novos</p></div>
-      <div class="valida">Indicadores complementares (C7 e C8). A tabela de comissão entre 1% e 5% ainda será confirmada com a Visu, por isso a régua mostra só os marcos de R$ 15 mil e R$ 50 mil.</div></div>
-    <div class="card" style="margin-top:14px">
-      <div class="tw"><table><thead><tr><th>Vendedor</th><th class="v">Faturamento</th><th class="v">Part.</th><th class="v">Pedidos</th><th class="v">Ticket médio</th><th class="v">Novos (R$)</th><th class="v">% novos</th><th class="v">Clientes novos</th><th id="thRegua">Régua da comissão</th></tr></thead><tbody id="tbVend"></tbody></table></div>
-      <div class="nota" id="vendNota">Comissão sobre o faturamento (data e valor da venda), como a Visu pratica. A régua compara o faturamento do mês com R$ 15 mil (começa em 1%) e R$ 50 mil (libera 5%, sem teto).</div>
+    <div class="bloco" id="b-vendedores"><h2>Vendedores</h2><span>faturamento, clientes novos, margem e régua da comissão</span></div>
+    <div class="card">
+      <div class="hd"><div><h3>Desempenho por vendedor<span class="req">C7 · C8</span></h3><div class="sub">Comissão sobre o faturamento: começa em 1% a partir de R$ 15 mil e chega a 5% a partir de R$ 50 mil, sem teto</div></div></div>
+      <div class="tw"><table><thead><tr><th>Vendedor</th><th class="v">Faturamento</th><th class="v">Part.</th><th class="v">Pedidos</th><th class="v">Ticket médio</th><th class="v">Novos (R$)</th><th class="v">% novos</th><th class="v">Clientes novos</th><th class="v" id="thMargem">Margem</th><th id="thRegua">Régua da comissão</th></tr></thead><tbody id="tbVend"></tbody></table></div>
+      <div class="nota" id="vendNota"></div>
     </div>
-  </section>
 
-  <section data-pagina="pedidos" hidden>
-    <div class="pagina-titulo"><div><div class="eyebrow" id="pedEyebrow">—</div><h2>Pedidos e entregas</h2><p>Ciclo de pagamento dos pedidos e o que precisa sair nas próximas semanas</p></div>
-      <div class="valida">C4 e visão de entregas (seção 6). Dependem das colunas de pagamento e "Prazo de entrega" da planilha.</div></div>
-    <div class="g2e" style="margin-top:14px">
+    <div class="bloco" id="b-pedidos"><h2>Pedidos e entregas</h2><span>ciclo de pagamento e o que precisa sair da fábrica</span></div>
+    <div class="g2e">
       <div class="card"><div class="hd"><div><h3>Ciclo do pedido<span class="req">C4</span></h3><div class="sub">Quitados, com sinal pago e com saldo na entrega</div></div></div><div id="ciclo"></div></div>
       <div class="card"><div class="hd"><div><h3>Entregas das próximas 3 semanas</h3><div class="sub">Pelo prazo de entrega informado na planilha</div></div></div><div id="entregas"></div></div>
     </div>
   </section>
 
-  <section data-pagina="financeiro" hidden>
-    <div class="pagina-titulo"><div><div class="eyebrow" id="finEyebrow">—</div><h2>Gestão financeira</h2><p>Resultado por competência, caixa realizado, contas em aberto e saldos, direto da Conta Azul</p></div>
-      <div class="seg" role="group" aria-label="Regime"><button type="button" data-reg="comp" aria-pressed="true">Competência</button><button type="button" data-reg="caixa" aria-pressed="false">Caixa</button></div></div>
+  <section data-pagina="financas" hidden>
+    <div class="pagina-titulo"><div><div class="eyebrow" id="finEyebrow">—</div><h2>Financeiro</h2><p>Os relatórios gerenciais da Conta Azul num só painel: DRE, margem de contribuição, fluxo de caixa, contas a receber e a pagar</p></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><nav class="atalhos" aria-label="Ir para"><button data-ir="b-resultado">Resultado</button><button data-ir="b-caixa">Caixa</button><button data-ir="b-receber">Receber</button><button data-ir="b-pagar">Pagar</button></nav>
+      <div class="seg" role="group" aria-label="Regime"><button type="button" data-reg="comp" aria-pressed="true">Competência</button><button type="button" data-reg="caixa" aria-pressed="false">Caixa</button></div></div></div>
+    <div class="aviso" id="finAviso" hidden></div>
     <div class="kpis" id="finKpis" style="margin-top:14px"></div>
-    <div class="g2" style="margin-top:16px">
+
+    <div class="bloco" id="b-resultado"><h2>Resultado</h2><span>DRE gerencial, margem de contribuição e ponto de equilíbrio</span></div>
+    <div class="g2">
       <div class="card"><div class="hd"><div><h3>Receita, despesas e resultado</h3><div class="sub" id="finEvolSub">Últimos meses</div></div></div><div id="finEvol"></div>
-        <div class="leg"><span><i style="background:var(--s1)"></i>Receita</span><span><i style="background:var(--s2)"></i>Despesas</span><span><i style="background:var(--ink2);height:2px"></i>Ponto de equilíbrio</span></div></div>
+        <div class="leg"><span><i style="background:var(--s1)"></i>Receita</span><span><i style="background:var(--s2)"></i>Despesas</span><span><i style="background:var(--ink);height:3px"></i>Resultado</span><span><i style="background:var(--ink2);height:2px"></i>Ponto de equilíbrio</span></div></div>
+      <div class="card"><div class="hd"><div><h3>Composição das despesas</h3><div class="sub" id="compSub">—</div></div></div><div id="composicao"></div></div>
+    </div>
+    <div class="card" style="margin-top:16px"><div class="hd"><div><h3>Margem de contribuição e ponto de equilíbrio<span class="req">C1</span></h3><div class="sub">Receita − custos variáveis = margem de contribuição. Ponto de equilíbrio = custos fixos ÷ margem de contribuição %.</div></div></div><div class="tw" id="mcTab"></div></div>
+    <div class="card" style="margin-top:16px"><div class="hd"><div><h3>DRE gerencial</h3><div class="sub" id="dreSub">—</div></div></div><div class="tw"><table class="dre" id="dre"></table></div></div>
+
+    <div class="bloco" id="b-caixa"><h2>Fluxo de caixa</h2><span>saldo nos bancos, realizado e previsto para 13 semanas</span></div>
+    <div class="kpis kmini" id="cxKpis"></div>
+    <div class="g2" style="margin-top:16px">
+      <div class="card"><div class="hd"><div><h3>Projeção semanal</h3><div class="sub" id="projSub">Saldo atual + contas a receber − contas a pagar pela data de vencimento</div></div></div><div id="projGraf"></div>
+        <div class="leg"><span><i style="background:var(--s1)"></i>Entradas previstas</span><span><i style="background:var(--s2)"></i>Saídas previstas</span><span><i style="background:var(--ink);height:3px"></i>Saldo projetado</span></div>
+        <details class="tabela"><summary>Ver em tabela</summary><div class="tw" id="projTab"></div></details></div>
       <div class="card"><div class="hd"><div><h3>Saldos bancários</h3><div class="sub">Saldo atual de cada conta</div></div></div><div id="saldos"></div></div>
     </div>
-    <div class="card" style="margin-top:16px"><div class="hd"><div><h3>DRE gerencial</h3><div class="sub" id="dreSub">—</div></div></div><div class="tw"><table class="dre" id="dre"></table></div></div>
+    <div class="card" style="margin-top:16px"><div class="hd"><div><h3>Caixa realizado mês a mês</h3><div class="sub">Recebimentos e pagamentos efetivados</div></div></div><div class="tw" id="cxReal"></div></div>
+
+    <div class="bloco" id="b-receber"><h2>Contas a receber</h2><span>inadimplência por idade e por cliente</span></div>
+    <div class="kpis kmini" id="rcKpis"></div>
+    <div class="g3" style="margin-top:16px">
+      <div class="card"><div class="hd"><div><h3>Atraso por idade</h3><div class="sub">Valor vencido e não recebido</div></div></div><div id="rcIdade"></div></div>
+      <div class="card"><div class="hd"><div><h3>Maiores atrasos por cliente</h3><div class="sub">Para a cobrança</div></div></div><div class="tw" id="rcPessoas"></div></div>
+      <div class="card"><div class="hd"><div><h3>Próximos recebimentos</h3><div class="sub">Em ordem de vencimento</div></div></div><div class="tw" id="rcProx"></div></div>
+    </div>
+
+    <div class="bloco" id="b-pagar"><h2>Contas a pagar e despesas</h2><span>por categoria, centro de custo e fornecedor</span></div>
+    <div class="kpis kmini" id="pgKpis"></div>
+    <div class="g2" style="margin-top:16px">
+      <div class="card"><div class="hd"><div><h3>Despesas por categoria</h3><div class="sub" id="pgCatSub">—</div></div></div><div class="rank" id="pgCat"></div></div>
+      <div class="card"><div class="hd"><div><h3>Por centro de custo</h3><div class="sub">No mês selecionado</div></div></div><div class="rank" id="pgCentro"></div>
+        <h3 style="margin-top:22px">Receitas por categoria</h3><div class="sub" id="rcCatSub" style="margin-bottom:12px">Competência</div><div class="rank" id="rcCat"></div></div>
+    </div>
     <div class="g2e" style="margin-top:16px">
-      <div class="card"><div class="hd"><div><h3>Contas a receber</h3><div class="sub">Em aberto</div></div></div><div id="finReceber"></div></div>
-      <div class="card"><div class="hd"><div><h3>Contas a pagar</h3><div class="sub">Em aberto</div></div></div><div id="finPagar"></div></div>
+      <div class="card"><div class="hd"><div><h3>Maiores fornecedores</h3><div class="sub">Últimos 12 meses</div></div></div><div class="rank" id="pgForn"></div></div>
+      <div class="card"><div class="hd"><div><h3>Próximos pagamentos</h3><div class="sub">Em ordem de vencimento</div></div></div><div class="tw" id="pgProx"></div></div>
     </div>
   </section>
 
-  <section data-pagina="conciliacao" hidden>
-    <div class="pagina-titulo"><div><div class="eyebrow" id="concEyebrow">—</div><h2>Planilha de vendas × Conta Azul</h2><p>Por que o total vendido no mês difere entre a planilha do comercial e o sistema</p></div></div>
-    <div class="g2" style="margin-top:14px">
+  <section data-pagina="controle" hidden>
+    <div class="pagina-titulo"><div><div class="eyebrow" id="concEyebrow">—</div><h2>Controle</h2><p>Planilha × sistema, qualidade dos dados e versões do painel</p></div>
+      <nav class="atalhos" aria-label="Ir para"><button data-ir="b-conc">Planilha × sistema</button><button data-ir="b-dados">Qualidade dos dados</button><button data-ir="b-versoes">Versões</button></nav></div>
+    <div class="bloco" id="b-conc"><h2>Planilha de vendas × Conta Azul</h2><span>por que o total vendido no mês difere entre as duas bases</span></div>
+    <div class="g2">
       <div class="card"><div class="hd"><div><h3>De onde vem a diferença</h3><div class="sub" id="concSub">—</div></div></div><div id="ponte"></div></div>
       <div class="card"><div class="hd"><div><h3>Motivos encontrados</h3><div class="sub">Calculados a partir das duas bases</div></div></div><ul class="motivos" id="motivos"></ul></div>
     </div>
     <div class="card" style="margin-top:16px"><div class="hd"><div><h3>Mês a mês</h3><div class="sub">Valores pela data da venda</div></div></div><div class="tw" id="concMeses"></div></div>
     <div class="card" style="margin-top:16px"><div class="hd"><div><h3>Clientes com diferença no mês</h3><div class="sub">Maiores diferenças entre o que está na planilha e o que está no sistema</div></div></div><div class="tw" id="concClientes"></div></div>
-  </section>
 
-  <section data-pagina="dados" hidden>
-    <div class="pagina-titulo"><div><div class="eyebrow">Planilha "Rotina de vendas_Gestão faturamento CLOUD"</div><h2>Qualidade dos dados</h2><p>Colunas reconhecidas e grafias que precisam de padronização. O painel já junta essas grafias nos cálculos; o ajuste definitivo é na planilha.</p></div></div>
-    <div class="g2e" style="margin-top:14px">
+    <div class="bloco" id="b-dados"><h2>Qualidade dos dados</h2><span>planilha "Rotina de vendas_Gestão faturamento CLOUD"</span></div>
+    <div class="g2e">
       <div class="card"><div class="hd"><div><h3>Colunas da planilha</h3><div class="sub" id="colSub">—</div></div></div><div id="colunas"></div></div>
       <div class="card"><div class="hd"><div><h3>Campos em branco</h3><div class="sub" id="vazSub">—</div></div></div><div class="tw"><table><tbody id="tbVazios"></tbody></table></div></div>
     </div>
     <div class="g2e" style="margin-top:16px">
-      <div class="card"><div class="hd"><div><h3>Clientes com mais de um nome</h3><div class="sub">Ajuste 1: cadastro único por cliente, com o lote na coluna Observação</div></div></div><div class="q-lista" id="qClientes"></div></div>
-      <div class="card"><div class="hd"><div><h3>Grafias diferentes</h3><div class="sub">Ajuste 4: listas suspensas para tipo de produto, material e cor</div></div></div><div class="q-lista" id="qGrafias"></div></div>
+      <div class="card"><div class="hd"><div><h3>Clientes com mais de um nome</h3><div class="sub">Cadastro único por cliente, com o lote na coluna Observação</div></div></div><div class="q-lista" id="qClientes"></div></div>
+      <div class="card"><div class="hd"><div><h3>Grafias diferentes</h3><div class="sub">Listas suspensas para tipo de produto, material, cor e vendedor</div></div></div><div class="q-lista" id="qGrafias"></div></div>
     </div>
+
+    <div class="bloco" id="b-versoes"><h2>Versões do painel</h2><span>o que mudou em cada entrega</span></div>
+    <div class="card"><ol class="versoes" id="listaVersoes"></ol></div>
+  </section>
+
+  <section data-pagina="usuarios" hidden>
+    <div class="pagina-titulo"><div><div class="eyebrow">Perfil ADM</div><h2>Usuários e acessos</h2><p>Cada pessoa recebe um link pessoal, cria a própria senha e entra com o e-mail. Diretores veem os dashboards; ADM também gerencia usuários e a conexão com a Conta Azul.</p></div></div>
+    <div class="aviso erro" id="usBanco" hidden></div>
+    <div class="card" style="margin-top:14px">
+      <div class="hd"><div><h3 id="usFormTit">Novo usuário</h3><div class="sub">Depois de salvar, clique em "Gerar link" e envie o link para a pessoa</div></div></div>
+      <form class="us-form" id="usForm"><input type="hidden" name="id">
+        <div class="f"><label for="usNome">Nome</label><input id="usNome" name="nome" required></div>
+        <div class="f"><label for="usEmail">E-mail (opcional; a pessoa confirma no convite)</label><input id="usEmail" name="email" type="email"></div>
+        <div class="f"><label for="usPerfil">Perfil</label><select id="usPerfil" name="perfil"><option value="diretor">Diretor</option><option value="adm">ADM</option></select></div>
+        <button class="bt2 pri" type="submit">Salvar</button><button class="bt2" type="button" id="usCancelar" hidden>Cancelar</button>
+      </form>
+      <div class="e" id="usErro" style="color:var(--red);font-size:12.5px;margin-top:8px"></div>
+    </div>
+    <div class="card" style="margin-top:16px"><div class="hd"><div><h3>Perfis</h3><div class="sub" id="usSub">—</div></div></div><div class="tw" id="usLista"></div><div id="usLink"></div></div>
   </section>
 
   <footer class="rod"><span id="rodA">—</span><span>Seja Expert · Gestão Financeira e BPO</span></footer>
@@ -363,13 +470,27 @@ const curto=(v)=>{const a=Math.abs(v||0);return a>=1e6?(v/1e6).toLocaleString('p
 const esc=(s)=>String(s??'').replace(/[&<>"]/g,(c)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const nomeMes=(m)=>{const[a,b]=m.split('-');return MES_L[+b-1]+' de '+a};
 const somaMes=(m,n)=>{const[a,b]=m.split('-').map(Number);const d=new Date(Date.UTC(a,b-1+n,1));return d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0')};
-function delta(a,b){ if(!b) return '<span class="delta eq">sem base</span>'; const d=(a-b)/b; const c=Math.abs(d)<.005?'eq':d>0?'up':'down'; return `<span class="delta ${c}">${d>0?'▲':d<0?'▼':'■'} ${pct(Math.abs(d))}</span>`; }
+function delta(a,b,inv){ if(!b) return '<span class="delta eq">sem base</span>'; const d=(a-b)/b; const c=Math.abs(d)<.005?'eq':(d>0)!==!!inv?'up':'down'; return `<span class="delta ${c}">${d>0?'▲':d<0?'▼':'■'} ${pct(Math.abs(d))}</span>`; }
+
+const VERSAO='v7';
+const VERSOES=[
+ {v:'v7',data:'11/10/2026',tit:'Usuários com perfis Diretor e ADM',arq:'painel-gestao-visu-v7.zip',itens:['Login por e-mail e senha, com perfis Diretor (dashboards) e ADM (dashboards, usuários e conexão com a Conta Azul).','Quatro perfis criados: dois diretores e dois ADM (Morgana e gestor).','Página Usuários: gera o link pessoal de cada pessoa, com mensagem pronta para WhatsApp ou e-mail. A pessoa cria a própria senha no primeiro acesso.']},
+ {v:'v6',data:'08/10/2026',tit:'Painel gerencial em 4 dashboards',arq:'painel-gestao-visu-v6.zip',itens:['13 abas viram 4 dashboards: Visão geral, Comercial, Financeiro e Controle.','Visão geral: vendas do mês contra o ponto de equilíbrio (com projeção pelo ritmo), cascata do faturamento ao resultado e quadro de indicadores com 6 meses de tendência.','Financeiro: margem de contribuição e ponto de equilíbrio recalculados todo mês pela DRE da Conta Azul, composição das despesas (fixas × variáveis), liquidez de 30 dias e dias de caixa.','Aviso quando os meses não têm despesas lançadas, para não comparar resultado incompleto.']},
+ {v:'v5',data:'08/10/2026',tit:'Histórico de versões',arq:'painel-gestao-visu-v5.zip',itens:['Página "Versões" com o que mudou em cada entrega e a versão no rodapé.','Arquivo CHANGELOG.md no projeto, com o mesmo histórico.']},
+ {v:'v4',data:'08/10/2026',tit:'Dashboards gerenciais (relatórios da Conta Azul)',arq:'painel-gestao-visu-v4.zip',itens:['Resumo executivo com pontos de atenção automáticos e a vitrine do catálogo.','Financeiro: DRE por competência e por caixa, fluxo de caixa com projeção de 13 semanas, contas a receber e inadimplência por idade, contas a pagar por categoria, centro de custo e fornecedor.','Comercial: curva ABC de produtos com margem, clientes inativos, margem por vendedor.','Alta de despesa passa a aparecer em vermelho.']},
+ {v:'v3',data:'08/10/2026',tit:'Painel de gestão comercial e financeiro',arq:'painel-gestao-visu-v3.zip',itens:['Todos os pontos do e-mail do Tiago (R1 a R4, C1 a C8 e regras de negócio).','Nome do vendedor lido da Conta Azul.','Página Planilha × sistema para explicar a diferença do total do mês.','Produtos do catálogo flutuando na página inicial.','Aviso vermelho quando a Conta Azul está desconectada.']},
+ {v:'v2',data:'08/10/2026',tit:'Especificação do Painel de Vendas e nova identidade visual',arq:'painel-comercial-visu-v2.zip',itens:['Indicadores da especificação: pedidos, ticket médio, novas × recompra, mix de produtos.','Leitura da planilha de vendas e página Qualidade dos dados.','Identidade visual do catálogo e do site da Visu.']},
+ {v:'v1',data:'08/10/2026',tit:'Primeira versão: painel comercial',arq:'painel-comercial-visu.zip + atualizacao-painel-visu.zip',itens:['Painel de vendas com login e conexão à Conta Azul pela API.','Publicação no GitHub e no Render.','Atualização: correção do link de autorização expirado e do endereço do token.']},
+];
+function pgVersoes(){
+  $('listaVersoes').innerHTML=VERSOES.map((x,i)=>`<li class="${i?'':'atual'}"><div class="v-cab"><span class="v-num">${x.v}</span><span class="v-tit">${esc(x.tit)}</span>${i?'':'<span class="v-tag">no ar</span>'}<span class="v-data">${x.data}</span></div><div class="v-arq">Arquivo: ${esc(x.arq)}</div><ul>${x.itens.map(t=>`<li>${esc(t)}</li>`).join('')}</ul></li>`).join('');
+}
 
 const tip=$('tip');
 function dica(e,h){ tip.innerHTML=h; tip.hidden=false; const x=Math.min(e.clientX+14,innerWidth-tip.offsetWidth-8); tip.style.left=Math.max(8,x)+'px'; tip.style.top=Math.max(8,e.clientY-tip.offsetHeight-12)+'px'; }
 const semDica=()=>{tip.hidden=true};
 
-const E={dados:null,fin:null,pagina:'geral',periodo:'mes',mes:null,filtros:{},medida:'pecas',evol:'valor',reg:'comp'};
+const E={dados:null,fin:null,pagina:'resumo',periodo:'mes',mes:null,filtros:{},medida:'pecas',evol:'valor',reg:'comp'};
 try{ const s=JSON.parse(localStorage.getItem('visu-vendas')||'{}'); if(s.pagina)E.pagina=s.pagina; if(s.medida)E.medida=s.medida; }catch(e){}
 const guardar=()=>{try{localStorage.setItem('visu-vendas',JSON.stringify({pagina:E.pagina,medida:E.medida}))}catch(e){}};
 
@@ -408,7 +529,7 @@ function montarFiltros(){
   const d=E.dados;
   const meses=[...new Set(d.linhas.map(l=>l.m).filter(Boolean))].sort().reverse();
   const hoje=new Date(Date.now()-3*3600e3).toISOString().slice(0,7);
-  if(!E.mes||!meses.includes(E.mes)) E.mes=meses.find(m=>m<=hoje)||meses[0];
+  if(!E.mes||!meses.includes(E.mes)) E.mes=meses.find(m=>m<hoje)||meses[0];
   $('fMes').innerHTML=meses.map(m=>`<option value="${m}">${nomeMes(m)}</option>`).join('');
   if(E.mes) $('fMes').value=E.mes;
   document.querySelectorAll('select[data-campo]').forEach(sel=>{
@@ -442,28 +563,38 @@ function desenhar(){
   const av=$('avisoFonte');
   if(d.fonte==='demo'){ av.hidden=false; av.className='aviso'+(PREVIA?'':' erro');
     av.innerHTML=PREVIA?'<span><b>Dados de demonstração.</b> Produtos e tecidos vêm do catálogo da Visu; clientes, vendedores e valores são fictícios.</span>'
-      :`<span><b>Você está vendo dados de demonstração, não os da Visu.</b> A Conta Azul está desconectada${d.credenciais_conta_azul?' (a conexão se perde quando o servidor reinicia sem banco de dados)':''}. Clientes, vendedores e valores abaixo são fictícios.</span>${d.credenciais_conta_azul?'<a class="bt" href="/conectar" style="color:var(--ink);border-color:var(--red);background:var(--panel)">Conectar Conta Azul</a>':''}`; }
+      :`<span><b>Você está vendo dados de demonstração, não os da Visu.</b> A Conta Azul está desconectada${d.credenciais_conta_azul?' (a conexão se perde quando o servidor reinicia sem banco de dados)':''}. Clientes, vendedores e valores abaixo são fictícios.${E.eu?.perfil==='adm'?'':' Avise o administrador do painel.'}</span>${d.credenciais_conta_azul&&E.eu?.perfil==='adm'?'<a class="bt" href="/conectar" style="color:var(--ink);border-color:var(--red);background:var(--panel)">Conectar Conta Azul</a>':''}`; }
   else av.className='aviso';
   if(d.fonte!=='demo'){ if(d.avisos?.length){ av.hidden=false; av.textContent=d.avisos.join(' '); } else av.hidden=true; }
   const at=new Date(d.atualizado_em);
-  $('rodA').textContent=`Atualizado em ${at.toLocaleDateString('pt-BR')} às ${at.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`+(PREVIA?' · prévia':' · atualiza sozinho a cada 5 min');
+  $('rodA').textContent=`Atualizado em ${at.toLocaleDateString('pt-BR')} às ${at.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`+(PREVIA?' · prévia':' · atualiza sozinho a cada 5 min')+' · '+VERSAO;
   document.querySelectorAll('nav.abas button').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.pg===E.pagina)));
   document.querySelectorAll('section[data-pagina]').forEach(s=>s.hidden=s.dataset.pagina!==E.pagina);
   const j=janela();
-  ['geralEyebrow','prodEyebrow','cliEyebrow','vendEyebrow','pedEyebrow'].forEach(id=>$(id).textContent=j.rot);
-  $('finEyebrow').textContent=nomeMes(E.mes); $('concEyebrow').textContent=nomeMes(E.mes);
-  ({geral:pgGeral,produtos:pgProdutos,clientes:pgClientes,vendedores:pgVendedores,pedidos:pgPedidos,financeiro:pgFinanceiro,conciliacao:pgConciliacao,dados:pgDados})[E.pagina](j);
+  ['comEyebrow'].forEach(id=>$(id).textContent=j.rot);
+  ['finEyebrow','concEyebrow','resEyebrow'].forEach(id=>$(id).textContent=nomeMes(E.mes));
+  document.querySelectorAll('.f.com').forEach(f=>f.hidden=E.pagina!=='comercial');
+  $('limpar').hidden=E.pagina!=='comercial'||!Object.values(E.filtros).some(Boolean);
+  ({resumo:pgVisao,comercial:pgComercial,financas:pgFinancas,controle:pgControle,usuarios:pgUsuarios})[E.pagina](j);
 }
 
 // ---------- 1. visão geral ----------
 function pgGeral(j){
   const a=resumo(linhas(j.atual)), b=resumo(linhas(j.ant,j.corte)), R=E.dados.regras;
-  $('kpis').innerHTML=[
-    ['Faturamento','',brl(a.fat),`${delta(a.fat,b.fat)}<span>${j.comp}: ${brl(b.fat)}</span>`,'dest'],
-    ['Pedidos','R1',int(a.pedidos),`${delta(a.pedidos,b.pedidos)}<span>${j.comp}: ${int(b.pedidos)}</span>`,''],
-    ['Ticket médio','R2',brl(a.ticket),`${delta(a.ticket,b.ticket)}<span>${j.comp}: ${brl(b.ticket)}</span>`,''],
-    ['Peças vendidas','',int(a.pecas),`${delta(a.pecas,b.pecas)}<span>${int(a.clientes)} clientes compraram</span>`,''],
-  ].map(([l,r,v,s,c])=>`<div class="kpi ${c}"><div class="l"><span>${l}</span>${r?`<span class="req" style="margin:0">${r}</span>`:''}</div><div class="v num">${v}</div><div class="s">${s}</div></div>`).join('');
+  const cuA=linhas(j.atual).reduce((x,l)=>x+(l.cu||0),0), mgA=cuA&&a.fat?(a.fat-cuA)/a.fat:null;
+  const hojeD=new Date(Date.now()-3*3600e3), parcialM=E.periodo==='mes'&&E.mes===mesHojeBR(), dm=new Date(+E.mes.slice(0,4),+E.mes.slice(5),0).getDate();
+  const peV=E.periodo==='mes'?peRef().valor:0;
+  $('kpis').innerHTML=kpiHtml([
+    ['Faturamento',brl(a.fat),`${delta(a.fat,b.fat)}<span>${j.comp}: ${brl(b.fat)}</span>`,'dest'],
+    ['Pedidos',int(a.pedidos),`${delta(a.pedidos,b.pedidos)}<span>${j.comp}: ${int(b.pedidos)}</span>`,'','R1'],
+    ['Ticket médio',brl(a.ticket),`${delta(a.ticket,b.ticket)}<span>${j.comp}: ${brl(b.ticket)}</span>`,'','R2'],
+    ['Vendas a clientes novos',pct(a.fat?a.nr.novo.t/a.fat:0),`<span>${brl(a.nr.novo.t)} · ${pl(a.nr.novo.c.size,'cliente novo','clientes novos')}</span>`,'','R3'],
+    ['Peças vendidas',int(a.pecas),`${delta(a.pecas,b.pecas)}<span>${j.comp}</span>`],
+    ['Clientes que compraram',int(a.clientes),`<span>${int(a.nr.recompra.c.size)} de recompra</span>`],
+    ['Margem bruta das vendas',mgA==null?'—':pct(mgA),`<span>${mgA==null?'sem custo dos produtos nesta fonte':mgA<0.4?'abaixo do mínimo de 40%':'acima do mínimo de 40%'}</span>`],
+    parcialM?['Projeção do mês',brl(a.fat/hojeD.getUTCDate()*dm),`<span>pelo ritmo de ${hojeD.getUTCDate()} dias${peV?` · PE ${curto(peV)}`:''}</span>`,'','C1']
+      :['Cobertura do equilíbrio',peV?pct(a.fat/peV):'—',`<span>${peV?`PE ${brl(peV)}`:'período maior que um mês'}</span>`,'','C1'],
+  ]);
 
   const tot=a.fat||1, totP=a.pedidos||1, n=a.nr.novo, r=a.nr.recompra, x=a.nr[''];
   const bar=(k)=>`<div class="barra2">${[['s2',n[k]],['s1',r[k]],['sNone',x[k]]].filter(z=>z[1]>0).map(([c,v])=>`<span style="flex:${v};background:var(--${c})"></span>`).join('')}</div>`;
@@ -478,9 +609,8 @@ function pgGeral(j){
     ${x.p?`<div class="nota alerta">${int(x.p)} ${x.p===1?'pedido está':'pedidos estão'} sem a marcação "Cliente novo ou recompra?" na planilha (${brl(x.t)}). Eles aparecem em cinza.</div>`:''}
     <div class="nota">${E.dados.nr_calculado?`Calculado pelo histórico da Conta Azul: cliente novo é quem fez a primeira compra no período (histórico desde ${E.dados.historico_desde?E.dados.historico_desde.split('-').reverse().join('/'):'—'}). Com a planilha ligada, vale a marcação dos vendedores.`:'A divisão segue a coluna "Cliente novo ou recompra?", preenchida pelos vendedores.'} Canal de origem (Instagram, indicação etc.) não é registrado hoje.</div>`;
 
-  vitrine(linhas(j.atual),j);
   const meses=[]; for(let i=11;i>=0;i--) meses.push(somaMes(E.mes,-i));
-  graficoEvolucao(meses.map(m=>({m,s:resumo(linhas([m]))})),R.ponto_equilibrio);
+  graficoEvolucao(meses.map(m=>({m,s:resumo(linhas([m]))})),peRef().valor);
 }
 
 function escala(max){ const bruto=max/4||1; const p=Math.pow(10,Math.floor(Math.log10(bruto))); const st=[1,2,2.5,5,10].map(s=>s*p).find(s=>s>=bruto)||10*p; return {passo:st,topo:Math.ceil(max/st)*st||st}; }
@@ -532,6 +662,12 @@ function pgProdutos(j){
     +`<tr class="tot"><td>Todos os tecidos</td><td class="v">${int(tot.pedidos)}</td><td class="v">${int(tot.pecas)}</td><td class="v">${brl(tot.fat)}</td><td class="v">${brl(tot.ticket)}</td><td class="v">${brl2(tot.pecas?tot.fat/tot.pecas:0)}</td></tr>`
     :`<tr><td colspan="6" class="vazio">${msg||'Sem vendas com esses filtros.'}</td></tr>`;
   document.querySelectorAll('[data-med]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.med===E.medida)));
+  const pr=new Map(); ls.forEach(l=>{ const k=l.pr||[l.tp,l.mt,l.cr].filter(Boolean).join(' · ')||'(sem produto)'; const g=pr.get(k)||{nome:k,t:0,q:0,cu:0,ped:new Set()}; g.t+=l.t; g.q+=l.q; g.cu+=l.cu||0; g.ped.add(l.p); pr.set(k,g); });
+  const lp=[...pr.values()].sort((a,b)=>b.t-a.t), totP=lp.reduce((s2,x)=>s2+x.t,0)||1, temCusto=lp.some(x=>x.cu>0);
+  let ac=0;
+  $('abcProdSub').textContent=`${int(lp.length)} produtos · A = 80% do faturamento, B = 15%, C = 5%`+(temCusto?' · margem pelo custo cadastrado na Conta Azul':' · margem aparece quando houver custo do produto');
+  $('abcProd').innerHTML=lp.length?`<table><thead><tr><th>Classe</th><th>Produto</th><th class="v">Peças</th><th class="v">Pedidos</th><th class="v">Faturamento</th><th class="v">% acumulado</th>${temCusto?'<th class="v">Margem bruta</th>':''}</tr></thead><tbody>${lp.slice(0,15).map(x=>{ const antes=ac/totP; ac+=x.t; const k=antes<.8?'A':antes<.95?'B':'C'; const mg=x.cu?(x.t-x.cu)/x.t:null;
+    return `<tr><td><span class="pill p-${k}">${k}</span></td><td class="el" title="${esc(x.nome)}">${esc(x.nome)}</td><td class="v">${int(x.q)}</td><td class="v">${x.ped.size}</td><td class="v">${brl(x.t)}</td><td class="v">${pct(ac/totP)}</td>${temCusto?`<td class="v">${mg==null?'—':`<span class="pill ${mg<0.4?'p-no':'p-ok'}" style="${mg<0.4?'background:var(--redSoft);color:var(--red)':''}">${pct(mg)}</span>`}</td>`:''}</tr>`; }).join('')}</tbody></table>`:'<div class="vazio">Sem vendas com esses filtros.</div>';
 }
 
 // ---------- 3. clientes ----------
@@ -551,6 +687,8 @@ function pgClientes(j){
   const mx=Math.max(...fx.map(f=>f.val),1);
   $('faixas').innerHTML=peds.length?`<div class="rank fx">${fx.map(f=>`<div class="r"><span class="nm" style="font-weight:500">${f.nome}</span><span class="tr"><i style="width:${f.val?Math.max(f.val/mx*100,2):0}%"></i></span><span class="vl">${int(f.val)} <span style="color:var(--ink3);font-weight:500">· ${brl(f.t)}</span></span></div>`).join('')}</div>`:'<div class="vazio">Sem pedidos.</div>';
   ranking('rkClientes',porCli.map(c=>({...c,val:c.t,rot:brl(c.t)})),(g)=>`${pl(g.pedidos,'pedido','pedidos')} · ${int(g.q)} peças · ${pct(g.t/tot)} · classe ${classe.get(g.nome)}`,null,10);
+  const inat=clientesInativos(), hj=Date.now()-3*3600e3;
+  $('inativos').innerHTML=inat.length?`<table><thead><tr><th>Cliente</th><th>Último vendedor</th><th class="v">Última compra</th><th class="v">Sem comprar</th><th class="v">Pedidos em 12 meses</th><th class="v">Comprou em 12 meses</th></tr></thead><tbody>${inat.slice(0,12).map(c=>`<tr><td class="el">${esc(c.nome)}</td><td class="el">${esc(c.v)}</td><td class="v">${c.ult.split('-').reverse().join('/')}</td><td class="v"><span class="pill p-mid">${Math.round((hj-Date.parse(c.ult))/864e5)} d</span></td><td class="v">${c.ped.size}</td><td class="v">${brl(c.t)}</td></tr>`).join('')}</tbody></table>`:'<div class="vazio">Nenhum cliente parado há mais de 90 dias.</div>';
   if(E.dados.linhas.some(l=>l.sg)) ranking('rkSegmento',agrupar(ls.filter(l=>l.sg),'sg').map(g=>({...g,val:g.t,rot:brl(g.t)})).sort((a,b)=>b.val-a.val),(g)=>`${pl(g.pedidos,'pedido','pedidos')} · ${pct(g.t/tot)}`);
   else $('rkSegmento').innerHTML='<div class="vazio">A planilha ainda não tem a coluna "Segmento". Se a Visu aprovar esta análise, a coluna entra com lista suspensa de poucos grupos (ex.: academias, escolas, indústria).</div>';
 }
@@ -559,14 +697,14 @@ function pgClientes(j){
 function pgVendedores(j){
   const ls=linhas(j.atual), tot=ls.reduce((s,l)=>s+l.t,0)||1, R=E.dados.regras, mesMode=E.periodo==='mes';
   const porV=new Map(); ls.forEach(l=>{ const g=porV.get(l.v)||[]; g.push(l); porV.set(l.v,g); });
-  const lista=[...porV.entries()].map(([nome,g])=>({nome,r:resumo(g)})).sort((a,b)=>b.r.fat-a.r.fat);
+  const lista=[...porV.entries()].map(([nome,g])=>({nome,r:resumo(g),cu:g.reduce((s2,l)=>s2+(l.cu||0),0)})).sort((a,b)=>b.r.fat-a.r.fat);
   $('thRegua').hidden=!mesMode;
   (E.dados.vendedores_cadastrados||[]).forEach(nm=>{ if(!porV.has(nm)&&!Object.values(E.filtros).some(Boolean)) lista.push({nome:nm,r:resumo([])}); });
   $('vendNota').textContent=mesMode?'Comissão sobre o faturamento (data e valor da venda), como a Visu pratica. A régua compara o faturamento do mês com R$ 15 mil (começa em 1%) e R$ 50 mil (libera 5%, sem teto). Os traços na barra marcam esses dois pontos.':'A régua da comissão aparece quando o período é um mês só, porque a comissão é apurada mês a mês.';
   const esc2=Math.max(R.comissao_teto*1.15,...lista.map(v=>v.r.fat));
   $('tbVend').innerHTML=lista.length?lista.map(v=>{ const f=v.r.fat, n=v.r.nr.novo;
     const st=f>=R.comissao_teto?['p-ok','5% liberado']:f>=R.comissao_inicio?['p-mid',`faltam ${brl(R.comissao_teto-f)} p/ 5%`]:['p-no',`faltam ${brl(R.comissao_inicio-f)} p/ 1%`];
-    return `<tr><td class="el"><b>${esc(v.nome)}</b></td><td class="v">${brl(f)}</td><td class="v">${pct(f/tot)}</td><td class="v">${int(v.r.pedidos)}</td><td class="v">${brl(v.r.ticket)}</td><td class="v">${brl(n.t)}</td><td class="v">${pct(f?n.t/f:0)}</td><td class="v">${int(n.c.size)}</td>
+    return `<tr><td class="el"><b>${esc(v.nome)}</b></td><td class="v">${brl(f)}</td><td class="v">${pct(f/tot)}</td><td class="v">${int(v.r.pedidos)}</td><td class="v">${brl(v.r.ticket)}</td><td class="v">${brl(n.t)}</td><td class="v">${pct(f?n.t/f:0)}</td><td class="v">${int(n.c.size)}</td><td class="v">${(()=>{const c=v.cu||0; return c?pct((f-c)/f):'—';})()}</td>
       ${mesMode?`<td style="min-width:230px"><div style="display:flex;gap:8px;align-items:center"><div class="mini" style="flex:1"><i style="width:${Math.min(f/esc2*100,100)}%"></i><u style="left:${R.comissao_inicio/esc2*100}%"></u><u style="left:${R.comissao_teto/esc2*100}%"></u></div><span class="pill ${st[0]}">${st[1]}</span></div></td>`:''}</tr>`; }).join('')
     :'<tr><td colspan="9" class="vazio">Sem vendas com esses filtros.</td></tr>';
 }
@@ -623,7 +761,7 @@ function pgPedidos(j){
   const hoje=new Date(Date.now()-3*3600e3).toISOString().slice(0,10), lim=new Date(Date.now()+21*864e5).toISOString().slice(0,10);
   const todos=new Map(); E.dados.linhas.forEach(l=>{ if(!l.pz||l.pz<hoje||l.pz>lim) return; const p=todos.get(l.p)||{c:l.c,v:l.v,pz:l.pz,q:0,t:0,prod:new Set()}; p.q+=l.q; p.t+=l.t; if(l.tp)p.prod.add(l.tp); todos.set(l.p,p); });
   const lista=[...todos.entries()].sort((a,b)=>a[1].pz.localeCompare(b[1].pz));
-  $('entregas').innerHTML=lista.length?`<div class="tw"><table><thead><tr><th>Entrega</th><th>Pedido</th><th>Cliente</th><th>Vendedor</th><th class="v">Peças</th></tr></thead><tbody>${lista.slice(0,40).map(([cod,p])=>`<tr><td class="num">${p.pz.split('-').reverse().slice(0,2).join('/')}</td><td>${esc(cod)}</td><td class="el">${esc(p.c)}</td><td class="el">${esc(p.v)}</td><td class="v">${int(p.q)}</td></tr>`).join('')}</tbody></table></div>`:'<div class="vazio">Nenhuma entrega prevista nas próximas 3 semanas.</div>';
+  $('entregas').innerHTML=lista.length?`<div class="tw"><table><thead><tr><th>Entrega</th><th>Pedido</th><th>Cliente</th><th>Vendedor</th><th class="v">Peças</th></tr></thead><tbody>${lista.slice(0,15).map(([cod,p])=>`<tr><td class="num">${p.pz.split('-').reverse().slice(0,2).join('/')}</td><td>${esc(cod)}</td><td class="el">${esc(p.c)}</td><td class="el">${esc(p.v)}</td><td class="v">${int(p.q)}</td></tr>`).join('')}</tbody></table></div>`:'<div class="vazio">Nenhuma entrega prevista nas próximas 3 semanas.</div>';
 }
 
 // ---------- financeiro ----------
@@ -632,18 +770,30 @@ async function carregarFin(forcar){
   const r=await fetch('/api/financeiro'+(forcar?'?forcar=1':''),{headers:{Accept:'application/json'}}); if(r.status===401){location.href='/login';return;}
   const d=await r.json(); if(!r.ok) throw new Error(d.erro||('erro '+r.status)); E.fin=d;
 }
+function precisaFin(alvo){
+  if(E.fin) return false;
+  $(alvo).innerHTML='<div class="vazio">Carregando os dados financeiros da Conta Azul…</div>';
+  carregarFin().then(()=>desenhar()).catch(e=>{$(alvo).innerHTML=`<div class="aviso erro">Não foi possível carregar o financeiro: ${esc(e.message)}</div>`});
+  return true;
+}
+const mesFin=()=>E.fin.meses.includes(E.mes)?E.mes:E.fin.meses[E.fin.meses.length-1];
 function pgFinanceiro(){
-  if(!E.fin){ $('finKpis').innerHTML='<div class="vazio">Carregando os dados financeiros da Conta Azul…</div>'; carregarFin().then(()=>E.pagina==='financeiro'&&desenhar()).catch(e=>{$('finKpis').innerHTML=`<div class="aviso erro">Não foi possível carregar o financeiro: ${esc(e.message)}</div>`}); return; }
+  if(precisaFin('finKpis')) return;
   const f=E.fin, m=f.meses.includes(E.mes)?E.mes:f.meses[f.meses.length-1], ma=somaMes(m,-1), cx=E.reg==='caixa';
   document.querySelectorAll('[data-reg]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.reg===E.reg)));
   const rec=(mm)=>cx?(f.caixa[mm]?.entradas||0):(f.receita[mm]||0), des=(mm)=>cx?(f.caixa[mm]?.saidas||0):(f.despesa[mm]||0), res=(mm)=>rec(mm)-des(mm);
-  const pe=f.ponto_equilibrio;
-  $('finKpis').innerHTML=[
-    [cx?'Entradas':'Receita',brl(rec(m)),`${delta(rec(m),rec(ma))}<span>mês anterior: ${brl(rec(ma))}${m===new Date(Date.now()-3*3600e3).toISOString().slice(0,7)?' · mês em andamento':''}</span>`,'dest'],
-    [cx?'Saídas':'Despesas e custos',brl(des(m)),`${delta(des(m),des(ma))}<span>mês anterior: ${brl(des(ma))}</span>`,''],
-    [cx?'Saldo do mês':'Resultado',`<span class="${res(m)<0?'neg':''}">${brl(res(m))}</span>`,`<span>margem ${pct(rec(m)?res(m)/rec(m):0)}</span>`,''],
-    ['Ponto de equilíbrio',pe?brl(pe):'—',pe?`<span class="pill ${rec(m)>=pe?'p-ok':'p-no'}">${rec(m)>=pe?`${brl(rec(m)-pe)} acima`:`faltam ${brl(pe-rec(m))}`}</span>`:'<span>defina PONTO_EQUILIBRIO</span>',''],
-  ].map(([l,v,s2,c])=>`<div class="kpi ${c}"><div class="l"><span>${l}</span></div><div class="v num">${v}</div><div class="s">${s2}</div></div>`).join('');
+  const P=peRef(), pe=P.valor, x=indM(m,cx), inc=incompleto(m), r30=f.receber.prox30.valor, p30=f.pagar.prox30.valor+f.pagar.atrasado;
+  const liq=p30?(f.saldo_atual+r30)/p30:null, saidas3=f.meses.filter(mm=>mm<m).slice(-3).map(mm=>f.caixa[mm]?.saidas||0), med=saidas3.length?saidas3.reduce((a,b)=>a+b,0)/saidas3.length:0;
+  $('finKpis').innerHTML=kpiHtml([
+    [cx?'Entradas':'Receita',brl(rec(m)),`${delta(rec(m),rec(ma))}<span>${nomeMes(ma)}: ${brl(rec(ma))}${m===mesHojeBR()?' · mês em andamento':''}</span>`,'dest'],
+    [cx?'Saídas':'Despesas e custos',brl(des(m)),`${delta(des(m),des(ma),1)}<span>${nomeMes(ma)}: ${brl(des(ma))}</span>`],
+    [cx?'Geração de caixa':'Resultado',inc&&!cx?'—':`<span class="${res(m)<0?'neg':''}">${brl(res(m))}</span>`,inc&&!cx?'<span>despesas não lançadas</span>':`<span>margem ${pct(rec(m)?res(m)/rec(m):0)}</span>`],
+    ['Margem de contribuição',x&&!inc?pct(x.mc_pct):'—',x&&!inc?`<span>${brl(x.margem_contribuicao)} para pagar ${brl(x.fixos)} de fixos</span>`:'<span>—</span>'],
+    ['Ponto de equilíbrio',pe?brl(pe):'—',pe?`<span class="pill ${rec(m)>=pe?'p-ok':'p-no'}" style="${rec(m)>=pe?'':'background:var(--redSoft);color:var(--red)'}">${rec(m)>=pe?`${brl(rec(m)-pe)} acima`:`faltam ${brl(pe-rec(m))}`}</span><span>${P.calc?'calculado':'especificação'}</span>`:'','','C1'],
+    ['Saldo em bancos',brl(f.saldo_atual),`<span>${med?`cobre ${Math.round(f.saldo_atual/med*30)} dias de saídas`:pl(f.saldos.length,'conta','contas')}</span>`],
+    ['Liquidez 30 dias',liq==null?'—':liq.toLocaleString('pt-BR',{maximumFractionDigits:2})+'×',`<span>(saldo + a receber 30d) ÷ (a pagar 30d + vencidas)</span>`],
+    ['Inadimplência',f.inadimplencia==null?'—':pct(f.inadimplencia),`<span>${brl(f.receber.atrasado)} em atraso</span>`],
+  ]);
   // evolução: barras agrupadas receita x despesa, linha do PE
   const ms=f.meses.slice(-12), W=760,H=250,L=58,R=12,T=16,B=28,w=W-L-R,h=H-T-B, slot=w/ms.length, bw=Math.min(slot*.32,18);
   const max=Math.max(...ms.map(mm=>Math.max(rec(mm),des(mm))),pe||0,1), {passo,topo}=escala(max), y=(v)=>T+h-(v/topo)*h;
@@ -651,6 +801,8 @@ function pgFinanceiro(){
   ms.forEach((mm,i)=>{ const cxp=L+i*slot+slot/2, sel=mm===m;
     g+=`<g class="fm" data-m="${mm}" style="cursor:pointer"><rect x="${L+i*slot}" y="${T}" width="${slot}" height="${h}" fill="transparent"/><rect x="${cxp-bw-1}" y="${y(rec(mm))}" width="${bw}" height="${Math.max(h-(y(rec(mm))-T),0)}" rx="3" fill="var(--s1)"/><rect x="${cxp+1}" y="${y(des(mm))}" width="${bw}" height="${Math.max(h-(y(des(mm))-T),0)}" rx="3" fill="var(--s2)"/><text x="${cxp}" y="${H-9}" text-anchor="middle" style="${sel?'fill:var(--ink);font-weight:700':''}">${MES_C[+mm.slice(5)-1]}</text></g>`; });
   if(pe&&!cx) g+=`<line x1="${L}" x2="${W-R}" y1="${y(pe)}" y2="${y(pe)}" stroke="var(--ink2)" stroke-width="1.5" stroke-dasharray="3 4" pointer-events="none"/>`;
+  { const pts=ms.map((mm,i)=>incompleto(mm)&&!cx?null:[L+i*slot+slot/2,y(Math.max(res(mm),0)),res(mm)]); let d='',ab=false; pts.forEach(q=>{ if(!q){ab=false;return;} d+=(ab?'L':'M')+q[0]+','+q[1]; ab=true; });
+    g+=`<path d="${d}" fill="none" stroke="var(--ink)" stroke-width="2.5" pointer-events="none"/>`+pts.filter(Boolean).map(q=>`<circle cx="${q[0]}" cy="${q[1]}" r="4" fill="${q[2]<0?'var(--red)':'var(--ink)'}" stroke="var(--panel)" stroke-width="2" pointer-events="none"/>`).join(''); }
   $('finEvol').innerHTML=`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Receita e despesas por mês">${g}</svg>`;
   $('finEvolSub').textContent=cx?'Entradas e saídas de caixa por mês':'Receita e despesas por competência';
   $('finEvol').querySelectorAll('.fm').forEach(el=>{ const mm=el.dataset.m; el.addEventListener('mousemove',e=>dica(e,`<b>${nomeMes(mm)}</b><br>${cx?'Entradas':'Receita'} ${brl(rec(mm))}<br>${cx?'Saídas':'Despesas'} ${brl(des(mm))}<br>${cx?'Saldo':'Resultado'} ${brl(res(mm))}`)); el.addEventListener('mouseleave',semDica); el.addEventListener('click',()=>{semDica();E.mes=mm;if([...$('fMes').options].some(o=>o.value===mm))$('fMes').value=mm;desenhar();}); });
@@ -658,10 +810,138 @@ function pgFinanceiro(){
   // DRE: 6 meses até o selecionado
   const idx=f.meses.indexOf(m), cols=f.meses.slice(Math.max(0,idx-5),idx+1);
   $('dreSub').textContent=`Regime de competência · ${nomeMes(cols[0])} a ${nomeMes(m)}`+(f.sem_categoria?` · ${int(f.sem_categoria)} lançamentos sem categoria`:'');
-  $('dre').innerHTML=`<thead><tr><th>Conta</th>${cols.map(c=>`<th class="v ${c===m?'sel':''}">${MES_C[+c.slice(5)-1]}/${c.slice(2,4)}</th>`).join('')}<th class="v">% receita</th></tr></thead><tbody>${f.dre.map(l=>`<tr class="${l.totalizador?'tz':''} n${Math.min(l.nivel,2)}"><td>${esc(l.descricao)}</td>${cols.map(c=>`<td class="v ${c===m?'sel':''} ${l.valores[c]<0?'neg':''}">${brl(l.valores[c])}</td>`).join('')}<td class="v">${f.receita[m]?pct(l.valores[m]/f.receita[m]):'—'}</td></tr>`).join('')}</tbody>`;
-  const contas=(id,r,rot)=>{ $(id).innerHTML=`<div class="rec" style="grid-template-columns:repeat(3,minmax(0,1fr));margin-bottom:12px">${[['Em aberto',r.total,r.qtd,''],['Atrasado',r.atrasado,r.atrasado_qtd,r.atrasado>0?'alerta':''],['Próximos 30 dias',r.prox30,r.prox30_qtd,'']].map(([l,v,q,c])=>`<div class="kpi ${c}"><div class="l">${l}</div><div class="v num" style="font-size:19px">${brl(v)}</div><div class="s">${pl(q,'parcela','parcelas')}</div></div>`).join('')}</div>
-    ${r.maiores_atrasos?.length?`<div class="tw"><table><thead><tr><th>${rot}</th><th>Vencimento</th><th class="v">Em aberto</th></tr></thead><tbody>${r.maiores_atrasos.map(x=>`<tr><td class="el">${esc(x.pessoa||x.descricao)}</td><td class="num">${x.vencimento.split('-').reverse().join('/')}</td><td class="v neg">${brl2(x.aberto)}</td></tr>`).join('')}</tbody></table></div>`:''}`; };
-  contas('finReceber',f.receber,'Cliente'); contas('finPagar',f.pagar,'Fornecedor');
+  const dre=cx?(f.dre_caixa||f.dre):f.dre, baseRec=(c)=>Math.abs(dre[0]?.valores[c]||0);
+  $('dreSub').textContent=`${cx?'Regime de caixa (pelo pagamento)':'Regime de competência'} · ${nomeMes(cols[0])} a ${nomeMes(m)}`+(f.sem_categoria?` · ${int(f.sem_categoria)} lançamentos sem categoria`:'');
+  $('dre').innerHTML=`<thead><tr><th>Conta</th>${cols.map(c=>`<th class="v ${c===m?'sel':''}">${MES_C[+c.slice(5)-1]}/${c.slice(2,4)}</th>`).join('')}<th class="v">% receita</th></tr></thead><tbody>${dre.map(l=>`<tr class="${l.totalizador?'tz':''} n${Math.min(l.nivel,2)}"><td>${esc(l.descricao)}</td>${cols.map(c=>`<td class="v ${c===m?'sel':''} ${l.valores[c]<0?'neg':''}">${brl(l.valores[c])}</td>`).join('')}<td class="v">${baseRec(m)?pct(l.valores[m]/baseRec(m)):'—'}</td></tr>`).join('')}</tbody>`;
+
+}
+
+
+// ---------- resumo executivo ----------
+function pgResumo(j){
+  vitrine(linhas(j.atual),j);
+  const a=resumo(linhas(j.atual)), b=resumo(linhas(j.ant,j.corte));
+  const f=E.fin; if(!f) carregarFin().then(()=>E.pagina==='resumo'&&desenhar()).catch(e=>{['termo','cascata','quadro'].forEach(id=>$(id).innerHTML=`<div class="aviso erro">Não foi possível carregar o financeiro: ${esc(e.message)}</div>`)});
+  const m=f?mesFin():E.mes, ma=somaMes(m,-1);
+  const res=f&&!incompleto(m)?f.resultado[m]||0:null, rec=f?f.receita[m]||0:0;
+  const proj30=f?f.projecao.semanas[3]?.saldo:null;
+  const custo=linhas(j.atual).reduce((s2,l)=>s2+(l.cu||0),0), margem=custo?(a.fat-custo)/a.fat:null;
+  $('resKpis').innerHTML=[
+    ['Vendas',brl(a.fat),`${delta(a.fat,b.fat)}<span>${j.comp}</span>`,'dest'],
+    ['Pedidos · ticket',`${int(a.pedidos)} · ${brl(a.ticket)}`,`${delta(a.ticket,b.ticket)}<span>ticket</span>`,''],
+    ['Clientes novos',pct(a.fat?a.nr.novo.t/a.fat:0),`<span>${int(a.nr.novo.c.size)} clientes · ${brl(a.nr.novo.t)}</span>`,''],
+    ['Margem bruta das vendas',margem==null?'—':pct(margem),`<span>${margem==null?'sem custo dos produtos nesta fonte':margem<0.4?'abaixo dos 40% mínimos':'acima dos 40% mínimos'}</span>`,''],
+    ['Resultado do mês',f?(res==null?'—':`<span class="${res<0?'neg':''}">${brl(res)}</span>`):'…',f?(res==null?'<span>despesas não lançadas no mês</span>':`<span>margem líquida ${pct(rec?res/rec:0)}</span>`):'<span>carregando</span>',''],
+    ['Saldo em caixa',f?brl(f.saldo_atual):'…',f?`<span>${f.saldos.length} ${f.saldos.length===1?'conta':'contas'}</span>`:'',''],
+    ['Caixa em 4 semanas',f?`<span class="${proj30<0?'neg':''}">${brl(proj30)}</span>`:'…',f?`<span>projeção pelo a receber e a pagar</span>`:'',''],
+    ['Inadimplência',f&&f.inadimplencia!=null?pct(f.inadimplencia):'—',f?`<span>${brl(f.receber.atrasado)} em atraso</span>`:'',''],
+  ].map(([l,v,s2,c])=>`<div class="kpi ${c}"><div class="l"><span>${l}</span></div><div class="v num">${v}</div><div class="s">${s2}</div></div>`).join('');
+  // vendas x PE x resultado
+  const meses=[]; for(let i=11;i>=0;i--) meses.push(somaMes(E.mes,-i));
+  const pe=peRef().valor;
+  const vs=meses.map(mm=>({k:mm,r:MES_C[+mm.slice(5)-1],v:resumo(linhas([mm])).fat}));
+  const W=760,H=250,L=58,R=12,T=16,B=28,w=W-L-R,h=H-T-B,slot=w/12,bw=Math.min(slot*.55,34);
+  const rs=meses.map(mm=>incompleto(mm)?null:f?.resultado?.[mm]??null);
+  const mx=Math.max(...vs.map(x=>x.v),pe||0,1), {passo,topo}=escala(mx), y=(v)=>T+h-(v/topo)*h;
+  let g=''; for(let v=0;v<=topo+1e-6;v+=passo) g+=`<line x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${L-8}" y="${y(v)+4}" text-anchor="end">${curto(v)}</text>`;
+  vs.forEach((x,i)=>{ const cx=L+i*slot+slot/2, r_=rs[i];
+    g+=`<g class="rg" data-i="${i}"><rect x="${L+i*slot}" y="${T}" width="${slot}" height="${h}" fill="transparent"/><rect x="${cx-bw/2}" y="${y(x.v)}" width="${bw}" height="${Math.max(y(0)-y(x.v),1)}" rx="3" fill="var(--s1)" opacity="${x.k===E.mes?1:.55}"/>`+
+      (r_!=null?`<rect x="${cx-bw/2}" y="${r_>=0?y(Math.min(Math.abs(r_),topo))-1:y(0)-4}" width="${bw}" height="4" rx="2" fill="${r_>=0?'var(--green)':'var(--red)'}"/>`:'')+
+      `<text x="${cx}" y="${H-9}" text-anchor="middle" style="${x.k===E.mes?'fill:var(--ink);font-weight:700':''}">${x.r}</text></g>`; });
+  if(pe) g+=`<line x1="${L}" x2="${W-R}" y1="${y(pe)}" y2="${y(pe)}" stroke="var(--ink2)" stroke-width="1.5" stroke-dasharray="3 4" pointer-events="none"/>`;
+  $('resGraf').innerHTML=`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Vendas e resultado por mês">${g}</svg>`;
+  $('resGraf').querySelectorAll('.rg').forEach(el=>{ const i=+el.dataset.i; el.addEventListener('mousemove',e=>dica(e,`<b>${nomeMes(meses[i])}</b><br>Vendas ${brl(vs[i].v)}${pe?`<br>${vs[i].v>=pe?'Acima':'Abaixo'} do ponto de equilíbrio`:''}${rs[i]!=null?`<br>Resultado ${brl(rs[i])}`:''}`)); el.addEventListener('mouseleave',semDica); el.addEventListener('click',()=>{semDica();E.mes=meses[i];$('fMes').value=meses[i];desenhar();}); });
+  // alertas
+  const al=[];
+  if(pe&&E.periodo==='mes'){ const p=j.rot.includes('até o dia')?a.fat/new Date(Date.now()-3*3600e3).getUTCDate()*new Date(+E.mes.slice(0,4),+E.mes.slice(5),0).getDate():a.fat; if(p<pe) al.push(['Vendas abaixo do ponto de equilíbrio',pe-p,`${j.rot.includes('até o dia')?'No ritmo atual, o mês fecha':'O mês fechou'} em ${brl(p)}, abaixo dos ${brl(pe)} necessários para cobrir a estrutura de custos.`,'var(--red)']); }
+  if(f){
+    if(f.receber.atrasado>0) al.push(['Recebimentos em atraso',f.receber.atrasado,`${pl(f.receber.atrasado_qtd,'parcela','parcelas')} vencidas. Maior devedor: ${f.receber.atraso_por_pessoa[0]?.pessoa||'—'} (${brl(f.receber.atraso_por_pessoa[0]?.valor)}).`,'var(--orange)']);
+    const neg=f.projecao.semanas.find(x=>x.saldo<0); if(neg) al.push(['Caixa negativo previsto',neg.saldo,`Na semana de ${neg.inicio.split('-').reverse().slice(0,2).join('/')}, pela projeção de contas a receber e a pagar.`,'var(--red)']);
+    if(f.pagar.atrasado>0) al.push(['Contas a pagar vencidas',f.pagar.atrasado,`${pl(f.pagar.atrasado_qtd,'conta','contas')} em atraso; confira o DDA e a programação de pagamentos.`,'var(--amber)']);
+    if(res!=null&&res<0) al.push(['Resultado negativo no mês',res,'Despesas e custos acima da receita no regime de competência.','var(--red)']);
+    const topDesp=f.despesas_categoria.map(x=>({n:x.nome,a:x.valores[m]||0,b:x.valores[ma]||0})).filter(x=>x.b>0&&x.a>x.b*1.25&&x.a-x.b>2000).sort((p,q)=>(q.a-q.b)-(p.a-p.b))[0];
+    if(topDesp) al.push([`Despesa em alta: ${topDesp.n}`,topDesp.a-topDesp.b,`Subiu ${pct((topDesp.a-topDesp.b)/topDesp.b)} em relação a ${nomeMes(ma)}.`,'var(--amber)']);
+  }
+  const abaixo=[...a.ped.values()].length&&custo?(()=>{ const pm=new Map(); linhas(j.atual).forEach(l=>{const p=pm.get(l.p)||{t:0,c:0};p.t+=l.t;p.c+=l.cu||0;pm.set(l.p,p)}); return [...pm.values()].filter(p=>p.c&&p.t&&(p.t-p.c)/p.t<0.4); })():[];
+  if(abaixo.length) al.push(['Vendas abaixo de 40% de margem',abaixo.reduce((s2,p)=>s2+p.t,0),`${pl(abaixo.length,'pedido','pedidos')} com margem abaixo da faixa verde; pela regra da Visu, precisam de autorização do Egberto.`,'var(--orange)']);
+  const inat=clientesInativos(); if(inat.length) al.push(['Clientes que pararam de comprar',inat.reduce((s2,c)=>s2+c.t,0),`${pl(inat.length,'cliente','clientes')} com compras nos últimos 12 meses e nada há mais de 90 dias. Bom alvo para o comercial.`,'var(--s1)']);
+  $('alertas').innerHTML=al.length?al.map(([t,v,ds,c])=>`<li><i style="background:${c}"></i><b>${t}</b><span class="vv ${v<0?'neg':''}">${brl(v)}</span><span class="ds">${ds}</span></li>`).join(''):'<li><i style="background:var(--green)"></i><b>Nenhum ponto de atenção no período.</b><span></span></li>';
+}
+
+function clientesInativos(){
+  const hoje=new Date(Date.now()-3*3600e3), lim=new Date(hoje.getTime()-90*864e5).toISOString().slice(0,10), ini=new Date(hoje.getTime()-365*864e5).toISOString().slice(0,10);
+  const c=new Map(); E.dados.linhas.forEach(l=>{ if(!l.d||l.d<ini) return; const g=c.get(l.c)||{nome:l.c,ult:l.d,t:0,ped:new Set(),v:l.v}; g.t+=l.t; g.ped.add(l.p); if(l.d>g.ult){g.ult=l.d;g.v=l.v;} c.set(l.c,g); });
+  return [...c.values()].filter(g=>g.ult<lim).sort((a,b)=>b.t-a.t);
+}
+
+// ---------- fluxo de caixa ----------
+function pgCaixa(){
+  if(precisaFin('cxKpis')) return;
+  const f=E.fin, p=f.projecao, m=mesFin(), cx=f.caixa[m]||{entradas:0,saidas:0};
+  const s4=p.semanas[3], s13=p.semanas[12], minimo=p.semanas.reduce((a,b)=>b.saldo<a.saldo?b:a,p.semanas[0]);
+  $('cxKpis').innerHTML=[
+    ['Saldo atual',brl(f.saldo_atual),`<span>${f.saldos.map(c=>esc(c.nome)).slice(0,2).join(' · ')}</span>`,'dest'],
+    ['Em 4 semanas',`<span class="${s4.saldo<0?'neg':''}">${brl(s4.saldo)}</span>`,`<span>até ${s4.fim.split('-').reverse().slice(0,2).join('/')}</span>`,''],
+    ['Em 13 semanas',`<span class="${s13.saldo<0?'neg':''}">${brl(s13.saldo)}</span>`,`<span>até ${s13.fim.split('-').reverse().slice(0,2).join('/')}</span>`,''],
+    ['Menor saldo previsto',`<span class="${minimo.saldo<0?'neg':''}">${brl(minimo.saldo)}</span>`,`<span>semana de ${minimo.inicio.split('-').reverse().slice(0,2).join('/')}</span>`,''],
+  ].map(([l,v,s2,c])=>`<div class="kpi ${c}"><div class="l"><span>${l}</span></div><div class="v num">${v}</div><div class="s">${s2}</div></div>`).join('');
+  $('projSub').textContent=`Saldo atual ${brl(p.saldo_inicial)} + a receber − a pagar, pelo vencimento. Fora da projeção: ${brl(p.atrasados_receber)} a receber e ${brl(p.atrasados_pagar)} a pagar já vencidos.`;
+  // barras entradas/saídas + linha de saldo
+  const W=760,H=270,L=62,R=12,T=16,B=30,w=W-L-R,h=H-T-B,n=p.semanas.length,slot=w/n,bw=Math.min(slot*.3,16);
+  const vals=p.semanas.flatMap(x=>[x.entradas,x.saidas,x.saldo]); const mn=Math.min(0,...vals), mx=Math.max(...vals,1);
+  const {passo}=escala(mx-mn); const lo=Math.floor(mn/passo)*passo, hi=Math.ceil(mx/passo)*passo; const y=(v)=>T+h-((v-lo)/(hi-lo))*h;
+  let g=''; for(let v=lo;v<=hi+1e-6;v+=passo) g+=`<line x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}" stroke="${Math.abs(v)<1e-6?'var(--line2)':'var(--line)'}"/><text x="${L-8}" y="${y(v)+4}" text-anchor="end">${curto(v)}</text>`;
+  const pts=[];
+  p.semanas.forEach((x,i)=>{ const cx=L+i*slot+slot/2; pts.push(`${cx},${y(x.saldo)}`);
+    g+=`<g class="pj" data-i="${i}"><rect x="${L+i*slot}" y="${T}" width="${slot}" height="${h}" fill="transparent"/><rect x="${cx-bw-1}" y="${y(x.entradas)}" width="${bw}" height="${Math.max(y(0)-y(x.entradas),1)}" rx="2" fill="var(--s1)"/><rect x="${cx+1}" y="${y(x.saidas)}" width="${bw}" height="${Math.max(y(0)-y(x.saidas),1)}" rx="2" fill="var(--s2)"/><text x="${cx}" y="${H-10}" text-anchor="middle">${x.inicio.slice(8)}/${x.inicio.slice(5,7)}</text></g>`; });
+  g+=`<polyline points="${pts.join(' ')}" fill="none" stroke="var(--ink)" stroke-width="2.5" pointer-events="none"/>`+p.semanas.map((x,i)=>`<circle cx="${L+i*slot+slot/2}" cy="${y(x.saldo)}" r="4" fill="${x.saldo<0?'var(--red)':'var(--ink)'}" stroke="var(--panel)" stroke-width="2" pointer-events="none"/>`).join('');
+  $('projGraf').innerHTML=`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Projeção de caixa semanal">${g}</svg>`;
+  $('projGraf').querySelectorAll('.pj').forEach(el=>{ const x=p.semanas[+el.dataset.i]; el.addEventListener('mousemove',e=>dica(e,`<b>${x.inicio.split('-').reverse().join('/')} a ${x.fim.split('-').reverse().join('/')}</b><br>Entradas ${brl(x.entradas)}<br>Saídas ${brl(x.saidas)}<br>Saldo projetado ${brl(x.saldo)}`)); el.addEventListener('mouseleave',semDica); });
+  $('projTab').innerHTML=`<table><thead><tr><th>Semana</th><th class="v">Entradas</th><th class="v">Saídas</th><th class="v">Saldo projetado</th></tr></thead><tbody>${p.semanas.map(x=>`<tr><td>${x.inicio.split('-').reverse().join('/')} a ${x.fim.split('-').reverse().join('/')}</td><td class="v">${brl(x.entradas)}</td><td class="v">${brl(x.saidas)}</td><td class="v ${x.saldo<0?'neg':''}">${brl(x.saldo)}</td></tr>`).join('')}</tbody></table>`;
+  $('cxReal').innerHTML=`<table><thead><tr><th>Mês</th><th class="v">Recebimentos</th><th class="v">Pagamentos</th><th class="v">Geração de caixa</th><th class="v">Receita (competência)</th><th class="v">Recebido ÷ receita</th></tr></thead><tbody>${f.meses.slice().reverse().map(mm=>{const c=f.caixa[mm]; return `<tr class="${mm===m?'tot':''}"><td>${nomeMes(mm)}</td><td class="v">${brl(c.entradas)}</td><td class="v">${brl(c.saidas)}</td><td class="v ${c.entradas-c.saidas<0?'neg':''}">${brl(c.entradas-c.saidas)}</td><td class="v">${brl(f.receita[mm])}</td><td class="v">${f.receita[mm]?pct(c.entradas/f.receita[mm]):'—'}</td></tr>`}).join('')}</tbody></table>`;
+}
+
+// ---------- contas a receber ----------
+function pgReceber(){
+  if(precisaFin('rcKpis')) return;
+  const f=E.fin, r=f.receber, m=mesFin();
+  $('rcKpis').innerHTML=[
+    ['A receber',brl(r.total),`<span>${pl(r.qtd,'parcela','parcelas')}</span>`,'dest'],
+    ['Em atraso',`<span class="${r.atrasado?'neg':''}">${brl(r.atrasado)}</span>`,`<span>${pl(r.atrasado_qtd,'parcela','parcelas')}</span>`,''],
+    ['Inadimplência',f.inadimplencia==null?'—':pct(f.inadimplencia),'<span>atraso ÷ tudo que venceu em 90 dias</span>',''],
+    ['Próximos 30 dias',brl(r.prox30.valor),`<span>7 dias: ${brl(r.prox7.valor)}</span>`,''],
+  ].map(([l,v,s2,c])=>`<div class="kpi ${c}"><div class="l"><span>${l}</span></div><div class="v num">${v}</div><div class="s">${s2}</div></div>`).join('');
+  const mx=Math.max(...r.idade.map(x=>x.valor),1);
+  $('rcIdade').innerHTML=`<div class="rank fx">${r.idade.map((x,i)=>`<div class="r"><span class="nm" style="font-weight:500">${x.faixa}</span><span class="tr"><i style="width:${x.valor?Math.max(x.valor/mx*100,2):0}%;background:${['var(--amber)','var(--orange)','var(--s2)','var(--red)','var(--red)'][i]}"></i></span><span class="vl">${brl(x.valor)} <span style="color:var(--ink3);font-weight:500">· ${x.qtd}</span></span></div>`).join('')}</div><div class="nota">Quanto mais antigo o atraso, menor a chance de recebimento. Atrasos acima de 90 dias pedem negociação ou protesto.</div>`;
+  const hoje=Date.now()-3*3600e3;
+  $('rcPessoas').innerHTML=r.atraso_por_pessoa.length?`<table><thead><tr><th>Cliente</th><th class="v">Parcelas</th><th class="v">Mais antiga</th><th class="v">Em atraso</th></tr></thead><tbody>${r.atraso_por_pessoa.map(x=>`<tr><td class="el">${esc(x.pessoa)}</td><td class="v">${x.qtd}</td><td class="v"><span class="pill ${(hoje-Date.parse(x.mais_antigo))/864e5>60?'p-no':'p-mid'}">${Math.round((hoje-Date.parse(x.mais_antigo))/864e5)} d</span></td><td class="v neg">${brl2(x.valor)}</td></tr>`).join('')}</tbody></table>`:'<div class="vazio">Nenhum recebimento em atraso.</div>';
+  $('rcProx').innerHTML=r.proximos.length?`<table><thead><tr><th>Vencimento</th><th>Cliente</th><th class="v">Valor</th></tr></thead><tbody>${r.proximos.map(x=>`<tr><td class="num">${x.vencimento.split('-').reverse().join('/')}</td><td class="el">${esc(x.pessoa||x.descricao)}</td><td class="v">${brl2(x.aberto)}</td></tr>`).join('')}</tbody></table>`:'<div class="vazio">Nada a vencer.</div>';
+  $('rcCatSub').textContent=`Competência · ${nomeMes(m)}`;
+  const cats=f.receitas_categoria.map(x=>({nome:x.nome,val:x.valores[m]||0,t:x.total})).filter(x=>x.val>0).sort((a,b)=>b.val-a.val);
+  const tot=cats.reduce((s2,x)=>s2+x.val,0)||1;
+  ranking('rcCat',cats.map(x=>({...x,rot:brl(x.val)})),(g)=>`${pct(g.val/tot)} da receita do mês`,'Sem receitas no mês.');
+}
+
+// ---------- contas a pagar e despesas ----------
+function pgPagar(){
+  if(precisaFin('pgKpis')) return;
+  const f=E.fin, pg=f.pagar, m=mesFin(), ma=somaMes(m,-1);
+  $('pgKpis').innerHTML=[
+    ['Despesas do mês',brl(f.despesa[m]),`${delta(f.despesa[m],f.despesa[ma],1)}<span>${nomeMes(ma)}: ${brl(f.despesa[ma])}</span>`,'dest'],
+    ['A pagar',brl(pg.total),`<span>${pl(pg.qtd,'conta','contas')}</span>`,''],
+    ['Vencidas',`<span class="${pg.atrasado?'neg':''}">${brl(pg.atrasado)}</span>`,`<span>${pl(pg.atrasado_qtd,'conta','contas')}</span>`,''],
+    ['Próximos 7 dias',brl(pg.prox7.valor),`<span>30 dias: ${brl(pg.prox30.valor)}</span>`,''],
+  ].map(([l,v,s2,c])=>`<div class="kpi ${c}"><div class="l"><span>${l}</span></div><div class="v num">${v}</div><div class="s">${s2}</div></div>`).join('');
+  const totM=f.despesa[m]||1;
+  $('pgCatSub').textContent=`${nomeMes(m)} · comparado com ${nomeMes(ma)}`;
+  const cats=f.despesas_categoria.map(x=>({nome:x.nome,val:x.valores[m]||0,ant:x.valores[ma]||0})).filter(x=>x.val>0||x.ant>0).sort((a,b)=>b.val-a.val);
+  ranking('pgCat',cats.map(x=>({...x,rot:brl(x.val)})),(g)=>`${pct(g.val/totM)} das despesas · ${g.ant?`${g.val>=g.ant?'▲':'▼'} ${pct(Math.abs(g.val-g.ant)/g.ant)} vs. mês anterior`:'sem lançamento no mês anterior'}`,'Sem despesas no mês.',12);
+  const cc=f.despesas_centro.map(x=>({nome:x.nome,val:x.valores[m]||0})).filter(x=>x.val>0).sort((a,b)=>b.val-a.val);
+  ranking('pgCentro',cc.map(x=>({...x,rot:brl(x.val)})),(g)=>`${pct(g.val/totM)} das despesas`,'Sem centros de custo nos lançamentos.');
+  const fo=f.fornecedores.map(x=>({nome:x.nome||'—',val:x.total}));
+  const totF=fo.reduce((s2,x)=>s2+x.val,0)||1;
+  ranking('pgForn',fo.map(x=>({...x,rot:brl(x.val)})),(g)=>`${pct(g.val/totF)} entre os 10 maiores`,'Sem fornecedores identificados.',10);
+  $('pgProx').innerHTML=pg.proximos.length?`<table><thead><tr><th>Vencimento</th><th>Fornecedor / descrição</th><th>Categoria</th><th class="v">Valor</th></tr></thead><tbody>${pg.proximos.map(x=>`<tr><td class="num">${x.vencimento.split('-').reverse().join('/')}</td><td class="el">${esc(x.pessoa||x.descricao)}</td><td class="el">${esc(x.categoria)}</td><td class="v">${brl2(x.aberto)}</td></tr>`).join('')}</tbody></table>`:'<div class="vazio">Nada a vencer.</div>';
 }
 
 // ---------- conciliação planilha x sistema ----------
@@ -723,6 +1003,193 @@ function pgConciliacao(){
     :`<table><thead><tr><th>Venda</th><th>Data</th><th>Cadastrada em</th><th>Cliente</th><th>Situação</th><th class="v">Valor</th></tr></thead><tbody>${[...andamento,...lancMesSeguinte,...criadoDepois].slice(0,30).map(v=>`<tr><td>${esc(v.n)}</td><td class="num">${v.d.split('-').reverse().join('/')}</td><td class="num">${v.e?v.e.split('-').reverse().join('/'):'—'}</td><td class="el">${esc(v.c)}</td><td>${v.s==='EM_ANDAMENTO'?'Em andamento':v.s==='APROVADO'?'Aprovada':v.s==='FATURADO'?'Faturada':v.s}</td><td class="v">${brl2(v.t)}</td></tr>`).join('')||'<tr><td colspan="6" class="vazio">Nenhuma venda pendente ou fora do mês.</td></tr>'}</tbody></table>`;
 }
 
+// ---------- v6: dashboards gerenciais ----------
+const MESES_PAG={resumo:1,comercial:1,financas:1,controle:1,usuarios:1};
+const kpiHtml=(arr)=>arr.map(([l,v,s2,c,r])=>`<div class="kpi ${c||''}"><div class="l"><span>${l}</span>${r?`<span class="req" style="margin:0">${r}</span>`:''}</div><div class="v num">${v}</div><div class="s">${s2||''}</div></div>`).join('');
+const incompleto=(m)=>!!(E.fin&&E.fin.primeiro_mes_despesas&&m<E.fin.primeiro_mes_despesas);
+const indM=(m,caixa)=>(caixa?E.fin?.indicadores_caixa:E.fin?.indicadores)?.[m]||null;
+const mesHojeBR=()=>new Date(Date.now()-3*3600e3).toISOString().slice(0,7);
+function semFiltro(fn){ const g=E.filtros; E.filtros={}; try{ return fn(); } finally { E.filtros=g; } }
+// ponto de equilíbrio de referência: calculado pela DRE (média dos 3 últimos meses fechados) ou o valor da especificação
+function peRef(){
+  const esp=E.dados?.regras?.ponto_equilibrio||E.fin?.ponto_equilibrio||0, f=E.fin;
+  if(f?.indicadores){ const hoje=mesHojeBR(); const ms=f.meses.filter(m=>m<hoje&&!incompleto(m)&&f.indicadores[m]?.ponto_equilibrio).slice(-3);
+    if(ms.length){ const v=ms.reduce((s,m)=>s+f.indicadores[m].ponto_equilibrio,0)/ms.length; return {valor:v,calc:true,esp,rot:`calculado pela DRE (média de ${ms.map(m=>MES_C[+m.slice(5)-1]).join(', ')})`}; } }
+  return {valor:esp,calc:false,esp,rot:'valor da especificação (DRE de agosto)'};
+}
+function spark(vals,cor,inv){
+  const v=vals.map(x=>x==null?null:+x), ok=v.filter(x=>x!=null); if(ok.length<2) return '';
+  const W=96,H=26,mn=Math.min(...ok),mx=Math.max(...ok),rg=mx-mn||1, x=(i)=>2+i*(W-4)/(v.length-1), y=(a)=>H-3-(a-mn)/rg*(H-6);
+  const pts=v.map((a,i)=>a==null?null:`${x(i)},${y(a)}`).filter(Boolean).join(' '); const ult=v[v.length-1], pen=v[v.length-2];
+  const c=cor||(ult==null||pen==null?'var(--ink3)':((ult>=pen)!==!!inv?'var(--green)':'var(--red)'));
+  return `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" aria-hidden="true"><polyline points="${pts}" fill="none" stroke="var(--line2)" stroke-width="1.5"/>${ult!=null?`<circle cx="${x(v.length-1)}" cy="${y(ult)}" r="3" fill="${c}"/>`:''}</svg>`;
+}
+
+// ---------- visão geral ----------
+function pgVisao(j){
+  semFiltro(()=>{
+    pgResumo(j);
+    if(!E.fin) return;
+    termometro(); cascata(); quadro();
+  });
+  if(!E.fin){ ['termo','cascata','quadro'].forEach(id=>$(id).innerHTML='<div class="vazio">Carregando os dados financeiros da Conta Azul…</div>'); }
+}
+function termometro(){
+  const m=mesHojeBR(), hoje=new Date(Date.now()-3*3600e3), parcial=true;
+  const diasMes=new Date(+m.slice(0,4),+m.slice(5),0).getDate(), dia=parcial?hoje.getUTCDate():diasMes, resta=diasMes-dia;
+  const vend=resumo(linhas([m])).fat, P=peRef(), pe=P.valor, meta=+E.dados.regras.meta||0;
+  const proj=parcial?vend/dia*diasMes:vend, mx=Math.max(proj,vend,pe,meta,1)*1.1, w=(v)=>Math.min(v/mx*100,100);
+  const falta=Math.max(pe-vend,0);
+  $('termoSub').textContent=`${nomeMes(m)} · dia ${dia} de ${diasMes} · vendas aprovadas e faturadas na Conta Azul, em tempo real`;
+  $('termo').innerHTML=`<div class="termo">
+      <div class="trk"><i class="pj" style="width:${w(proj)}%"></i><i class="fe" style="width:${w(vend)}%"></i>
+        ${pe?`<u style="left:${w(pe)}%"><b>PE ${curto(pe)}</b></u>`:''}${meta?`<u class="mt" style="left:${w(meta)}%"><b>Meta ${curto(meta)}</b></u>`:''}</div>
+    </div>
+    <div class="tlin">
+      <div><span>Vendido${parcial?' até hoje':''}</span><b>${brl(vend)}</b><em>${pe?pct(vend/pe)+' do ponto de equilíbrio':''}</em></div>
+      ${parcial?`<div><span>Projeção pelo ritmo</span><b class="${proj<pe?'neg':'pos'}">${brl(proj)}</b><em>${brl(vend/dia)} por dia corrido</em></div>`:`<div><span>Resultado do mês</span><b class="${(E.fin.resultado[m]||0)<0?'neg':'pos'}">${incompleto(m)?'—':brl(E.fin.resultado[m])}</b><em>${incompleto(m)?'despesas não lançadas':'competência'}</em></div>`}
+      <div><span>${falta?'Falta para o equilíbrio':'Acima do equilíbrio'}</span><b class="${falta?'neg':'pos'}">${brl(falta||vend-pe)}</b><em>${falta&&parcial&&resta?`${brl(falta/resta)} por dia nos ${resta} dias restantes`:falta?'mês fechou abaixo':'cobre a estrutura fixa'}</em></div>
+    </div>
+    <div class="nota">Ponto de equilíbrio de ${brl(pe)}: ${P.rot}.${P.calc&&P.esp?` Na especificação: ${brl(P.esp)}.`:''}${meta?'':' A meta de vendas (C2) ainda não foi definida pela Visu; quando vier, entra em META_MENSAL.'}</div>`;
+}
+function cascata(){
+  const f=E.fin, m=f.meses.includes(E.mes)?E.mes:f.meses[f.meses.length-1], x=f.indicadores?.[m];
+  if(!x){ $('cascata').innerHTML='<div class="vazio">Sem dados da DRE para o mês.</div>'; return; }
+  const fixosOp=x.fixos-x.financeiro-x.tributos;
+  const passos=[['Receita',x.receita,'t'],['Deduções e impostos',-x.deducoes],['Custos variáveis',-x.custos_variaveis],['Margem de contribuição',x.margem_contribuicao,'t'],['Custos e despesas fixos',-fixosOp],['Financeiras e tributos',-(x.financeiro+x.tributos)]];
+  if(x.outras_receitas) passos.push(['Outras receitas',x.outras_receitas]);
+  passos.push(['Resultado',x.resultado,'t']);
+  const W=620,H=270,L=8,R=8,T=26,B=46,w=W-L-R,h=H-T-B,n=passos.length,slot=w/n,bw=Math.min(slot*.62,54);
+  let acum=0; const barras=passos.map(([r,v,t])=>{ let a,b; if(t){a=0;b=v;acum=v;} else {a=acum;b=acum+v;acum=b;} return {r,v,t,a,b}; });
+  const mn=Math.min(0,...barras.flatMap(z=>[z.a,z.b])), mx=Math.max(...barras.flatMap(z=>[z.a,z.b]),1), y=(v)=>T+h-(v-mn)/(mx-mn)*h;
+  let g=`<line x1="${L}" x2="${W-R}" y1="${y(0)}" y2="${y(0)}" stroke="var(--line2)"/>`;
+  barras.forEach((z,i)=>{ const cx=L+i*slot+slot/2, top=y(Math.max(z.a,z.b)), hh=Math.max(Math.abs(y(z.a)-y(z.b)),1.5);
+    const cor=z.t?(z.v<0?'var(--red)':'var(--s1)'):z.v<0?'var(--s2)':'var(--green)';
+    g+=`<rect x="${cx-bw/2}" y="${top}" width="${bw}" height="${hh}" rx="3" fill="${cor}"/>`;
+    if(i<barras.length-1) g+=`<line x1="${cx+bw/2}" x2="${cx+slot-bw/2}" y1="${y(z.b)}" y2="${y(z.b)}" stroke="var(--ink3)" stroke-dasharray="2 3"/>`;
+    g+=`<text x="${cx}" y="${top-7}" text-anchor="middle" style="fill:var(--ink);font-weight:700">${curto(z.v)}</text>`;
+    const pal=z.r.split(' '); const l1=pal.slice(0,Math.ceil(pal.length/2)).join(' '), l2=pal.slice(Math.ceil(pal.length/2)).join(' ');
+    g+=`<text x="${cx}" y="${H-28}" text-anchor="middle">${l1}</text><text x="${cx}" y="${H-14}" text-anchor="middle">${l2}</text>`; });
+  $('cascSub').textContent=`${nomeMes(m)} · competência · margem de contribuição ${pct(x.mc_pct)}${incompleto(m)?' · despesas ainda não lançadas neste mês':''}`;
+  $('cascata').innerHTML=`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Cascata do faturamento ao resultado">${g}</svg>`;
+}
+function quadro(){
+  const f=E.fin, m=E.mes, ms=[]; for(let i=5;i>=0;i--) ms.push(somaMes(m,-i));
+  const vs=new Map(ms.map(mm=>[mm,resumo(linhas([mm]))])), cu=new Map(ms.map(mm=>[mm,linhas([mm]).reduce((s,l)=>s+(l.cu||0),0)]));
+  const I=(mm)=>f.indicadores?.[mm], C=(mm)=>f.caixa?.[mm];
+  const fx=(mm,fn)=>{ try{ const r=fn(mm); return r==null||Number.isNaN(r)?null:r; }catch(e){ return null; } };
+  const linhasQ=[
+    ['Comercial'],
+    ['Vendas (aprovadas e faturadas)',mm=>vs.get(mm).fat,'brl'],
+    ['Pedidos',mm=>vs.get(mm).pedidos,'int','R1'],
+    ['Ticket médio',mm=>vs.get(mm).ticket,'brl','R2'],
+    ['Vendas para clientes novos',mm=>{const s=vs.get(mm);return s.fat?s.nr.novo.t/s.fat:null},'pct','R3'],
+    ['Clientes que compraram',mm=>vs.get(mm).clientes,'int'],
+    ['Margem bruta das vendas',mm=>{const c=cu.get(mm),t=vs.get(mm).fat;return c&&t?(t-c)/t:null},'pct'],
+    ['Financeiro (competência)'],
+    ['Receita',mm=>I(mm)?.receita,'brl'],
+    ['Margem de contribuição',mm=>incompleto(mm)?null:I(mm)?.mc_pct,'pct'],
+    ['Custos e despesas fixos',mm=>incompleto(mm)?null:I(mm)?.fixos,'brl',null,1],
+    ['Ponto de equilíbrio',mm=>incompleto(mm)||mm===mesHojeBR()?null:I(mm)?.ponto_equilibrio,'brl','C1',1],
+    ['Resultado líquido',mm=>incompleto(mm)?null:f.resultado?.[mm],'brl',null,0,1],
+    ['Margem líquida',mm=>incompleto(mm)||!I(mm)?.receita?null:f.resultado[mm]/I(mm).receita,'pct'],
+    ['Caixa'],
+    ['Recebimentos',mm=>C(mm)?.entradas,'brl'],
+    ['Pagamentos',mm=>C(mm)?.saidas,'brl',null,1],
+    ['Geração de caixa',mm=>C(mm)?C(mm).entradas-C(mm).saidas:null,'brl',null,0,1],
+  ];
+  const fmt=(v,t)=>v==null?'—':t==='brl'?brl(v):t==='int'?int(v):pct(v);
+  const parcial=m===mesHojeBR();
+  $('quadroSub').textContent=`${nomeMes(m)} comparado com o mês anterior e com a média dos 3 meses anteriores${parcial?' · mês em andamento (valores parciais)':''}${f.primeiro_mes_despesas&&f.primeiro_mes_despesas>f.meses[0]?` · despesas na Conta Azul a partir de ${nomeMes(f.primeiro_mes_despesas)}`:''}`;
+  $('quadro').innerHTML=`<table class="quadro"><thead><tr><th>Indicador</th><th>6 meses</th><th class="v">${MES_C[+m.slice(5)-1]}/${m.slice(2,4)}</th><th class="v">${MES_C[+ms[4].slice(5)-1]}/${ms[4].slice(2,4)}</th><th class="v">Variação</th><th class="v">Média 3 meses</th></tr></thead><tbody>${linhasQ.map(([rot,fn,t,req,inv,abs])=>{
+    if(!fn) return `<tr class="grp"><td colspan="6">${rot}</td></tr>`;
+    const vals=ms.map(mm=>fx(mm,fn)), a=vals[5], b=vals[4], med3=[vals[2],vals[3],vals[4]].filter(v=>v!=null), md=med3.length?med3.reduce((s,v)=>s+v,0)/med3.length:null;
+    const dv=a!=null&&b!=null&&abs?`<span class="delta ${Math.abs(a-b)<1?'eq':a>b?'up':'down'}">${a>=b?'▲':'▼'} ${brl(Math.abs(a-b))}</span>`:a!=null&&b?(t==='pct'?`<span class="delta ${Math.abs(a-b)<.0005?'eq':(a>b)!==!!inv?'up':'down'}">${a>=b?'▲':'▼'} ${(Math.abs(a-b)*100).toLocaleString('pt-BR',{maximumFractionDigits:1})} p.p.</span>`:delta(a,b,inv)):'<span class="delta eq">—</span>';
+    return `<tr><td>${rot}${req?`<span class="req">${req}</span>`:''}</td><td>${spark(vals,null,inv)}</td><td class="v"><b class="${t!=='pct'&&a<0?'neg':''}">${fmt(a,t)}</b></td><td class="v">${fmt(b,t)}</td><td class="v">${dv}</td><td class="v">${fmt(md,t)}</td></tr>`; }).join('')}</tbody></table>`;
+}
+
+// ---------- comercial ----------
+function pgComercial(j){ pgGeral(j); pgProdutos(j); pgClientes(j); pgVendedores(j); pgPedidos(j); }
+
+// ---------- financeiro ----------
+function pgFinancas(){
+  if(!E.fin){ $('finKpis').innerHTML='<div class="vazio">Carregando os dados financeiros da Conta Azul…</div>'; carregarFin().then(()=>desenhar()).catch(e=>{$('finKpis').innerHTML=`<div class="aviso erro">Não foi possível carregar o financeiro: ${esc(e.message)}</div>`}); return; }
+  const f=E.fin, av=$('finAviso');
+  if(f.primeiro_mes_despesas&&f.primeiro_mes_despesas>f.meses[0]){ av.hidden=false; av.innerHTML=`<span><b>Despesas lançadas na Conta Azul a partir de ${nomeMes(f.primeiro_mes_despesas)}.</b> Nos meses anteriores só há receitas, então resultado, margem e ponto de equilíbrio desses meses não são comparáveis e aparecem como "—".</span>`; } else av.hidden=true;
+  pgFinanceiro(); composicao(); mcTab(); pgCaixa(); pgReceber(); pgPagar();
+}
+function composicao(){
+  const f=E.fin, m=mesFin(), x=indM(m,E.reg==='caixa'); if(!x){ $('composicao').innerHTML='<div class="vazio">—</div>'; return; }
+  const fixosOp=x.fixos-x.financeiro-x.tributos, tot=x.variaveis+x.fixos||1, rec=x.receita||1;
+  const partes=[['Deduções e impostos',x.deducoes,'var(--s3)'],['Custos variáveis',x.custos_variaveis,'var(--s2)'],['Custos e despesas fixos',fixosOp,'var(--s1)'],['Financeiras e tributos',x.financeiro+x.tributos,'var(--sNone)']].concat(x.nao_classificado?[['A identificar',x.nao_classificado,'var(--red)']]:[]);
+  $('compSub').textContent=`${nomeMes(m)} · ${E.reg==='caixa'?'pagamentos do mês':'competência'} · ${brl(x.variaveis+x.fixos)} no total`;
+  $('composicao').innerHTML=`<div class="barra2" style="height:26px">${partes.filter(p=>p[1]>0).map(p=>`<span style="flex:${p[1]};background:${p[2]}"></span>`).join('')}</div>
+    <div class="rank" style="margin-top:16px">${partes.map(p=>`<div class="r" style="grid-template-columns:14px minmax(0,1fr) auto"><i style="width:10px;height:10px;border-radius:3px;background:${p[2]}"></i><span class="nm">${p[0]}</span><span class="vl">${brl(p[1])}</span><span class="mt">${pct(p[1]/tot)} das despesas · ${pct(p[1]/rec)} da receita</span></div>`).join('')}</div>
+    <div class="nota">Variáveis acompanham as vendas (impostos, matéria-prima, comissões, fretes). Fixos são a estrutura que precisa ser coberta todo mês, vendendo ou não. A classificação segue as linhas "(Variáveis)" e "(Fixos)" da DRE cadastrada na Conta Azul.</div>`;
+}
+function mcTab(){
+  const f=E.fin, m=mesFin(), idx=f.meses.indexOf(m), cols=f.meses.slice(Math.max(0,idx-5),idx+1), I=(c)=>f.indicadores[c];
+  const esp=f.ponto_equilibrio||E.dados?.regras?.ponto_equilibrio;
+  const L=[['Receita',c=>I(c).receita],['(−) Custos variáveis',c=>-I(c).variaveis],['= Margem de contribuição',c=>I(c).margem_contribuicao,1],['Margem de contribuição %',c=>I(c).mc_pct,0,'pct'],['(−) Custos e despesas fixos',c=>-I(c).fixos],['= Resultado',c=>I(c).resultado,1],['Ponto de equilíbrio',c=>I(c).ponto_equilibrio,1],['Receita acima (+) ou abaixo (−) do equilíbrio',c=>I(c).ponto_equilibrio==null?null:I(c).receita-I(c).ponto_equilibrio]];
+  $('mcTab').innerHTML=`<table class="dre"><thead><tr><th>Indicador</th>${cols.map(c=>`<th class="v ${c===m?'sel':''}">${MES_C[+c.slice(5)-1]}/${c.slice(2,4)}</th>`).join('')}</tr></thead><tbody>${L.map(([r,fn,tz,t])=>`<tr class="${tz?'tz':''}"><td>${r}</td>${cols.map(c=>{ const v=incompleto(c)&&!/^Receita$/.test(r)?null:fn(c); return `<td class="v ${c===m?'sel':''} ${v<0?'neg':''}">${v==null?'—':t==='pct'?pct(v):brl(v)}</td>`; }).join('')}</tr>`).join('')}</tbody></table>
+    ${esp?`<div class="nota">Referência da especificação (C1): ponto de equilíbrio de ${brl(esp)}, calculado sobre a DRE de agosto. Aqui ele é recalculado todo mês com os lançamentos da Conta Azul.</div>`:''}`;
+}
+
+// ---------- controle ----------
+function pgControle(){ pgConciliacao(); pgDados(); pgVersoes(); }
+
+// ---------- usuários (ADM) ----------
+const PERF={diretor:'Diretor',adm:'ADM'};
+let US={lista:[],banco:true,link:null};
+async function api(url,op={}){ if(PREVIA) return previaApi(url,op); const r=await fetch(url,{...op,headers:{'Content-Type':'application/json',Accept:'application/json'}}); const d=await r.json().catch(()=>({})); if(!r.ok) throw new Error(d.erro||('erro '+r.status)); return d; }
+// prévia: simula a API sem servidor
+let PV=[{id:'diretor-1',nome:'Diretor 1',email:'',perfil:'diretor'},{id:'diretor-2',nome:'Diretor 2',email:'',perfil:'diretor'},{id:'morgana',nome:'Morgana Limeira',email:'morgana.limeira@sejaexpergestao.com',perfil:'adm',senha_criada:true,ultimo_acesso:new Date().toISOString()},{id:'gestor-seja-expert',nome:'Gestor Seja Expert',email:'',perfil:'adm'}];
+function previaApi(url,op){ const m=op.method||'GET';
+  if(url==='/api/usuarios'&&m==='GET') return {usuarios:PV,banco:true};
+  if(url==='/api/usuarios'&&m==='POST'){ const b=JSON.parse(op.body); let u=PV.find(x=>x.id===b.id); if(u) Object.assign(u,b); else PV.push(u={...b,id:'novo-'+PV.length}); return u; }
+  if(m==='DELETE'){ PV=PV.filter(x=>x.id!==url.split('/').pop()); return {ok:true}; }
+  if(url.endsWith('/convite')){ const id=url.split('/')[3]; const u=PV.find(x=>x.id===id); u.senha_criada=false; return {link:`https://painel-visu.onrender.com/convite/exemplo-${id}`,expira_em:new Date(Date.now()+7*864e5).toISOString(),usuario:u}; } }
+async function pgUsuarios(){
+  try{ const d=await api('/api/usuarios'); US.lista=d.usuarios; US.banco=d.banco; }catch(e){ $('usLista').innerHTML=`<div class="aviso erro">${esc(e.message)}</div>`; return; }
+  $('usBanco').hidden=US.banco; $('usBanco').innerHTML='<span><b>Sem banco de dados configurado.</b> Usuários e senhas ficam em arquivo e se perdem quando o Render reinicia. Configure DATABASE_URL (Neon, gratuito) antes de enviar os links.</span>';
+  const n=(p)=>US.lista.filter(u=>u.perfil===p).length;
+  $('usSub').textContent=`${pl(n('diretor'),'diretor','diretores')} · ${pl(n('adm'),'ADM','ADMs')} · link de convite vale 7 dias e uma vez só`;
+  const dt=(x)=>x?new Date(x).toLocaleDateString('pt-BR')+' '+new Date(x).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):'—';
+  $('usLista').innerHTML=`<table><thead><tr><th>Nome</th><th>E-mail (login)</th><th>Perfil</th><th>Situação</th><th>Último acesso</th><th></th></tr></thead><tbody>${US.lista.map(u=>`<tr>
+    <td><b>${esc(u.nome)}</b></td><td class="el">${u.email?esc(u.email):'<span style="color:var(--ink3)">definido no primeiro acesso</span>'}</td>
+    <td><span class="pill" style="${u.perfil==='adm'?'background:var(--orange);color:#fff':'background:var(--teal);color:#241E48'}">${PERF[u.perfil]}</span></td>
+    <td>${u.senha_criada?'<span class="status ok">✓ ativo</span>':'<span class="status at">aguardando convite</span>'}</td><td class="num">${dt(u.ultimo_acesso)}</td>
+    <td style="white-space:nowrap;text-align:right"><button class="bt2 ${u.senha_criada?'':'pri'}" data-conv="${u.id}">${u.senha_criada?'Redefinir senha':'Gerar link'}</button> <button class="bt2" data-ed="${u.id}">Editar</button> ${u.id!==E.eu?.id?`<button class="bt2 del" data-del="${u.id}">Remover</button>`:''}</td></tr>`).join('')}</tbody></table>`;
+  $('usLista').querySelectorAll('[data-conv]').forEach(b=>b.addEventListener('click',async()=>{ const u=US.lista.find(x=>x.id===b.dataset.conv);
+    if(u.senha_criada&&!confirm(`Gerar um novo link para ${u.nome}? A senha atual deixa de funcionar até a pessoa criar outra.`)) return;
+    try{ US.link=await api(`/api/usuarios/${u.id}/convite`,{method:'POST'}); mostrarLink(); pgUsuarios(); }catch(e){ alert(e.message); } }));
+  $('usLista').querySelectorAll('[data-ed]').forEach(b=>b.addEventListener('click',()=>{ const u=US.lista.find(x=>x.id===b.dataset.ed); const f=$('usForm'); f.id.value=u.id; f.nome.value=u.nome; f.email.value=u.email; f.perfil.value=u.perfil; $('usFormTit').textContent='Editar '+u.nome; $('usCancelar').hidden=false; f.nome.focus(); }));
+  $('usLista').querySelectorAll('[data-del]').forEach(b=>b.addEventListener('click',async()=>{ const u=US.lista.find(x=>x.id===b.dataset.del); if(!confirm(`Remover o acesso de ${u.nome}?`)) return; await api(`/api/usuarios/${u.id}`,{method:'DELETE'}); pgUsuarios(); }));
+  mostrarLink();
+}
+function mostrarLink(){
+  const L=US.link; if(!L){ $('usLink').innerHTML=''; return; }
+  const msg=`Olá, ${L.usuario.nome.split(' ')[0]}! Este é o seu acesso ao Painel de Gestão Visu (perfil ${PERF[L.usuario.perfil]}). Abra o link, crie sua senha e entre com seu e-mail: ${L.link} (o link é pessoal, vale 7 dias e uma vez só)`;
+  $('usLink').innerHTML=`<div class="linkbox"><b>Link de ${esc(L.usuario.nome)}</b> <span style="font-size:12px;color:var(--ink2)">· vale até ${new Date(L.expira_em).toLocaleDateString('pt-BR')} · uma vez só</span>
+    <input readonly value="${esc(L.link)}" id="usLinkTxt" style="margin-top:8px">
+    <div class="ac"><button class="bt2 pri" id="usCopiar" type="button">Copiar link</button><button class="bt2" id="usCopiarMsg" type="button">Copiar mensagem pronta</button>
+    <a class="bt2" style="text-decoration:none" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(msg)}">WhatsApp</a>
+    <a class="bt2" style="text-decoration:none" href="mailto:${esc(L.usuario.email||'')}?subject=${encodeURIComponent('Acesso ao Painel de Gestão Visu')}&body=${encodeURIComponent(msg)}">E-mail</a></div></div>`;
+  const cp=(t,b)=>{ (navigator.clipboard?.writeText(t)||Promise.reject()).then(()=>{b.textContent='Copiado ✓'}).catch(()=>{$('usLinkTxt').select();}); };
+  $('usCopiar').addEventListener('click',e=>cp(L.link,e.target)); $('usCopiarMsg').addEventListener('click',e=>cp(msg,e.target));
+}
+$('usForm').addEventListener('submit',async e=>{ e.preventDefault(); const f=e.target; $('usErro').textContent='';
+  try{ await api('/api/usuarios',{method:'POST',body:JSON.stringify({id:f.id.value||undefined,nome:f.nome.value,email:f.email.value,perfil:f.perfil.value})}); f.reset(); f.id.value=''; $('usFormTit').textContent='Novo usuário'; $('usCancelar').hidden=true; pgUsuarios(); }
+  catch(err){ $('usErro').textContent=err.message; } });
+$('usCancelar').addEventListener('click',()=>{ const f=$('usForm'); f.reset(); f.id.value=''; $('usFormTit').textContent='Novo usuário'; $('usCancelar').hidden=true; });
+async function carregarEu(){
+  try{ E.eu=PREVIA?(window.__EU__||{id:'morgana',nome:'Morgana Limeira',perfil:'adm'}):await (await fetch('/api/eu',{headers:{Accept:'application/json'}})).json(); }catch(e){ E.eu=null; }
+  if(!E.eu?.perfil) return;
+  $('eu').hidden=false; $('eu').innerHTML=`<b>${esc(E.eu.nome)}</b><i class="${E.eu.perfil==='adm'?'':'dir'}">${PERF[E.eu.perfil]}</i>`;
+  $('abaUsuarios').hidden=E.eu.perfil!=='adm';
+  if(E.pagina==='usuarios'&&E.eu.perfil!=='adm') E.pagina='resumo';
+}
+
 // ---------- eventos ----------
 document.querySelectorAll('nav.abas button').forEach(b=>b.addEventListener('click',()=>{E.pagina=b.dataset.pg;guardar();desenhar();scrollTo({top:0})}));
 $('fPeriodo').addEventListener('change',e=>{E.periodo=e.target.value;desenhar()});
@@ -735,7 +1202,9 @@ $('atualizar').addEventListener('click',()=>{ E.fin=null; carregar(true); });
 document.querySelectorAll('[data-reg]').forEach(b=>b.addEventListener('click',()=>{E.reg=b.dataset.reg;desenhar()}));
 if(PREVIA){ $('atualizar').hidden=true; $('sair').hidden=true; if(window.__LOGO__) $('logo').src=window.__LOGO__; }
 else setInterval(()=>{ if(!document.hidden) carregar(); },5*60*1000);
-const hash=location.hash.slice(1); if(['geral','produtos','clientes','vendedores','pedidos','financeiro','conciliacao','dados'].includes(hash)) E.pagina=hash;
-carregar();
+const hash=location.hash.slice(1); if(MESES_PAG[hash]) E.pagina=hash;
+if(!MESES_PAG[E.pagina]) E.pagina={geral:'comercial',produtos:'comercial',clientes:'comercial',vendedores:'comercial',pedidos:'comercial',financeiro:'financas',caixa:'financas',receber:'financas',pagar:'financas',conciliacao:'controle',dados:'controle',versoes:'controle'}[E.pagina]||'resumo';
+document.querySelectorAll('[data-ir]').forEach(b=>b.addEventListener('click',()=>$(b.dataset.ir).scrollIntoView({behavior:'smooth',block:'start'})));
+carregarEu().then(()=>carregar());
 })();
 </script>

@@ -6,18 +6,16 @@ Código no GitHub, publicação no Render (a hospedagem definitiva será decidid
 
 ## Páginas
 
-| Página | Conteúdo | Fonte |
+| Dashboard | Conteúdo | Requisitos |
 |---|---|---|
-| **Visão geral** | Vitrine com os produtos do catálogo e as peças vendidas, faturamento, pedidos (R1), ticket médio (R2), novas vendas x recompra (R3) e evolução de 12 meses com o ponto de equilíbrio (C1). | Planilha ou Conta Azul |
-| **Produtos** | Mix por material + cor, tipo de produto, material e cor, em peças ou R$ (R4); ticket médio por tecido (R2). | Planilha ou itens das vendas na Conta Azul |
-| **Clientes** *(a validar)* | Curva ABC e top 10 (C3), faixas de valor e maior pedido (C5), segmento (C6). | Planilha ou Conta Azul |
-| **Vendedores** *(a validar)* | Faturamento, pedidos, ticket, vendas para clientes novos e régua da comissão (C7, C8). | Planilha ou Conta Azul (vendedor da venda) |
-| **Pedidos e entregas** | Ciclo do pedido: quitados, com sinal e sem pagamento (C4). Entregas das próximas 3 semanas. | Planilha |
-| **Financeiro** | Receita, despesas, resultado e ponto de equilíbrio; DRE gerencial por competência; regime de caixa; contas a receber e a pagar em aberto; saldos bancários. | Conta Azul |
-| **Planilha × sistema** | Explica por que o total do mês difere entre a planilha do comercial e a Conta Azul: pedidos não lançados, vendas em andamento, data de outro mês, diferenças de valor. | Planilha + Conta Azul |
-| **Qualidade dos dados** | Colunas reconhecidas, campos em branco, clientes com mais de um nome e grafias diferentes. | Planilha |
+| **Visão geral** | Vitrine do catálogo; 8 indicadores do mês; mês em andamento contra o ponto de equilíbrio com projeção pelo ritmo; cascata do faturamento ao resultado (margem de contribuição e estrutura fixa); vendas × PE × resultado em 12 meses; pontos de atenção; quadro de indicadores com tendência de 6 meses. | R1, R2, R3, C1, C2 |
+| **Comercial** | Vendas (evolução, novos × recompra), Produtos (tipo, tecido, cor, material + cor, ticket por tecido, ABC com margem), Clientes (ABC, faixas, top 10, segmento, inativos), Vendedores (margem e régua de comissão), Pedidos e entregas. | R1 a R4, C3 a C8 |
+| **Financeiro** | Resultado (receita × despesas × resultado, composição fixas × variáveis, margem de contribuição e PE mês a mês, DRE competência/caixa), Fluxo de caixa (projeção 13 semanas, realizado, saldos), Contas a receber (inadimplência por idade e cliente), Contas a pagar (categoria, centro de custo, fornecedor). | C1 |
+| **Controle** | Planilha × sistema, qualidade dos dados, versões. | — |
 
-**Filtros em todas as páginas:** período (mês, ano até o mês, últimos 12 meses), mês, vendedor, tipo de venda (B2B/B2C), novo ou recompra, tipo de produto, material e cor.
+**Ponto de equilíbrio:** custos fixos ÷ margem de contribuição %. As categorias são classificadas pela linha da DRE cadastrada na Conta Azul ("(Variáveis)" e "(Fixos)"). A Visão geral usa a média dos 3 últimos meses fechados; o valor da especificação (R$ 176 mil) aparece como referência.
+
+**Filtros:** nas páginas financeiras, período e mês; nas comerciais, também período (mês, ano até o mês, últimos 12 meses), mês, vendedor, tipo de venda (B2B/B2C), novo ou recompra, tipo de produto, material e cor.
 
 ### Regras de cálculo
 - **Pedido:** cada código distinto em "Cód. interno" (ou "Nome do pedido (Trello)"). Sem código, as linhas do mesmo cliente no mesmo dia contam como um pedido.
@@ -27,6 +25,24 @@ Código no GitHub, publicação no Render (a hospedagem definitiva será decidid
 - **Comissão:** sobre o faturamento (data e valor da venda), nunca sobre o recebimento. Começa em 1% a partir de R$ 15 mil no mês e chega a 5% a partir de R$ 50 mil, sem teto. A tabela intermediária ainda será confirmada com a Visu.
 - **Cadastro do cliente:** "Yelloran lote 1" e "Yelloran - Lote 2" contam como "Yelloran". Diferenças de maiúsculas, acentos e espaços também são unificadas.
 - **Grafias:** "Poliamida", "poliamida " e "POLIAMIDA" contam como um só material. O painel exibe a grafia mais usada. O mesmo vale para tipo de produto, cor e vendedor.
+
+## Usuários e perfis
+
+| Perfil | O que vê e faz |
+|---|---|
+| **Diretor** | Visão geral, Comercial, Financeiro e Controle. |
+| **ADM** | Tudo do Diretor + página **Usuários** + conectar/desconectar a Conta Azul + `/api/diagnostico`. |
+
+Perfis criados na primeira execução: **Diretor 1**, **Diretor 2**, **Morgana Limeira (ADM)** e **Gestor Seja Expert (ADM)**. Nomes, e-mails e perfis se ajustam na página Usuários (ou pela variável `USUARIOS_JSON`, só na primeira execução).
+
+**Como dar acesso a alguém**
+1. Entre como ADM. No primeiro acesso, deixe o e-mail em branco e use a senha mestra `PAINEL_SENHA`.
+2. Abra **Usuários**, clique em **Gerar link** na linha da pessoa e envie o link (há botões de copiar, WhatsApp e e-mail com a mensagem pronta).
+3. A pessoa abre o link, confirma o e-mail, cria a própria senha e já entra. Depois disso, entra pelo login com e-mail e senha.
+
+O link é pessoal, vale 7 dias e funciona uma vez só. "Redefinir senha" gera um link novo e desativa a senha antiga. As senhas ficam guardadas só como hash (scrypt).
+
+**Importante:** configure `DATABASE_URL` antes de enviar os links. Sem banco, os usuários e as senhas ficam em arquivo e se perdem quando o Render reinicia.
 
 ## Fonte dos dados
 

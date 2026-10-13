@@ -75,7 +75,7 @@ export function gerarDemoPlanilha() {
           pedido: `VS-${cod}`, pedido_informado: true, vendedor, tipo_venda: tipoVenda,
           novo_recompra: r() < 0.03 ? '' : marcadoNovo ? 'novo' : 'recompra',
           tipo_produto: prod[0], material, especificacao, cor,
-          quantidade: qtd, total: Math.round(qtd * unit * 100) / 100,
+          quantidade: qtd, total: Math.round(qtd * unit * 100) / 100, custo: Math.round(qtd * unit * (0.5 + r() * 0.16) * 100) / 100,
           pag1: pagto.p1, pag2: pagto.p2, pago_100: pagto.ok, forma_pagamento: pagto.fp, prazo_entrega: prazo, frete: '', segmento: '',
         });
       }
