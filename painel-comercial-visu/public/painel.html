@@ -238,6 +238,27 @@ table.quadro svg{display:block}
 .linkbox{margin-top:10px;border:1px solid var(--orange);background:var(--orangeSoft);border-radius:10px;padding:12px}
 .linkbox input{width:100%;font:inherit;font-size:12.5px;padding:7px 9px;border:1px solid var(--line2);border-radius:8px;background:var(--panel);color:var(--ink)}
 .linkbox .ac{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+[data-d]{cursor:pointer}
+.kpi[data-d]:hover{border-color:var(--orange)}
+.kpi[data-d] .l::after{content:"ver detalhes ›";font-size:10px;letter-spacing:.02em;text-transform:none;font-weight:600;color:var(--orange);opacity:0;transition:opacity .15s}
+.kpi[data-d]:hover .l::after{opacity:1}
+.rank .r[data-d]:hover .nm,td [data-d]:hover,tr[data-d]:hover td{color:var(--orange)}
+tr[data-d]:hover td{background:var(--bg)}
+td.lk,span.lk{text-decoration:underline dotted var(--line2);text-underline-offset:3px}
+.motivos li[data-d]:hover{border-color:var(--orange)}
+.det-fundo{position:fixed;inset:0;background:rgba(20,16,40,.45);z-index:50}
+.det{position:fixed;top:0;right:0;bottom:0;width:min(980px,100vw);background:var(--panel);z-index:51;display:flex;flex-direction:column;box-shadow:-20px 0 50px rgba(0,0,0,.25)}
+.det header{padding:18px 20px 12px;border-bottom:1px solid var(--line);display:flex;gap:12px;align-items:flex-start}
+.det header h3{font-family:var(--display);font-weight:600;font-size:18px;margin:0}
+.det header .sub{font-size:12.5px;color:var(--ink3);margin-top:2px}
+.det .fe{margin-left:auto;border:0;background:var(--bg);border-radius:8px;width:34px;height:34px;font-size:18px;cursor:pointer;color:var(--ink)}
+.det .bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:10px 20px;border-bottom:1px solid var(--line)}
+.det .bar input{flex:1;min-width:160px;background:var(--bg);border:1px solid var(--line2);border-radius:8px;padding:7px 10px;font:inherit;font-size:13px;color:var(--ink)}
+.det .tot{font-size:13px;color:var(--ink2)}.det .tot b{color:var(--ink);font-variant-numeric:tabular-nums}
+.det .corpo{overflow:auto;flex:1;padding:0 20px 20px}
+.det td{white-space:nowrap}.det td.wr{white-space:normal;min-width:220px}
+.det th{position:sticky;top:0;background:var(--panel);cursor:pointer;z-index:1}
+.det th.ord::after{content:" ▾"}.det th.ord.asc::after{content:" ▴"}
 .rod{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:11.5px;color:var(--ink3);border-top:1px solid var(--line);padding-top:12px}
 @media (max-width:640px){.marca img{height:34px}.marca .div{display:none}.f select{max-width:150px}}
 </style>
@@ -455,6 +476,8 @@ table.quadro svg{display:block}
   <footer class="rod"><span id="rodA">—</span><span>Seja Expert · Gestão Financeira e BPO</span></footer>
 </main>
 <div class="tip" id="tip" hidden></div>
+<div class="det-fundo" id="detFundo" hidden></div>
+<aside class="det" id="det" hidden role="dialog" aria-modal="true" aria-labelledby="detTit"><header><div><h3 id="detTit">—</h3><div class="sub" id="detSub"></div></div><button class="fe" id="detFechar" type="button" aria-label="Fechar">×</button></header><div class="bar"><input id="detBusca" type="search" placeholder="Buscar nesta lista"><span class="tot" id="detTot"></span><button class="bt2" id="detCsv" type="button">Exportar CSV</button></div><div class="corpo" id="detCorpo"></div></aside>
 
 <script>
 (function(){
@@ -472,8 +495,9 @@ const nomeMes=(m)=>{const[a,b]=m.split('-');return MES_L[+b-1]+' de '+a};
 const somaMes=(m,n)=>{const[a,b]=m.split('-').map(Number);const d=new Date(Date.UTC(a,b-1+n,1));return d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0')};
 function delta(a,b,inv){ if(!b) return '<span class="delta eq">sem base</span>'; const d=(a-b)/b; const c=Math.abs(d)<.005?'eq':(d>0)!==!!inv?'up':'down'; return `<span class="delta ${c}">${d>0?'▲':d<0?'▼':'■'} ${pct(Math.abs(d))}</span>`; }
 
-const VERSAO='v7';
+const VERSAO='v8';
 const VERSOES=[
+ {v:'v8',data:'13/10/2026',tit:'Detalhamento ao clicar nos valores',arq:'painel-visu-v8-detalhamento.zip',itens:['Clicar em um valor abre a lista que forma aquele total: pedidos, itens, clientes, lançamentos ou parcelas em aberto.','Vale para os indicadores, vendedores, rankings de produto, tecido, cor e cliente, curva ABC, DRE, despesas por categoria e centro de custo, fornecedores, contas a receber e a pagar, caixa e pontos de atenção.','A lista tem busca, ordenação por coluna e exportação para CSV (abre no Excel).']},
  {v:'v7',data:'11/10/2026',tit:'Usuários com perfis Diretor e ADM',arq:'painel-gestao-visu-v7.zip',itens:['Login por e-mail e senha, com perfis Diretor (dashboards) e ADM (dashboards, usuários e conexão com a Conta Azul).','Quatro perfis criados: dois diretores e dois ADM (Morgana e gestor).','Página Usuários: gera o link pessoal de cada pessoa, com mensagem pronta para WhatsApp ou e-mail. A pessoa cria a própria senha no primeiro acesso.']},
  {v:'v6',data:'08/10/2026',tit:'Painel gerencial em 4 dashboards',arq:'painel-gestao-visu-v6.zip',itens:['13 abas viram 4 dashboards: Visão geral, Comercial, Financeiro e Controle.','Visão geral: vendas do mês contra o ponto de equilíbrio (com projeção pelo ritmo), cascata do faturamento ao resultado e quadro de indicadores com 6 meses de tendência.','Financeiro: margem de contribuição e ponto de equilíbrio recalculados todo mês pela DRE da Conta Azul, composição das despesas (fixas × variáveis), liquidez de 30 dias e dias de caixa.','Aviso quando os meses não têm despesas lançadas, para não comparar resultado incompleto.']},
  {v:'v5',data:'08/10/2026',tit:'Histórico de versões',arq:'painel-gestao-visu-v5.zip',itens:['Página "Versões" com o que mudou em cada entrega e a versão no rodapé.','Arquivo CHANGELOG.md no projeto, com o mesmo histórico.']},
@@ -557,6 +581,7 @@ async function carregar(forcar){
 }
 
 function desenhar(){
+  REG.clear(); regN=0;
   const d=E.dados; if(!d||!E.mes) return; marcarFiltros();
   const fonte={planilha:['Planilha de vendas',''],conta_azul:['Conta Azul ao vivo','ca'],demo:['Demonstração','demo']}[d.fonte]||['—',''];
   $('chipTxt').textContent=fonte[0]; $('chip').className='chip '+fonte[1];
@@ -583,17 +608,17 @@ function pgGeral(j){
   const a=resumo(linhas(j.atual)), b=resumo(linhas(j.ant,j.corte)), R=E.dados.regras;
   const cuA=linhas(j.atual).reduce((x,l)=>x+(l.cu||0),0), mgA=cuA&&a.fat?(a.fat-cuA)/a.fat:null;
   const hojeD=new Date(Date.now()-3*3600e3), parcialM=E.periodo==='mes'&&E.mes===mesHojeBR(), dm=new Date(+E.mes.slice(0,4),+E.mes.slice(5),0).getDate();
-  const peV=E.periodo==='mes'?peRef().valor:0;
+  const peV=E.periodo==='mes'?peRef().valor:0, lsK=linhas(j.atual);
   $('kpis').innerHTML=kpiHtml([
-    ['Faturamento',brl(a.fat),`${delta(a.fat,b.fat)}<span>${j.comp}: ${brl(b.fat)}</span>`,'dest'],
-    ['Pedidos',int(a.pedidos),`${delta(a.pedidos,b.pedidos)}<span>${j.comp}: ${int(b.pedidos)}</span>`,'','R1'],
-    ['Ticket médio',brl(a.ticket),`${delta(a.ticket,b.ticket)}<span>${j.comp}: ${brl(b.ticket)}</span>`,'','R2'],
-    ['Vendas a clientes novos',pct(a.fat?a.nr.novo.t/a.fat:0),`<span>${brl(a.nr.novo.t)} · ${pl(a.nr.novo.c.size,'cliente novo','clientes novos')}</span>`,'','R3'],
-    ['Peças vendidas',int(a.pecas),`${delta(a.pecas,b.pecas)}<span>${j.comp}</span>`],
-    ['Clientes que compraram',int(a.clientes),`<span>${int(a.nr.recompra.c.size)} de recompra</span>`],
-    ['Margem bruta das vendas',mgA==null?'—':pct(mgA),`<span>${mgA==null?'sem custo dos produtos nesta fonte':mgA<0.4?'abaixo do mínimo de 40%':'acima do mínimo de 40%'}</span>`],
-    parcialM?['Projeção do mês',brl(a.fat/hojeD.getUTCDate()*dm),`<span>pelo ritmo de ${hojeD.getUTCDate()} dias${peV?` · PE ${curto(peV)}`:''}</span>`,'','C1']
-      :['Cobertura do equilíbrio',peV?pct(a.fat/peV):'—',`<span>${peV?`PE ${brl(peV)}`:'período maior que um mês'}</span>`,'','C1'],
+    ['Faturamento',brl(a.fat),`${delta(a.fat,b.fat)}<span>${j.comp}: ${brl(b.fat)}</span>`,'dest','',()=>detPedidos('Faturamento',lsK)],
+    ['Pedidos',int(a.pedidos),`${delta(a.pedidos,b.pedidos)}<span>${j.comp}: ${int(b.pedidos)}</span>`,'','R1',()=>detPedidos('Pedidos',lsK)],
+    ['Ticket médio',brl(a.ticket),`${delta(a.ticket,b.ticket)}<span>${j.comp}: ${brl(b.ticket)}</span>`,'','R2',()=>detPedidos('Ticket médio: pedidos do período',lsK)],
+    ['Vendas a clientes novos',pct(a.fat?a.nr.novo.t/a.fat:0),`<span>${brl(a.nr.novo.t)} · ${pl(a.nr.novo.c.size,'cliente novo','clientes novos')}</span>`,'','R3',()=>detPedidos('Vendas a clientes novos',lsK.filter(l=>a.ped.get(l.p)?.nr==='novo'))],
+    ['Peças vendidas',int(a.pecas),`${delta(a.pecas,b.pecas)}<span>${j.comp}</span>`,'','',()=>detItens('Peças vendidas',lsK)],
+    ['Clientes que compraram',int(a.clientes),`<span>${int(a.nr.recompra.c.size)} de recompra</span>`,'','',()=>detClientes('Clientes que compraram',lsK)],
+    ['Margem bruta das vendas',mgA==null?'—':pct(mgA),`<span>${mgA==null?'sem custo dos produtos nesta fonte':mgA<0.4?'abaixo do mínimo de 40%':'acima do mínimo de 40%'}</span>`,'','',()=>detPedidos('Margem por pedido',lsK)],
+    parcialM?['Projeção do mês',brl(a.fat/hojeD.getUTCDate()*dm),`<span>pelo ritmo de ${hojeD.getUTCDate()} dias${peV?` · PE ${curto(peV)}`:''}</span>`,'','C1',()=>detPedidos('Vendas do mês até hoje',lsK)]
+      :['Cobertura do equilíbrio',peV?pct(a.fat/peV):'—',`<span>${peV?`PE ${brl(peV)}`:'período maior que um mês'}</span>`,'','C1',()=>detPedidos('Vendas do período',lsK)],
   ]);
 
   const tot=a.fat||1, totP=a.pedidos||1, n=a.nr.novo, r=a.nr.recompra, x=a.nr[''];
@@ -602,7 +627,7 @@ function pgGeral(j){
   const temClass=E.dados.linhas.some(l=>l.nr);
   $('novoRec').innerHTML=!a.pedidos?'<div class="vazio">Sem pedidos no período com esses filtros.</div>':!temClass?'<div class="vazio">Esta fonte não tem a coluna "Cliente novo ou recompra?". A divisão aparece quando a planilha de vendas for ligada.</div>':`
     <div class="nr">
-      <div><h4>Em faturamento</h4>${bar('t')}<div class="leg"><span><i style="background:var(--s2)"></i>Novos <b>${brl(n.t)}</b> · ${pct(n.t/tot)}</span><span><i style="background:var(--s1)"></i>Recompra <b>${brl(r.t)}</b> · ${pct(r.t/tot)}</span></div></div>
+      <div><h4>Em faturamento</h4>${bar('t')}<div class="leg"><span class="lk"${D(()=>detPedidos('Vendas a clientes novos',linhas(j.atual).filter(l=>a.ped.get(l.p)?.nr==='novo')))}><i style="background:var(--s2)"></i>Novos <b>${brl(n.t)}</b> · ${pct(n.t/tot)}</span><span class="lk"${D(()=>detPedidos('Vendas de recompra',linhas(j.atual).filter(l=>a.ped.get(l.p)?.nr==='recompra')))}><i style="background:var(--s1)"></i>Recompra <b>${brl(r.t)}</b> · ${pct(r.t/tot)}</span></div></div>
       <div><h4>Em pedidos</h4>${bar('p')}<div class="leg"><span><i style="background:var(--s2)"></i>Novos <b>${int(n.p)}</b> · ${pct(n.p/totP)}</span><span><i style="background:var(--s1)"></i>Recompra <b>${int(r.p)}</b> · ${pct(r.p/totP)}</span></div></div>
       <div><h4>Em clientes</h4><div class="leg" style="margin:0"><span>Clientes novos <b>${int(n.c.size)}</b></span><span>Clientes de recompra <b>${int(r.c.size)}</b></span></div></div>
     </div>
@@ -640,10 +665,10 @@ function graficoEvolucao(serie,pe){
 }
 
 // ---------- 2. produtos ----------
-function ranking(id,lista,meta,vazio,limite){
+function ranking(id,lista,meta,vazio,limite,abrir){
   const el=$(id); if(!lista.length){ el.innerHTML=`<div class="vazio">${vazio||'Sem vendas com esses filtros.'}</div>`; return; }
   const max=lista[0].val||1;
-  el.innerHTML=lista.slice(0,limite||8).map((g,i)=>`<div class="r"><span class="pos">${i+1}</span><span class="nm" title="${esc(g.nome)}">${esc(g.nome)}</span><span class="vl">${g.rot}</span><span class="tr"><i style="width:${Math.max(g.val/max*100,1.5)}%"></i></span><span class="mt">${meta(g)}</span></div>`).join('');
+  el.innerHTML=lista.slice(0,limite||8).map((g,i)=>`<div class="r"${abrir?D(()=>abrir(g))+' tabindex="0"':''}><span class="pos">${i+1}</span><span class="nm" title="${esc(g.nome)}">${esc(g.nome)}</span><span class="vl">${g.rot}</span><span class="tr"><i style="width:${Math.max(g.val/max*100,1.5)}%"></i></span><span class="mt">${meta(g)}</span></div>`).join('');
 }
 function pgProdutos(j){
   const ls=linhas(j.atual), pc=E.medida==='pecas', totQ=ls.reduce((s,l)=>s+l.q,0)||1, totT=ls.reduce((s,l)=>s+l.t,0)||1;
@@ -652,13 +677,13 @@ function pgProdutos(j){
   const prep=(arr)=>arr.map(g=>({...g,val:pc?g.q:g.t,rot:pc?int(g.q)+' pç':brl(g.t)})).sort((a,b)=>b.val-a.val);
   const meta=(g)=>pc?`${pct(g.q/totQ)} das peças · ${brl(g.t)} · ${pl(g.pedidos,'pedido','pedidos')}`:`${pct(g.t/totT)} do faturamento · ${int(g.q)} peças · ${pl(g.pedidos,'pedido','pedidos')}`;
   const mc=new Map(); ls.forEach(l=>{ if(!l.mt&&!l.cr) return; const k=(l.mt||'(sem material)')+' · '+(l.cr||'(sem cor)'); const g=mc.get(k)||{nome:k,t:0,q:0,ped:new Set()}; g.t+=l.t; g.q+=l.q; g.ped.add(l.p); mc.set(k,g); });
-  ranking('rkMatCor',prep([...mc.values()].map(g=>({...g,pedidos:g.ped.size}))),meta,msg,10);
+  ranking('rkMatCor',prep([...mc.values()].map(g=>({...g,pedidos:g.ped.size}))),meta,msg,10,(g)=>detItens(g.nome,ls.filter(l=>(l.mt||'(sem material)')+' · '+(l.cr||'(sem cor)')===g.nome)));
   const sem=(c)=>agrupar(ls.filter(l=>l[c]),c);
-  ranking('rkProduto',prep(agrupar(ls.filter(l=>l.tp||l.pr).map(l=>({...l,tp:l.tp||l.pr})),'tp')),meta,E.dados.itens_pendentes?'Buscando os produtos das vendas na Conta Azul…':msg);
-  ranking('rkMaterial',prep(sem('mt')),meta,msg);
-  ranking('rkCor',prep(sem('cr')),meta,msg);
+  ranking('rkProduto',prep(agrupar(ls.filter(l=>l.tp||l.pr).map(l=>({...l,tp:l.tp||l.pr})),'tp')),meta,E.dados.itens_pendentes?'Buscando os produtos das vendas na Conta Azul…':msg,8,(g)=>detItens(g.nome,ls.filter(l=>(l.tp||l.pr||'(em branco)')===g.nome)));
+  ranking('rkMaterial',prep(sem('mt')),meta,msg,8,(g)=>detItens('Material: '+g.nome,ls.filter(l=>l.mt===g.nome)));
+  ranking('rkCor',prep(sem('cr')),meta,msg,8,(g)=>detItens('Cor: '+g.nome,ls.filter(l=>l.cr===g.nome)));
   const tec=sem('mt').sort((a,b)=>b.t-a.t), tot=resumo(ls);
-  $('tbTecido').innerHTML=tec.length?tec.map(g=>`<tr><td>${esc(g.nome)}</td><td class="v">${int(g.pedidos)}</td><td class="v">${int(g.q)}</td><td class="v">${brl(g.t)}</td><td class="v">${brl(g.pedidos?g.t/g.pedidos:0)}</td><td class="v">${brl2(g.q?g.t/g.q:0)}</td></tr>`).join('')
+  $('tbTecido').innerHTML=tec.length?tec.map(g=>`<tr${D(()=>detItens('Tecido: '+g.nome,ls.filter(l=>l.mt===g.nome)))}><td class="lk">${esc(g.nome)}</td><td class="v">${int(g.pedidos)}</td><td class="v">${int(g.q)}</td><td class="v">${brl(g.t)}</td><td class="v">${brl(g.pedidos?g.t/g.pedidos:0)}</td><td class="v">${brl2(g.q?g.t/g.q:0)}</td></tr>`).join('')
     +`<tr class="tot"><td>Todos os tecidos</td><td class="v">${int(tot.pedidos)}</td><td class="v">${int(tot.pecas)}</td><td class="v">${brl(tot.fat)}</td><td class="v">${brl(tot.ticket)}</td><td class="v">${brl2(tot.pecas?tot.fat/tot.pecas:0)}</td></tr>`
     :`<tr><td colspan="6" class="vazio">${msg||'Sem vendas com esses filtros.'}</td></tr>`;
   document.querySelectorAll('[data-med]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.med===E.medida)));
@@ -667,7 +692,7 @@ function pgProdutos(j){
   let ac=0;
   $('abcProdSub').textContent=`${int(lp.length)} produtos · A = 80% do faturamento, B = 15%, C = 5%`+(temCusto?' · margem pelo custo cadastrado na Conta Azul':' · margem aparece quando houver custo do produto');
   $('abcProd').innerHTML=lp.length?`<table><thead><tr><th>Classe</th><th>Produto</th><th class="v">Peças</th><th class="v">Pedidos</th><th class="v">Faturamento</th><th class="v">% acumulado</th>${temCusto?'<th class="v">Margem bruta</th>':''}</tr></thead><tbody>${lp.slice(0,15).map(x=>{ const antes=ac/totP; ac+=x.t; const k=antes<.8?'A':antes<.95?'B':'C'; const mg=x.cu?(x.t-x.cu)/x.t:null;
-    return `<tr><td><span class="pill p-${k}">${k}</span></td><td class="el" title="${esc(x.nome)}">${esc(x.nome)}</td><td class="v">${int(x.q)}</td><td class="v">${x.ped.size}</td><td class="v">${brl(x.t)}</td><td class="v">${pct(ac/totP)}</td>${temCusto?`<td class="v">${mg==null?'—':`<span class="pill ${mg<0.4?'p-no':'p-ok'}" style="${mg<0.4?'background:var(--redSoft);color:var(--red)':''}">${pct(mg)}</span>`}</td>`:''}</tr>`; }).join('')}</tbody></table>`:'<div class="vazio">Sem vendas com esses filtros.</div>';
+    return `<tr${D(()=>detItens('Produto: '+x.nome,ls.filter(l=>(l.pr||[l.tp,l.mt,l.cr].filter(Boolean).join(' · ')||'(sem produto)')===x.nome)))}><td><span class="pill p-${k}">${k}</span></td><td class="el lk" title="${esc(x.nome)}">${esc(x.nome)}</td><td class="v">${int(x.q)}</td><td class="v">${x.ped.size}</td><td class="v">${brl(x.t)}</td><td class="v">${pct(ac/totP)}</td>${temCusto?`<td class="v">${mg==null?'—':`<span class="pill ${mg<0.4?'p-no':'p-ok'}" style="${mg<0.4?'background:var(--redSoft);color:var(--red)':''}">${pct(mg)}</span>`}</td>`:''}</tr>`; }).join('')}</tbody></table>`:'<div class="vazio">Sem vendas com esses filtros.</div>';
 }
 
 // ---------- 3. clientes ----------
@@ -679,17 +704,17 @@ function pgClientes(j){
   const top10=porCli.slice(0,10).reduce((s,c)=>s+c.t,0);
   $('abcSub').textContent=porCli.length?`${int(porCli.length)} clientes compraram · os 10 maiores somam ${pct(top10/tot)}`:'—';
   $('abc').innerHTML=porCli.length?`<div class="tw"><table><thead><tr><th>Classe</th><th class="v">Clientes</th><th class="v">Faturamento</th><th class="v">% do total</th></tr></thead><tbody>
-    ${Object.entries(cls).map(([k,g])=>`<tr><td><span class="pill p-${k}">${k}</span></td><td class="v">${int(g.n)}</td><td class="v">${brl(g.t)}</td><td class="v">${pct(g.t/tot)}</td></tr>`).join('')}</tbody></table></div>
+    ${Object.entries(cls).map(([k,g])=>`<tr${D(()=>detClientes('Clientes da classe '+k,ls.filter(l=>classe.get(l.c)===k)))}><td><span class="pill p-${k}">${k}</span></td><td class="v">${int(g.n)}</td><td class="v">${brl(g.t)}</td><td class="v">${pct(g.t/tot)}</td></tr>`).join('')}</tbody></table></div>
     <div class="nota">A: clientes que somam os primeiros 80% do faturamento · B: os 15% seguintes · C: os 5% finais.</div>`:'<div class="vazio">Sem vendas com esses filtros.</div>';
   const peds=[...a.ped.values()]; const maior=peds.reduce((m,p)=>!m||p.t>m.t?p:m,null);
   $('fxSub').textContent=peds.length?`Ticket médio ${brl(a.ticket)} · maior pedido ${brl(maior.t)} (${maior.c})`:'—';
   const fx=FAIXAS.map(([ate,rot],i)=>{const de=i?FAIXAS[i-1][0]:0; const ps=peds.filter(p=>p.t>de&&p.t<=ate); return {nome:rot,val:ps.length,t:ps.reduce((s,p)=>s+p.t,0)};});
   const mx=Math.max(...fx.map(f=>f.val),1);
-  $('faixas').innerHTML=peds.length?`<div class="rank fx">${fx.map(f=>`<div class="r"><span class="nm" style="font-weight:500">${f.nome}</span><span class="tr"><i style="width:${f.val?Math.max(f.val/mx*100,2):0}%"></i></span><span class="vl">${int(f.val)} <span style="color:var(--ink3);font-weight:500">· ${brl(f.t)}</span></span></div>`).join('')}</div>`:'<div class="vazio">Sem pedidos.</div>';
-  ranking('rkClientes',porCli.map(c=>({...c,val:c.t,rot:brl(c.t)})),(g)=>`${pl(g.pedidos,'pedido','pedidos')} · ${int(g.q)} peças · ${pct(g.t/tot)} · classe ${classe.get(g.nome)}`,null,10);
+  $('faixas').innerHTML=peds.length?`<div class="rank fx">${fx.map((f,i)=>`<div class="r"${D(()=>{ const de=i?FAIXAS[i-1][0]:0, ate=FAIXAS[i][0]; detPedidos('Pedidos '+f.nome.toLowerCase(),ls.filter(l=>{const t=a.ped.get(l.p).t; return t>de&&t<=ate;})); })}><span class="nm" style="font-weight:500">${f.nome}</span><span class="tr"><i style="width:${f.val?Math.max(f.val/mx*100,2):0}%"></i></span><span class="vl">${int(f.val)} <span style="color:var(--ink3);font-weight:500">· ${brl(f.t)}</span></span></div>`).join('')}</div>`:'<div class="vazio">Sem pedidos.</div>';
+  ranking('rkClientes',porCli.map(c=>({...c,val:c.t,rot:brl(c.t)})),(g)=>`${pl(g.pedidos,'pedido','pedidos')} · ${int(g.q)} peças · ${pct(g.t/tot)} · classe ${classe.get(g.nome)}`,null,10,(g)=>detPedidos('Cliente: '+g.nome,ls.filter(l=>l.c===g.nome)));
   const inat=clientesInativos(), hj=Date.now()-3*3600e3;
-  $('inativos').innerHTML=inat.length?`<table><thead><tr><th>Cliente</th><th>Último vendedor</th><th class="v">Última compra</th><th class="v">Sem comprar</th><th class="v">Pedidos em 12 meses</th><th class="v">Comprou em 12 meses</th></tr></thead><tbody>${inat.slice(0,12).map(c=>`<tr><td class="el">${esc(c.nome)}</td><td class="el">${esc(c.v)}</td><td class="v">${c.ult.split('-').reverse().join('/')}</td><td class="v"><span class="pill p-mid">${Math.round((hj-Date.parse(c.ult))/864e5)} d</span></td><td class="v">${c.ped.size}</td><td class="v">${brl(c.t)}</td></tr>`).join('')}</tbody></table>`:'<div class="vazio">Nenhum cliente parado há mais de 90 dias.</div>';
-  if(E.dados.linhas.some(l=>l.sg)) ranking('rkSegmento',agrupar(ls.filter(l=>l.sg),'sg').map(g=>({...g,val:g.t,rot:brl(g.t)})).sort((a,b)=>b.val-a.val),(g)=>`${pl(g.pedidos,'pedido','pedidos')} · ${pct(g.t/tot)}`);
+  $('inativos').innerHTML=inat.length?`<table><thead><tr><th>Cliente</th><th>Último vendedor</th><th class="v">Última compra</th><th class="v">Sem comprar</th><th class="v">Pedidos em 12 meses</th><th class="v">Comprou em 12 meses</th></tr></thead><tbody>${inat.slice(0,12).map(c=>`<tr${D(()=>detPedidos('Histórico: '+c.nome,E.dados.linhas.filter(l=>l.c===c.nome),'Pedidos dos últimos 24 meses'))}><td class="el lk">${esc(c.nome)}</td><td class="el">${esc(c.v)}</td><td class="v">${c.ult.split('-').reverse().join('/')}</td><td class="v"><span class="pill p-mid">${Math.round((hj-Date.parse(c.ult))/864e5)} d</span></td><td class="v">${c.ped.size}</td><td class="v">${brl(c.t)}</td></tr>`).join('')}</tbody></table>`:'<div class="vazio">Nenhum cliente parado há mais de 90 dias.</div>';
+  if(E.dados.linhas.some(l=>l.sg)) ranking('rkSegmento',agrupar(ls.filter(l=>l.sg),'sg').map(g=>({...g,val:g.t,rot:brl(g.t)})).sort((a,b)=>b.val-a.val),(g)=>`${pl(g.pedidos,'pedido','pedidos')} · ${pct(g.t/tot)}`,null,8,(g)=>detPedidos('Segmento: '+g.nome,ls.filter(l=>l.sg===g.nome)));
   else $('rkSegmento').innerHTML='<div class="vazio">A planilha ainda não tem a coluna "Segmento". Se a Visu aprovar esta análise, a coluna entra com lista suspensa de poucos grupos (ex.: academias, escolas, indústria).</div>';
 }
 
@@ -704,7 +729,8 @@ function pgVendedores(j){
   const esc2=Math.max(R.comissao_teto*1.15,...lista.map(v=>v.r.fat));
   $('tbVend').innerHTML=lista.length?lista.map(v=>{ const f=v.r.fat, n=v.r.nr.novo;
     const st=f>=R.comissao_teto?['p-ok','5% liberado']:f>=R.comissao_inicio?['p-mid',`faltam ${brl(R.comissao_teto-f)} p/ 5%`]:['p-no',`faltam ${brl(R.comissao_inicio-f)} p/ 1%`];
-    return `<tr><td class="el"><b>${esc(v.nome)}</b></td><td class="v">${brl(f)}</td><td class="v">${pct(f/tot)}</td><td class="v">${int(v.r.pedidos)}</td><td class="v">${brl(v.r.ticket)}</td><td class="v">${brl(n.t)}</td><td class="v">${pct(f?n.t/f:0)}</td><td class="v">${int(n.c.size)}</td><td class="v">${(()=>{const c=v.cu||0; return c?pct((f-c)/f):'—';})()}</td>
+    const lsV=ls.filter(l=>l.v===v.nome);
+    return `<tr${D(()=>detPedidos('Vendedor: '+v.nome,lsV))}><td class="el"><b class="lk">${esc(v.nome)}</b></td><td class="v lk">${brl(f)}</td><td class="v">${pct(f/tot)}</td><td class="v">${int(v.r.pedidos)}</td><td class="v">${brl(v.r.ticket)}</td><td class="v">${brl(n.t)}</td><td class="v">${pct(f?n.t/f:0)}</td><td class="v">${int(n.c.size)}</td><td class="v">${(()=>{const c=v.cu||0; return c?pct((f-c)/f):'—';})()}</td>
       ${mesMode?`<td style="min-width:230px"><div style="display:flex;gap:8px;align-items:center"><div class="mini" style="flex:1"><i style="width:${Math.min(f/esc2*100,100)}%"></i><u style="left:${R.comissao_inicio/esc2*100}%"></u><u style="left:${R.comissao_teto/esc2*100}%"></u></div><span class="pill ${st[0]}">${st[1]}</span></div></td>`:''}</tr>`; }).join('')
     :'<tr><td colspan="9" class="vazio">Sem vendas com esses filtros.</td></tr>';
 }
@@ -750,11 +776,11 @@ function pgPedidos(j){
   const ped=new Map(); ls.forEach(l=>{ const p=ped.get(l.p)||{t:0,c:l.c,p1:0,p2:0,ok:false,pz:l.pz,v:l.v}; p.t+=l.t; p.p1=Math.max(p.p1,l.p1||0); p.p2=Math.max(p.p2,l.p2||0); p.ok=p.ok||l.ok; if(l.pz) p.pz=l.pz; ped.set(l.p,p); });
   if(!temPag) $('ciclo').innerHTML='<div class="vazio">Esta fonte não tem as colunas "1º pagamento", "2º pagamento" e "Pedido 100% pago". O ciclo aparece quando a planilha de vendas for ligada.</div>';
   else {
-    const g={q:[0,0,'Quitados','var(--green)'],s:[0,0,'Sinal pago, saldo na entrega','var(--s2)'],n:[0,0,'Sem pagamento registrado','var(--sNone)']};
-    ped.forEach(p=>{ const k=p.ok?'q':p.p1>0?'s':'n'; g[k][0]++; g[k][1]+=p.t; });
+    const g={q:[0,0,'Quitados','var(--green)',new Set()],s:[0,0,'Sinal pago, saldo na entrega','var(--s2)',new Set()],n:[0,0,'Sem pagamento registrado','var(--sNone)',new Set()]};
+    ped.forEach((p,cod)=>{ const k=p.ok?'q':p.p1>0?'s':'n'; g[k][0]++; g[k][1]+=p.t; g[k][4].add(cod); });
     const tot=[...ped.values()].reduce((s,p)=>s+p.t,0)||1;
     $('ciclo').innerHTML=`<div class="barra2">${Object.values(g).filter(x=>x[1]>0).map(x=>`<span style="flex:${x[1]};background:${x[3]}"></span>`).join('')}</div>
-      <div class="rank" style="margin-top:14px">${Object.values(g).map(x=>`<div class="r" style="grid-template-columns:14px minmax(0,1fr) auto"><i style="width:10px;height:10px;border-radius:3px;background:${x[3]}"></i><span class="nm">${x[2]}</span><span class="vl">${brl(x[1])}</span><span class="mt">${pl(x[0],'pedido','pedidos')} · ${pct(x[1]/tot)}</span></div>`).join('')}</div>
+      <div class="rank" style="margin-top:14px">${Object.values(g).map(x=>`<div class="r" style="grid-template-columns:14px minmax(0,1fr) auto"${D(()=>detPedidos(x[2],ls.filter(l=>x[4].has(l.p))))}><i style="width:10px;height:10px;border-radius:3px;background:${x[3]}"></i><span class="nm">${x[2]}</span><span class="vl">${brl(x[1])}</span><span class="mt">${pl(x[0],'pedido','pedidos')} · ${pct(x[1]/tot)}</span></div>`).join('')}</div>
       <div class="nota">Regra da Visu: venda a prazo só com autorização da diretoria; cartão de crédito, sinal de 60% ou pagamento integral.</div>`;
   }
   if(!temPz){ $('entregas').innerHTML='<div class="vazio">Sem a coluna "Prazo de entrega" nesta fonte.</div>'; return; }
@@ -785,14 +811,14 @@ function pgFinanceiro(){
   const P=peRef(), pe=P.valor, x=indM(m,cx), inc=incompleto(m), r30=f.receber.prox30.valor, p30=f.pagar.prox30.valor+f.pagar.atrasado;
   const liq=p30?(f.saldo_atual+r30)/p30:null, saidas3=f.meses.filter(mm=>mm<m).slice(-3).map(mm=>f.caixa[mm]?.saidas||0), med=saidas3.length?saidas3.reduce((a,b)=>a+b,0)/saidas3.length:0;
   $('finKpis').innerHTML=kpiHtml([
-    [cx?'Entradas':'Receita',brl(rec(m)),`${delta(rec(m),rec(ma))}<span>${nomeMes(ma)}: ${brl(rec(ma))}${m===mesHojeBR()?' · mês em andamento':''}</span>`,'dest'],
-    [cx?'Saídas':'Despesas e custos',brl(des(m)),`${delta(des(m),des(ma),1)}<span>${nomeMes(ma)}: ${brl(des(ma))}</span>`],
-    [cx?'Geração de caixa':'Resultado',inc&&!cx?'—':`<span class="${res(m)<0?'neg':''}">${brl(res(m))}</span>`,inc&&!cx?'<span>despesas não lançadas</span>':`<span>margem ${pct(rec(m)?res(m)/rec(m):0)}</span>`],
-    ['Margem de contribuição',x&&!inc?pct(x.mc_pct):'—',x&&!inc?`<span>${brl(x.margem_contribuicao)} para pagar ${brl(x.fixos)} de fixos</span>`:'<span>—</span>'],
-    ['Ponto de equilíbrio',pe?brl(pe):'—',pe?`<span class="pill ${rec(m)>=pe?'p-ok':'p-no'}" style="${rec(m)>=pe?'':'background:var(--redSoft);color:var(--red)'}">${rec(m)>=pe?`${brl(rec(m)-pe)} acima`:`faltam ${brl(pe-rec(m))}`}</span><span>${P.calc?'calculado':'especificação'}</span>`:'','','C1'],
-    ['Saldo em bancos',brl(f.saldo_atual),`<span>${med?`cobre ${Math.round(f.saldo_atual/med*30)} dias de saídas`:pl(f.saldos.length,'conta','contas')}</span>`],
-    ['Liquidez 30 dias',liq==null?'—':liq.toLocaleString('pt-BR',{maximumFractionDigits:2})+'×',`<span>(saldo + a receber 30d) ÷ (a pagar 30d + vencidas)</span>`],
-    ['Inadimplência',f.inadimplencia==null?'—':pct(f.inadimplencia),`<span>${brl(f.receber.atrasado)} em atraso</span>`],
+    [cx?'Entradas':'Receita',brl(rec(m)),`${delta(rec(m),rec(ma))}<span>${nomeMes(ma)}: ${brl(rec(ma))}${m===mesHojeBR()?' · mês em andamento':''}</span>`,'dest','',()=>detLanc((cx?'Entradas':'Receitas')+' de '+nomeMes(m),l=>l[1]==='r'&&l[0]===m,cx)],
+    [cx?'Saídas':'Despesas e custos',brl(des(m)),`${delta(des(m),des(ma),1)}<span>${nomeMes(ma)}: ${brl(des(ma))}</span>`,'','',()=>detLanc((cx?'Saídas':'Despesas e custos')+' de '+nomeMes(m),l=>l[1]==='p'&&l[0]===m,cx)],
+    [cx?'Geração de caixa':'Resultado',inc&&!cx?'—':`<span class="${res(m)<0?'neg':''}">${brl(res(m))}</span>`,inc&&!cx?'<span>despesas não lançadas</span>':`<span>margem ${pct(rec(m)?res(m)/rec(m):0)}</span>`,'','',()=>detLanc('Lançamentos de '+nomeMes(m),l=>l[0]===m,cx,'Receitas e despesas do mês (despesas com valor positivo)')],
+    ['Margem de contribuição',x&&!inc?pct(x.mc_pct):'—',x&&!inc?`<span>${brl(x.margem_contribuicao)} para pagar ${brl(x.fixos)} de fixos</span>`:'<span>—</span>','','',()=>detLanc('Custos variáveis de '+nomeMes(m),l=>l[0]===m&&['deducao','variavel'].includes(l[10]),cx)],
+    ['Ponto de equilíbrio',pe?brl(pe):'—',pe?`<span class="pill ${rec(m)>=pe?'p-ok':'p-no'}" style="${rec(m)>=pe?'':'background:var(--redSoft);color:var(--red)'}">${rec(m)>=pe?`${brl(rec(m)-pe)} acima`:`faltam ${brl(pe-rec(m))}`}</span><span>${P.calc?'calculado':'especificação'}</span>`:'','','C1',()=>detLanc('Custos e despesas fixos de '+nomeMes(m),l=>l[0]===m&&l[1]==='p'&&!['deducao','variavel'].includes(l[10]),cx)],
+    ['Saldo em bancos',brl(f.saldo_atual),`<span>${med?`cobre ${Math.round(f.saldo_atual/med*30)} dias de saídas`:pl(f.saldos.length,'conta','contas')}</span>`,'','',()=>abrirDet('Saldos bancários','Saldo atual de cada conta financeira',[{rot:'Conta'},{rot:'Saldo',t:'brl',total:1}],(E.fin.saldos||[]).map(c=>[c.nome,c.saldo]))],
+    ['Liquidez 30 dias',liq==null?'—':liq.toLocaleString('pt-BR',{maximumFractionDigits:2})+'×',`<span>(saldo + a receber 30d) ÷ (a pagar 30d + vencidas)</span>`,'','',()=>{ const lim=new Date(Date.now()+27*864e5).toISOString().slice(0,10); detAbertos('Contas dos próximos 30 dias e vencidas',x=>x[1]<=lim&&(x[0]==='p'||x[1]>=hojeISO()),'A receber nos próximos 30 dias e a pagar (30 dias + vencidas)'); }],
+    ['Inadimplência',f.inadimplencia==null?'—':pct(f.inadimplencia),`<span>${brl(f.receber.atrasado)} em atraso</span>`,'','',()=>detAbertos('Recebimentos em atraso',x=>x[0]==='r'&&x[1]<hojeISO())],
   ]);
   // evolução: barras agrupadas receita x despesa, linha do PE
   const ms=f.meses.slice(-12), W=760,H=250,L=58,R=12,T=16,B=28,w=W-L-R,h=H-T-B, slot=w/ms.length, bw=Math.min(slot*.32,18);
@@ -812,7 +838,7 @@ function pgFinanceiro(){
   $('dreSub').textContent=`Regime de competência · ${nomeMes(cols[0])} a ${nomeMes(m)}`+(f.sem_categoria?` · ${int(f.sem_categoria)} lançamentos sem categoria`:'');
   const dre=cx?(f.dre_caixa||f.dre):f.dre, baseRec=(c)=>Math.abs(dre[0]?.valores[c]||0);
   $('dreSub').textContent=`${cx?'Regime de caixa (pelo pagamento)':'Regime de competência'} · ${nomeMes(cols[0])} a ${nomeMes(m)}`+(f.sem_categoria?` · ${int(f.sem_categoria)} lançamentos sem categoria`:'');
-  $('dre').innerHTML=`<thead><tr><th>Conta</th>${cols.map(c=>`<th class="v ${c===m?'sel':''}">${MES_C[+c.slice(5)-1]}/${c.slice(2,4)}</th>`).join('')}<th class="v">% receita</th></tr></thead><tbody>${dre.map(l=>`<tr class="${l.totalizador?'tz':''} n${Math.min(l.nivel,2)}"><td>${esc(l.descricao)}</td>${cols.map(c=>`<td class="v ${c===m?'sel':''} ${l.valores[c]<0?'neg':''}">${brl(l.valores[c])}</td>`).join('')}<td class="v">${baseRec(m)?pct(l.valores[m]/baseRec(m)):'—'}</td></tr>`).join('')}</tbody>`;
+  $('dre').innerHTML=`<thead><tr><th>Conta</th>${cols.map(c=>`<th class="v ${c===m?'sel':''}">${MES_C[+c.slice(5)-1]}/${c.slice(2,4)}</th>`).join('')}<th class="v">% receita</th></tr></thead><tbody>${dre.map(l=>`<tr class="${l.totalizador?'tz':''} n${Math.min(l.nivel,2)}"><td>${esc(l.descricao)}</td>${cols.map(c=>`<td class="v ${c===m?'sel':''} ${l.valores[c]<0?'neg':''} ${!l.totalizador&&l.valores[c]?'lk':''}"${!l.totalizador&&l.valores[c]?D(()=>detLanc(l.descricao+' · '+nomeMes(c),x=>x[0]===c&&x[9].split('|')[l.nivel]===l.descricao,cx)):''}>${brl(l.valores[c])}</td>`).join('')}<td class="v">${baseRec(m)?pct(l.valores[m]/baseRec(m)):'—'}</td></tr>`).join('')}</tbody>`;
 
 }
 
@@ -825,17 +851,17 @@ function pgResumo(j){
   const m=f?mesFin():E.mes, ma=somaMes(m,-1);
   const res=f&&!incompleto(m)?f.resultado[m]||0:null, rec=f?f.receita[m]||0:0;
   const proj30=f?f.projecao.semanas[3]?.saldo:null;
-  const custo=linhas(j.atual).reduce((s2,l)=>s2+(l.cu||0),0), margem=custo?(a.fat-custo)/a.fat:null;
+  const lsR=linhas(j.atual), custo=lsR.reduce((s2,l)=>s2+(l.cu||0),0), margem=custo?(a.fat-custo)/a.fat:null;
   $('resKpis').innerHTML=[
-    ['Vendas',brl(a.fat),`${delta(a.fat,b.fat)}<span>${j.comp}</span>`,'dest'],
-    ['Pedidos · ticket',`${int(a.pedidos)} · ${brl(a.ticket)}`,`${delta(a.ticket,b.ticket)}<span>ticket</span>`,''],
-    ['Clientes novos',pct(a.fat?a.nr.novo.t/a.fat:0),`<span>${int(a.nr.novo.c.size)} clientes · ${brl(a.nr.novo.t)}</span>`,''],
-    ['Margem bruta das vendas',margem==null?'—':pct(margem),`<span>${margem==null?'sem custo dos produtos nesta fonte':margem<0.4?'abaixo dos 40% mínimos':'acima dos 40% mínimos'}</span>`,''],
-    ['Resultado do mês',f?(res==null?'—':`<span class="${res<0?'neg':''}">${brl(res)}</span>`):'…',f?(res==null?'<span>despesas não lançadas no mês</span>':`<span>margem líquida ${pct(rec?res/rec:0)}</span>`):'<span>carregando</span>',''],
-    ['Saldo em caixa',f?brl(f.saldo_atual):'…',f?`<span>${f.saldos.length} ${f.saldos.length===1?'conta':'contas'}</span>`:'',''],
-    ['Caixa em 4 semanas',f?`<span class="${proj30<0?'neg':''}">${brl(proj30)}</span>`:'…',f?`<span>projeção pelo a receber e a pagar</span>`:'',''],
-    ['Inadimplência',f&&f.inadimplencia!=null?pct(f.inadimplencia):'—',f?`<span>${brl(f.receber.atrasado)} em atraso</span>`:'',''],
-  ].map(([l,v,s2,c])=>`<div class="kpi ${c}"><div class="l"><span>${l}</span></div><div class="v num">${v}</div><div class="s">${s2}</div></div>`).join('');
+    ['Vendas',brl(a.fat),`${delta(a.fat,b.fat)}<span>${j.comp}</span>`,'dest',()=>detPedidos('Vendas',lsR)],
+    ['Pedidos · ticket',`${int(a.pedidos)} · ${brl(a.ticket)}`,`${delta(a.ticket,b.ticket)}<span>ticket</span>`,'',()=>detPedidos('Pedidos',lsR)],
+    ['Clientes novos',pct(a.fat?a.nr.novo.t/a.fat:0),`<span>${int(a.nr.novo.c.size)} clientes · ${brl(a.nr.novo.t)}</span>`,'',()=>detPedidos('Vendas a clientes novos',lsR.filter(l=>a.ped.get(l.p)?.nr==='novo'))],
+    ['Margem bruta das vendas',margem==null?'—':pct(margem),`<span>${margem==null?'sem custo dos produtos nesta fonte':margem<0.4?'abaixo dos 40% mínimos':'acima dos 40% mínimos'}</span>`,'',()=>detPedidos('Margem por pedido',lsR)],
+    ['Resultado do mês',f?(res==null?'—':`<span class="${res<0?'neg':''}">${brl(res)}</span>`):'…',f?(res==null?'<span>despesas não lançadas no mês</span>':`<span>margem líquida ${pct(rec?res/rec:0)}</span>`):'<span>carregando</span>','',f?()=>detLanc('Lançamentos de '+nomeMes(m),l=>l[0]===m):null],
+    ['Saldo em caixa',f?brl(f.saldo_atual):'…',f?`<span>${f.saldos.length} ${f.saldos.length===1?'conta':'contas'}</span>`:'','',f?()=>abrirDet('Saldos bancários','Saldo atual de cada conta financeira',[{rot:'Conta'},{rot:'Saldo',t:'brl',total:1}],f.saldos.map(c=>[c.nome,c.saldo])):null],
+    ['Caixa em 4 semanas',f?`<span class="${proj30<0?'neg':''}">${brl(proj30)}</span>`:'…',f?`<span>projeção pelo a receber e a pagar</span>`:'','',f?()=>detAbertos('Contas a vencer em 4 semanas',x=>x[1]>=hojeISO()&&x[1]<=f.projecao.semanas[3].fim):null],
+    ['Inadimplência',f&&f.inadimplencia!=null?pct(f.inadimplencia):'—',f?`<span>${brl(f.receber.atrasado)} em atraso</span>`:'','',f?()=>detAbertos('Recebimentos em atraso',x=>x[0]==='r'&&x[1]<hojeISO()):null],
+  ].map(([l,v,s2,c,fn])=>`<div class="kpi ${c}"${D(fn)}><div class="l"><span>${l}</span></div><div class="v num">${v}</div><div class="s">${s2}</div></div>`).join('');
   // vendas x PE x resultado
   const meses=[]; for(let i=11;i>=0;i--) meses.push(somaMes(E.mes,-i));
   const pe=peRef().valor;
@@ -853,19 +879,20 @@ function pgResumo(j){
   $('resGraf').querySelectorAll('.rg').forEach(el=>{ const i=+el.dataset.i; el.addEventListener('mousemove',e=>dica(e,`<b>${nomeMes(meses[i])}</b><br>Vendas ${brl(vs[i].v)}${pe?`<br>${vs[i].v>=pe?'Acima':'Abaixo'} do ponto de equilíbrio`:''}${rs[i]!=null?`<br>Resultado ${brl(rs[i])}`:''}`)); el.addEventListener('mouseleave',semDica); el.addEventListener('click',()=>{semDica();E.mes=meses[i];$('fMes').value=meses[i];desenhar();}); });
   // alertas
   const al=[];
-  if(pe&&E.periodo==='mes'){ const p=j.rot.includes('até o dia')?a.fat/new Date(Date.now()-3*3600e3).getUTCDate()*new Date(+E.mes.slice(0,4),+E.mes.slice(5),0).getDate():a.fat; if(p<pe) al.push(['Vendas abaixo do ponto de equilíbrio',pe-p,`${j.rot.includes('até o dia')?'No ritmo atual, o mês fecha':'O mês fechou'} em ${brl(p)}, abaixo dos ${brl(pe)} necessários para cobrir a estrutura de custos.`,'var(--red)']); }
+  if(pe&&E.periodo==='mes'){ const p=j.rot.includes('até o dia')?a.fat/new Date(Date.now()-3*3600e3).getUTCDate()*new Date(+E.mes.slice(0,4),+E.mes.slice(5),0).getDate():a.fat; if(p<pe) al.push(['Vendas abaixo do ponto de equilíbrio',pe-p,`${j.rot.includes('até o dia')?'No ritmo atual, o mês fecha':'O mês fechou'} em ${brl(p)}, abaixo dos ${brl(pe)} necessários para cobrir a estrutura de custos.`,'var(--red)',(()=>{const x=lsR;return ()=>detPedidos('Vendas do período',x);})()]); }
   if(f){
-    if(f.receber.atrasado>0) al.push(['Recebimentos em atraso',f.receber.atrasado,`${pl(f.receber.atrasado_qtd,'parcela','parcelas')} vencidas. Maior devedor: ${f.receber.atraso_por_pessoa[0]?.pessoa||'—'} (${brl(f.receber.atraso_por_pessoa[0]?.valor)}).`,'var(--orange)']);
-    const neg=f.projecao.semanas.find(x=>x.saldo<0); if(neg) al.push(['Caixa negativo previsto',neg.saldo,`Na semana de ${neg.inicio.split('-').reverse().slice(0,2).join('/')}, pela projeção de contas a receber e a pagar.`,'var(--red)']);
-    if(f.pagar.atrasado>0) al.push(['Contas a pagar vencidas',f.pagar.atrasado,`${pl(f.pagar.atrasado_qtd,'conta','contas')} em atraso; confira o DDA e a programação de pagamentos.`,'var(--amber)']);
-    if(res!=null&&res<0) al.push(['Resultado negativo no mês',res,'Despesas e custos acima da receita no regime de competência.','var(--red)']);
+    if(f.receber.atrasado>0) al.push(['Recebimentos em atraso',f.receber.atrasado,`${pl(f.receber.atrasado_qtd,'parcela','parcelas')} vencidas. Maior devedor: ${f.receber.atraso_por_pessoa[0]?.pessoa||'—'} (${brl(f.receber.atraso_por_pessoa[0]?.valor)}).`,'var(--orange)',()=>detAbertos('Recebimentos em atraso',x=>x[0]==='r'&&x[1]<hojeISO())]);
+    const neg=f.projecao.semanas.find(x=>x.saldo<0); if(neg) al.push(['Caixa negativo previsto',neg.saldo,`Na semana de ${neg.inicio.split('-').reverse().slice(0,2).join('/')}, pela projeção de contas a receber e a pagar.`,'var(--red)',()=>detAbertos('Contas até a semana de caixa negativo',x=>x[1]>=hojeISO()&&x[1]<=neg.fim)]);
+    if(f.pagar.atrasado>0) al.push(['Contas a pagar vencidas',f.pagar.atrasado,`${pl(f.pagar.atrasado_qtd,'conta','contas')} em atraso; confira o DDA e a programação de pagamentos.`,'var(--amber)',()=>detAbertos('Contas a pagar vencidas',x=>x[0]==='p'&&x[1]<hojeISO())]);
+    if(res!=null&&res<0) al.push(['Resultado negativo no mês',res,'Despesas e custos acima da receita no regime de competência.','var(--red)',()=>detLanc('Lançamentos de '+nomeMes(m),l=>l[0]===m)]);
     const topDesp=f.despesas_categoria.map(x=>({n:x.nome,a:x.valores[m]||0,b:x.valores[ma]||0})).filter(x=>x.b>0&&x.a>x.b*1.25&&x.a-x.b>2000).sort((p,q)=>(q.a-q.b)-(p.a-p.b))[0];
-    if(topDesp) al.push([`Despesa em alta: ${topDesp.n}`,topDesp.a-topDesp.b,`Subiu ${pct((topDesp.a-topDesp.b)/topDesp.b)} em relação a ${nomeMes(ma)}.`,'var(--amber)']);
+    if(topDesp) al.push([`Despesa em alta: ${topDesp.n}`,topDesp.a-topDesp.b,`Subiu ${pct((topDesp.a-topDesp.b)/topDesp.b)} em relação a ${nomeMes(ma)}.`,'var(--amber)',()=>detLanc(topDesp.n+' · '+nomeMes(m),l=>l[1]==='p'&&l[0]===m&&l[2]===topDesp.n)]);
   }
-  const abaixo=[...a.ped.values()].length&&custo?(()=>{ const pm=new Map(); linhas(j.atual).forEach(l=>{const p=pm.get(l.p)||{t:0,c:0};p.t+=l.t;p.c+=l.cu||0;pm.set(l.p,p)}); return [...pm.values()].filter(p=>p.c&&p.t&&(p.t-p.c)/p.t<0.4); })():[];
-  if(abaixo.length) al.push(['Vendas abaixo de 40% de margem',abaixo.reduce((s2,p)=>s2+p.t,0),`${pl(abaixo.length,'pedido','pedidos')} com margem abaixo da faixa verde; pela regra da Visu, precisam de autorização do Egberto.`,'var(--orange)']);
-  const inat=clientesInativos(); if(inat.length) al.push(['Clientes que pararam de comprar',inat.reduce((s2,c)=>s2+c.t,0),`${pl(inat.length,'cliente','clientes')} com compras nos últimos 12 meses e nada há mais de 90 dias. Bom alvo para o comercial.`,'var(--s1)']);
-  $('alertas').innerHTML=al.length?al.map(([t,v,ds,c])=>`<li><i style="background:${c}"></i><b>${t}</b><span class="vv ${v<0?'neg':''}">${brl(v)}</span><span class="ds">${ds}</span></li>`).join(''):'<li><i style="background:var(--green)"></i><b>Nenhum ponto de atenção no período.</b><span></span></li>';
+  const abaixo=[...a.ped.values()].length&&custo?(()=>{ const pm=new Map(); lsR.forEach(l=>{const p=pm.get(l.p)||{t:0,c:0,k:l.p};p.t+=l.t;p.c+=l.cu||0;pm.set(l.p,p)}); return [...pm.values()].filter(p=>p.c&&p.t&&(p.t-p.c)/p.t<0.4); })():[];
+  const abaixoK=new Set(abaixo.map(p=>p.k));
+  if(abaixo.length) al.push(['Vendas abaixo de 40% de margem',abaixo.reduce((s2,p)=>s2+p.t,0),`${pl(abaixo.length,'pedido','pedidos')} com margem abaixo da faixa verde; pela regra da Visu, precisam de autorização do Egberto.`,'var(--orange)',(()=>{const x=lsR.filter(l=>abaixoK.has(l.p));return ()=>detPedidos('Vendas abaixo de 40% de margem',x);})()]);
+  const inat=clientesInativos(); if(inat.length) al.push(['Clientes que pararam de comprar',inat.reduce((s2,c)=>s2+c.t,0),`${pl(inat.length,'cliente','clientes')} com compras nos últimos 12 meses e nada há mais de 90 dias. Bom alvo para o comercial.`,'var(--s1)',()=>abrirDet('Clientes que pararam de comprar','Compraram nos últimos 12 meses e estão há mais de 90 dias sem pedido',[{rot:'Cliente'},{rot:'Último vendedor'},{rot:'Última compra',t:'data'},{rot:'Dias sem comprar',t:'int'},{rot:'Pedidos',t:'int'},{rot:'Comprou em 12 meses',t:'brl',total:1}],inat.map(c=>[c.nome,c.v,c.ult,diasAtr(c.ult),c.ped.size,c.t]))]);
+  $('alertas').innerHTML=al.length?al.map(([t,v,ds,c,fn])=>`<li${D(fn)}><i style="background:${c}"></i><b>${t}</b><span class="vv ${v<0?'neg':''}">${brl(v)}</span><span class="ds">${ds}</span></li>`).join(''):'<li><i style="background:var(--green)"></i><b>Nenhum ponto de atenção no período.</b><span></span></li>';
 }
 
 function clientesInativos(){
@@ -880,11 +907,11 @@ function pgCaixa(){
   const f=E.fin, p=f.projecao, m=mesFin(), cx=f.caixa[m]||{entradas:0,saidas:0};
   const s4=p.semanas[3], s13=p.semanas[12], minimo=p.semanas.reduce((a,b)=>b.saldo<a.saldo?b:a,p.semanas[0]);
   $('cxKpis').innerHTML=[
-    ['Saldo atual',brl(f.saldo_atual),`<span>${f.saldos.map(c=>esc(c.nome)).slice(0,2).join(' · ')}</span>`,'dest'],
-    ['Em 4 semanas',`<span class="${s4.saldo<0?'neg':''}">${brl(s4.saldo)}</span>`,`<span>até ${s4.fim.split('-').reverse().slice(0,2).join('/')}</span>`,''],
-    ['Em 13 semanas',`<span class="${s13.saldo<0?'neg':''}">${brl(s13.saldo)}</span>`,`<span>até ${s13.fim.split('-').reverse().slice(0,2).join('/')}</span>`,''],
-    ['Menor saldo previsto',`<span class="${minimo.saldo<0?'neg':''}">${brl(minimo.saldo)}</span>`,`<span>semana de ${minimo.inicio.split('-').reverse().slice(0,2).join('/')}</span>`,''],
-  ].map(([l,v,s2,c])=>`<div class="kpi ${c}"><div class="l"><span>${l}</span></div><div class="v num">${v}</div><div class="s">${s2}</div></div>`).join('');
+    ['Saldo atual',brl(f.saldo_atual),`<span>${f.saldos.map(c=>esc(c.nome)).slice(0,2).join(' · ')}</span>`,'dest','',()=>abrirDet('Saldos bancários','Saldo atual de cada conta financeira',[{rot:'Conta'},{rot:'Saldo',t:'brl',total:1}],(E.fin.saldos||[]).map(c=>[c.nome,c.saldo]))],
+    ['Em 4 semanas',`<span class="${s4.saldo<0?'neg':''}">${brl(s4.saldo)}</span>`,`<span>até ${s4.fim.split('-').reverse().slice(0,2).join('/')}</span>`,'','',()=>detAbertos('Contas a vencer em 4 semanas',x=>x[1]>=hojeISO()&&x[1]<=s4.fim,'Entradas (a receber) e saídas (a pagar) da projeção')],
+    ['Em 13 semanas',`<span class="${s13.saldo<0?'neg':''}">${brl(s13.saldo)}</span>`,`<span>até ${s13.fim.split('-').reverse().slice(0,2).join('/')}</span>`,'','',()=>detAbertos('Contas a vencer em 13 semanas',x=>x[1]>=hojeISO()&&x[1]<=s13.fim,'Entradas (a receber) e saídas (a pagar) da projeção')],
+    ['Menor saldo previsto',`<span class="${minimo.saldo<0?'neg':''}">${brl(minimo.saldo)}</span>`,`<span>semana de ${minimo.inicio.split('-').reverse().slice(0,2).join('/')}</span>`,'','',()=>detAbertos('Contas até a semana de menor saldo',x=>x[1]>=hojeISO()&&x[1]<=minimo.fim)],
+  ].map(([l,v,s2,c,r,fn])=>`<div class="kpi ${c}"${D(fn)}><div class="l"><span>${l}</span></div><div class="v num">${v}</div><div class="s">${s2}</div></div>`).join('');
   $('projSub').textContent=`Saldo atual ${brl(p.saldo_inicial)} + a receber − a pagar, pelo vencimento. Fora da projeção: ${brl(p.atrasados_receber)} a receber e ${brl(p.atrasados_pagar)} a pagar já vencidos.`;
   // barras entradas/saídas + linha de saldo
   const W=760,H=270,L=62,R=12,T=16,B=30,w=W-L-R,h=H-T-B,n=p.semanas.length,slot=w/n,bw=Math.min(slot*.3,16);
@@ -898,7 +925,7 @@ function pgCaixa(){
   $('projGraf').innerHTML=`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Projeção de caixa semanal">${g}</svg>`;
   $('projGraf').querySelectorAll('.pj').forEach(el=>{ const x=p.semanas[+el.dataset.i]; el.addEventListener('mousemove',e=>dica(e,`<b>${x.inicio.split('-').reverse().join('/')} a ${x.fim.split('-').reverse().join('/')}</b><br>Entradas ${brl(x.entradas)}<br>Saídas ${brl(x.saidas)}<br>Saldo projetado ${brl(x.saldo)}`)); el.addEventListener('mouseleave',semDica); });
   $('projTab').innerHTML=`<table><thead><tr><th>Semana</th><th class="v">Entradas</th><th class="v">Saídas</th><th class="v">Saldo projetado</th></tr></thead><tbody>${p.semanas.map(x=>`<tr><td>${x.inicio.split('-').reverse().join('/')} a ${x.fim.split('-').reverse().join('/')}</td><td class="v">${brl(x.entradas)}</td><td class="v">${brl(x.saidas)}</td><td class="v ${x.saldo<0?'neg':''}">${brl(x.saldo)}</td></tr>`).join('')}</tbody></table>`;
-  $('cxReal').innerHTML=`<table><thead><tr><th>Mês</th><th class="v">Recebimentos</th><th class="v">Pagamentos</th><th class="v">Geração de caixa</th><th class="v">Receita (competência)</th><th class="v">Recebido ÷ receita</th></tr></thead><tbody>${f.meses.slice().reverse().map(mm=>{const c=f.caixa[mm]; return `<tr class="${mm===m?'tot':''}"><td>${nomeMes(mm)}</td><td class="v">${brl(c.entradas)}</td><td class="v">${brl(c.saidas)}</td><td class="v ${c.entradas-c.saidas<0?'neg':''}">${brl(c.entradas-c.saidas)}</td><td class="v">${brl(f.receita[mm])}</td><td class="v">${f.receita[mm]?pct(c.entradas/f.receita[mm]):'—'}</td></tr>`}).join('')}</tbody></table>`;
+  $('cxReal').innerHTML=`<table><thead><tr><th>Mês</th><th class="v">Recebimentos</th><th class="v">Pagamentos</th><th class="v">Geração de caixa</th><th class="v">Receita (competência)</th><th class="v">Recebido ÷ receita</th></tr></thead><tbody>${f.meses.slice().reverse().map(mm=>{const c=f.caixa[mm]; return `<tr class="${mm===m?'tot':''}"><td>${nomeMes(mm)}</td><td class="v lk"${D(()=>detLanc('Recebimentos de '+nomeMes(mm),l=>l[1]==='r'&&l[0]===mm,1))}>${brl(c.entradas)}</td><td class="v lk"${D(()=>detLanc('Pagamentos de '+nomeMes(mm),l=>l[1]==='p'&&l[0]===mm,1))}>${brl(c.saidas)}</td><td class="v ${c.entradas-c.saidas<0?'neg':''}">${brl(c.entradas-c.saidas)}</td><td class="v lk"${D(()=>detLanc('Receitas de '+nomeMes(mm),l=>l[1]==='r'&&l[0]===mm))}>${brl(f.receita[mm])}</td><td class="v">${f.receita[mm]?pct(c.entradas/f.receita[mm]):'—'}</td></tr>`}).join('')}</tbody></table>`;
 }
 
 // ---------- contas a receber ----------
@@ -906,20 +933,21 @@ function pgReceber(){
   if(precisaFin('rcKpis')) return;
   const f=E.fin, r=f.receber, m=mesFin();
   $('rcKpis').innerHTML=[
-    ['A receber',brl(r.total),`<span>${pl(r.qtd,'parcela','parcelas')}</span>`,'dest'],
-    ['Em atraso',`<span class="${r.atrasado?'neg':''}">${brl(r.atrasado)}</span>`,`<span>${pl(r.atrasado_qtd,'parcela','parcelas')}</span>`,''],
-    ['Inadimplência',f.inadimplencia==null?'—':pct(f.inadimplencia),'<span>atraso ÷ tudo que venceu em 90 dias</span>',''],
-    ['Próximos 30 dias',brl(r.prox30.valor),`<span>7 dias: ${brl(r.prox7.valor)}</span>`,''],
-  ].map(([l,v,s2,c])=>`<div class="kpi ${c}"><div class="l"><span>${l}</span></div><div class="v num">${v}</div><div class="s">${s2}</div></div>`).join('');
+    ['A receber',brl(r.total),`<span>${pl(r.qtd,'parcela','parcelas')}</span>`,'dest',()=>detAbertos('Contas a receber em aberto',x=>x[0]==='r')],
+    ['Em atraso',`<span class="${r.atrasado?'neg':''}">${brl(r.atrasado)}</span>`,`<span>${pl(r.atrasado_qtd,'parcela','parcelas')}</span>`,'',()=>detAbertos('Recebimentos em atraso',x=>x[0]==='r'&&x[1]<hojeISO())],
+    ['Inadimplência',f.inadimplencia==null?'—':pct(f.inadimplencia),'<span>atraso ÷ tudo que venceu em 90 dias</span>','',()=>detAbertos('Recebimentos em atraso',x=>x[0]==='r'&&x[1]<hojeISO())],
+    ['Próximos 30 dias',brl(r.prox30.valor),`<span>7 dias: ${brl(r.prox7.valor)}</span>`,'',()=>{ const lim=new Date(Date.parse(hojeISO())+30*864e5).toISOString().slice(0,10); detAbertos('A receber nos próximos 30 dias',x=>x[0]==='r'&&x[1]>=hojeISO()&&x[1]<=lim); }],
+  ].map(([l,v,s2,c,fn])=>`<div class="kpi ${c}"${D(fn)}><div class="l"><span>${l}</span></div><div class="v num">${v}</div><div class="s">${s2}</div></div>`).join('');
   const mx=Math.max(...r.idade.map(x=>x.valor),1);
-  $('rcIdade').innerHTML=`<div class="rank fx">${r.idade.map((x,i)=>`<div class="r"><span class="nm" style="font-weight:500">${x.faixa}</span><span class="tr"><i style="width:${x.valor?Math.max(x.valor/mx*100,2):0}%;background:${['var(--amber)','var(--orange)','var(--s2)','var(--red)','var(--red)'][i]}"></i></span><span class="vl">${brl(x.valor)} <span style="color:var(--ink3);font-weight:500">· ${x.qtd}</span></span></div>`).join('')}</div><div class="nota">Quanto mais antigo o atraso, menor a chance de recebimento. Atrasos acima de 90 dias pedem negociação ou protesto.</div>`;
+  const FX=[[1,15],[16,30],[31,60],[61,90],[91,1e9]];
+  $('rcIdade').innerHTML=`<div class="rank fx">${r.idade.map((x,i)=>`<div class="r"${D(()=>detAbertos('Atraso de '+x.faixa,y=>y[0]==='r'&&y[1]<hojeISO()&&diasAtr(y[1])>=FX[i][0]&&diasAtr(y[1])<=FX[i][1]))}><span class="nm" style="font-weight:500">${x.faixa}</span><span class="tr"><i style="width:${x.valor?Math.max(x.valor/mx*100,2):0}%;background:${['var(--amber)','var(--orange)','var(--s2)','var(--red)','var(--red)'][i]}"></i></span><span class="vl">${brl(x.valor)} <span style="color:var(--ink3);font-weight:500">· ${x.qtd}</span></span></div>`).join('')}</div><div class="nota">Quanto mais antigo o atraso, menor a chance de recebimento. Atrasos acima de 90 dias pedem negociação ou protesto.</div>`;
   const hoje=Date.now()-3*3600e3;
-  $('rcPessoas').innerHTML=r.atraso_por_pessoa.length?`<table><thead><tr><th>Cliente</th><th class="v">Parcelas</th><th class="v">Mais antiga</th><th class="v">Em atraso</th></tr></thead><tbody>${r.atraso_por_pessoa.map(x=>`<tr><td class="el">${esc(x.pessoa)}</td><td class="v">${x.qtd}</td><td class="v"><span class="pill ${(hoje-Date.parse(x.mais_antigo))/864e5>60?'p-no':'p-mid'}">${Math.round((hoje-Date.parse(x.mais_antigo))/864e5)} d</span></td><td class="v neg">${brl2(x.valor)}</td></tr>`).join('')}</tbody></table>`:'<div class="vazio">Nenhum recebimento em atraso.</div>';
-  $('rcProx').innerHTML=r.proximos.length?`<table><thead><tr><th>Vencimento</th><th>Cliente</th><th class="v">Valor</th></tr></thead><tbody>${r.proximos.map(x=>`<tr><td class="num">${x.vencimento.split('-').reverse().join('/')}</td><td class="el">${esc(x.pessoa||x.descricao)}</td><td class="v">${brl2(x.aberto)}</td></tr>`).join('')}</tbody></table>`:'<div class="vazio">Nada a vencer.</div>';
+  $('rcPessoas').innerHTML=r.atraso_por_pessoa.length?`<table><thead><tr><th>Cliente</th><th class="v">Parcelas</th><th class="v">Mais antiga</th><th class="v">Em atraso</th></tr></thead><tbody>${r.atraso_por_pessoa.map(x=>`<tr${D(()=>detAbertos('Em atraso: '+x.pessoa,y=>y[0]==='r'&&y[1]<hojeISO()&&(y[2]||'—')===x.pessoa))}><td class="el lk">${esc(x.pessoa)}</td><td class="v">${x.qtd}</td><td class="v"><span class="pill ${(hoje-Date.parse(x.mais_antigo))/864e5>60?'p-no':'p-mid'}">${Math.round((hoje-Date.parse(x.mais_antigo))/864e5)} d</span></td><td class="v neg">${brl2(x.valor)}</td></tr>`).join('')}</tbody></table>`:'<div class="vazio">Nenhum recebimento em atraso.</div>';
+  $('rcProx').innerHTML=r.proximos.length?`<table><thead><tr><th>Vencimento</th><th>Cliente</th><th class="v">Valor</th></tr></thead><tbody>${r.proximos.map(x=>`<tr${D(()=>detAbertos('A receber: '+(x.pessoa||x.descricao),y=>y[0]==='r'&&y[2]===x.pessoa))}><td class="num">${x.vencimento.split('-').reverse().join('/')}</td><td class="el">${esc(x.pessoa||x.descricao)}</td><td class="v">${brl2(x.aberto)}</td></tr>`).join('')}</tbody></table>`:'<div class="vazio">Nada a vencer.</div>';
   $('rcCatSub').textContent=`Competência · ${nomeMes(m)}`;
   const cats=f.receitas_categoria.map(x=>({nome:x.nome,val:x.valores[m]||0,t:x.total})).filter(x=>x.val>0).sort((a,b)=>b.val-a.val);
   const tot=cats.reduce((s2,x)=>s2+x.val,0)||1;
-  ranking('rcCat',cats.map(x=>({...x,rot:brl(x.val)})),(g)=>`${pct(g.val/tot)} da receita do mês`,'Sem receitas no mês.');
+  ranking('rcCat',cats.map(x=>({...x,rot:brl(x.val)})),(g)=>`${pct(g.val/tot)} da receita do mês`,'Sem receitas no mês.',8,(g)=>detLanc(g.nome+' · '+nomeMes(m),l=>l[1]==='r'&&l[0]===m&&l[2]===g.nome));
 }
 
 // ---------- contas a pagar e despesas ----------
@@ -927,21 +955,21 @@ function pgPagar(){
   if(precisaFin('pgKpis')) return;
   const f=E.fin, pg=f.pagar, m=mesFin(), ma=somaMes(m,-1);
   $('pgKpis').innerHTML=[
-    ['Despesas do mês',brl(f.despesa[m]),`${delta(f.despesa[m],f.despesa[ma],1)}<span>${nomeMes(ma)}: ${brl(f.despesa[ma])}</span>`,'dest'],
-    ['A pagar',brl(pg.total),`<span>${pl(pg.qtd,'conta','contas')}</span>`,''],
-    ['Vencidas',`<span class="${pg.atrasado?'neg':''}">${brl(pg.atrasado)}</span>`,`<span>${pl(pg.atrasado_qtd,'conta','contas')}</span>`,''],
-    ['Próximos 7 dias',brl(pg.prox7.valor),`<span>30 dias: ${brl(pg.prox30.valor)}</span>`,''],
-  ].map(([l,v,s2,c])=>`<div class="kpi ${c}"><div class="l"><span>${l}</span></div><div class="v num">${v}</div><div class="s">${s2}</div></div>`).join('');
+    ['Despesas do mês',brl(f.despesa[m]),`${delta(f.despesa[m],f.despesa[ma],1)}<span>${nomeMes(ma)}: ${brl(f.despesa[ma])}</span>`,'dest',()=>detLanc('Despesas de '+nomeMes(m),l=>l[1]==='p'&&l[0]===m)],
+    ['A pagar',brl(pg.total),`<span>${pl(pg.qtd,'conta','contas')}</span>`,'',()=>detAbertos('Contas a pagar em aberto',x=>x[0]==='p')],
+    ['Vencidas',`<span class="${pg.atrasado?'neg':''}">${brl(pg.atrasado)}</span>`,`<span>${pl(pg.atrasado_qtd,'conta','contas')}</span>`,'',()=>detAbertos('Contas a pagar vencidas',x=>x[0]==='p'&&x[1]<hojeISO())],
+    ['Próximos 7 dias',brl(pg.prox7.valor),`<span>30 dias: ${brl(pg.prox30.valor)}</span>`,'',()=>{ const lim=new Date(Date.parse(hojeISO())+30*864e5).toISOString().slice(0,10); detAbertos('A pagar nos próximos 30 dias',x=>x[0]==='p'&&x[1]>=hojeISO()&&x[1]<=lim); }],
+  ].map(([l,v,s2,c,fn])=>`<div class="kpi ${c}"${D(fn)}><div class="l"><span>${l}</span></div><div class="v num">${v}</div><div class="s">${s2}</div></div>`).join('');
   const totM=f.despesa[m]||1;
   $('pgCatSub').textContent=`${nomeMes(m)} · comparado com ${nomeMes(ma)}`;
   const cats=f.despesas_categoria.map(x=>({nome:x.nome,val:x.valores[m]||0,ant:x.valores[ma]||0})).filter(x=>x.val>0||x.ant>0).sort((a,b)=>b.val-a.val);
-  ranking('pgCat',cats.map(x=>({...x,rot:brl(x.val)})),(g)=>`${pct(g.val/totM)} das despesas · ${g.ant?`${g.val>=g.ant?'▲':'▼'} ${pct(Math.abs(g.val-g.ant)/g.ant)} vs. mês anterior`:'sem lançamento no mês anterior'}`,'Sem despesas no mês.',12);
+  ranking('pgCat',cats.map(x=>({...x,rot:brl(x.val)})),(g)=>`${pct(g.val/totM)} das despesas · ${g.ant?`${g.val>=g.ant?'▲':'▼'} ${pct(Math.abs(g.val-g.ant)/g.ant)} vs. mês anterior`:'sem lançamento no mês anterior'}`,'Sem despesas no mês.',12,(g)=>detLanc(g.nome+' · '+nomeMes(m),l=>l[1]==='p'&&l[0]===m&&l[2]===g.nome));
   const cc=f.despesas_centro.map(x=>({nome:x.nome,val:x.valores[m]||0})).filter(x=>x.val>0).sort((a,b)=>b.val-a.val);
-  ranking('pgCentro',cc.map(x=>({...x,rot:brl(x.val)})),(g)=>`${pct(g.val/totM)} das despesas`,'Sem centros de custo nos lançamentos.');
+  ranking('pgCentro',cc.map(x=>({...x,rot:brl(x.val)})),(g)=>`${pct(g.val/totM)} das despesas`,'Sem centros de custo nos lançamentos.',8,(g)=>detLanc('Centro de custo: '+g.nome+' · '+nomeMes(m),l=>l[1]==='p'&&l[0]===m&&l[3]===g.nome));
   const fo=f.fornecedores.map(x=>({nome:x.nome||'—',val:x.total}));
   const totF=fo.reduce((s2,x)=>s2+x.val,0)||1;
-  ranking('pgForn',fo.map(x=>({...x,rot:brl(x.val)})),(g)=>`${pct(g.val/totF)} entre os 10 maiores`,'Sem fornecedores identificados.',10);
-  $('pgProx').innerHTML=pg.proximos.length?`<table><thead><tr><th>Vencimento</th><th>Fornecedor / descrição</th><th>Categoria</th><th class="v">Valor</th></tr></thead><tbody>${pg.proximos.map(x=>`<tr><td class="num">${x.vencimento.split('-').reverse().join('/')}</td><td class="el">${esc(x.pessoa||x.descricao)}</td><td class="el">${esc(x.categoria)}</td><td class="v">${brl2(x.aberto)}</td></tr>`).join('')}</tbody></table>`:'<div class="vazio">Nada a vencer.</div>';
+  ranking('pgForn',fo.map(x=>({...x,rot:brl(x.val)})),(g)=>`${pct(g.val/totF)} entre os 10 maiores`,'Sem fornecedores identificados.',10,(g)=>detLanc('Fornecedor: '+g.nome,l=>l[1]==='p'&&(l[4]||'—')===g.nome,0,'Lançamentos dos últimos 12 meses'));
+  $('pgProx').innerHTML=pg.proximos.length?`<table><thead><tr><th>Vencimento</th><th>Fornecedor / descrição</th><th>Categoria</th><th class="v">Valor</th></tr></thead><tbody>${pg.proximos.map(x=>`<tr${D(()=>detAbertos('A pagar: '+(x.pessoa||x.descricao),y=>y[0]==='p'&&y[2]===x.pessoa))}><td class="num">${x.vencimento.split('-').reverse().join('/')}</td><td class="el">${esc(x.pessoa||x.descricao)}</td><td class="el">${esc(x.categoria)}</td><td class="v">${brl2(x.aberto)}</td></tr>`).join('')}</tbody></table>`:'<div class="vazio">Nada a vencer.</div>';
 }
 
 // ---------- conciliação planilha x sistema ----------
@@ -1003,9 +1031,71 @@ function pgConciliacao(){
     :`<table><thead><tr><th>Venda</th><th>Data</th><th>Cadastrada em</th><th>Cliente</th><th>Situação</th><th class="v">Valor</th></tr></thead><tbody>${[...andamento,...lancMesSeguinte,...criadoDepois].slice(0,30).map(v=>`<tr><td>${esc(v.n)}</td><td class="num">${v.d.split('-').reverse().join('/')}</td><td class="num">${v.e?v.e.split('-').reverse().join('/'):'—'}</td><td class="el">${esc(v.c)}</td><td>${v.s==='EM_ANDAMENTO'?'Em andamento':v.s==='APROVADO'?'Aprovada':v.s==='FATURADO'?'Faturada':v.s}</td><td class="v">${brl2(v.t)}</td></tr>`).join('')||'<tr><td colspan="6" class="vazio">Nenhuma venda pendente ou fora do mês.</td></tr>'}</tbody></table>`;
 }
 
+// ---------- detalhamento ao clicar nos valores ----------
+const REG=new Map(); let regN=0;
+const dk=(fn)=>{ const k='d'+(regN++); REG.set(k,fn); return k; };
+const D=(fn)=>fn?` data-d="${dk(fn)}"`:'';
+const DET={cols:[],linhas:[],ord:null,asc:false,titulo:''};
+const fmtDet=(v,t)=>v==null||v===''?'—':t==='brl'?brl2(v):t==='int'?int(v):t==='pct'?pct(v):t==='data'?String(v).slice(0,10).split('-').reverse().join('/'):t==='mes'?(v?MES_C[+String(v).slice(5,7)-1]+'/'+String(v).slice(2,4):'—'):esc(v);
+function abrirDet(titulo,sub,cols,linhas){
+  semDica(); DET.cols=cols; DET.linhas=linhas; DET.titulo=titulo; DET.ord=cols.findIndex(c=>c.total); DET.asc=false;
+  $('detTit').textContent=titulo; $('detSub').textContent=sub||''; $('detBusca').value='';
+  $('det').hidden=false; $('detFundo').hidden=false; document.body.style.overflow='hidden'; desenharDet(); $('detFechar').focus();
+}
+function desenharDet(){
+  const q=$('detBusca').value.trim().toLowerCase(), C=DET.cols;
+  let ls=q?DET.linhas.filter(l=>l.some(v=>String(v??'').toLowerCase().includes(q))):DET.linhas.slice();
+  if(DET.ord>=0){ const i=DET.ord, a=DET.asc?1:-1; ls.sort((x,y)=>{ const p=x[i],r=y[i]; return (typeof p==='number'&&typeof r==='number'?p-r:String(p??'').localeCompare(String(r??''),'pt-BR'))*a; }); }
+  const it=C.findIndex(c=>c.total), tot=it>=0?ls.reduce((s2,l)=>s2+(+l[it]||0),0):null;
+  $('detTot').innerHTML=`<b>${int(ls.length)}</b> ${ls.length===1?'linha':'linhas'}${tot!=null?` · total <b>${brl2(tot)}</b>`:''}`;
+  $('detCorpo').innerHTML=ls.length?`<table><thead><tr>${C.map((c,i)=>`<th data-o="${i}" class="${['brl','int','pct'].includes(c.t)?'v':''} ${DET.ord===i?'ord'+(DET.asc?' asc':''):''}">${c.rot}</th>`).join('')}</tr></thead><tbody>${ls.slice(0,800).map(l=>`<tr>${C.map((c,i)=>`<td class="${['brl','int','pct'].includes(c.t)?'v':''} ${c.t==='brl'&&l[i]<0?'neg':''} ${c.wr?'wr':''}">${fmtDet(l[i],c.t)}</td>`).join('')}</tr>`).join('')}</tbody></table>${ls.length>800?`<div class="nota">Mostrando 800 de ${int(ls.length)} linhas. Use a busca ou exporte o CSV para ver tudo.</div>`:''}`:'<div class="vazio">Nada encontrado.</div>';
+  $('detCorpo').querySelectorAll('th[data-o]').forEach(th=>th.addEventListener('click',()=>{ const i=+th.dataset.o; if(DET.ord===i) DET.asc=!DET.asc; else {DET.ord=i;DET.asc=false;} desenharDet(); }));
+}
+function fecharDet(){ $('det').hidden=true; $('detFundo').hidden=true; document.body.style.overflow=''; }
+$('detFechar').addEventListener('click',fecharDet); $('detFundo').addEventListener('click',fecharDet);
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&!$('det').hidden) fecharDet(); });
+$('detBusca').addEventListener('input',desenharDet);
+$('detCsv').addEventListener('click',()=>{ const C=DET.cols; const linhas=[C.map(c=>c.rot),...DET.linhas.map(l=>C.map((c,i)=>c.t==='brl'||c.t==='int'?String(l[i]??'').replace('.',','):c.t==='pct'&&l[i]!=null?String((l[i]*100).toFixed(1)).replace('.',',')+'%':String(l[i]??'')))];
+  const csv='﻿'+linhas.map(r=>r.map(v=>/[;"\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v).join(';')).join('\n');
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'})); a.download=DET.titulo.replace(/[^\wÀ-ú -]+/g,'').trim().replace(/\s+/g,'-').toLowerCase()+'.csv'; document.body.appendChild(a); a.click(); a.remove(); });
+document.addEventListener('click',e=>{ const el=e.target.closest('[data-d]'); if(!el||el.closest('#det')) return; const f=REG.get(el.dataset.d); if(f){ e.preventDefault(); f(); } });
+document.addEventListener('keydown',e=>{ if(e.key==='Enter'){ const el=e.target.closest?.('[data-d]'); if(el){ const f=REG.get(el.dataset.d); if(f) f(); } } });
+
+// pedidos (vendas) por trás de um total comercial
+const rotNR=(x)=>x==='novo'?'Novo':x==='recompra'?'Recompra':'—';
+function detPedidos(titulo,ls,sub){
+  const m=new Map(); ls.forEach(l=>{ const p=m.get(l.p)||{d:l.d||l.m,p:l.p,c:l.c,v:l.v,nr:l.nr,prod:new Set(),q:0,t:0,cu:0}; if(l.d&&(!p.d||l.d<p.d)) p.d=l.d; p.q+=l.q; p.t+=l.t; p.cu+=l.cu||0; if(!p.nr&&l.nr) p.nr=l.nr; const pr=l.pr||[l.tp,l.mt,l.cr].filter(Boolean).join(' · '); if(pr) p.prod.add(pr); m.set(l.p,p); });
+  const rows=[...m.values()].map(p=>[p.d,p.p,p.c,p.v,rotNR(p.nr),[...p.prod].slice(0,3).join(' / ')+(p.prod.size>3?` +${p.prod.size-3}`:''),p.q,p.t,p.cu&&p.t?(p.t-p.cu)/p.t:null]);
+  abrirDet(titulo,sub||`${pl(rows.length,'pedido','pedidos')} · ${janela().rot}`,[{rot:'Data',t:'data'},{rot:'Pedido'},{rot:'Cliente'},{rot:'Vendedor'},{rot:'Novo/recompra'},{rot:'Produtos',wr:1},{rot:'Peças',t:'int'},{rot:'Valor',t:'brl',total:1},{rot:'Margem',t:'pct'}],rows);
+}
+function detItens(titulo,ls,sub){
+  abrirDet(titulo,sub||janela().rot,[{rot:'Data',t:'data'},{rot:'Pedido'},{rot:'Cliente'},{rot:'Vendedor'},{rot:'Produto'},{rot:'Tipo'},{rot:'Material'},{rot:'Cor'},{rot:'Peças',t:'int'},{rot:'Valor',t:'brl',total:1}],
+    ls.map(l=>[l.d||l.m,l.p,l.c,l.v,l.pr||'',l.tp||'',l.mt||'',l.cr||'',l.q,l.t]));
+}
+function detClientes(titulo,ls,sub){
+  const m=new Map(); ls.forEach(l=>{ const g=m.get(l.c)||{c:l.c,ped:new Set(),q:0,t:0,ult:'',v:l.v}; g.ped.add(l.p); g.q+=l.q; g.t+=l.t; if((l.d||'')>g.ult){g.ult=l.d;g.v=l.v;} m.set(l.c,g); });
+  abrirDet(titulo,sub||janela().rot,[{rot:'Cliente'},{rot:'Último vendedor'},{rot:'Última compra',t:'data'},{rot:'Pedidos',t:'int'},{rot:'Peças',t:'int'},{rot:'Faturamento',t:'brl',total:1}],[...m.values()].map(g=>[g.c,g.v,g.ult,g.ped.size,g.q,g.t]));
+}
+// lançamentos financeiros por trás de um total
+const COLS_LANC=[{rot:'Competência',t:'mes'},{rot:'Vencimento',t:'data'},{rot:'Categoria'},{rot:'Cliente / fornecedor'},{rot:'Descrição',wr:1},{rot:'Centro de custo'},{rot:'Situação'},{rot:'Valor',t:'brl',total:1}];
+function detLanc(titulo,fil,caixa,sub){
+  const src=caixa?E.fin?.det_caixa:E.fin?.det_competencia;
+  if(!src){ abrirDet(titulo,'O detalhamento aparece depois que o servidor for atualizado para a v8.',[{rot:'—'}],[]); return; }
+  const rows=src.filter(fil).map(x=>[x[0],x[6],x[2],x[4],x[5],x[3],x[8],x[7]]);
+  abrirDet(titulo,sub||(caixa?'Regime de caixa (pelo pagamento)':'Regime de competência'),caixa?[{rot:'Pago em',t:'mes'},...COLS_LANC.slice(1)]:COLS_LANC,rows);
+}
+function detAbertos(titulo,fil,sub){
+  const src=E.fin?.det_abertos; const hoje=new Date(Date.now()-3*3600e3).toISOString().slice(0,10);
+  if(!src){ abrirDet(titulo,'O detalhamento aparece depois que o servidor for atualizado para a v8.',[{rot:'—'}],[]); return; }
+  const rows=src.filter(fil).map(x=>[x[1],x[1]<hoje?Math.round((Date.parse(hoje)-Date.parse(x[1]))/864e5):null,x[2],x[3],x[4],x[6],x[5]]);
+  abrirDet(titulo,sub||'Parcelas em aberto',[{rot:'Vencimento',t:'data'},{rot:'Dias de atraso',t:'int'},{rot:'Cliente / fornecedor'},{rot:'Descrição'},{rot:'Categoria'},{rot:'Valor total',t:'brl'},{rot:'Em aberto',t:'brl',total:1}],rows);
+}
+const hojeISO=()=>new Date(Date.now()-3*3600e3).toISOString().slice(0,10);
+const diasAtr=(v)=>Math.round((Date.parse(hojeISO())-Date.parse(v))/864e5);
+
 // ---------- v6: dashboards gerenciais ----------
 const MESES_PAG={resumo:1,comercial:1,financas:1,controle:1,usuarios:1};
-const kpiHtml=(arr)=>arr.map(([l,v,s2,c,r])=>`<div class="kpi ${c||''}"><div class="l"><span>${l}</span>${r?`<span class="req" style="margin:0">${r}</span>`:''}</div><div class="v num">${v}</div><div class="s">${s2||''}</div></div>`).join('');
+const kpiHtml=(arr)=>arr.map(([l,v,s2,c,r,fn])=>`<div class="kpi ${c||''}"${fn?D(fn)+' tabindex="0"':''}><div class="l"><span>${l}</span>${r?`<span class="req" style="margin:0">${r}</span>`:''}</div><div class="v num">${v}</div><div class="s">${s2||''}</div></div>`).join('');
 const incompleto=(m)=>!!(E.fin&&E.fin.primeiro_mes_despesas&&m<E.fin.primeiro_mes_despesas);
 const indM=(m,caixa)=>(caixa?E.fin?.indicadores_caixa:E.fin?.indicadores)?.[m]||null;
 const mesHojeBR=()=>new Date(Date.now()-3*3600e3).toISOString().slice(0,7);
@@ -1046,7 +1136,7 @@ function termometro(){
         ${pe?`<u style="left:${w(pe)}%"><b>PE ${curto(pe)}</b></u>`:''}${meta?`<u class="mt" style="left:${w(meta)}%"><b>Meta ${curto(meta)}</b></u>`:''}</div>
     </div>
     <div class="tlin">
-      <div><span>Vendido${parcial?' até hoje':''}</span><b>${brl(vend)}</b><em>${pe?pct(vend/pe)+' do ponto de equilíbrio':''}</em></div>
+      <div${D((()=>{const x=linhas([m]);return ()=>detPedidos('Vendas de '+nomeMes(m),x);})())}><span>Vendido${parcial?' até hoje':''}</span><b class="lk">${brl(vend)}</b><em>${pe?pct(vend/pe)+' do ponto de equilíbrio':''}</em></div>
       ${parcial?`<div><span>Projeção pelo ritmo</span><b class="${proj<pe?'neg':'pos'}">${brl(proj)}</b><em>${brl(vend/dia)} por dia corrido</em></div>`:`<div><span>Resultado do mês</span><b class="${(E.fin.resultado[m]||0)<0?'neg':'pos'}">${incompleto(m)?'—':brl(E.fin.resultado[m])}</b><em>${incompleto(m)?'despesas não lançadas':'competência'}</em></div>`}
       <div><span>${falta?'Falta para o equilíbrio':'Acima do equilíbrio'}</span><b class="${falta?'neg':'pos'}">${brl(falta||vend-pe)}</b><em>${falta&&parcial&&resta?`${brl(falta/resta)} por dia nos ${resta} dias restantes`:falta?'mês fechou abaixo':'cobre a estrutura fixa'}</em></div>
     </div>
@@ -1056,6 +1146,7 @@ function cascata(){
   const f=E.fin, m=f.meses.includes(E.mes)?E.mes:f.meses[f.meses.length-1], x=f.indicadores?.[m];
   if(!x){ $('cascata').innerHTML='<div class="vazio">Sem dados da DRE para o mês.</div>'; return; }
   const fixosOp=x.fixos-x.financeiro-x.tributos;
+  const N={'Receita':l=>l[1]==='r'&&l[10]==='receita','Deduções e impostos':l=>l[10]==='deducao','Custos variáveis':l=>l[10]==='variavel','Custos e despesas fixos':l=>l[1]==='p'&&['fixo','nao_classificado'].includes(l[10]),'Financeiras e tributos':l=>['financeiro','tributos'].includes(l[10]),'Outras receitas':l=>l[10]==='outras_receitas','Margem de contribuição':l=>['receita','deducao','variavel'].includes(l[10]),'Resultado':()=>true};
   const passos=[['Receita',x.receita,'t'],['Deduções e impostos',-x.deducoes],['Custos variáveis',-x.custos_variaveis],['Margem de contribuição',x.margem_contribuicao,'t'],['Custos e despesas fixos',-fixosOp],['Financeiras e tributos',-(x.financeiro+x.tributos)]];
   if(x.outras_receitas) passos.push(['Outras receitas',x.outras_receitas]);
   passos.push(['Resultado',x.resultado,'t']);
@@ -1065,7 +1156,7 @@ function cascata(){
   let g=`<line x1="${L}" x2="${W-R}" y1="${y(0)}" y2="${y(0)}" stroke="var(--line2)"/>`;
   barras.forEach((z,i)=>{ const cx=L+i*slot+slot/2, top=y(Math.max(z.a,z.b)), hh=Math.max(Math.abs(y(z.a)-y(z.b)),1.5);
     const cor=z.t?(z.v<0?'var(--red)':'var(--s1)'):z.v<0?'var(--s2)':'var(--green)';
-    g+=`<rect x="${cx-bw/2}" y="${top}" width="${bw}" height="${hh}" rx="3" fill="${cor}"/>`;
+    g+=`<rect x="${cx-bw/2}" y="${top}" width="${bw}" height="${hh}" rx="3" fill="${cor}"${D(()=>detLanc(z.r+' · '+nomeMes(m),l=>l[0]===m&&N[z.r](l)))}/>`;
     if(i<barras.length-1) g+=`<line x1="${cx+bw/2}" x2="${cx+slot-bw/2}" y1="${y(z.b)}" y2="${y(z.b)}" stroke="var(--ink3)" stroke-dasharray="2 3"/>`;
     g+=`<text x="${cx}" y="${top-7}" text-anchor="middle" style="fill:var(--ink);font-weight:700">${curto(z.v)}</text>`;
     const pal=z.r.split(' '); const l1=pal.slice(0,Math.ceil(pal.length/2)).join(' '), l2=pal.slice(Math.ceil(pal.length/2)).join(' ');
@@ -1080,32 +1171,32 @@ function quadro(){
   const fx=(mm,fn)=>{ try{ const r=fn(mm); return r==null||Number.isNaN(r)?null:r; }catch(e){ return null; } };
   const linhasQ=[
     ['Comercial'],
-    ['Vendas (aprovadas e faturadas)',mm=>vs.get(mm).fat,'brl'],
-    ['Pedidos',mm=>vs.get(mm).pedidos,'int','R1'],
+    ['Vendas (aprovadas e faturadas)',mm=>vs.get(mm).fat,'brl',null,0,0,mm=>detPedidos('Vendas de '+nomeMes(mm),linhas([mm]))],
+    ['Pedidos',mm=>vs.get(mm).pedidos,'int','R1',0,0,mm=>detPedidos('Pedidos de '+nomeMes(mm),linhas([mm]))],
     ['Ticket médio',mm=>vs.get(mm).ticket,'brl','R2'],
     ['Vendas para clientes novos',mm=>{const s=vs.get(mm);return s.fat?s.nr.novo.t/s.fat:null},'pct','R3'],
-    ['Clientes que compraram',mm=>vs.get(mm).clientes,'int'],
+    ['Clientes que compraram',mm=>vs.get(mm).clientes,'int',null,0,0,mm=>detClientes('Clientes de '+nomeMes(mm),linhas([mm]))],
     ['Margem bruta das vendas',mm=>{const c=cu.get(mm),t=vs.get(mm).fat;return c&&t?(t-c)/t:null},'pct'],
     ['Financeiro (competência)'],
-    ['Receita',mm=>I(mm)?.receita,'brl'],
+    ['Receita',mm=>I(mm)?.receita,'brl',null,0,0,mm=>detLanc('Receitas de '+nomeMes(mm),l=>l[1]==='r'&&l[0]===mm)],
     ['Margem de contribuição',mm=>incompleto(mm)?null:I(mm)?.mc_pct,'pct'],
-    ['Custos e despesas fixos',mm=>incompleto(mm)?null:I(mm)?.fixos,'brl',null,1],
+    ['Custos e despesas fixos',mm=>incompleto(mm)?null:I(mm)?.fixos,'brl',null,1,0,mm=>detLanc('Custos e despesas fixos de '+nomeMes(mm),l=>l[0]===mm&&l[1]==='p'&&!['deducao','variavel'].includes(l[10]))],
     ['Ponto de equilíbrio',mm=>incompleto(mm)||mm===mesHojeBR()?null:I(mm)?.ponto_equilibrio,'brl','C1',1],
-    ['Resultado líquido',mm=>incompleto(mm)?null:f.resultado?.[mm],'brl',null,0,1],
+    ['Resultado líquido',mm=>incompleto(mm)?null:f.resultado?.[mm],'brl',null,0,1,mm=>detLanc('Lançamentos de '+nomeMes(mm),l=>l[0]===mm)],
     ['Margem líquida',mm=>incompleto(mm)||!I(mm)?.receita?null:f.resultado[mm]/I(mm).receita,'pct'],
     ['Caixa'],
-    ['Recebimentos',mm=>C(mm)?.entradas,'brl'],
-    ['Pagamentos',mm=>C(mm)?.saidas,'brl',null,1],
+    ['Recebimentos',mm=>C(mm)?.entradas,'brl',null,0,0,mm=>detLanc('Recebimentos de '+nomeMes(mm),l=>l[1]==='r'&&l[0]===mm,1)],
+    ['Pagamentos',mm=>C(mm)?.saidas,'brl',null,1,0,mm=>detLanc('Pagamentos de '+nomeMes(mm),l=>l[1]==='p'&&l[0]===mm,1)],
     ['Geração de caixa',mm=>C(mm)?C(mm).entradas-C(mm).saidas:null,'brl',null,0,1],
   ];
   const fmt=(v,t)=>v==null?'—':t==='brl'?brl(v):t==='int'?int(v):pct(v);
   const parcial=m===mesHojeBR();
   $('quadroSub').textContent=`${nomeMes(m)} comparado com o mês anterior e com a média dos 3 meses anteriores${parcial?' · mês em andamento (valores parciais)':''}${f.primeiro_mes_despesas&&f.primeiro_mes_despesas>f.meses[0]?` · despesas na Conta Azul a partir de ${nomeMes(f.primeiro_mes_despesas)}`:''}`;
-  $('quadro').innerHTML=`<table class="quadro"><thead><tr><th>Indicador</th><th>6 meses</th><th class="v">${MES_C[+m.slice(5)-1]}/${m.slice(2,4)}</th><th class="v">${MES_C[+ms[4].slice(5)-1]}/${ms[4].slice(2,4)}</th><th class="v">Variação</th><th class="v">Média 3 meses</th></tr></thead><tbody>${linhasQ.map(([rot,fn,t,req,inv,abs])=>{
+  $('quadro').innerHTML=`<table class="quadro"><thead><tr><th>Indicador</th><th>6 meses</th><th class="v">${MES_C[+m.slice(5)-1]}/${m.slice(2,4)}</th><th class="v">${MES_C[+ms[4].slice(5)-1]}/${ms[4].slice(2,4)}</th><th class="v">Variação</th><th class="v">Média 3 meses</th></tr></thead><tbody>${linhasQ.map(([rot,fn,t,req,inv,abs,det])=>{
     if(!fn) return `<tr class="grp"><td colspan="6">${rot}</td></tr>`;
     const vals=ms.map(mm=>fx(mm,fn)), a=vals[5], b=vals[4], med3=[vals[2],vals[3],vals[4]].filter(v=>v!=null), md=med3.length?med3.reduce((s,v)=>s+v,0)/med3.length:null;
     const dv=a!=null&&b!=null&&abs?`<span class="delta ${Math.abs(a-b)<1?'eq':a>b?'up':'down'}">${a>=b?'▲':'▼'} ${brl(Math.abs(a-b))}</span>`:a!=null&&b?(t==='pct'?`<span class="delta ${Math.abs(a-b)<.0005?'eq':(a>b)!==!!inv?'up':'down'}">${a>=b?'▲':'▼'} ${(Math.abs(a-b)*100).toLocaleString('pt-BR',{maximumFractionDigits:1})} p.p.</span>`:delta(a,b,inv)):'<span class="delta eq">—</span>';
-    return `<tr><td>${rot}${req?`<span class="req">${req}</span>`:''}</td><td>${spark(vals,null,inv)}</td><td class="v"><b class="${t!=='pct'&&a<0?'neg':''}">${fmt(a,t)}</b></td><td class="v">${fmt(b,t)}</td><td class="v">${dv}</td><td class="v">${fmt(md,t)}</td></tr>`; }).join('')}</tbody></table>`;
+    return `<tr><td>${rot}${req?`<span class="req">${req}</span>`:''}</td><td>${spark(vals,null,inv)}</td><td class="v"${det&&a!=null?D(()=>semFiltro(()=>det(ms[5]))):''}><b class="${t!=='pct'&&a<0?'neg':''} ${det&&a!=null?'lk':''}">${fmt(a,t)}</b></td><td class="v ${det&&b!=null?'lk':''}"${det&&b!=null?D(()=>semFiltro(()=>det(ms[4]))):''}>${fmt(b,t)}</td><td class="v">${dv}</td><td class="v">${fmt(md,t)}</td></tr>`; }).join('')}</tbody></table>`;
 }
 
 // ---------- comercial ----------
@@ -1121,10 +1212,10 @@ function pgFinancas(){
 function composicao(){
   const f=E.fin, m=mesFin(), x=indM(m,E.reg==='caixa'); if(!x){ $('composicao').innerHTML='<div class="vazio">—</div>'; return; }
   const fixosOp=x.fixos-x.financeiro-x.tributos, tot=x.variaveis+x.fixos||1, rec=x.receita||1;
-  const partes=[['Deduções e impostos',x.deducoes,'var(--s3)'],['Custos variáveis',x.custos_variaveis,'var(--s2)'],['Custos e despesas fixos',fixosOp,'var(--s1)'],['Financeiras e tributos',x.financeiro+x.tributos,'var(--sNone)']].concat(x.nao_classificado?[['A identificar',x.nao_classificado,'var(--red)']]:[]);
+  const partes=[['Deduções e impostos',x.deducoes,'var(--s3)',['deducao']],['Custos variáveis',x.custos_variaveis,'var(--s2)',['variavel']],['Custos e despesas fixos',fixosOp,'var(--s1)',['fixo']],['Financeiras e tributos',x.financeiro+x.tributos,'var(--sNone)',['financeiro','tributos']]].concat(x.nao_classificado?[['A identificar',x.nao_classificado,'var(--red)',['nao_classificado']]]:[]);
   $('compSub').textContent=`${nomeMes(m)} · ${E.reg==='caixa'?'pagamentos do mês':'competência'} · ${brl(x.variaveis+x.fixos)} no total`;
   $('composicao').innerHTML=`<div class="barra2" style="height:26px">${partes.filter(p=>p[1]>0).map(p=>`<span style="flex:${p[1]};background:${p[2]}"></span>`).join('')}</div>
-    <div class="rank" style="margin-top:16px">${partes.map(p=>`<div class="r" style="grid-template-columns:14px minmax(0,1fr) auto"><i style="width:10px;height:10px;border-radius:3px;background:${p[2]}"></i><span class="nm">${p[0]}</span><span class="vl">${brl(p[1])}</span><span class="mt">${pct(p[1]/tot)} das despesas · ${pct(p[1]/rec)} da receita</span></div>`).join('')}</div>
+    <div class="rank" style="margin-top:16px">${partes.map(p=>`<div class="r" style="grid-template-columns:14px minmax(0,1fr) auto"${D(()=>detLanc(p[0]+' · '+nomeMes(m),l=>l[1]==='p'&&l[0]===m&&p[3].includes(l[10]),E.reg==='caixa'))}><i style="width:10px;height:10px;border-radius:3px;background:${p[2]}"></i><span class="nm">${p[0]}</span><span class="vl">${brl(p[1])}</span><span class="mt">${pct(p[1]/tot)} das despesas · ${pct(p[1]/rec)} da receita</span></div>`).join('')}</div>
     <div class="nota">Variáveis acompanham as vendas (impostos, matéria-prima, comissões, fretes). Fixos são a estrutura que precisa ser coberta todo mês, vendendo ou não. A classificação segue as linhas "(Variáveis)" e "(Fixos)" da DRE cadastrada na Conta Azul.</div>`;
 }
 function mcTab(){

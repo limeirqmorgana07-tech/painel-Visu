@@ -2,6 +2,12 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v8 — 13/10/2026 · Detalhamento ao clicar nos valores
+Arquivo: `painel-visu-v8-detalhamento.zip`
+- Clicar em um valor abre a lista que forma aquele total: pedidos, itens, clientes, lançamentos ou parcelas em aberto.
+- Vale para os indicadores, vendedores, rankings de produto, tecido, cor e cliente, curva ABC, DRE, despesas por categoria e centro de custo, fornecedores, contas a receber e a pagar, caixa e pontos de atenção.
+- A lista tem busca, ordenação por coluna e exportação para CSV (abre no Excel).
+
 ## v7 — 11/10/2026 · Usuários com perfis Diretor e ADM
 Arquivo: `painel-gestao-visu-v7.zip`
 - Login por e-mail e senha, com perfis Diretor (dashboards) e ADM (dashboards, usuários e conexão com a Conta Azul).

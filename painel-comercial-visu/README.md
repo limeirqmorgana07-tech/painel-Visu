@@ -26,6 +26,12 @@ Código no GitHub, publicação no Render (a hospedagem definitiva será decidid
 - **Cadastro do cliente:** "Yelloran lote 1" e "Yelloran - Lote 2" contam como "Yelloran". Diferenças de maiúsculas, acentos e espaços também são unificadas.
 - **Grafias:** "Poliamida", "poliamida " e "POLIAMIDA" contam como um só material. O painel exibe a grafia mais usada. O mesmo vale para tipo de produto, cor e vendedor.
 
+## Detalhamento
+
+Todo valor com cursor de mão (indicadores, linhas de vendedor, rankings, células da DRE, categorias, fornecedores, contas em aberto, pontos de atenção) abre um painel lateral com os registros que formam aquele total. O painel tem busca, ordenação por coluna e botão **Exportar CSV**.
+- **Comercial:** pedidos ou itens da venda (data, pedido, cliente, vendedor, produtos, peças, valor, margem).
+- **Financeiro:** lançamentos da Conta Azul (competência ou caixa) e parcelas em aberto (vencimento, dias de atraso, cliente/fornecedor).
+
 ## Usuários e perfis
 
 | Perfil | O que vê e faz |

@@ -138,6 +138,24 @@ function indicadores(estrutura, lancs, meses) {
   }));
 }
 
+
+// ---------- detalhamento: os lançamentos por trás de cada total (para abrir ao clicar no painel) ----------
+// Linha compacta: [mês, r|p, categoria, centro, pessoa, descrição, vencimento, valor, status, caminho na DRE, natureza]
+function detalhar(parcelas, campoValor, campoMes, mapa) {
+  const out = [];
+  for (const p of parcelas) {
+    const cats = p.categorias.length ? p.categorias : [{ id: null, nome: 'Sem categoria' }];
+    for (const c of cats) {
+      const v = r2((p[campoValor] || 0) / cats.length);
+      if (!v) continue;
+      const caminho = mapa.get(c.id) || 'Lançamentos sem categoria na DRE';
+      out.push([(p[campoMes] || '').slice(0, 7), p.tipo === 'receber' ? 'r' : 'p', c.nome, p.centros?.[0] || 'Sem centro de custo', p.pessoa || '', p.descricao || '', p.vencimento || '', v, p.status || '',
+        caminho.split(' > ').join('|'), natureza({ tipo: p.tipo, categoria_id: c.id, categoria: c.nome, valor: v }, mapa)]);
+    }
+  }
+  return out;
+}
+
 // ---------- agrupamentos (relatórios por categoria / centro de custo / pessoa) ----------
 function porDimensao(lancs, meses, tipo, campo, limite = 12) {
   const mapa = new Map();
@@ -233,6 +251,9 @@ function montar(b, fonte) {
     projecao: projecao(abertos, saldoAtual, hoje),
     sem_categoria: lComp.filter((x) => !x.categoria_id).length,
     indicadores: indicadores(estrutura, lComp, meses),
+    det_competencia: detalhar(comp.filter((x) => meses.includes((x.competencia || '').slice(0, 7))), 'total', 'competencia', classificador(estrutura)),
+    det_caixa: detalhar(pagas, 'pago', 'mes_pag', classificador(estrutura)),
+    det_abertos: abertos.map((x) => [x.tipo === 'receber' ? 'r' : 'p', x.vencimento, x.pessoa || '', x.descricao || '', x.categorias[0]?.nome || '', r2(x.aberto), r2(x.total)]),
     indicadores_caixa: indicadores(estrutura, lCaixa, meses),
     primeiro_mes_despesas: meses.find((m) => Math.abs(lComp.filter((x) => x.tipo === 'pagar' && x.mes === m).reduce((s, x) => s + x.valor, 0)) > 0.25 * Math.max(1, Math.abs(lComp.filter((x) => x.tipo === 'receber' && x.mes === m).reduce((s, x) => s + x.valor, 0)))) || null,
   };
