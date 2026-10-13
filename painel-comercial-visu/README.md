@@ -41,12 +41,13 @@ Todo valor com cursor de mão (indicadores, linhas de vendedor, rankings, célul
 
 Perfis criados na primeira execução: **Diretor 1**, **Diretor 2**, **Morgana Limeira (ADM)** e **Gestor Seja Expert (ADM)**. Nomes, e-mails e perfis se ajustam na página Usuários (ou pela variável `USUARIOS_JSON`, só na primeira execução).
 
-**Como dar acesso a alguém**
+**Como dar acesso a alguém (senha temporária)**
 1. Entre como ADM. No primeiro acesso, deixe o e-mail em branco e use a senha mestra `PAINEL_SENHA`.
-2. Abra **Usuários**, clique em **Gerar link** na linha da pessoa e envie o link (há botões de copiar, WhatsApp e e-mail com a mensagem pronta).
-3. A pessoa abre o link, confirma o e-mail, cria a própria senha e já entra. Depois disso, entra pelo login com e-mail e senha.
+2. Em **Usuários**, confira nome, e-mail (é o login) e perfil da pessoa (botão **Editar**).
+3. Clique em **Senha temporária**. Aparecem o endereço do painel, o e-mail e a senha (ex.: `Visu-K7QM-4XPA`), com botões para copiar a mensagem pronta, WhatsApp e e-mail. A senha só aparece nessa hora.
+4. A pessoa entra com o e-mail e a senha temporária; o painel pede para ela criar a própria senha antes de mostrar os dados.
 
-O link é pessoal, vale 7 dias e funciona uma vez só. "Redefinir senha" gera um link novo e desativa a senha antiga. As senhas ficam guardadas só como hash (scrypt).
+A senha temporária vale 7 dias. Gerar outra derruba a anterior. O botão **Link** é a alternativa: um link pessoal em que a pessoa cria a senha sem receber nenhuma. Todos podem usar **Trocar senha** no topo do painel. As senhas ficam guardadas só como hash (scrypt).
 
 **Importante:** configure `DATABASE_URL` antes de enviar os links. Sem banco, os usuários e as senhas ficam em arquivo e se perdem quando o Render reinicia.
 

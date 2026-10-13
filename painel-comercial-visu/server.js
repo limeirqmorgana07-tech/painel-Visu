@@ -26,6 +26,10 @@ const gravarCookie = (req, res, valor, horas = 12) => res.setHeader('Set-Cookie'
 
 async function exigeLogin(req, res, next) {
   req.usuario = await usuarios.lerSessao(lerCookie(req)).catch(() => null);
+  if (req.usuario?.temporaria) {
+    if (req.path.startsWith('/api/')) return res.status(403).json({ erro: 'troque a senha temporária para continuar' });
+    return res.redirect('/trocar-senha');
+  }
   if (req.usuario) return next();
   if (req.path.startsWith('/api/')) return res.status(401).json({ erro: 'login necessário' });
   res.redirect('/login');
@@ -54,25 +58,49 @@ button,.b{display:block;margin-top:14px;width:100%;box-sizing:border-box;padding
 const paginaLogin = (erro = '', email = '') => pagina('Painel de Gestão', `<p>Acesso restrito</p>
 <form method="post" action="/login"><label for="email">E-mail</label><input id="email" type="email" name="email" value="${esc(email)}" autocomplete="username" autofocus>
 <label for="senha">Senha</label><input id="senha" type="password" name="senha" autocomplete="current-password" required><button>Entrar</button>
-${erro ? `<div class="e">${esc(erro)}</div>` : ''}</form><div class="d">Primeiro acesso? Use o link pessoal que você recebeu.</div>`);
+${erro ? `<div class="e">${esc(erro)}</div>` : ''}</form><div class="d">Primeiro acesso? Entre com a senha temporária que você recebeu; o painel pede para criar a sua.</div>`);
 
 app.get('/login', (req, res) => res.send(paginaLogin()));
 app.post('/login', async (req, res) => {
   const email = String(req.body.email || '').trim();
   const senha = String(req.body.senha || '');
-  let u = await usuarios.autenticar(email, senha).catch(() => null);
+  const r = await usuarios.autenticar(email, senha).catch(() => ({ erro: 'E-mail ou senha incorretos.' }));
+  let u = r.u || null;
   if (!u && config.senhaPainel && (!email || email.toLowerCase() === 'admin')) {
     const ok = crypto.timingSafeEqual(crypto.createHash('sha256').update(senha).digest(), crypto.createHash('sha256').update(config.senhaPainel).digest());
     if (ok) u = usuarios.ADMIN_MESTRE;
   }
-  if (!u) return res.status(401).send(paginaLogin('E-mail ou senha incorretos.', email));
+  if (!u) return res.status(401).send(paginaLogin(r.erro || 'E-mail ou senha incorretos.', email));
   gravarCookie(req, res, usuarios.cookieDeSessao(u));
   if (u.id !== '__admin') usuarios.registrarAcesso(u.id);
-  res.redirect('/');
+  res.redirect(u.temporaria ? '/trocar-senha' : '/');
 });
 app.get('/sair', (req, res) => {
   res.setHeader('Set-Cookie', `${COOKIE}=; Path=/; Max-Age=0`);
   res.redirect('/login');
+});
+
+// troca de senha: obrigatória depois de entrar com senha temporária; opcional a qualquer momento
+const paginaTroca = (u, erro = '') => pagina(u.temporaria ? `Olá, ${u.nome.split(' ')[0]}` : 'Trocar senha', `<p>${u.temporaria ? 'Você entrou com uma senha temporária. Crie a sua senha para continuar.' : 'Escolha uma nova senha.'}</p>
+<form method="post" action="/trocar-senha">${u.temporaria ? '' : '<label for="atual">Senha atual</label><input id="atual" type="password" name="atual" required autocomplete="current-password">'}
+<label for="nova">Nova senha (mínimo 8 caracteres)</label><input id="nova" type="password" name="nova" minlength="8" required autocomplete="new-password">
+<label for="nova2">Repita a nova senha</label><input id="nova2" type="password" name="nova2" minlength="8" required autocomplete="new-password">
+<button>Salvar e entrar</button>${erro ? `<div class="e">${esc(erro)}</div>` : ''}</form>${u.temporaria ? '' : '<div class="d"><a href="/">Voltar ao painel</a></div>'}`);
+async function sessaoParaTroca(req, res) {
+  const u = await usuarios.lerSessao(lerCookie(req)).catch(() => null);
+  if (!u) { res.redirect('/login'); return null; }
+  if (u.id === '__admin') { res.send(pagina('Trocar senha', '<p>A senha mestra é a variável PAINEL_SENHA no Render. Para ter senha própria, gere uma senha temporária para você na página Usuários.</p><a class="b" href="/">Voltar ao painel</a>')); return null; }
+  return u;
+}
+app.get('/trocar-senha', async (req, res) => { const u = await sessaoParaTroca(req, res); if (u) res.send(paginaTroca(u)); });
+app.post('/trocar-senha', async (req, res) => {
+  const u = await sessaoParaTroca(req, res); if (!u) return;
+  try {
+    if (req.body.nova !== req.body.nova2) throw new Error('As duas senhas não são iguais.');
+    const novo = await usuarios.trocarSenha(u.id, { atual: req.body.atual, nova: req.body.nova });
+    gravarCookie(req, res, usuarios.cookieDeSessao(novo));
+    res.redirect('/');
+  } catch (e) { res.status(400).send(paginaTroca(u, e.message)); }
 });
 
 // convite: a pessoa abre o link pessoal e cria a própria senha
@@ -108,6 +136,9 @@ app.post('/api/usuarios', exigeAdm, async (req, res) => {
 app.delete('/api/usuarios/:id', exigeAdm, async (req, res) => {
   if (req.params.id === req.usuario.id) return res.status(400).json({ erro: 'Você não pode remover o próprio acesso.' });
   await usuarios.remover(req.params.id); res.json({ ok: true });
+});
+app.post('/api/usuarios/:id/senha-temporaria', exigeAdm, async (req, res) => {
+  try { res.json(await usuarios.gerarSenhaTemporaria(req.params.id)); } catch (e) { res.status(400).json({ erro: e.message }); }
 });
 app.post('/api/usuarios/:id/convite', exigeAdm, async (req, res) => {
   try { res.json(await usuarios.gerarConvite(req.params.id)); } catch (e) { res.status(400).json({ erro: e.message }); }

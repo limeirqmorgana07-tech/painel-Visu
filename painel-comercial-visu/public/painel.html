@@ -274,6 +274,7 @@ td.lk,span.lk{text-decoration:underline dotted var(--line2);text-underline-offse
       <span class="eu" id="eu" hidden></span>
       <span class="chip" id="chip"><i></i><span id="chipTxt">—</span></span>
       <button class="bt" id="atualizar" type="button">Atualizar</button>
+      <a class="bt" id="trocar" href="/trocar-senha" hidden>Trocar senha</a>
       <a class="bt" id="sair" href="/sair">Sair</a>
     </div>
   </div>
@@ -458,13 +459,13 @@ td.lk,span.lk{text-decoration:underline dotted var(--line2);text-underline-offse
   </section>
 
   <section data-pagina="usuarios" hidden>
-    <div class="pagina-titulo"><div><div class="eyebrow">Perfil ADM</div><h2>Usuários e acessos</h2><p>Cada pessoa recebe um link pessoal, cria a própria senha e entra com o e-mail. Diretores veem os dashboards; ADM também gerencia usuários e a conexão com a Conta Azul.</p></div></div>
+    <div class="pagina-titulo"><div><div class="eyebrow">Perfil ADM</div><h2>Usuários e acessos</h2><p>Gere uma senha temporária e envie com o endereço do painel. No primeiro acesso a pessoa entra com o e-mail e a senha temporária e o painel pede para ela criar a própria senha. Diretores veem os dashboards; ADM também gerencia usuários e a conexão com a Conta Azul.</p></div></div>
     <div class="aviso erro" id="usBanco" hidden></div>
     <div class="card" style="margin-top:14px">
-      <div class="hd"><div><h3 id="usFormTit">Novo usuário</h3><div class="sub">Depois de salvar, clique em "Gerar link" e envie o link para a pessoa</div></div></div>
+      <div class="hd"><div><h3 id="usFormTit">Novo usuário</h3><div class="sub">Depois de salvar, clique em "Senha temporária" e envie o acesso para a pessoa</div></div></div>
       <form class="us-form" id="usForm"><input type="hidden" name="id">
         <div class="f"><label for="usNome">Nome</label><input id="usNome" name="nome" required></div>
-        <div class="f"><label for="usEmail">E-mail (opcional; a pessoa confirma no convite)</label><input id="usEmail" name="email" type="email"></div>
+        <div class="f"><label for="usEmail">E-mail (será o login)</label><input id="usEmail" name="email" type="email"></div>
         <div class="f"><label for="usPerfil">Perfil</label><select id="usPerfil" name="perfil"><option value="diretor">Diretor</option><option value="adm">ADM</option></select></div>
         <button class="bt2 pri" type="submit">Salvar</button><button class="bt2" type="button" id="usCancelar" hidden>Cancelar</button>
       </form>
@@ -495,8 +496,9 @@ const nomeMes=(m)=>{const[a,b]=m.split('-');return MES_L[+b-1]+' de '+a};
 const somaMes=(m,n)=>{const[a,b]=m.split('-').map(Number);const d=new Date(Date.UTC(a,b-1+n,1));return d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0')};
 function delta(a,b,inv){ if(!b) return '<span class="delta eq">sem base</span>'; const d=(a-b)/b; const c=Math.abs(d)<.005?'eq':(d>0)!==!!inv?'up':'down'; return `<span class="delta ${c}">${d>0?'▲':d<0?'▼':'■'} ${pct(Math.abs(d))}</span>`; }
 
-const VERSAO='v8';
+const VERSAO='v9';
 const VERSOES=[
+ {v:'v9',data:'13/10/2026',tit:'Senha temporária',arq:'painel-visu-v9-senha-temporaria.zip',itens:['Na página Usuários, o botão "Senha temporária" gera uma senha (ex.: Visu-K7QM-4XPA) que vale 7 dias.','A pessoa entra com e-mail e senha temporária e o painel obriga a criar a própria senha antes de mostrar os dados.','Mensagem pronta para WhatsApp ou e-mail com endereço, login e senha. Botão "Trocar senha" no topo para todos os usuários.']},
  {v:'v8',data:'13/10/2026',tit:'Detalhamento ao clicar nos valores',arq:'painel-visu-v8-detalhamento.zip',itens:['Clicar em um valor abre a lista que forma aquele total: pedidos, itens, clientes, lançamentos ou parcelas em aberto.','Vale para os indicadores, vendedores, rankings de produto, tecido, cor e cliente, curva ABC, DRE, despesas por categoria e centro de custo, fornecedores, contas a receber e a pagar, caixa e pontos de atenção.','A lista tem busca, ordenação por coluna e exportação para CSV (abre no Excel).']},
  {v:'v7',data:'11/10/2026',tit:'Usuários com perfis Diretor e ADM',arq:'painel-gestao-visu-v7.zip',itens:['Login por e-mail e senha, com perfis Diretor (dashboards) e ADM (dashboards, usuários e conexão com a Conta Azul).','Quatro perfis criados: dois diretores e dois ADM (Morgana e gestor).','Página Usuários: gera o link pessoal de cada pessoa, com mensagem pronta para WhatsApp ou e-mail. A pessoa cria a própria senha no primeiro acesso.']},
  {v:'v6',data:'08/10/2026',tit:'Painel gerencial em 4 dashboards',arq:'painel-gestao-visu-v6.zip',itens:['13 abas viram 4 dashboards: Visão geral, Comercial, Financeiro e Controle.','Visão geral: vendas do mês contra o ponto de equilíbrio (com projeção pelo ritmo), cascata do faturamento ao resultado e quadro de indicadores com 6 meses de tendência.','Financeiro: margem de contribuição e ponto de equilíbrio recalculados todo mês pela DRE da Conta Azul, composição das despesas (fixas × variáveis), liquidez de 30 dias e dias de caixa.','Aviso quando os meses não têm despesas lançadas, para não comparar resultado incompleto.']},
@@ -1234,31 +1236,47 @@ const PERF={diretor:'Diretor',adm:'ADM'};
 let US={lista:[],banco:true,link:null};
 async function api(url,op={}){ if(PREVIA) return previaApi(url,op); const r=await fetch(url,{...op,headers:{'Content-Type':'application/json',Accept:'application/json'}}); const d=await r.json().catch(()=>({})); if(!r.ok) throw new Error(d.erro||('erro '+r.status)); return d; }
 // prévia: simula a API sem servidor
-let PV=[{id:'diretor-1',nome:'Diretor 1',email:'',perfil:'diretor'},{id:'diretor-2',nome:'Diretor 2',email:'',perfil:'diretor'},{id:'morgana',nome:'Morgana Limeira',email:'morgana.limeira@sejaexpergestao.com',perfil:'adm',senha_criada:true,ultimo_acesso:new Date().toISOString()},{id:'gestor-seja-expert',nome:'Gestor Seja Expert',email:'',perfil:'adm'}];
+let PV=[{id:'diretor-1',nome:'Diretor 1',email:'diretor1@visu.com.br',perfil:'diretor'},{id:'diretor-2',nome:'Diretor 2',email:'',perfil:'diretor'},{id:'morgana',nome:'Morgana Limeira',email:'morgana.limeira@sejaexpergestao.com',perfil:'adm',senha_criada:true,ultimo_acesso:new Date().toISOString()},{id:'gestor-seja-expert',nome:'Gestor Seja Expert',email:'',perfil:'adm'}];
 function previaApi(url,op){ const m=op.method||'GET';
   if(url==='/api/usuarios'&&m==='GET') return {usuarios:PV,banco:true};
   if(url==='/api/usuarios'&&m==='POST'){ const b=JSON.parse(op.body); let u=PV.find(x=>x.id===b.id); if(u) Object.assign(u,b); else PV.push(u={...b,id:'novo-'+PV.length}); return u; }
   if(m==='DELETE'){ PV=PV.filter(x=>x.id!==url.split('/').pop()); return {ok:true}; }
+  if(url.endsWith('/senha-temporaria')){ const id=url.split('/')[3]; const u=PV.find(x=>x.id===id); if(!u.email) throw new Error('Cadastre o e-mail da pessoa antes (botão Editar). Ele será o login.'); u.temporaria=true; u.senha_criada=false; u.temp_expira_em=new Date(Date.now()+7*864e5).toISOString(); return {senha:'Visu-K7QM-4XPA',login:'https://painel-visu.onrender.com',email:u.email,expira_em:u.temp_expira_em,usuario:u}; }
   if(url.endsWith('/convite')){ const id=url.split('/')[3]; const u=PV.find(x=>x.id===id); u.senha_criada=false; return {link:`https://painel-visu.onrender.com/convite/exemplo-${id}`,expira_em:new Date(Date.now()+7*864e5).toISOString(),usuario:u}; } }
 async function pgUsuarios(){
   try{ const d=await api('/api/usuarios'); US.lista=d.usuarios; US.banco=d.banco; }catch(e){ $('usLista').innerHTML=`<div class="aviso erro">${esc(e.message)}</div>`; return; }
   $('usBanco').hidden=US.banco; $('usBanco').innerHTML='<span><b>Sem banco de dados configurado.</b> Usuários e senhas ficam em arquivo e se perdem quando o Render reinicia. Configure DATABASE_URL (Neon, gratuito) antes de enviar os links.</span>';
   const n=(p)=>US.lista.filter(u=>u.perfil===p).length;
-  $('usSub').textContent=`${pl(n('diretor'),'diretor','diretores')} · ${pl(n('adm'),'ADM','ADMs')} · link de convite vale 7 dias e uma vez só`;
+  $('usSub').textContent=`${pl(n('diretor'),'diretor','diretores')} · ${pl(n('adm'),'ADM','ADMs')} · senha temporária vale 7 dias e precisa ser trocada no primeiro acesso`;
   const dt=(x)=>x?new Date(x).toLocaleDateString('pt-BR')+' '+new Date(x).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):'—';
   $('usLista').innerHTML=`<table><thead><tr><th>Nome</th><th>E-mail (login)</th><th>Perfil</th><th>Situação</th><th>Último acesso</th><th></th></tr></thead><tbody>${US.lista.map(u=>`<tr>
-    <td><b>${esc(u.nome)}</b></td><td class="el">${u.email?esc(u.email):'<span style="color:var(--ink3)">definido no primeiro acesso</span>'}</td>
+    <td><b>${esc(u.nome)}</b></td><td class="el">${u.email?esc(u.email):'<span style="color:var(--red)">cadastre o e-mail (Editar)</span>'}</td>
     <td><span class="pill" style="${u.perfil==='adm'?'background:var(--orange);color:#fff':'background:var(--teal);color:#241E48'}">${PERF[u.perfil]}</span></td>
-    <td>${u.senha_criada?'<span class="status ok">✓ ativo</span>':'<span class="status at">aguardando convite</span>'}</td><td class="num">${dt(u.ultimo_acesso)}</td>
-    <td style="white-space:nowrap;text-align:right"><button class="bt2 ${u.senha_criada?'':'pri'}" data-conv="${u.id}">${u.senha_criada?'Redefinir senha':'Gerar link'}</button> <button class="bt2" data-ed="${u.id}">Editar</button> ${u.id!==E.eu?.id?`<button class="bt2 del" data-del="${u.id}">Remover</button>`:''}</td></tr>`).join('')}</tbody></table>`;
+    <td>${u.senha_criada?'<span class="status ok">✓ ativo</span>':u.temporaria?`<span class="status at">senha temporária · até ${new Date(u.temp_expira_em).toLocaleDateString('pt-BR')}</span>`:'<span class="status at">sem acesso ainda</span>'}</td><td class="num">${dt(u.ultimo_acesso)}</td>
+    <td style="white-space:nowrap;text-align:right"><button class="bt2 ${u.senha_criada?'':'pri'}" data-temp="${u.id}">${u.senha_criada?'Redefinir senha':'Senha temporária'}</button> <button class="bt2" data-conv="${u.id}" title="Alternativa: link pessoal para a pessoa criar a senha">Link</button> <button class="bt2" data-ed="${u.id}">Editar</button> ${u.id!==E.eu?.id?`<button class="bt2 del" data-del="${u.id}">Remover</button>`:''}</td></tr>`).join('')}</tbody></table>`;
   $('usLista').querySelectorAll('[data-conv]').forEach(b=>b.addEventListener('click',async()=>{ const u=US.lista.find(x=>x.id===b.dataset.conv);
     if(u.senha_criada&&!confirm(`Gerar um novo link para ${u.nome}? A senha atual deixa de funcionar até a pessoa criar outra.`)) return;
-    try{ US.link=await api(`/api/usuarios/${u.id}/convite`,{method:'POST'}); mostrarLink(); pgUsuarios(); }catch(e){ alert(e.message); } }));
+    try{ US.temp=null; US.link=await api(`/api/usuarios/${u.id}/convite`,{method:'POST'}); mostrarLink(); pgUsuarios(); }catch(e){ alert(e.message); } }));
+  $('usLista').querySelectorAll('[data-temp]').forEach(b=>b.addEventListener('click',async()=>{ const u=US.lista.find(x=>x.id===b.dataset.temp);
+    if((u.senha_criada||u.temporaria)&&!confirm(`Gerar uma nova senha temporária para ${u.nome}? A senha atual deixa de funcionar.`)) return;
+    try{ US.link=null; US.temp=await api(`/api/usuarios/${u.id}/senha-temporaria`,{method:'POST'}); mostrarLink(); pgUsuarios(); }catch(e){ alert(e.message); } }));
   $('usLista').querySelectorAll('[data-ed]').forEach(b=>b.addEventListener('click',()=>{ const u=US.lista.find(x=>x.id===b.dataset.ed); const f=$('usForm'); f.id.value=u.id; f.nome.value=u.nome; f.email.value=u.email; f.perfil.value=u.perfil; $('usFormTit').textContent='Editar '+u.nome; $('usCancelar').hidden=false; f.nome.focus(); }));
   $('usLista').querySelectorAll('[data-del]').forEach(b=>b.addEventListener('click',async()=>{ const u=US.lista.find(x=>x.id===b.dataset.del); if(!confirm(`Remover o acesso de ${u.nome}?`)) return; await api(`/api/usuarios/${u.id}`,{method:'DELETE'}); pgUsuarios(); }));
   mostrarLink();
 }
 function mostrarLink(){
+  const T=US.temp;
+  if(T){
+    const msg=`Olá, ${T.usuario.nome.split(' ')[0]}! Seu acesso ao Painel de Gestão Visu (perfil ${PERF[T.usuario.perfil]}):\n\nEndereço: ${T.login}\nE-mail: ${T.email}\nSenha temporária: ${T.senha}\n\nNo primeiro acesso o painel pede para você criar a sua senha. A senha temporária vale até ${new Date(T.expira_em).toLocaleDateString('pt-BR')}.`;
+    $('usLink').innerHTML=`<div class="linkbox"><b>Acesso de ${esc(T.usuario.nome)}</b> <span style="font-size:12px;color:var(--ink2)">· senha temporária válida até ${new Date(T.expira_em).toLocaleDateString('pt-BR')} · anote agora, ela não aparece de novo</span>
+      <div class="tw" style="margin-top:8px"><table><tbody><tr><td>Endereço</td><td><b>${esc(T.login)}</b></td></tr><tr><td>E-mail (login)</td><td><b>${esc(T.email)}</b></td></tr><tr><td>Senha temporária</td><td><b style="font-family:ui-monospace,Consolas,monospace;font-size:15px;letter-spacing:.04em">${esc(T.senha)}</b></td></tr></tbody></table></div>
+      <div class="ac"><button class="bt2 pri" id="usCopiarMsg" type="button">Copiar mensagem pronta</button><button class="bt2" id="usCopiar" type="button">Copiar só a senha</button>
+      <a class="bt2" style="text-decoration:none" target="_blank" rel="noopener" href="https://wa.me/?text=${encodeURIComponent(msg)}">WhatsApp</a>
+      <a class="bt2" style="text-decoration:none" href="mailto:${esc(T.email)}?subject=${encodeURIComponent('Acesso ao Painel de Gestão Visu')}&body=${encodeURIComponent(msg)}">E-mail</a></div></div>`;
+    const cp=(t,b)=>{ (navigator.clipboard?.writeText(t)||Promise.reject()).then(()=>{b.textContent='Copiado ✓'}).catch(()=>{}); };
+    $('usCopiar').addEventListener('click',e=>cp(T.senha,e.target)); $('usCopiarMsg').addEventListener('click',e=>cp(msg,e.target));
+    return;
+  }
   const L=US.link; if(!L){ $('usLink').innerHTML=''; return; }
   const msg=`Olá, ${L.usuario.nome.split(' ')[0]}! Este é o seu acesso ao Painel de Gestão Visu (perfil ${PERF[L.usuario.perfil]}). Abra o link, crie sua senha e entre com seu e-mail: ${L.link} (o link é pessoal, vale 7 dias e uma vez só)`;
   $('usLink').innerHTML=`<div class="linkbox"><b>Link de ${esc(L.usuario.nome)}</b> <span style="font-size:12px;color:var(--ink2)">· vale até ${new Date(L.expira_em).toLocaleDateString('pt-BR')} · uma vez só</span>
@@ -1278,6 +1296,7 @@ async function carregarEu(){
   if(!E.eu?.perfil) return;
   $('eu').hidden=false; $('eu').innerHTML=`<b>${esc(E.eu.nome)}</b><i class="${E.eu.perfil==='adm'?'':'dir'}">${PERF[E.eu.perfil]}</i>`;
   $('abaUsuarios').hidden=E.eu.perfil!=='adm';
+  $('trocar').hidden=PREVIA||E.eu.id==='__admin';
   if(E.pagina==='usuarios'&&E.eu.perfil!=='adm') E.pagina='resumo';
 }
 

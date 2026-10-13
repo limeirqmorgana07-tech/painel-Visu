@@ -22,7 +22,7 @@ const b64 = (s) => Buffer.from(s).toString('base64url');
 const de64 = (s) => Buffer.from(s, 'base64url').toString();
 const hmac = (s) => crypto.createHmac('sha256', config.segredoSessao).update(s).digest('base64url');
 const igual = (a, b) => a.length === b.length && crypto.timingSafeEqual(Buffer.from(a), Buffer.from(b));
-const limpo = (u) => ({ id: u.id, nome: u.nome, email: u.email || '', perfil: u.perfil, senha_criada: !!u.hash, ultimo_acesso: u.ultimo_acesso || null, criado_em: u.criado_em || null });
+const limpo = (u) => ({ id: u.id, nome: u.nome, email: u.email || '', perfil: u.perfil, senha_criada: !!u.hash && !u.temporaria, temporaria: !!(u.hash && u.temporaria), temp_expira_em: u.temporaria && u.temp_exp ? new Date(u.temp_exp).toISOString() : null, ultimo_acesso: u.ultimo_acesso || null, criado_em: u.criado_em || null });
 
 let cache = null;
 async function carregar() {
@@ -71,7 +71,7 @@ export async function gerarConvite(id) {
   const u = lista.find((x) => x.id === id);
   if (!u) throw new Error('Usuário não encontrado.');
   u.ver = (u.ver || 0) + 1; // invalida links e sessões anteriores dessa pessoa
-  u.hash = null; u.salt = null;
+  u.hash = null; u.salt = null; u.temporaria = false; u.temp_exp = null;
   await gravar(lista);
   const exp = Date.now() + VALIDADE_CONVITE_DIAS * 864e5;
   const corpo = b64(JSON.stringify({ id: u.id, v: u.ver, exp }));
@@ -102,16 +102,53 @@ export async function aceitarConvite(token, { senha, email }) {
   u.email = email;
   u.salt = crypto.randomBytes(16).toString('base64');
   u.hash = hashSenha(senha, u.salt);
+  u.temporaria = false; u.temp_exp = null;
   u.ver = (u.ver || 0) + 1; // o link deixa de valer
   await gravar(lista);
   return u;
 }
 
+// Retorna { u } ou { erro }. Senha temporária vale 7 dias e obriga a trocar no primeiro acesso.
 export async function autenticar(email, senha) {
   email = String(email || '').trim().toLowerCase();
   const u = (await carregar()).find((x) => x.email === email && x.hash);
-  if (!u) { hashSenha(senha, 'x'); return null; }
-  return igual(hashSenha(senha, u.salt), u.hash) ? u : null;
+  if (!u) { hashSenha(senha, 'x'); return { erro: 'E-mail ou senha incorretos.' }; }
+  if (!igual(hashSenha(senha, u.salt), u.hash)) return { erro: 'E-mail ou senha incorretos.' };
+  if (u.temporaria && u.temp_exp && u.temp_exp < Date.now()) return { erro: 'Sua senha temporária expirou. Peça uma nova ao administrador do painel.' };
+  return { u };
+}
+
+// ---------- senha temporária (o ADM gera e envia; a pessoa troca no primeiro acesso) ----------
+const LETRAS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+const bloco = (n) => Array.from(crypto.randomBytes(n), (b) => LETRAS[b % LETRAS.length]).join('');
+export async function gerarSenhaTemporaria(id) {
+  const lista = await carregar();
+  const u = lista.find((x) => x.id === id);
+  if (!u) throw new Error('Usuário não encontrado.');
+  if (!u.email) throw new Error('Cadastre o e-mail da pessoa antes (botão Editar). Ele será o login.');
+  const senha = `Visu-${bloco(4)}-${bloco(4)}`;
+  u.salt = crypto.randomBytes(16).toString('base64');
+  u.hash = hashSenha(senha, u.salt);
+  u.temporaria = true;
+  u.temp_exp = Date.now() + VALIDADE_CONVITE_DIAS * 864e5;
+  u.ver = (u.ver || 0) + 1; // derruba sessões e links anteriores
+  await gravar(lista);
+  return { senha, login: config.urlPublica, email: u.email, expira_em: new Date(u.temp_exp).toISOString(), usuario: limpo(u) };
+}
+
+export async function trocarSenha(id, { atual, nova }) {
+  const lista = await carregar();
+  const u = lista.find((x) => x.id === id);
+  if (!u) throw new Error('Usuário não encontrado.');
+  if (!u.temporaria && !igual(hashSenha(atual || '', u.salt), u.hash)) throw new Error('A senha atual está incorreta.');
+  if (String(nova || '').length < 8) throw new Error('A nova senha precisa ter pelo menos 8 caracteres.');
+  if (u.temporaria && igual(hashSenha(nova, u.salt), u.hash)) throw new Error('A nova senha precisa ser diferente da temporária.');
+  u.salt = crypto.randomBytes(16).toString('base64');
+  u.hash = hashSenha(nova, u.salt);
+  u.temporaria = false; u.temp_exp = null;
+  u.ver = (u.ver || 0) + 1;
+  await gravar(lista);
+  return u;
 }
 
 export async function registrarAcesso(id) {
