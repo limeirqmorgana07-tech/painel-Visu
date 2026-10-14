@@ -2,6 +2,11 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v12 — 14/10/2026 · Assinatura Seja Expert no menu
+Arquivo: `painel-visu-v12-assinatura.zip`
+- Rodapé do menu lateral com "Desenvolvido por", a marca Seja Expert, "Gestão Financeira e BPO" e a versão do painel.
+- A menção à Seja Expert saiu do topo do menu e do rodapé das páginas.
+
 ## v11 — 14/10/2026 · Correções de usuários e menu
 Arquivo: `painel-visu-v11-correcoes.zip`
 - Tiago Sobral (ADM, tiago.sobral@sejaexpertgestao.com) passa a fazer parte dos perfis iniciais, no lugar de "Gestor Seja Expert".

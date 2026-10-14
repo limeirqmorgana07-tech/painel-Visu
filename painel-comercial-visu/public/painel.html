@@ -287,6 +287,13 @@ td.lk,span.lk{text-decoration:underline dotted var(--line2);text-underline-offse
 .sb .ver-como select{background:var(--navy2);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:7px 8px;font:inherit;font-size:13px}
 .sb .rodape{border-top:1px solid rgba(255,255,255,.08);padding:12px 14px;display:flex;align-items:center;gap:10px}
 .sb .av{width:34px;height:34px;border-radius:50%;background:var(--navy2);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex:none;border:2px solid #EA780C}
+.sb .dev{flex:none;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 14px 12px;border-top:1px solid rgba(255,255,255,.08);background:rgba(0,0,0,.14);text-decoration:none}
+.sb .dev:hover{background:rgba(0,0,0,.24)}
+.sb .dev-l{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#8C88AE;font-weight:600}
+.sb .se-logo{width:150px;height:auto;display:block;margin:2px 0}
+.sb .se-logo text{fill:#fff}
+.sb .dev-s{font-size:10.5px;color:#A9A4C8}
+.sb .dev-v{font-size:10px;color:#7F7AA3}
 .sb .quem{flex:1;min-width:0}.sb .rodape{flex:none}.sb .ver-como{flex:none}.sb .quem .n{color:#fff;font-size:13px;font-weight:600;line-height:1.3}
 .sb .quem .p{font-size:11.5px;color:#A9A4C8}.sb .quem .p a{color:inherit}
 .sb .quem .v{font-size:10.5px;color:#7F7AA3;margin-top:2px}
@@ -330,10 +337,11 @@ main{max-width:none;padding:18px 26px 48px}
 <div class="scrim" id="scrim"></div>
 <aside class="sb" id="sb" aria-label="Menu">
   <div class="fio"></div>
-  <a class="logo-box" href="#painel"><img id="logo" src="/logo-visu.png" alt="Visu Design"><span class="sys">Painel de Gestão</span><span class="emp">Visu Indústria Têxtil · marca paraibana<br>Seja Expert · Gestão Financeira e BPO</span></a>
+  <a class="logo-box" href="#painel"><img id="logo" src="/logo-visu.png" alt="Visu Design"><span class="sys">Painel de Gestão</span><span class="emp">Visu Indústria Têxtil · marca paraibana</span></a>
   <nav id="menu"></nav>
   <div class="ver-como" id="verComoBox" hidden><label for="verComo">Ver o painel como</label><select id="verComo"></select></div>
-  <div class="rodape"><div class="av" id="av">—</div><div class="quem"><div class="n" id="euNome">—</div><div class="p"><span id="euPerfil">—</span><span id="trocarBox"> · <a href="/trocar-senha" id="trocar">trocar senha</a></span></div><div class="v" id="euVersao"></div></div><a class="ib" id="sair" href="/sair" title="Sair" aria-label="Sair">⏻</a></div>
+  <div class="rodape"><div class="av" id="av">—</div><div class="quem"><div class="n" id="euNome">—</div><div class="p"><span id="euPerfil">—</span><span id="trocarBox"> · <a href="/trocar-senha" id="trocar">trocar senha</a></span></div></div><a class="ib" id="sair" href="/sair" title="Sair" aria-label="Sair">⏻</a></div>
+  <a class="dev" href="https://sejaexpertgestao.com" target="_blank" rel="noopener" title="Seja Expert · Gestão Financeira e BPO"><span class="dev-l">Desenvolvido por</span><svg class="se-logo" viewBox="0 0 166 32" role="img" aria-label="Seja Expert"><defs><linearGradient id="seSeta1" gradientUnits="userSpaceOnUse" x1="1" y1="0" x2="19" y2="0"><stop offset="0" stop-color="#8CC63F"/><stop offset="1" stop-color="#F2D33A"/></linearGradient><linearGradient id="seSeta2" gradientUnits="userSpaceOnUse" x1="79" y1="0" x2="91" y2="0"><stop offset="0" stop-color="#8CC63F"/><stop offset="1" stop-color="#F2D33A"/></linearGradient></defs><text x="0" y="24" font-family="Outfit,'Plus Jakarta Sans',system-ui,sans-serif" style="font-size:26px" font-weight="300" fill="#fff" textLength="13" lengthAdjust="spacingAndGlyphs">s</text><text x="14" y="24" font-family="Outfit,'Plus Jakarta Sans',system-ui,sans-serif" style="font-size:26px" font-weight="700" fill="#fff" textLength="15" lengthAdjust="spacingAndGlyphs">e</text><path d="M1 17h18" stroke="url(#seSeta1)" stroke-width="2.4" stroke-linecap="round"/><path d="M16.5 14l3.2 3-3.2 3" fill="none" stroke="#F2D33A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><rect x="36" y="5" width="1.2" height="22" fill="rgba(255,255,255,.4)"/><text x="44" y="23" font-family="Outfit,'Plus Jakarta Sans',system-ui,sans-serif" style="font-size:22px" font-weight="300" fill="#fff" textLength="40" lengthAdjust="spacingAndGlyphs">seja</text><text x="88" y="23" font-family="Outfit,'Plus Jakarta Sans',system-ui,sans-serif" style="font-size:22px" font-weight="700" fill="#fff" textLength="76" lengthAdjust="spacingAndGlyphs">expert</text><path d="M79 16.5h12" stroke="url(#seSeta2)" stroke-width="2.2" stroke-linecap="round"/><path d="M88.6 13.8l2.8 2.7-2.8 2.7" fill="none" stroke="#F2D33A" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="dev-s">Gestão Financeira e BPO</span><span class="dev-v" id="euVersao"></span></a>
 </aside>
 <div class="main-col">
   <div class="topbar">
@@ -547,7 +555,7 @@ main{max-width:none;padding:18px 26px 48px}
   </section>
 
 
-  <footer class="rod"><span id="rodA">—</span><span>Seja Expert · Gestão Financeira e BPO</span></footer>
+  <footer class="rod"><span id="rodA">—</span></footer>
 </main>
 </div>
 </div>
@@ -572,8 +580,9 @@ const nomeMes=(m)=>{const[a,b]=m.split('-');return MES_L[+b-1]+' de '+a};
 const somaMes=(m,n)=>{const[a,b]=m.split('-').map(Number);const d=new Date(Date.UTC(a,b-1+n,1));return d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0')};
 function delta(a,b,inv){ if(!b) return '<span class="delta eq">sem base</span>'; const d=(a-b)/b; const c=Math.abs(d)<.005?'eq':(d>0)!==!!inv?'up':'down'; return `<span class="delta ${c}">${d>0?'▲':d<0?'▼':'■'} ${pct(Math.abs(d))}</span>`; }
 
-const VERSAO='v11';
+const VERSAO='v12';
 const VERSOES=[
+ {v:'v12',data:'14/10/2026',tit:'Assinatura Seja Expert no menu',arq:'painel-visu-v12-assinatura.zip',itens:['Rodapé do menu lateral com "Desenvolvido por", a marca Seja Expert, "Gestão Financeira e BPO" e a versão do painel.','A menção à Seja Expert saiu do topo do menu e do rodapé das páginas.']},
  {v:'v11',data:'14/10/2026',tit:'Correções de usuários e menu',arq:'painel-visu-v11-correcoes.zip',itens:['Tiago Sobral (ADM, tiago.sobral@sejaexpertgestao.com) passa a fazer parte dos perfis iniciais, no lugar de "Gestor Seja Expert".','E-mail da Morgana corrigido para @sejaexpertgestao.com.','Menu lateral abre os módulos quando nenhum está aberto; rodapé do menu não fica mais cortado.','Aviso mais claro sobre a falta do banco de dados (DATABASE_URL).']},
  {v:'v10',data:'13/10/2026',tit:'Menu lateral e permissões por perfil',arq:'painel-visu-v10-menu-lateral.zip',itens:['Menu lateral no padrão do Sistema de Gestão: módulos Gestão, Comercial, Financeiro, Controle e Administração, cada painel na sua página.','Perfis ADM, Diretor, Comercial e Financeiro, com o que cada um vê. Em Permissões, o ADM tira páginas de uma pessoa específica; o servidor bloqueia os dados também.','"Ver o painel como" no menu (ADM) para conferir o que cada perfil ou pessoa enxerga.']},
  {v:'v9',data:'13/10/2026',tit:'Senha temporária',arq:'painel-visu-v9-senha-temporaria.zip',itens:['Na página Usuários, o botão "Senha temporária" gera uma senha (ex.: Visu-K7QM-4XPA) que vale 7 dias.','A pessoa entra com e-mail e senha temporária e o painel obriga a criar a própria senha antes de mostrar os dados.','Mensagem pronta para WhatsApp ou e-mail com endereço, login e senha. Botão "Trocar senha" no topo para todos os usuários.']},
@@ -1462,7 +1471,7 @@ $('atualizar').addEventListener('click',()=>{ E.fin=null; carregar(true); });
 document.querySelectorAll('[data-reg]').forEach(b=>b.addEventListener('click',()=>{E.reg=b.dataset.reg;desenhar()}));
 if(PREVIA){ $('atualizar').hidden=true; $('sair').hidden=true; if(window.__LOGO__) $('logo').src=window.__LOGO__; }
 else setInterval(()=>{ if(!document.hidden) carregar(); },5*60*1000);
-$('euVersao').textContent='Versão '+VERSAO.slice(1)+' · '+(VERSOES[0]?.data||'');
+$('euVersao').textContent='Versão '+VERSAO.slice(1)+'.0 · '+(VERSOES[0]?.data||'');
 const hash=location.hash.slice(1); if(MESES_PAG[hash]) E.pagina=hash;
 if(!MESES_PAG[E.pagina]) E.pagina={resumo:'painel',geral:'vendas',comercial:'vendas',financas:'dre',financeiro:'dre',controle:'conciliacao'}[E.pagina]||'painel';
 document.querySelectorAll('[data-ir]').forEach(b=>b.addEventListener('click',()=>$(b.dataset.ir).scrollIntoView({behavior:'smooth',block:'start'})));
