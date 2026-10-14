@@ -2,6 +2,10 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v13 — 14/10/2026 · Assinatura mais discreta
+Arquivo: `painel-visu-v13-assinatura.zip`
+- "Desenvolvido por Seja Expert" virou uma linha pequena no pé do menu, com a versão ao lado, no estilo do FluxIA.
+
 ## v12 — 14/10/2026 · Assinatura Seja Expert no menu
 Arquivo: `painel-visu-v12-assinatura.zip`
 - Rodapé do menu lateral com "Desenvolvido por", a marca Seja Expert, "Gestão Financeira e BPO" e a versão do painel.
