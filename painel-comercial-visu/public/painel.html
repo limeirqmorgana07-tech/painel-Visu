@@ -287,7 +287,7 @@ td.lk,span.lk{text-decoration:underline dotted var(--line2);text-underline-offse
 .sb .ver-como select{background:var(--navy2);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:7px 8px;font:inherit;font-size:13px}
 .sb .rodape{border-top:1px solid rgba(255,255,255,.08);padding:12px 14px;display:flex;align-items:center;gap:10px}
 .sb .av{width:34px;height:34px;border-radius:50%;background:var(--navy2);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex:none;border:2px solid #EA780C}
-.sb .quem{flex:1;min-width:0}.sb .quem .n{color:#fff;font-size:13px;font-weight:600;line-height:1.3}
+.sb .quem{flex:1;min-width:0}.sb .rodape{flex:none}.sb .ver-como{flex:none}.sb .quem .n{color:#fff;font-size:13px;font-weight:600;line-height:1.3}
 .sb .quem .p{font-size:11.5px;color:#A9A4C8}.sb .quem .p a{color:inherit}
 .sb .quem .v{font-size:10.5px;color:#7F7AA3;margin-top:2px}
 .sb .ib{border:1px solid rgba(255,255,255,.22);border-radius:8px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;color:#fff;text-decoration:none;font-size:15px;flex:none}
@@ -572,8 +572,9 @@ const nomeMes=(m)=>{const[a,b]=m.split('-');return MES_L[+b-1]+' de '+a};
 const somaMes=(m,n)=>{const[a,b]=m.split('-').map(Number);const d=new Date(Date.UTC(a,b-1+n,1));return d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0')};
 function delta(a,b,inv){ if(!b) return '<span class="delta eq">sem base</span>'; const d=(a-b)/b; const c=Math.abs(d)<.005?'eq':(d>0)!==!!inv?'up':'down'; return `<span class="delta ${c}">${d>0?'▲':d<0?'▼':'■'} ${pct(Math.abs(d))}</span>`; }
 
-const VERSAO='v10';
+const VERSAO='v11';
 const VERSOES=[
+ {v:'v11',data:'14/10/2026',tit:'Correções de usuários e menu',arq:'painel-visu-v11-correcoes.zip',itens:['Tiago Sobral (ADM, tiago.sobral@sejaexpertgestao.com) passa a fazer parte dos perfis iniciais, no lugar de "Gestor Seja Expert".','E-mail da Morgana corrigido para @sejaexpertgestao.com.','Menu lateral abre os módulos quando nenhum está aberto; rodapé do menu não fica mais cortado.','Aviso mais claro sobre a falta do banco de dados (DATABASE_URL).']},
  {v:'v10',data:'13/10/2026',tit:'Menu lateral e permissões por perfil',arq:'painel-visu-v10-menu-lateral.zip',itens:['Menu lateral no padrão do Sistema de Gestão: módulos Gestão, Comercial, Financeiro, Controle e Administração, cada painel na sua página.','Perfis ADM, Diretor, Comercial e Financeiro, com o que cada um vê. Em Permissões, o ADM tira páginas de uma pessoa específica; o servidor bloqueia os dados também.','"Ver o painel como" no menu (ADM) para conferir o que cada perfil ou pessoa enxerga.']},
  {v:'v9',data:'13/10/2026',tit:'Senha temporária',arq:'painel-visu-v9-senha-temporaria.zip',itens:['Na página Usuários, o botão "Senha temporária" gera uma senha (ex.: Visu-K7QM-4XPA) que vale 7 dias.','A pessoa entra com e-mail e senha temporária e o painel obriga a criar a própria senha antes de mostrar os dados.','Mensagem pronta para WhatsApp ou e-mail com endereço, login e senha. Botão "Trocar senha" no topo para todos os usuários.']},
  {v:'v8',data:'13/10/2026',tit:'Detalhamento ao clicar nos valores',arq:'painel-visu-v8-detalhamento.zip',itens:['Clicar em um valor abre a lista que forma aquele total: pedidos, itens, clientes, lançamentos ou parcelas em aberto.','Vale para os indicadores, vendedores, rankings de produto, tecido, cor e cliente, curva ABC, DRE, despesas por categoria e centro de custo, fornecedores, contas a receber e a pagar, caixa e pontos de atenção.','A lista tem busca, ordenação por coluna e exportação para CSV (abre no Excel).']},
@@ -1200,7 +1201,7 @@ function paginasAtivas(){ if(E.verComo) return paginasDe(E.verComo); return E.eu
 function montarMenu(){
   const ok=new Set(paginasAtivas()); let abertos=[]; try{ abertos=JSON.parse(localStorage.getItem('visu-menu')||'null'); }catch(e){}
   $('menu').innerHTML=MENU.map(g=>{ const its=g.itens.filter(i=>ok.has(i[0])); if(!its.length) return '';
-    const aberto=!abertos||abertos.includes(g.grupo)||its.some(i=>i[0]===E.pagina);
+    const aberto=!abertos||!abertos.length||abertos.includes(g.grupo)||its.some(i=>i[0]===E.pagina);
     return `<div class="nm-mod ${aberto?'aberto':''}" data-g="${g.grupo}"><button type="button" class="nm-tit" aria-expanded="${aberto}"><span><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true">${g.ico}</svg>${g.grupo}</span><i aria-hidden="true">▾</i></button>
       <div class="nm-itens">${its.map(i=>`<a class="nm-item ${i[0]===E.pagina?'ativo':''}" href="#${i[0]}" data-pg="${i[0]}">${i[1]}${i[0]==='receber'&&E.fin?.receber?.atrasado_qtd?`<span class="bd" title="Parcelas em atraso">${E.fin.receber.atrasado_qtd}</span>`:''}</a>`).join('')}</div></div>`; }).join('');
   $('menu').querySelectorAll('.nm-tit').forEach(b=>b.addEventListener('click',()=>{ const m=b.parentElement; const on=m.classList.toggle('aberto'); b.setAttribute('aria-expanded',on);
@@ -1365,7 +1366,7 @@ async function montarVerComo(){
 let US={lista:[],banco:true,link:null};
 async function api(url,op={}){ if(PREVIA) return previaApi(url,op); const r=await fetch(url,{...op,headers:{'Content-Type':'application/json',Accept:'application/json'}}); const d=await r.json().catch(()=>({})); if(!r.ok) throw new Error(d.erro||('erro '+r.status)); return d; }
 // prévia: simula a API sem servidor
-let PV=[{id:'diretor-1',nome:'Diretor 1',email:'diretor1@visu.com.br',perfil:'diretor'},{id:'diretor-2',nome:'Diretor 2',email:'',perfil:'diretor'},{id:'morgana',nome:'Morgana Limeira',email:'morgana.limeira@sejaexpergestao.com',perfil:'adm',senha_criada:true,ultimo_acesso:new Date().toISOString()},{id:'gestor-seja-expert',nome:'Gestor Seja Expert',email:'',perfil:'adm'}];
+let PV=[{id:'diretor-1',nome:'Diretor 1',email:'diretor1@visu.com.br',perfil:'diretor'},{id:'diretor-2',nome:'Diretor 2',email:'',perfil:'diretor'},{id:'morgana',nome:'Morgana Limeira',email:'morgana.limeira@sejaexpertgestao.com',perfil:'adm',senha_criada:true,ultimo_acesso:new Date().toISOString()},{id:'tiago-sobral',nome:'Tiago Sobral',email:'tiago.sobral@sejaexpertgestao.com',perfil:'adm'}];
 function previaApi(url,op){ const m=op.method||'GET';
   if(url==='/api/usuarios'&&m==='GET') return {usuarios:PV,banco:true};
   if(url==='/api/usuarios'&&m==='POST'){ const b=JSON.parse(op.body); let u=PV.find(x=>x.id===b.id); if(u) Object.assign(u,b); else PV.push(u={...b,id:'novo-'+PV.length}); return u; }
@@ -1374,7 +1375,7 @@ function previaApi(url,op){ const m=op.method||'GET';
   if(url.endsWith('/convite')){ const id=url.split('/')[3]; const u=PV.find(x=>x.id===id); u.senha_criada=false; return {link:`https://painel-visu.onrender.com/convite/exemplo-${id}`,expira_em:new Date(Date.now()+7*864e5).toISOString(),usuario:u}; } }
 async function pgUsuarios(){
   try{ const d=await api('/api/usuarios'); US.lista=d.usuarios; US.banco=d.banco; }catch(e){ $('usLista').innerHTML=`<div class="aviso erro">${esc(e.message)}</div>`; return; }
-  $('usBanco').hidden=US.banco; $('usBanco').innerHTML='<span><b>Sem banco de dados configurado.</b> Usuários e senhas ficam em arquivo e se perdem quando o Render reinicia. Configure DATABASE_URL (Neon, gratuito) antes de enviar os links.</span>';
+  $('usBanco').hidden=US.banco; $('usBanco').innerHTML='<span><b>Sem banco de dados: usuários, senhas e a conexão com a Conta Azul se apagam toda vez que o Render reinicia.</b> Por isso cadastros somem e o painel volta para os dados de demonstração. Configure a variável DATABASE_URL no Render (banco gratuito do Neon) para guardar tudo de forma permanente.</span>';
   const n=(p)=>US.lista.filter(u=>u.perfil===p).length;
   $('usSub').textContent=`${pl(n('diretor'),'diretor','diretores')} · ${pl(n('adm'),'ADM','ADMs')} · senha temporária vale 7 dias e precisa ser trocada no primeiro acesso`;
   const dt=(x)=>x?new Date(x).toLocaleDateString('pt-BR')+' '+new Date(x).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):'—';

@@ -14,8 +14,8 @@ const VALIDADE_CONVITE_DIAS = 7;
 const INICIAIS = [
   { id: 'diretor-1', nome: 'Diretor 1', email: '', perfil: 'diretor' },
   { id: 'diretor-2', nome: 'Diretor 2', email: '', perfil: 'diretor' },
-  { id: 'morgana', nome: 'Morgana Limeira', email: 'morgana.limeira@sejaexpergestao.com', perfil: 'adm' },
-  { id: 'gestor-seja-expert', nome: 'Gestor Seja Expert', email: '', perfil: 'adm' },
+  { id: 'morgana', nome: 'Morgana Limeira', email: 'morgana.limeira@sejaexpertgestao.com', perfil: 'adm' },
+  { id: 'tiago-sobral', nome: 'Tiago Sobral', email: 'tiago.sobral@sejaexpertgestao.com', perfil: 'adm' },
 ];
 
 const b64 = (s) => Buffer.from(s).toString('base64url');
@@ -34,6 +34,14 @@ async function carregar() {
     lista = base.map((u) => ({ ...u, ver: 0, criado_em: new Date().toISOString() }));
     await salvarKV(CHAVE, lista).catch(() => {});
   }
+  let mudou = false;
+  for (const u of lista) {
+    if (u.email === 'morgana.limeira@sejaexpergestao.com') { u.email = 'morgana.limeira@sejaexpertgestao.com'; mudou = true; }
+    if (u.id === 'gestor-seja-expert' && u.nome === 'Gestor Seja Expert' && !u.email && !lista.some((x) => x.email === 'tiago.sobral@sejaexpertgestao.com')) {
+      Object.assign(u, { nome: 'Tiago Sobral', email: 'tiago.sobral@sejaexpertgestao.com' }); mudou = true;
+    }
+  }
+  if (mudou) await salvarKV(CHAVE, lista).catch(() => {});
   cache = lista;
   return cache;
 }
@@ -169,7 +177,7 @@ export async function lerSessao(valor) {
   if (!corpo || !sig || !igual(sig, hmac('sessao.' + corpo))) return null;
   let d; try { d = JSON.parse(de64(corpo)); } catch { return null; }
   if (d.exp < Date.now()) return null;
-  if (d.id === '__admin') return { id: '__admin', nome: 'Administrador (senha mestra)', perfil: 'adm', email: '' };
+  if (d.id === '__admin') return { id: '__admin', nome: 'Administrador', perfil: 'adm', email: '' };
   const u = await porId(d.id);
   if (!u || (u.ver || 0) !== d.v || !u.hash) return null;
   return u;

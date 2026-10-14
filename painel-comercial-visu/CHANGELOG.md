@@ -2,6 +2,13 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v11 — 14/10/2026 · Correções de usuários e menu
+Arquivo: `painel-visu-v11-correcoes.zip`
+- Tiago Sobral (ADM, tiago.sobral@sejaexpertgestao.com) passa a fazer parte dos perfis iniciais, no lugar de "Gestor Seja Expert".
+- E-mail da Morgana corrigido para @sejaexpertgestao.com.
+- Menu lateral abre os módulos quando nenhum está aberto; rodapé do menu não fica mais cortado.
+- Aviso mais claro sobre a falta do banco de dados (DATABASE_URL).
+
 ## v10 — 13/10/2026 · Menu lateral e permissões por perfil
 Arquivo: `painel-visu-v10-menu-lateral.zip`
 - Menu lateral no padrão do Sistema de Gestão: módulos Gestão, Comercial, Financeiro, Controle e Administração, cada painel na sua página.

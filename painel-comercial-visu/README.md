@@ -50,7 +50,7 @@ Todo valor com cursor de mão (indicadores, linhas de vendedor, rankings, célul
 | **Diretor** | Visão geral, Comercial, Financeiro e Controle. |
 | **ADM** | Tudo do Diretor + página **Usuários** + conectar/desconectar a Conta Azul + `/api/diagnostico`. |
 
-Perfis criados na primeira execução: **Diretor 1**, **Diretor 2**, **Morgana Limeira (ADM)** e **Gestor Seja Expert (ADM)**. Nomes, e-mails e perfis se ajustam na página Usuários (ou pela variável `USUARIOS_JSON`, só na primeira execução).
+Perfis criados na primeira execução: **Diretor 1**, **Diretor 2**, **Morgana Limeira (ADM)** e **Tiago Sobral (ADM)**. Nomes, e-mails e perfis se ajustam na página Usuários (ou pela variável `USUARIOS_JSON`, só na primeira execução).
 
 **Como dar acesso a alguém (senha temporária)**
 1. Entre como ADM. No primeiro acesso, deixe o e-mail em branco e use a senha mestra `PAINEL_SENHA`.
