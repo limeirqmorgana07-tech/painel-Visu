@@ -4,16 +4,27 @@ Painel de vendas da Visu Indústria Têxtil, desenvolvido pela Seja Expert. Segu
 
 Código no GitHub, publicação no Render (a hospedagem definitiva será decidida com a FluxIA). O painel é complementar ao painel financeiro e à Conta Azul, que segue como sistema transacional.
 
-## Páginas
+## Páginas (menu lateral)
 
-| Dashboard | Conteúdo | Requisitos |
+| Módulo | Página | Conteúdo |
 |---|---|---|
-| **Visão geral** | Vitrine do catálogo; 8 indicadores do mês; mês em andamento contra o ponto de equilíbrio com projeção pelo ritmo; cascata do faturamento ao resultado (margem de contribuição e estrutura fixa); vendas × PE × resultado em 12 meses; pontos de atenção; quadro de indicadores com tendência de 6 meses. | R1, R2, R3, C1, C2 |
-| **Comercial** | Vendas (evolução, novos × recompra), Produtos (tipo, tecido, cor, material + cor, ticket por tecido, ABC com margem), Clientes (ABC, faixas, top 10, segmento, inativos), Vendedores (margem e régua de comissão), Pedidos e entregas. | R1 a R4, C3 a C8 |
-| **Financeiro** | Resultado (receita × despesas × resultado, composição fixas × variáveis, margem de contribuição e PE mês a mês, DRE competência/caixa), Fluxo de caixa (projeção 13 semanas, realizado, saldos), Contas a receber (inadimplência por idade e cliente), Contas a pagar (categoria, centro de custo, fornecedor). | C1 |
-| **Controle** | Planilha × sistema, qualidade dos dados, versões. | — |
+| Gestão | Painel executivo | Vitrine, 8 indicadores, mês em andamento × ponto de equilíbrio, cascata do faturamento ao resultado, vendas × resultado em 12 meses, pontos de atenção |
+| Gestão | Quadro de indicadores | Comercial, resultado e caixa: mês, mês anterior, variação, média de 3 meses e tendência |
+| Comercial | Vendas · Produtos e mix · Clientes · Vendedores e comissão · Pedidos e entregas | R1 a R4, C3 a C8 |
+| Financeiro | DRE gerencial · Margem e ponto de equilíbrio · Fluxo de caixa · Contas a receber · Contas a pagar | relatórios gerenciais da Conta Azul, C1 |
+| Controle | Planilha × sistema · Qualidade dos dados · Versões do painel | — |
+| Administração | Usuários e permissões | só ADM |
 
-**Ponto de equilíbrio:** custos fixos ÷ margem de contribuição %. As categorias são classificadas pela linha da DRE cadastrada na Conta Azul ("(Variáveis)" e "(Fixos)"). A Visão geral usa a média dos 3 últimos meses fechados; o valor da especificação (R$ 176 mil) aparece como referência.
+## Perfis e permissões
+
+| Perfil | Vê por padrão |
+|---|---|
+| **ADM** | Tudo, inclusive Usuários e permissões e a conexão com a Conta Azul |
+| **Diretor** | Tudo, menos Usuários e permissões |
+| **Comercial** | Páginas do módulo Comercial, Planilha × sistema e Versões (sem financeiro) |
+| **Financeiro** | Gestão, Financeiro e Controle (sem as páginas comerciais) |
+
+Em **Usuários e permissões → Permissões**, o ADM desmarca páginas de uma pessoa específica. O que for desmarcado some do menu, e o servidor bloqueia os dados de vendas ou do financeiro quando a pessoa não tem nenhuma página que use esses dados. O seletor **Ver o painel como**, no menu, mostra ao ADM exatamente o que cada perfil ou pessoa enxerga.
 
 **Filtros:** nas páginas financeiras, período e mês; nas comerciais, também período (mês, ano até o mês, últimos 12 meses), mês, vendedor, tipo de venda (B2B/B2C), novo ou recompra, tipo de produto, material e cor.
 

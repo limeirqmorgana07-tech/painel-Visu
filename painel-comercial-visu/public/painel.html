@@ -261,57 +261,111 @@ td.lk,span.lk{text-decoration:underline dotted var(--line2);text-underline-offse
 .det th.ord::after{content:" ▾"}.det th.ord.asc::after{content:" ▴"}
 .rod{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:11.5px;color:var(--ink3);border-top:1px solid var(--line);padding-top:12px}
 @media (max-width:640px){.marca img{height:34px}.marca .div{display:none}.f select{max-width:150px}}
+/* ---------- v10: menu lateral (padrão Sistema de Gestão) ---------- */
+#shell{display:flex;min-height:100vh}
+.sb{width:256px;flex:none;background:var(--navy);color:#D9D6EC;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;z-index:30}
+.sb .fio{height:4px;flex:none}
+.sb .logo-box{display:flex;flex-direction:column;align-items:center;gap:6px;padding:18px 16px 14px;text-decoration:none;border-bottom:1px solid rgba(255,255,255,.08)}
+.sb .logo-box img{width:150px;height:auto;display:block}
+.sb .sys{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#A9A4C8;font-weight:700}
+.sb .emp{font-size:11.5px;color:#8C88AE;text-align:center;line-height:1.35}
+.sb nav{flex:1;overflow-y:auto;padding:8px 0 12px}
+.sb nav::-webkit-scrollbar{width:8px}.sb nav::-webkit-scrollbar-thumb{background:rgba(255,255,255,.2);border-radius:8px}
+.nm-mod{margin-bottom:2px}
+.nm-tit{display:flex;align-items:center;gap:9px;width:100%;background:none;border:0;cursor:pointer;font:inherit;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#9D98C2;padding:14px 18px 6px;text-align:left}
+.nm-tit span{flex:1;display:inline-flex;align-items:center;gap:9px}
+.nm-tit i{font-style:normal;font-size:11px;transition:transform .15s}
+.nm-mod:not(.aberto) .nm-tit i{transform:rotate(-90deg)}
+.nm-mod:not(.aberto) .nm-itens{display:none}
+.nm-tit svg{opacity:.9;color:#EA780C}
+.nm-item{display:flex;align-items:center;gap:8px;width:100%;background:none;border:0;border-left:3px solid transparent;cursor:pointer;font:inherit;font-size:14px;color:#D9D6EC;padding:10px 18px 10px 41px;text-align:left;text-decoration:none}
+.nm-item:hover{background:rgba(255,255,255,.06);color:#fff}
+.nm-item.ativo{background:var(--navy2);color:#fff;font-weight:600;border-left-color:#EA780C}
+.nm-item .bd{margin-left:auto;background:#C23A3A;color:#fff;border-radius:20px;font-size:10.5px;padding:1px 7px;font-weight:700}
+.sb .ver-como{padding:10px 16px;border-top:1px solid rgba(255,255,255,.08);display:flex;flex-direction:column;gap:5px}
+.sb .ver-como label{font-size:11.5px;color:#A9A4C8}
+.sb .ver-como select{background:var(--navy2);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:7px 8px;font:inherit;font-size:13px}
+.sb .rodape{border-top:1px solid rgba(255,255,255,.08);padding:12px 14px;display:flex;align-items:center;gap:10px}
+.sb .av{width:34px;height:34px;border-radius:50%;background:var(--navy2);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex:none;border:2px solid #EA780C}
+.sb .quem{flex:1;min-width:0}.sb .quem .n{color:#fff;font-size:13px;font-weight:600;line-height:1.3}
+.sb .quem .p{font-size:11.5px;color:#A9A4C8}.sb .quem .p a{color:inherit}
+.sb .quem .v{font-size:10.5px;color:#7F7AA3;margin-top:2px}
+.sb .ib{border:1px solid rgba(255,255,255,.22);border-radius:8px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;color:#fff;text-decoration:none;font-size:15px;flex:none}
+.sb .ib:hover{border-color:#fff;background:rgba(255,255,255,.08)}
+.main-col{flex:1;min-width:0;display:flex;flex-direction:column}
+.topbar{display:flex;align-items:flex-start;gap:14px;padding:22px 26px 10px;flex-wrap:wrap}
+.topbar h1{font-family:var(--display);font-weight:600;font-size:26px;margin:0;letter-spacing:-.015em;color:var(--ink)}
+.topbar .ctx{font-size:13px;color:var(--ink3);margin-top:2px}
+.topbar .ctx b{color:var(--orange);font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-size:11px;margin-right:6px}
+.topbar .acoes{margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.topbar .chip{background:var(--panel);color:var(--ink2);border:1px solid var(--line)}
+.topbar .bt{border-color:var(--line2);color:var(--ink);background:var(--panel)}
+.topbar .bt:hover{background:var(--bg);border-color:var(--orange)}
+.hamb{display:none;border:1px solid var(--line2);background:var(--panel);border-radius:8px;width:38px;height:38px;cursor:pointer;font-size:18px;color:var(--ink)}
+.filtros{position:sticky;top:0;z-index:6;background:var(--bg);border-bottom:1px solid var(--line)}
+.filtros .in{max-width:none;padding:10px 26px}
+main{max-width:none;padding:18px 26px 48px}
+.pg-tools{display:flex;justify-content:flex-end;gap:8px;margin-bottom:12px}
+.simula{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:var(--amberSoft);border-left:4px solid var(--orange);border-radius:10px;padding:10px 14px;font-size:13px}
+.scrim{display:none}
+@media (max-width:980px){
+  .sb{position:fixed;left:0;top:0;bottom:0;transform:translateX(-100%);transition:transform .18s ease}
+  .sb.aberto{transform:none;box-shadow:0 0 40px rgba(0,0,0,.35)}
+  .scrim.on{display:block;position:fixed;inset:0;background:rgba(20,16,40,.45);z-index:25}
+  .hamb{display:flex;align-items:center;justify-content:center}
+  .topbar{padding:14px 16px 8px}.topbar h1{font-size:21px}
+  .filtros .in{padding:10px 16px} main{padding:14px 16px 40px}
+}
+.perm-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-top:10px}
+.perm-grupo{border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.perm-grupo b{display:block;font-family:var(--display);font-weight:600;margin-bottom:6px}
+.perm-grupo label{display:flex;gap:8px;align-items:center;font-size:13px;padding:3px 0;cursor:pointer}
+.perm-grupo label.off{color:var(--ink3);cursor:not-allowed}
+#resKpis{margin-top:16px}
+.status{white-space:nowrap}
+.vitrine{min-height:150px}.palco{height:150px}.peca img{height:96px}.peca.foto img{height:84px;width:84px}
 </style>
 
-<header class="topo">
-  <div class="in">
-    <div class="marca">
-      <img id="logo" src="/logo-visu.png" alt="Visu Design">
-      <span class="div"></span>
-      <div><h1>Painel de Gestão</h1><div class="s">Visu Indústria Têxtil · comercial e financeiro · Seja Expert</div></div>
-    </div>
-    <div class="acoes">
-      <span class="eu" id="eu" hidden></span>
-      <span class="chip" id="chip"><i></i><span id="chipTxt">—</span></span>
-      <button class="bt" id="atualizar" type="button">Atualizar</button>
-      <a class="bt" id="trocar" href="/trocar-senha" hidden>Trocar senha</a>
-      <a class="bt" id="sair" href="/sair">Sair</a>
-    </div>
-  </div>
-  <nav class="abas" role="tablist" aria-label="Páginas do painel">
-    <button role="tab" data-pg="resumo" aria-selected="true">Visão geral</button>
-    <button role="tab" data-pg="comercial" aria-selected="false">Comercial</button>
-    <button role="tab" data-pg="financas" aria-selected="false">Financeiro</button>
-    <button role="tab" data-pg="controle" aria-selected="false">Controle</button>
-    <button role="tab" data-pg="usuarios" aria-selected="false" hidden id="abaUsuarios">Usuários</button>
-  </nav>
+<div id="shell">
+<div class="scrim" id="scrim"></div>
+<aside class="sb" id="sb" aria-label="Menu">
   <div class="fio"></div>
-</header>
-
-<div class="filtros"><div class="in">
-  <div class="f"><label for="fPeriodo">Período</label><select id="fPeriodo"><option value="mes">Mês</option><option value="ano">Ano até o mês</option><option value="12m">Últimos 12 meses</option></select></div>
-  <div class="f"><label for="fMes">Mês</label><select id="fMes"></select></div>
-  <div class="f com"><label for="fVendedor">Vendedor</label><select id="fVendedor" data-campo="v"></select></div>
-  <div class="f com"><label for="fTipoVenda">Tipo de venda</label><select id="fTipoVenda" data-campo="tv"></select></div>
-  <div class="f com"><label for="fNR">Novo ou recompra</label><select id="fNR" data-campo="nr"></select></div>
-  <div class="f com"><label for="fProduto">Tipo de produto</label><select id="fProduto" data-campo="tp"></select></div>
-  <div class="f com"><label for="fMaterial">Material</label><select id="fMaterial" data-campo="mt"></select></div>
-  <div class="f com"><label for="fCor">Cor</label><select id="fCor" data-campo="cr"></select></div>
-  <button class="limpar" id="limpar" type="button" hidden>Limpar filtros</button>
-</div></div>
-
+  <a class="logo-box" href="#painel"><img id="logo" src="/logo-visu.png" alt="Visu Design"><span class="sys">Painel de Gestão</span><span class="emp">Visu Indústria Têxtil · marca paraibana<br>Seja Expert · Gestão Financeira e BPO</span></a>
+  <nav id="menu"></nav>
+  <div class="ver-como" id="verComoBox" hidden><label for="verComo">Ver o painel como</label><select id="verComo"></select></div>
+  <div class="rodape"><div class="av" id="av">—</div><div class="quem"><div class="n" id="euNome">—</div><div class="p"><span id="euPerfil">—</span><span id="trocarBox"> · <a href="/trocar-senha" id="trocar">trocar senha</a></span></div><div class="v" id="euVersao"></div></div><a class="ib" id="sair" href="/sair" title="Sair" aria-label="Sair">⏻</a></div>
+</aside>
+<div class="main-col">
+  <div class="topbar">
+    <button class="hamb" id="hamb" type="button" aria-label="Abrir menu">☰</button>
+    <div style="flex:1;min-width:0"><h1 id="pgTit">—</h1><div class="ctx" id="pgCtx">—</div></div>
+    <div class="acoes"><span class="chip" id="chip"><i></i><span id="chipTxt">—</span></span><button class="bt" id="atualizar" type="button">Atualizar</button></div>
+  </div>
+  <div class="filtros" id="barraFiltros"><div class="in">
+    <div class="f per"><label for="fPeriodo">Período</label><select id="fPeriodo"><option value="mes">Mês</option><option value="ano">Ano até o mês</option><option value="12m">Últimos 12 meses</option></select></div>
+    <div class="f per"><label for="fMes">Mês</label><select id="fMes"></select></div>
+    <div class="f com"><label for="fVendedor">Vendedor</label><select id="fVendedor" data-campo="v"></select></div>
+    <div class="f com"><label for="fTipoVenda">Tipo de venda</label><select id="fTipoVenda" data-campo="tv"></select></div>
+    <div class="f com"><label for="fNR">Novo ou recompra</label><select id="fNR" data-campo="nr"></select></div>
+    <div class="f com"><label for="fProduto">Tipo de produto</label><select id="fProduto" data-campo="tp"></select></div>
+    <div class="f com"><label for="fMaterial">Material</label><select id="fMaterial" data-campo="mt"></select></div>
+    <div class="f com"><label for="fCor">Cor</label><select id="fCor" data-campo="cr"></select></div>
+    <button class="limpar" id="limpar" type="button" hidden>Limpar filtros</button>
+  </div></div>
 <main id="app">
+  <div class="simula" id="simula" hidden></div>
   <div class="aviso" id="avisoFonte" hidden></div>
   <div class="aviso erro" id="avisoErro" hidden></div>
+  <div class="aviso" id="finAviso" hidden></div>
 
-  <section data-pagina="resumo">
+  <section data-pagina="painel" hidden>
+    
     <div class="vitrine" id="vitrine" aria-label="Produtos Visu Design">
       <div class="txt"><div class="k">Visu Design</div><h3>O que mais saiu da fábrica</h3><p id="vitrineSub">Modelos do catálogo com o volume vendido no período</p></div>
       <div class="palco"><div class="trilho" id="trilho"></div></div>
       <div class="fio2"></div>
     </div>
-    <div class="pagina-titulo" style="margin-top:18px"><div><div class="eyebrow" id="resEyebrow">—</div><h2>Visão geral</h2><p>O mês da Visu em uma tela: vendas, resultado, caixa e o que pede decisão</p></div></div>
-    <div class="kpis" id="resKpis" style="margin-top:14px"></div>
+    <div class="kpis" id="resKpis" ></div>
     <div class="g2e" style="margin-top:16px">
       <div class="card"><div class="hd"><div><h3>Mês em andamento contra o ponto de equilíbrio<span class="req">C1 · C2</span></h3><div class="sub" id="termoSub">—</div></div></div><div id="termo"></div></div>
       <div class="card"><div class="hd"><div><h3>Do faturamento ao resultado</h3><div class="sub" id="cascSub">Competência · margem de contribuição e estrutura fixa</div></div></div><div id="cascata"></div></div>
@@ -321,16 +375,17 @@ td.lk,span.lk{text-decoration:underline dotted var(--line2);text-underline-offse
         <div class="leg"><span><i style="background:var(--s1)"></i>Vendas</span><span><i style="background:var(--green)"></i>Resultado positivo</span><span><i style="background:var(--red)"></i>Resultado negativo</span><span><i style="background:var(--ink2);height:2px"></i>Ponto de equilíbrio</span></div></div>
       <div class="card"><div class="hd"><div><h3>Pontos de atenção</h3><div class="sub">Calculados a cada atualização</div></div></div><ul class="motivos" id="alertas"></ul></div>
     </div>
-    <div class="card" style="margin-top:16px"><div class="hd"><div><h3>Quadro de indicadores</h3><div class="sub" id="quadroSub">—</div></div></div><div class="tw" id="quadro"></div></div>
   </section>
 
-  <section data-pagina="comercial" hidden>
-    <div class="pagina-titulo"><div><div class="eyebrow" id="comEyebrow">—</div><h2>Comercial</h2><p>Indicadores da especificação do Painel de Vendas: R1 a R4 e complementares C1 a C8</p></div>
-      <nav class="atalhos" aria-label="Ir para"><button data-ir="b-vendas">Vendas</button><button data-ir="b-produtos">Produtos</button><button data-ir="b-clientes">Clientes</button><button data-ir="b-vendedores">Vendedores</button><button data-ir="b-pedidos">Pedidos</button></nav></div>
-    <div class="kpis" id="kpis" style="margin-top:14px"></div>
+  <section data-pagina="indicadores" hidden>
+    
+    <div class="card" ><div class="hd"><div><h3>Quadro de indicadores</h3><div class="sub" id="quadroSub">—</div></div></div><div class="tw" id="quadro"></div></div>
+  </section>
 
-    <div class="bloco" id="b-vendas"><h2>Vendas</h2><span>pedidos, ticket e de onde veio a receita</span></div>
-    <div class="g2">
+  <section data-pagina="vendas" hidden>
+    
+    <div class="kpis" id="kpis"></div>
+    <div class="g2" style="margin-top:16px">
       <div class="card">
         <div class="hd"><div><h3>Evolução mensal<span class="req">R1 · R3 · C1</span></h3><div class="sub" id="evolSub">—</div></div>
           <div class="seg" role="group" aria-label="Medida do gráfico"><button type="button" data-evol="valor" aria-pressed="true">R$</button><button type="button" data-evol="pedidos" aria-pressed="false">Pedidos</button></div></div>
@@ -343,9 +398,10 @@ td.lk,span.lk{text-decoration:underline dotted var(--line2);text-underline-offse
         <div id="novoRec"></div>
       </div>
     </div>
+  </section>
 
-    <div class="bloco" id="b-produtos"><h2>Produtos</h2><span>mix por tipo, tecido e cor para decidir a compra de matéria-prima</span>
-      <div class="seg" role="group" aria-label="Medida dos rankings" style="margin-left:auto"><button type="button" data-med="pecas" aria-pressed="true">Peças</button><button type="button" data-med="valor" aria-pressed="false">R$</button></div></div>
+  <section data-pagina="produtos" hidden>
+    <div class="pg-tools"><div class="seg" role="group" aria-label="Medida dos rankings"><button type="button" data-med="pecas" aria-pressed="true">Peças</button><button type="button" data-med="valor" aria-pressed="false">R$</button></div></div>
     <div class="g3">
       <div class="card"><div class="hd"><div><h3>Tipo de produto<span class="req">R4</span></h3></div></div><div class="rank" id="rkProduto"></div></div>
       <div class="card"><div class="hd"><div><h3>Material / tecido<span class="req">R4</span></h3></div></div><div class="rank" id="rkMaterial"></div></div>
@@ -360,8 +416,10 @@ td.lk,span.lk{text-decoration:underline dotted var(--line2);text-underline-offse
       <div class="hd"><div><h3>Curva ABC e margem dos produtos<span class="req">C3</span></h3><div class="sub" id="abcProdSub">Faturamento, peças e margem bruta por produto</div></div></div>
       <div class="tw" id="abcProd"></div>
     </div>
+  </section>
 
-    <div class="bloco" id="b-clientes"><h2>Clientes</h2><span>concentração, faixas de valor, segmento e quem parou de comprar</span></div>
+  <section data-pagina="clientes" hidden>
+    
     <div class="g2e">
       <div class="card"><div class="hd"><div><h3>Curva ABC<span class="req">C3</span></h3><div class="sub" id="abcSub">—</div></div></div><div id="abc"></div></div>
       <div class="card"><div class="hd"><div><h3>Pedidos por faixa de valor<span class="req">C5</span></h3><div class="sub" id="fxSub">—</div></div></div><div id="faixas"></div></div>
@@ -371,39 +429,45 @@ td.lk,span.lk{text-decoration:underline dotted var(--line2);text-underline-offse
       <div class="card"><div class="hd"><div><h3>Segmento de cliente<span class="req">C6</span></h3><div class="sub">Depende da coluna "Segmento" na planilha</div></div></div><div class="rank" id="rkSegmento"></div></div>
     </div>
     <div class="card" style="margin-top:16px"><div class="hd"><div><h3>Clientes que pararam de comprar</h3><div class="sub">Compraram nos últimos 12 meses e estão há mais de 90 dias sem pedido · foco da Visu em clientes novos e recompra</div></div></div><div class="tw" id="inativos"></div></div>
+  </section>
 
-    <div class="bloco" id="b-vendedores"><h2>Vendedores</h2><span>faturamento, clientes novos, margem e régua da comissão</span></div>
+  <section data-pagina="vendedores" hidden>
+    
     <div class="card">
       <div class="hd"><div><h3>Desempenho por vendedor<span class="req">C7 · C8</span></h3><div class="sub">Comissão sobre o faturamento: começa em 1% a partir de R$ 15 mil e chega a 5% a partir de R$ 50 mil, sem teto</div></div></div>
       <div class="tw"><table><thead><tr><th>Vendedor</th><th class="v">Faturamento</th><th class="v">Part.</th><th class="v">Pedidos</th><th class="v">Ticket médio</th><th class="v">Novos (R$)</th><th class="v">% novos</th><th class="v">Clientes novos</th><th class="v" id="thMargem">Margem</th><th id="thRegua">Régua da comissão</th></tr></thead><tbody id="tbVend"></tbody></table></div>
       <div class="nota" id="vendNota"></div>
     </div>
+  </section>
 
-    <div class="bloco" id="b-pedidos"><h2>Pedidos e entregas</h2><span>ciclo de pagamento e o que precisa sair da fábrica</span></div>
+  <section data-pagina="pedidos" hidden>
+    
     <div class="g2e">
       <div class="card"><div class="hd"><div><h3>Ciclo do pedido<span class="req">C4</span></h3><div class="sub">Quitados, com sinal pago e com saldo na entrega</div></div></div><div id="ciclo"></div></div>
       <div class="card"><div class="hd"><div><h3>Entregas das próximas 3 semanas</h3><div class="sub">Pelo prazo de entrega informado na planilha</div></div></div><div id="entregas"></div></div>
     </div>
   </section>
 
-  <section data-pagina="financas" hidden>
-    <div class="pagina-titulo"><div><div class="eyebrow" id="finEyebrow">—</div><h2>Financeiro</h2><p>Os relatórios gerenciais da Conta Azul num só painel: DRE, margem de contribuição, fluxo de caixa, contas a receber e a pagar</p></div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><nav class="atalhos" aria-label="Ir para"><button data-ir="b-resultado">Resultado</button><button data-ir="b-caixa">Caixa</button><button data-ir="b-receber">Receber</button><button data-ir="b-pagar">Pagar</button></nav>
-      <div class="seg" role="group" aria-label="Regime"><button type="button" data-reg="comp" aria-pressed="true">Competência</button><button type="button" data-reg="caixa" aria-pressed="false">Caixa</button></div></div></div>
-    <div class="aviso" id="finAviso" hidden></div>
-    <div class="kpis" id="finKpis" style="margin-top:14px"></div>
-
-    <div class="bloco" id="b-resultado"><h2>Resultado</h2><span>DRE gerencial, margem de contribuição e ponto de equilíbrio</span></div>
-    <div class="g2">
+  <section data-pagina="dre" hidden>
+    <div class="pg-tools"><div class="seg" role="group" aria-label="Regime"><button type="button" data-reg="comp" aria-pressed="true">Competência</button><button type="button" data-reg="caixa" aria-pressed="false">Caixa</button></div></div>
+    <div class="kpis" id="finKpis"></div>
+    <div class="g2" style="margin-top:16px">
       <div class="card"><div class="hd"><div><h3>Receita, despesas e resultado</h3><div class="sub" id="finEvolSub">Últimos meses</div></div></div><div id="finEvol"></div>
         <div class="leg"><span><i style="background:var(--s1)"></i>Receita</span><span><i style="background:var(--s2)"></i>Despesas</span><span><i style="background:var(--ink);height:3px"></i>Resultado</span><span><i style="background:var(--ink2);height:2px"></i>Ponto de equilíbrio</span></div></div>
-      <div class="card"><div class="hd"><div><h3>Composição das despesas</h3><div class="sub" id="compSub">—</div></div></div><div id="composicao"></div></div>
-    </div>
-    <div class="card" style="margin-top:16px"><div class="hd"><div><h3>Margem de contribuição e ponto de equilíbrio<span class="req">C1</span></h3><div class="sub">Receita − custos variáveis = margem de contribuição. Ponto de equilíbrio = custos fixos ÷ margem de contribuição %.</div></div></div><div class="tw" id="mcTab"></div></div>
+      </div>
     <div class="card" style="margin-top:16px"><div class="hd"><div><h3>DRE gerencial</h3><div class="sub" id="dreSub">—</div></div></div><div class="tw"><table class="dre" id="dre"></table></div></div>
+  </section>
 
-    <div class="bloco" id="b-caixa"><h2>Fluxo de caixa</h2><span>saldo nos bancos, realizado e previsto para 13 semanas</span></div>
-    <div class="kpis kmini" id="cxKpis"></div>
+  <section data-pagina="equilibrio" hidden>
+    
+    <div class="g2e"><div class="card"><div class="hd"><div><h3>Composição das despesas</h3><div class="sub" id="compSub">—</div></div></div><div id="composicao"></div></div>
+    <div class="card"><div class="hd"><div><h3>Mês em andamento contra o ponto de equilíbrio<span class="req">C1 · C2</span></h3><div class="sub" id="termoSub2">Mesmo termômetro da Visão geral</div></div></div><div id="termo2"></div></div></div>
+    <div class="card" style="margin-top:16px"><div class="hd"><div><h3>Margem de contribuição e ponto de equilíbrio<span class="req">C1</span></h3><div class="sub">Receita − custos variáveis = margem de contribuição. Ponto de equilíbrio = custos fixos ÷ margem de contribuição %.</div></div></div><div class="tw" id="mcTab"></div></div>
+  </section>
+
+  <section data-pagina="caixa" hidden>
+    
+    <div class="kpis" id="cxKpis"></div>
     <div class="g2" style="margin-top:16px">
       <div class="card"><div class="hd"><div><h3>Projeção semanal</h3><div class="sub" id="projSub">Saldo atual + contas a receber − contas a pagar pela data de vencimento</div></div></div><div id="projGraf"></div>
         <div class="leg"><span><i style="background:var(--s1)"></i>Entradas previstas</span><span><i style="background:var(--s2)"></i>Saídas previstas</span><span><i style="background:var(--ink);height:3px"></i>Saldo projetado</span></div>
@@ -411,17 +475,21 @@ td.lk,span.lk{text-decoration:underline dotted var(--line2);text-underline-offse
       <div class="card"><div class="hd"><div><h3>Saldos bancários</h3><div class="sub">Saldo atual de cada conta</div></div></div><div id="saldos"></div></div>
     </div>
     <div class="card" style="margin-top:16px"><div class="hd"><div><h3>Caixa realizado mês a mês</h3><div class="sub">Recebimentos e pagamentos efetivados</div></div></div><div class="tw" id="cxReal"></div></div>
+  </section>
 
-    <div class="bloco" id="b-receber"><h2>Contas a receber</h2><span>inadimplência por idade e por cliente</span></div>
-    <div class="kpis kmini" id="rcKpis"></div>
+  <section data-pagina="receber" hidden>
+    
+    <div class="kpis" id="rcKpis"></div>
     <div class="g3" style="margin-top:16px">
       <div class="card"><div class="hd"><div><h3>Atraso por idade</h3><div class="sub">Valor vencido e não recebido</div></div></div><div id="rcIdade"></div></div>
       <div class="card"><div class="hd"><div><h3>Maiores atrasos por cliente</h3><div class="sub">Para a cobrança</div></div></div><div class="tw" id="rcPessoas"></div></div>
       <div class="card"><div class="hd"><div><h3>Próximos recebimentos</h3><div class="sub">Em ordem de vencimento</div></div></div><div class="tw" id="rcProx"></div></div>
     </div>
+  </section>
 
-    <div class="bloco" id="b-pagar"><h2>Contas a pagar e despesas</h2><span>por categoria, centro de custo e fornecedor</span></div>
-    <div class="kpis kmini" id="pgKpis"></div>
+  <section data-pagina="pagar" hidden>
+    
+    <div class="kpis" id="pgKpis"></div>
     <div class="g2" style="margin-top:16px">
       <div class="card"><div class="hd"><div><h3>Despesas por categoria</h3><div class="sub" id="pgCatSub">—</div></div></div><div class="rank" id="pgCat"></div></div>
       <div class="card"><div class="hd"><div><h3>Por centro de custo</h3><div class="sub">No mês selecionado</div></div></div><div class="rank" id="pgCentro"></div>
@@ -433,18 +501,18 @@ td.lk,span.lk{text-decoration:underline dotted var(--line2);text-underline-offse
     </div>
   </section>
 
-  <section data-pagina="controle" hidden>
-    <div class="pagina-titulo"><div><div class="eyebrow" id="concEyebrow">—</div><h2>Controle</h2><p>Planilha × sistema, qualidade dos dados e versões do painel</p></div>
-      <nav class="atalhos" aria-label="Ir para"><button data-ir="b-conc">Planilha × sistema</button><button data-ir="b-dados">Qualidade dos dados</button><button data-ir="b-versoes">Versões</button></nav></div>
-    <div class="bloco" id="b-conc"><h2>Planilha de vendas × Conta Azul</h2><span>por que o total vendido no mês difere entre as duas bases</span></div>
+  <section data-pagina="conciliacao" hidden>
+    
     <div class="g2">
       <div class="card"><div class="hd"><div><h3>De onde vem a diferença</h3><div class="sub" id="concSub">—</div></div></div><div id="ponte"></div></div>
       <div class="card"><div class="hd"><div><h3>Motivos encontrados</h3><div class="sub">Calculados a partir das duas bases</div></div></div><ul class="motivos" id="motivos"></ul></div>
     </div>
     <div class="card" style="margin-top:16px"><div class="hd"><div><h3>Mês a mês</h3><div class="sub">Valores pela data da venda</div></div></div><div class="tw" id="concMeses"></div></div>
     <div class="card" style="margin-top:16px"><div class="hd"><div><h3>Clientes com diferença no mês</h3><div class="sub">Maiores diferenças entre o que está na planilha e o que está no sistema</div></div></div><div class="tw" id="concClientes"></div></div>
+  </section>
 
-    <div class="bloco" id="b-dados"><h2>Qualidade dos dados</h2><span>planilha "Rotina de vendas_Gestão faturamento CLOUD"</span></div>
+  <section data-pagina="dados" hidden>
+    
     <div class="g2e">
       <div class="card"><div class="hd"><div><h3>Colunas da planilha</h3><div class="sub" id="colSub">—</div></div></div><div id="colunas"></div></div>
       <div class="card"><div class="hd"><div><h3>Campos em branco</h3><div class="sub" id="vazSub">—</div></div></div><div class="tw"><table><tbody id="tbVazios"></tbody></table></div></div>
@@ -453,29 +521,37 @@ td.lk,span.lk{text-decoration:underline dotted var(--line2);text-underline-offse
       <div class="card"><div class="hd"><div><h3>Clientes com mais de um nome</h3><div class="sub">Cadastro único por cliente, com o lote na coluna Observação</div></div></div><div class="q-lista" id="qClientes"></div></div>
       <div class="card"><div class="hd"><div><h3>Grafias diferentes</h3><div class="sub">Listas suspensas para tipo de produto, material, cor e vendedor</div></div></div><div class="q-lista" id="qGrafias"></div></div>
     </div>
+  </section>
 
-    <div class="bloco" id="b-versoes"><h2>Versões do painel</h2><span>o que mudou em cada entrega</span></div>
+  <section data-pagina="versoes" hidden>
+    
     <div class="card"><ol class="versoes" id="listaVersoes"></ol></div>
   </section>
 
   <section data-pagina="usuarios" hidden>
-    <div class="pagina-titulo"><div><div class="eyebrow">Perfil ADM</div><h2>Usuários e acessos</h2><p>Gere uma senha temporária e envie com o endereço do painel. No primeiro acesso a pessoa entra com o e-mail e a senha temporária e o painel pede para ela criar a própria senha. Diretores veem os dashboards; ADM também gerencia usuários e a conexão com a Conta Azul.</p></div></div>
+    
     <div class="aviso erro" id="usBanco" hidden></div>
     <div class="card" style="margin-top:14px">
       <div class="hd"><div><h3 id="usFormTit">Novo usuário</h3><div class="sub">Depois de salvar, clique em "Senha temporária" e envie o acesso para a pessoa</div></div></div>
       <form class="us-form" id="usForm"><input type="hidden" name="id">
         <div class="f"><label for="usNome">Nome</label><input id="usNome" name="nome" required></div>
         <div class="f"><label for="usEmail">E-mail (será o login)</label><input id="usEmail" name="email" type="email"></div>
-        <div class="f"><label for="usPerfil">Perfil</label><select id="usPerfil" name="perfil"><option value="diretor">Diretor</option><option value="adm">ADM</option></select></div>
+        <div class="f"><label for="usPerfil">Perfil</label><select id="usPerfil" name="perfil"><option value="diretor">Diretor</option><option value="comercial">Comercial</option><option value="financeiro">Financeiro</option><option value="adm">ADM</option></select></div>
         <button class="bt2 pri" type="submit">Salvar</button><button class="bt2" type="button" id="usCancelar" hidden>Cancelar</button>
       </form>
       <div class="e" id="usErro" style="color:var(--red);font-size:12.5px;margin-top:8px"></div>
     </div>
-    <div class="card" style="margin-top:16px"><div class="hd"><div><h3>Perfis</h3><div class="sub" id="usSub">—</div></div></div><div class="tw" id="usLista"></div><div id="usLink"></div></div>
+    <div class="card" style="margin-top:16px"><div class="hd"><div><h3>Usuários</h3><div class="sub" id="usSub">—</div></div></div><div class="tw" id="usLista"></div><div id="usLink"></div></div>
+    <div class="card" style="margin-top:16px" id="usPermCard" hidden><div class="hd"><div><h3 id="usPermTit">Permissões</h3><div class="sub" id="usPermSub">—</div></div><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="bt2" type="button" id="usPermTodos">Marcar todos</button><button class="bt2" type="button" id="usPermPadrao">Padrão do perfil</button><button class="bt2 pri" type="button" id="usPermSalvar">Salvar permissões</button><button class="bt2" type="button" id="usPermFechar">Fechar</button></div></div><div class="perm-grid" id="usPermGrid"></div></div>
+    <div class="card" style="margin-top:16px"><div class="hd"><div><h3>O que cada perfil vê</h3><div class="sub">Padrão de cada perfil. Em "Permissões" dá para tirar páginas de uma pessoa específica.</div></div></div><div class="tw" id="usMatriz"></div></div>
   </section>
+
 
   <footer class="rod"><span id="rodA">—</span><span>Seja Expert · Gestão Financeira e BPO</span></footer>
 </main>
+</div>
+</div>
+
 <div class="tip" id="tip" hidden></div>
 <div class="det-fundo" id="detFundo" hidden></div>
 <aside class="det" id="det" hidden role="dialog" aria-modal="true" aria-labelledby="detTit"><header><div><h3 id="detTit">—</h3><div class="sub" id="detSub"></div></div><button class="fe" id="detFechar" type="button" aria-label="Fechar">×</button></header><div class="bar"><input id="detBusca" type="search" placeholder="Buscar nesta lista"><span class="tot" id="detTot"></span><button class="bt2" id="detCsv" type="button">Exportar CSV</button></div><div class="corpo" id="detCorpo"></div></aside>
@@ -496,8 +572,9 @@ const nomeMes=(m)=>{const[a,b]=m.split('-');return MES_L[+b-1]+' de '+a};
 const somaMes=(m,n)=>{const[a,b]=m.split('-').map(Number);const d=new Date(Date.UTC(a,b-1+n,1));return d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0')};
 function delta(a,b,inv){ if(!b) return '<span class="delta eq">sem base</span>'; const d=(a-b)/b; const c=Math.abs(d)<.005?'eq':(d>0)!==!!inv?'up':'down'; return `<span class="delta ${c}">${d>0?'▲':d<0?'▼':'■'} ${pct(Math.abs(d))}</span>`; }
 
-const VERSAO='v9';
+const VERSAO='v10';
 const VERSOES=[
+ {v:'v10',data:'13/10/2026',tit:'Menu lateral e permissões por perfil',arq:'painel-visu-v10-menu-lateral.zip',itens:['Menu lateral no padrão do Sistema de Gestão: módulos Gestão, Comercial, Financeiro, Controle e Administração, cada painel na sua página.','Perfis ADM, Diretor, Comercial e Financeiro, com o que cada um vê. Em Permissões, o ADM tira páginas de uma pessoa específica; o servidor bloqueia os dados também.','"Ver o painel como" no menu (ADM) para conferir o que cada perfil ou pessoa enxerga.']},
  {v:'v9',data:'13/10/2026',tit:'Senha temporária',arq:'painel-visu-v9-senha-temporaria.zip',itens:['Na página Usuários, o botão "Senha temporária" gera uma senha (ex.: Visu-K7QM-4XPA) que vale 7 dias.','A pessoa entra com e-mail e senha temporária e o painel obriga a criar a própria senha antes de mostrar os dados.','Mensagem pronta para WhatsApp ou e-mail com endereço, login e senha. Botão "Trocar senha" no topo para todos os usuários.']},
  {v:'v8',data:'13/10/2026',tit:'Detalhamento ao clicar nos valores',arq:'painel-visu-v8-detalhamento.zip',itens:['Clicar em um valor abre a lista que forma aquele total: pedidos, itens, clientes, lançamentos ou parcelas em aberto.','Vale para os indicadores, vendedores, rankings de produto, tecido, cor e cliente, curva ABC, DRE, despesas por categoria e centro de custo, fornecedores, contas a receber e a pagar, caixa e pontos de atenção.','A lista tem busca, ordenação por coluna e exportação para CSV (abre no Excel).']},
  {v:'v7',data:'11/10/2026',tit:'Usuários com perfis Diretor e ADM',arq:'painel-gestao-visu-v7.zip',itens:['Login por e-mail e senha, com perfis Diretor (dashboards) e ADM (dashboards, usuários e conexão com a Conta Azul).','Quatro perfis criados: dois diretores e dois ADM (Morgana e gestor).','Página Usuários: gera o link pessoal de cada pessoa, com mensagem pronta para WhatsApp ou e-mail. A pessoa cria a própria senha no primeiro acesso.']},
@@ -516,7 +593,7 @@ const tip=$('tip');
 function dica(e,h){ tip.innerHTML=h; tip.hidden=false; const x=Math.min(e.clientX+14,innerWidth-tip.offsetWidth-8); tip.style.left=Math.max(8,x)+'px'; tip.style.top=Math.max(8,e.clientY-tip.offsetHeight-12)+'px'; }
 const semDica=()=>{tip.hidden=true};
 
-const E={dados:null,fin:null,pagina:'resumo',periodo:'mes',mes:null,filtros:{},medida:'pecas',evol:'valor',reg:'comp'};
+const E={dados:null,fin:null,verComo:null,pagina:'painel',periodo:'mes',mes:null,filtros:{},medida:'pecas',evol:'valor',reg:'comp'};
 try{ const s=JSON.parse(localStorage.getItem('visu-vendas')||'{}'); if(s.pagina)E.pagina=s.pagina; if(s.medida)E.medida=s.medida; }catch(e){}
 const guardar=()=>{try{localStorage.setItem('visu-vendas',JSON.stringify({pagina:E.pagina,medida:E.medida}))}catch(e){}};
 
@@ -595,14 +672,21 @@ function desenhar(){
   if(d.fonte!=='demo'){ if(d.avisos?.length){ av.hidden=false; av.textContent=d.avisos.join(' '); } else av.hidden=true; }
   const at=new Date(d.atualizado_em);
   $('rodA').textContent=`Atualizado em ${at.toLocaleDateString('pt-BR')} às ${at.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`+(PREVIA?' · prévia':' · atualiza sozinho a cada 5 min')+' · '+VERSAO;
-  document.querySelectorAll('nav.abas button').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.pg===E.pagina)));
+  const permit=paginasAtivas(); if(!permit.includes(E.pagina)) E.pagina=permit[0]||'painel';
+  montarMenu();
   document.querySelectorAll('section[data-pagina]').forEach(s=>s.hidden=s.dataset.pagina!==E.pagina);
-  const j=janela();
-  ['comEyebrow'].forEach(id=>$(id).textContent=j.rot);
-  ['finEyebrow','concEyebrow','resEyebrow'].forEach(id=>$(id).textContent=nomeMes(E.mes));
-  document.querySelectorAll('.f.com').forEach(f=>f.hidden=E.pagina!=='comercial');
-  $('limpar').hidden=E.pagina!=='comercial'||!Object.values(E.filtros).some(Boolean);
-  ({resumo:pgVisao,comercial:pgComercial,financas:pgFinancas,controle:pgControle,usuarios:pgUsuarios})[E.pagina](j);
+  const j=janela(), it=ITEM[E.pagina], grupo=it.grupo, comercial=grupo==='Comercial';
+  $('pgTit').textContent=it.rot;
+  const per=['usuarios','versoes','dados'].includes(E.pagina)?'':grupo==='Comercial'?j.rot:nomeMes(E.mes);
+  $('pgCtx').innerHTML=`<b>${grupo}</b>${esc(it.ctx)}${per?' · '+esc(per):''}`;
+  document.title=it.rot+' · Painel de Gestão Visu';
+  $('barraFiltros').hidden=['usuarios','versoes','dados'].includes(E.pagina);
+  document.querySelectorAll('.f.com').forEach(f=>f.hidden=!comercial);
+  document.querySelectorAll('.f.per')[0].hidden=!comercial;
+  $('limpar').hidden=!comercial||!Object.values(E.filtros).some(Boolean);
+  avisoFin();
+  const S=$('simula'); if(E.verComo){ S.hidden=false; S.innerHTML=`<span>Visualizando o painel como <b>${esc(E.verComo.nome||PERF[E.verComo.perfil])}</b>. O menu mostra exatamente o que esse perfil vê.</span><button class="bt2" type="button" id="simSair">Voltar para ADM</button>`; $('simSair').onclick=()=>{ E.verComo=null; $('verComo').value=''; desenhar(); }; } else S.hidden=true;
+  ({painel:pgVisao,indicadores:pgIndicadores,vendas:pgGeral,produtos:pgProdutos,clientes:pgClientes,vendedores:pgVendedores,pedidos:pgPedidos,dre:pgDRE,equilibrio:pgEquilibrio,caixa:pgCx,receber:pgRc,pagar:pgPg,conciliacao:pgConciliacao,dados:pgDados,versoes:pgVersoes,usuarios:pgUsuarios})[E.pagina](j);
 }
 
 // ---------- 1. visão geral ----------
@@ -849,7 +933,7 @@ function pgFinanceiro(){
 function pgResumo(j){
   vitrine(linhas(j.atual),j);
   const a=resumo(linhas(j.atual)), b=resumo(linhas(j.ant,j.corte));
-  const f=E.fin; if(!f) carregarFin().then(()=>E.pagina==='resumo'&&desenhar()).catch(e=>{['termo','cascata','quadro'].forEach(id=>$(id).innerHTML=`<div class="aviso erro">Não foi possível carregar o financeiro: ${esc(e.message)}</div>`)});
+  const f=E.fin; if(!f) carregarFin().then(()=>E.pagina==='painel'&&desenhar()).catch(e=>{['termo','cascata','quadro'].forEach(id=>$(id).innerHTML=`<div class="aviso erro">Não foi possível carregar o financeiro: ${esc(e.message)}</div>`)});
   const m=f?mesFin():E.mes, ma=somaMes(m,-1);
   const res=f&&!incompleto(m)?f.resultado[m]||0:null, rec=f?f.receita[m]||0:0;
   const proj30=f?f.projecao.semanas[3]?.saldo:null;
@@ -1096,7 +1180,35 @@ const hojeISO=()=>new Date(Date.now()-3*3600e3).toISOString().slice(0,10);
 const diasAtr=(v)=>Math.round((Date.parse(hojeISO())-Date.parse(v))/864e5);
 
 // ---------- v6: dashboards gerenciais ----------
-const MESES_PAG={resumo:1,comercial:1,financas:1,controle:1,usuarios:1};
+// ---------- menu lateral e permissões por perfil ----------
+const MENU=[
+  {grupo:'Gestão',ico:'<path d="M3 3h8v8H3zM13 3h8v5h-8zM13 10h8v11h-8zM3 13h8v8H3z"/>',itens:[['painel','Painel executivo','Vendas, resultado, caixa e o que pede decisão'],['indicadores','Quadro de indicadores','Comercial, resultado e caixa com tendência de 6 meses']]},
+  {grupo:'Comercial',ico:'<path d="M3 4h2l2.4 11h11.2L21 7H7" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="9" cy="19" r="1.6"/><circle cx="17" cy="19" r="1.6"/>',itens:[['vendas','Vendas','Pedidos, ticket médio e novas vendas × recompra (R1, R2, R3)'],['produtos','Produtos e mix','Tipo de produto, tecido e cor em peças ou R$ (R4) e curva ABC'],['clientes','Clientes','Curva ABC, faixas de valor, segmento e quem parou de comprar (C3, C5, C6)'],['vendedores','Vendedores e comissão','Faturamento, clientes novos, margem e régua da comissão (C7, C8)'],['pedidos','Pedidos e entregas','Ciclo de pagamento e entregas das próximas semanas (C4)']]},
+  {grupo:'Financeiro',ico:'<circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 6v12M15 9c0-1.2-1.3-2-3-2s-3 .8-3 2 1.3 2 3 2 3 .8 3 2-1.3 2-3 2-3-.8-3-2" fill="none" stroke="currentColor" stroke-width="1.8"/>',itens:[['dre','DRE gerencial','Receita, custos, despesas e resultado por competência ou caixa'],['equilibrio','Margem e ponto de equilíbrio','Custos fixos × variáveis, margem de contribuição e ponto de equilíbrio (C1)'],['caixa','Fluxo de caixa','Saldo nos bancos, realizado e projeção de 13 semanas'],['receber','Contas a receber','Inadimplência por idade e por cliente'],['pagar','Contas a pagar','Despesas por categoria, centro de custo e fornecedor']]},
+  {grupo:'Controle',ico:'<path d="M6 2h9l4 4v16H6z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 11l2 2 4-4" fill="none" stroke="currentColor" stroke-width="2"/>',itens:[['conciliacao','Planilha × sistema','Por que o total do mês difere entre a planilha do comercial e a Conta Azul'],['dados','Qualidade dos dados','Colunas reconhecidas, campos em branco e grafias diferentes'],['versoes','Versões do painel','O que mudou em cada entrega']]},
+  {grupo:'Administração',ico:'<circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.6 2.7-6 6-6s6 2.4 6 6z"/><circle cx="17" cy="9" r="2.4"/><path d="M15.5 14.2c2.9.3 5.5 2.4 5.5 5.8h-4.5"/>',itens:[['usuarios','Usuários e permissões','Perfis, senhas temporárias e o que cada pessoa vê']]},
+];
+const TODAS=MENU.flatMap(g=>g.itens.map(i=>i[0]));
+const MESES_PAG=Object.fromEntries(TODAS.map(p=>[p,1]));
+const ITEM=Object.fromEntries(MENU.flatMap(g=>g.itens.map(i=>[i[0],{rot:i[1],ctx:i[2],grupo:g.grupo}])));
+const GRUPO_DE=Object.fromEntries(TODAS.map(p=>[p,ITEM[p].grupo]));
+const COMP=['vendas','produtos','clientes','vendedores','pedidos'], FINP=['dre','equilibrio','caixa','receber','pagar'];
+const PADRAO={adm:TODAS,diretor:TODAS.filter(p=>p!=='usuarios'),comercial:[...COMP,'conciliacao','versoes'],financeiro:['painel','indicadores',...FINP,'conciliacao','dados','versoes']};
+function paginasDe(u){ if(!u) return []; const base=PADRAO[u.perfil]||[]; if(u.perfil==='adm'||!Array.isArray(u.paginas)) return base; const r=base.filter(p=>u.paginas.includes(p)); return r.length?r:base.slice(0,1); }
+// páginas que aparecem agora (com o "Ver o painel como" do ADM)
+function paginasAtivas(){ if(E.verComo) return paginasDe(E.verComo); return E.eu?.paginas||paginasDe(E.eu)||TODAS; }
+function montarMenu(){
+  const ok=new Set(paginasAtivas()); let abertos=[]; try{ abertos=JSON.parse(localStorage.getItem('visu-menu')||'null'); }catch(e){}
+  $('menu').innerHTML=MENU.map(g=>{ const its=g.itens.filter(i=>ok.has(i[0])); if(!its.length) return '';
+    const aberto=!abertos||abertos.includes(g.grupo)||its.some(i=>i[0]===E.pagina);
+    return `<div class="nm-mod ${aberto?'aberto':''}" data-g="${g.grupo}"><button type="button" class="nm-tit" aria-expanded="${aberto}"><span><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true">${g.ico}</svg>${g.grupo}</span><i aria-hidden="true">▾</i></button>
+      <div class="nm-itens">${its.map(i=>`<a class="nm-item ${i[0]===E.pagina?'ativo':''}" href="#${i[0]}" data-pg="${i[0]}">${i[1]}${i[0]==='receber'&&E.fin?.receber?.atrasado_qtd?`<span class="bd" title="Parcelas em atraso">${E.fin.receber.atrasado_qtd}</span>`:''}</a>`).join('')}</div></div>`; }).join('');
+  $('menu').querySelectorAll('.nm-tit').forEach(b=>b.addEventListener('click',()=>{ const m=b.parentElement; const on=m.classList.toggle('aberto'); b.setAttribute('aria-expanded',on);
+    const lista=[...$('menu').querySelectorAll('.nm-mod.aberto')].map(x=>x.dataset.g); try{ localStorage.setItem('visu-menu',JSON.stringify(lista)); }catch(e){} }));
+  $('menu').querySelectorAll('.nm-item').forEach(a=>a.addEventListener('click',e=>{ e.preventDefault(); irPara(a.dataset.pg); }));
+}
+function irPara(pg){ E.pagina=pg; guardar(); try{ history.replaceState(null,'','#'+pg); }catch(e){} fecharMenu(); desenhar(); scrollTo({top:0}); }
+function fecharMenu(){ $('sb').classList.remove('aberto'); $('scrim').classList.remove('on'); }
 const kpiHtml=(arr)=>arr.map(([l,v,s2,c,r,fn])=>`<div class="kpi ${c||''}"${fn?D(fn)+' tabindex="0"':''}><div class="l"><span>${l}</span>${r?`<span class="req" style="margin:0">${r}</span>`:''}</div><div class="v num">${v}</div><div class="s">${s2||''}</div></div>`).join('');
 const incompleto=(m)=>!!(E.fin&&E.fin.primeiro_mes_despesas&&m<E.fin.primeiro_mes_despesas);
 const indM=(m,caixa)=>(caixa?E.fin?.indicadores_caixa:E.fin?.indicadores)?.[m]||null;
@@ -1122,18 +1234,30 @@ function pgVisao(j){
   semFiltro(()=>{
     pgResumo(j);
     if(!E.fin) return;
-    termometro(); cascata(); quadro();
+    termometro(); cascata();
   });
-  if(!E.fin){ ['termo','cascata','quadro'].forEach(id=>$(id).innerHTML='<div class="vazio">Carregando os dados financeiros da Conta Azul…</div>'); }
+  if(!E.fin){ ['termo','cascata'].forEach(id=>$(id).innerHTML='<div class="vazio">Carregando os dados financeiros da Conta Azul…</div>'); }
 }
-function termometro(){
+function pgIndicadores(){ if(comFin('quadro')) semFiltro(()=>quadro()); }
+// garante o financeiro carregado antes de desenhar uma página financeira
+function comFin(alvo){
+  if(E.fin){ avisoFin(); return true; }
+  $(alvo).innerHTML='<div class="vazio">Carregando os dados financeiros da Conta Azul…</div>';
+  carregarFin().then(()=>desenhar()).catch(e=>{$(alvo).innerHTML=`<div class="aviso erro">Não foi possível carregar o financeiro: ${esc(e.message)}</div>`});
+  return false;
+}
+function avisoFin(){
+  const f=E.fin, av=$('finAviso');
+  if(f&&f.primeiro_mes_despesas&&f.primeiro_mes_despesas>f.meses[0]&&GRUPO_DE[E.pagina]==='Financeiro'){ av.hidden=false; av.innerHTML=`<span><b>Despesas lançadas na Conta Azul a partir de ${nomeMes(f.primeiro_mes_despesas)}.</b> Nos meses anteriores só há receitas, então resultado, margem e ponto de equilíbrio desses meses não são comparáveis e aparecem como "—".</span>`; } else av.hidden=true;
+}
+function termometro(alvo='termo',subId='termoSub'){
   const m=mesHojeBR(), hoje=new Date(Date.now()-3*3600e3), parcial=true;
   const diasMes=new Date(+m.slice(0,4),+m.slice(5),0).getDate(), dia=parcial?hoje.getUTCDate():diasMes, resta=diasMes-dia;
   const vend=resumo(linhas([m])).fat, P=peRef(), pe=P.valor, meta=+E.dados.regras.meta||0;
   const proj=parcial?vend/dia*diasMes:vend, mx=Math.max(proj,vend,pe,meta,1)*1.1, w=(v)=>Math.min(v/mx*100,100);
   const falta=Math.max(pe-vend,0);
-  $('termoSub').textContent=`${nomeMes(m)} · dia ${dia} de ${diasMes} · vendas aprovadas e faturadas na Conta Azul, em tempo real`;
-  $('termo').innerHTML=`<div class="termo">
+  $(subId).textContent=`${nomeMes(m)} · dia ${dia} de ${diasMes} · vendas aprovadas e faturadas na Conta Azul, em tempo real`;
+  $(alvo).innerHTML=`<div class="termo">
       <div class="trk"><i class="pj" style="width:${w(proj)}%"></i><i class="fe" style="width:${w(vend)}%"></i>
         ${pe?`<u style="left:${w(pe)}%"><b>PE ${curto(pe)}</b></u>`:''}${meta?`<u class="mt" style="left:${w(meta)}%"><b>Meta ${curto(meta)}</b></u>`:''}</div>
     </div>
@@ -1205,12 +1329,11 @@ function quadro(){
 function pgComercial(j){ pgGeral(j); pgProdutos(j); pgClientes(j); pgVendedores(j); pgPedidos(j); }
 
 // ---------- financeiro ----------
-function pgFinancas(){
-  if(!E.fin){ $('finKpis').innerHTML='<div class="vazio">Carregando os dados financeiros da Conta Azul…</div>'; carregarFin().then(()=>desenhar()).catch(e=>{$('finKpis').innerHTML=`<div class="aviso erro">Não foi possível carregar o financeiro: ${esc(e.message)}</div>`}); return; }
-  const f=E.fin, av=$('finAviso');
-  if(f.primeiro_mes_despesas&&f.primeiro_mes_despesas>f.meses[0]){ av.hidden=false; av.innerHTML=`<span><b>Despesas lançadas na Conta Azul a partir de ${nomeMes(f.primeiro_mes_despesas)}.</b> Nos meses anteriores só há receitas, então resultado, margem e ponto de equilíbrio desses meses não são comparáveis e aparecem como "—".</span>`; } else av.hidden=true;
-  pgFinanceiro(); composicao(); mcTab(); pgCaixa(); pgReceber(); pgPagar();
-}
+const pgDRE=()=>{ if(comFin('finKpis')) pgFinanceiro(); };
+const pgEquilibrio=()=>{ if(comFin('mcTab')){ composicao(); mcTab(); semFiltro(()=>termometro('termo2','termoSub2')); } };
+const pgCx=()=>{ if(comFin('cxKpis')) pgCaixa(); };
+const pgRc=()=>{ if(comFin('rcKpis')) pgReceber(); };
+const pgPg=()=>{ if(comFin('pgKpis')) pgPagar(); };
 function composicao(){
   const f=E.fin, m=mesFin(), x=indM(m,E.reg==='caixa'); if(!x){ $('composicao').innerHTML='<div class="vazio">—</div>'; return; }
   const fixosOp=x.fixos-x.financeiro-x.tributos, tot=x.variaveis+x.fixos||1, rec=x.receita||1;
@@ -1232,7 +1355,13 @@ function mcTab(){
 function pgControle(){ pgConciliacao(); pgDados(); pgVersoes(); }
 
 // ---------- usuários (ADM) ----------
-const PERF={diretor:'Diretor',adm:'ADM'};
+const PERF={adm:'ADM',diretor:'Diretor',comercial:'Comercial',financeiro:'Financeiro'};
+async function montarVerComo(){
+  let us=[]; try{ us=(await api('/api/usuarios')).usuarios; }catch(e){}
+  const ops=[['','Administrador (eu)'],...Object.keys(PERF).filter(k=>k!=='adm').map(k=>['p:'+k,'Perfil '+PERF[k]]),...us.filter(u=>u.perfil!=='adm').map(u=>['u:'+u.id,u.nome+' · '+PERF[u.perfil]])];
+  $('verComo').innerHTML=ops.map(([v,r])=>`<option value="${esc(v)}">${esc(r)}</option>`).join('');
+  $('verComo').onchange=()=>{ const v=$('verComo').value; if(!v) E.verComo=null; else if(v.startsWith('p:')) E.verComo={perfil:v.slice(2),nome:'Perfil '+PERF[v.slice(2)]}; else { const u=us.find(x=>x.id===v.slice(2)); E.verComo=u?{...u}:null; } desenhar(); };
+}
 let US={lista:[],banco:true,link:null};
 async function api(url,op={}){ if(PREVIA) return previaApi(url,op); const r=await fetch(url,{...op,headers:{'Content-Type':'application/json',Accept:'application/json'}}); const d=await r.json().catch(()=>({})); if(!r.ok) throw new Error(d.erro||('erro '+r.status)); return d; }
 // prévia: simula a API sem servidor
@@ -1251,15 +1380,17 @@ async function pgUsuarios(){
   const dt=(x)=>x?new Date(x).toLocaleDateString('pt-BR')+' '+new Date(x).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):'—';
   $('usLista').innerHTML=`<table><thead><tr><th>Nome</th><th>E-mail (login)</th><th>Perfil</th><th>Situação</th><th>Último acesso</th><th></th></tr></thead><tbody>${US.lista.map(u=>`<tr>
     <td><b>${esc(u.nome)}</b></td><td class="el">${u.email?esc(u.email):'<span style="color:var(--red)">cadastre o e-mail (Editar)</span>'}</td>
-    <td><span class="pill" style="${u.perfil==='adm'?'background:var(--orange);color:#fff':'background:var(--teal);color:#241E48'}">${PERF[u.perfil]}</span></td>
+    <td><span class="pill" style="${u.perfil==='adm'?'background:var(--orange);color:#fff':u.perfil==='diretor'?'background:var(--teal);color:#241E48':'background:var(--barSoft);color:var(--ink)'}">${PERF[u.perfil]||u.perfil}</span>${Array.isArray(u.paginas)&&u.perfil!=='adm'?`<div style="font-size:11px;color:var(--ink3);margin-top:3px">${paginasDe(u).length} de ${PADRAO[u.perfil].length} páginas</div>`:''}</td>
     <td>${u.senha_criada?'<span class="status ok">✓ ativo</span>':u.temporaria?`<span class="status at">senha temporária · até ${new Date(u.temp_expira_em).toLocaleDateString('pt-BR')}</span>`:'<span class="status at">sem acesso ainda</span>'}</td><td class="num">${dt(u.ultimo_acesso)}</td>
-    <td style="white-space:nowrap;text-align:right"><button class="bt2 ${u.senha_criada?'':'pri'}" data-temp="${u.id}">${u.senha_criada?'Redefinir senha':'Senha temporária'}</button> <button class="bt2" data-conv="${u.id}" title="Alternativa: link pessoal para a pessoa criar a senha">Link</button> <button class="bt2" data-ed="${u.id}">Editar</button> ${u.id!==E.eu?.id?`<button class="bt2 del" data-del="${u.id}">Remover</button>`:''}</td></tr>`).join('')}</tbody></table>`;
+    <td style="white-space:nowrap;text-align:right"><button class="bt2 ${u.senha_criada?'':'pri'}" data-temp="${u.id}">${u.senha_criada?'Redefinir senha':'Senha temporária'}</button> <button class="bt2" data-conv="${u.id}" title="Alternativa: link pessoal para a pessoa criar a senha">Link</button> <button class="bt2" data-ed="${u.id}">Editar</button> ${u.perfil!=='adm'?`<button class="bt2" data-perm="${u.id}">Permissões</button>`:''} ${u.id!==E.eu?.id?`<button class="bt2 del" data-del="${u.id}">Remover</button>`:''}</td></tr>`).join('')}</tbody></table>`;
   $('usLista').querySelectorAll('[data-conv]').forEach(b=>b.addEventListener('click',async()=>{ const u=US.lista.find(x=>x.id===b.dataset.conv);
     if(u.senha_criada&&!confirm(`Gerar um novo link para ${u.nome}? A senha atual deixa de funcionar até a pessoa criar outra.`)) return;
     try{ US.temp=null; US.link=await api(`/api/usuarios/${u.id}/convite`,{method:'POST'}); mostrarLink(); pgUsuarios(); }catch(e){ alert(e.message); } }));
   $('usLista').querySelectorAll('[data-temp]').forEach(b=>b.addEventListener('click',async()=>{ const u=US.lista.find(x=>x.id===b.dataset.temp);
     if((u.senha_criada||u.temporaria)&&!confirm(`Gerar uma nova senha temporária para ${u.nome}? A senha atual deixa de funcionar.`)) return;
     try{ US.link=null; US.temp=await api(`/api/usuarios/${u.id}/senha-temporaria`,{method:'POST'}); mostrarLink(); pgUsuarios(); }catch(e){ alert(e.message); } }));
+  $('usLista').querySelectorAll('[data-perm]').forEach(b=>b.addEventListener('click',()=>abrirPerm(US.lista.find(x=>x.id===b.dataset.perm))));
+  $('usMatriz').innerHTML=`<table><thead><tr><th>Página</th>${Object.keys(PERF).map(k=>`<th style="text-align:center">${PERF[k]}</th>`).join('')}</tr></thead><tbody>${MENU.map(g=>`<tr class="grp"><td colspan="5" style="font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--orange);padding-top:12px">${g.grupo}</td></tr>`+g.itens.map(i=>`<tr><td>${i[1]}</td>${Object.keys(PERF).map(k=>`<td style="text-align:center">${PADRAO[k].includes(i[0])?'<span class="status ok">✓</span>':'<span style="color:var(--ink3)">—</span>'}</td>`).join('')}</tr>`).join('')).join('')}</tbody></table>`;
   $('usLista').querySelectorAll('[data-ed]').forEach(b=>b.addEventListener('click',()=>{ const u=US.lista.find(x=>x.id===b.dataset.ed); const f=$('usForm'); f.id.value=u.id; f.nome.value=u.nome; f.email.value=u.email; f.perfil.value=u.perfil; $('usFormTit').textContent='Editar '+u.nome; $('usCancelar').hidden=false; f.nome.focus(); }));
   $('usLista').querySelectorAll('[data-del]').forEach(b=>b.addEventListener('click',async()=>{ const u=US.lista.find(x=>x.id===b.dataset.del); if(!confirm(`Remover o acesso de ${u.nome}?`)) return; await api(`/api/usuarios/${u.id}`,{method:'DELETE'}); pgUsuarios(); }));
   mostrarLink();
@@ -1294,14 +1425,32 @@ $('usCancelar').addEventListener('click',()=>{ const f=$('usForm'); f.reset(); f
 async function carregarEu(){
   try{ E.eu=PREVIA?(window.__EU__||{id:'morgana',nome:'Morgana Limeira',perfil:'adm'}):await (await fetch('/api/eu',{headers:{Accept:'application/json'}})).json(); }catch(e){ E.eu=null; }
   if(!E.eu?.perfil) return;
-  $('eu').hidden=false; $('eu').innerHTML=`<b>${esc(E.eu.nome)}</b><i class="${E.eu.perfil==='adm'?'':'dir'}">${PERF[E.eu.perfil]}</i>`;
-  $('abaUsuarios').hidden=E.eu.perfil!=='adm';
-  $('trocar').hidden=PREVIA||E.eu.id==='__admin';
-  if(E.pagina==='usuarios'&&E.eu.perfil!=='adm') E.pagina='resumo';
+  if(!E.eu.paginas) E.eu.paginas=paginasDe(E.eu);
+  $('euNome').textContent=E.eu.nome; $('euPerfil').textContent=PERF[E.eu.perfil]||E.eu.perfil;
+  $('av').textContent=E.eu.nome.split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join('').toUpperCase();
+  $('trocarBox').hidden=PREVIA||E.eu.id==='__admin';
+  if(E.eu.perfil==='adm'){ $('verComoBox').hidden=false; montarVerComo(); }
 }
 
+let PERMU=null;
+function abrirPerm(u){
+  PERMU=u; const base=PADRAO[u.perfil]||[], atuais=new Set(paginasDe(u));
+  $('usPermCard').hidden=false; $('usPermTit').textContent='Permissões de '+u.nome;
+  $('usPermSub').textContent=`Perfil ${PERF[u.perfil]}. Desmarque o que ${u.nome.split(' ')[0]} não deve ver: some do menu e o servidor bloqueia os dados. Itens em cinza não fazem parte do perfil; para liberar, mude o perfil em Editar.`;
+  $('usPermGrid').innerHTML=MENU.map(g=>`<div class="perm-grupo"><b>${g.grupo}</b>${g.itens.map(i=>{ const ok=base.includes(i[0]); return `<label class="${ok?'':'off'}"><input type="checkbox" value="${i[0]}" ${ok?'':'disabled'} ${ok&&atuais.has(i[0])?'checked':''}> ${i[1]}</label>`; }).join('')}</div>`).join('');
+  $('usPermCard').scrollIntoView({behavior:'smooth',block:'start'});
+}
+$('usPermFechar').addEventListener('click',()=>{ $('usPermCard').hidden=true; PERMU=null; });
+$('usPermTodos').addEventListener('click',()=>$('usPermGrid').querySelectorAll('input:not(:disabled)').forEach(c=>c.checked=true));
+$('usPermPadrao').addEventListener('click',async()=>{ if(!PERMU) return; await api('/api/usuarios',{method:'POST',body:JSON.stringify({id:PERMU.id,nome:PERMU.nome,email:PERMU.email,perfil:PERMU.perfil,paginas:null})}); $('usPermCard').hidden=true; pgUsuarios(); });
+$('usPermSalvar').addEventListener('click',async()=>{ if(!PERMU) return; const sel=[...$('usPermGrid').querySelectorAll('input:checked')].map(c=>c.value);
+  if(!sel.length){ alert('Deixe pelo menos uma página marcada.'); return; }
+  try{ await api('/api/usuarios',{method:'POST',body:JSON.stringify({id:PERMU.id,nome:PERMU.nome,email:PERMU.email,perfil:PERMU.perfil,paginas:sel})}); $('usPermCard').hidden=true; pgUsuarios(); }catch(e){ alert(e.message); } });
+
 // ---------- eventos ----------
-document.querySelectorAll('nav.abas button').forEach(b=>b.addEventListener('click',()=>{E.pagina=b.dataset.pg;guardar();desenhar();scrollTo({top:0})}));
+$('hamb').addEventListener('click',()=>{ $('sb').classList.toggle('aberto'); $('scrim').classList.toggle('on'); });
+$('scrim').addEventListener('click',fecharMenu);
+window.addEventListener('hashchange',()=>{ const h=location.hash.slice(1); if(MESES_PAG[h]&&h!==E.pagina){ E.pagina=h; desenhar(); } });
 $('fPeriodo').addEventListener('change',e=>{E.periodo=e.target.value;desenhar()});
 $('fMes').addEventListener('change',e=>{E.mes=e.target.value;desenhar()});
 document.querySelectorAll('select[data-campo]').forEach(s=>s.addEventListener('change',()=>{E.filtros[s.dataset.campo]=s.value;desenhar()}));
@@ -1312,8 +1461,9 @@ $('atualizar').addEventListener('click',()=>{ E.fin=null; carregar(true); });
 document.querySelectorAll('[data-reg]').forEach(b=>b.addEventListener('click',()=>{E.reg=b.dataset.reg;desenhar()}));
 if(PREVIA){ $('atualizar').hidden=true; $('sair').hidden=true; if(window.__LOGO__) $('logo').src=window.__LOGO__; }
 else setInterval(()=>{ if(!document.hidden) carregar(); },5*60*1000);
+$('euVersao').textContent='Versão '+VERSAO.slice(1)+' · '+(VERSOES[0]?.data||'');
 const hash=location.hash.slice(1); if(MESES_PAG[hash]) E.pagina=hash;
-if(!MESES_PAG[E.pagina]) E.pagina={geral:'comercial',produtos:'comercial',clientes:'comercial',vendedores:'comercial',pedidos:'comercial',financeiro:'financas',caixa:'financas',receber:'financas',pagar:'financas',conciliacao:'controle',dados:'controle',versoes:'controle'}[E.pagina]||'resumo';
+if(!MESES_PAG[E.pagina]) E.pagina={resumo:'painel',geral:'vendas',comercial:'vendas',financas:'dre',financeiro:'dre',controle:'conciliacao'}[E.pagina]||'painel';
 document.querySelectorAll('[data-ir]').forEach(b=>b.addEventListener('click',()=>$(b.dataset.ir).scrollIntoView({behavior:'smooth',block:'start'})));
 carregarEu().then(()=>carregar());
 })();

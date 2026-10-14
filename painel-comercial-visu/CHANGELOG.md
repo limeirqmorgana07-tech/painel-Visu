@@ -2,6 +2,12 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v10 — 13/10/2026 · Menu lateral e permissões por perfil
+Arquivo: `painel-visu-v10-menu-lateral.zip`
+- Menu lateral no padrão do Sistema de Gestão: módulos Gestão, Comercial, Financeiro, Controle e Administração, cada painel na sua página.
+- Perfis ADM, Diretor, Comercial e Financeiro. Em Permissões, o ADM tira páginas de uma pessoa específica; o servidor bloqueia os dados também.
+- "Ver o painel como" no menu (ADM) para conferir o que cada perfil ou pessoa enxerga.
+
 ## v9 — 13/10/2026 · Senha temporária
 Arquivo: `painel-visu-v9-senha-temporaria.zip`
 - Na página Usuários, o botão "Senha temporária" gera uma senha (ex.: Visu-K7QM-4XPA) que vale 7 dias.

@@ -10,6 +10,7 @@ import { dadosDeVendas } from './src/vendas.js';
 import { dadosFinanceiros } from './src/financeiro.js';
 import { planilhaConfigurada } from './src/planilha.js';
 import * as usuarios from './src/usuarios.js';
+import { paginasDe, veFinanceiro, veVendas } from './src/paginas.js';
 
 const raiz = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
@@ -128,7 +129,7 @@ app.post('/convite/:token', async (req, res) => {
 
 // ---------- usuários (perfil ADM) ----------
 app.use(express.json());
-app.get('/api/eu', exigeLogin, (req, res) => res.json({ id: req.usuario.id, nome: req.usuario.nome, email: req.usuario.email || '', perfil: req.usuario.perfil }));
+app.get('/api/eu', exigeLogin, (req, res) => res.json({ id: req.usuario.id, nome: req.usuario.nome, email: req.usuario.email || '', perfil: req.usuario.perfil, paginas: paginasDe(req.usuario) }));
 app.get('/api/usuarios', exigeAdm, async (req, res) => res.json({ usuarios: await usuarios.listar(), perfis: usuarios.PERFIS, banco: usuarios.bancoConfigurado() }));
 app.post('/api/usuarios', exigeAdm, async (req, res) => {
   try { res.json(await usuarios.salvar(req.body || {})); } catch (e) { res.status(400).json({ erro: e.message }); }
@@ -179,6 +180,7 @@ app.get('/api/status', exigeLogin, async (req, res) => {
 // Base de vendas (linhas da planilha já padronizadas). Os indicadores são calculados no navegador,
 // para os filtros responderem na hora.
 app.get('/api/vendas', exigeLogin, async (req, res) => {
+  if (!veVendas(req.usuario)) return res.status(403).json({ erro: 'seu perfil não tem acesso aos dados de vendas' });
   try {
     res.json(await dadosDeVendas(req.query.forcar === '1'));
   } catch (e) {
@@ -189,6 +191,7 @@ app.get('/api/vendas', exigeLogin, async (req, res) => {
 
 // Gestão financeira (DRE, caixa, contas a receber/pagar, saldos) pela API da Conta Azul
 app.get('/api/financeiro', exigeLogin, async (req, res) => {
+  if (!veFinanceiro(req.usuario)) return res.status(403).json({ erro: 'seu perfil não tem acesso ao financeiro' });
   try { res.json(await dadosFinanceiros(req.query.forcar === '1')); }
   catch (e) { console.error('[financeiro]', e); res.status(502).json({ erro: e.message }); }
 });
