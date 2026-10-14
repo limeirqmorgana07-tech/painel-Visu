@@ -2,6 +2,13 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v15 — 14/10/2026 · Produtos gerencial, período personalizado e vendedores ativos
+Arquivo: `painel-visu-v15.zip`
+- Produtos e mix redesenhado: indicadores do mix, participação por tipo com variação, evolução do mix em 6 meses, matriz tecido × cor e curva ABC em gráfico.
+- Margem bruta calculada só sobre os itens com custo cadastrado na Conta Azul, com o percentual de cobertura.
+- Filtro "Período personalizado" (de/até) nas páginas comerciais.
+- Vendedores: o ADM marca quem é ou não é vendedor; os inativos saem da lista e da régua de comissão.
+
 ## v14 — 14/10/2026 · Painel mais estável
 Arquivo: `painel-visu-v14-estavel.zip`
 - Um erro em segundo plano (Conta Azul ou banco fora do ar) não derruba mais o painel inteiro.

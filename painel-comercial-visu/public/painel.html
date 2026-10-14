@@ -60,6 +60,7 @@ nav.abas .tag{font-size:10px;font-weight:700;letter-spacing:.04em;padding:1px 6p
 .f{display:flex;flex-direction:column;gap:3px;min-width:0}
 .f label{font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--ink3)}
 .f select{background:var(--panel);border:1px solid var(--line2);border-radius:8px;padding:6px 8px;font-size:13px;max-width:190px}
+.f input[type=date]{background:var(--panel);border:1px solid var(--line2);border-radius:8px;padding:5px 8px;font:inherit;font-size:13px;color:var(--ink)}
 .f select.ativo{border-color:var(--orange);box-shadow:0 0 0 1px var(--orange)}
 .limpar{background:none;border:0;color:var(--orange);font-weight:700;font-size:12.5px;cursor:pointer;padding:6px 4px}
 
@@ -329,6 +330,16 @@ main{max-width:none;padding:18px 26px 48px}
 .perm-grupo label.off{color:var(--ink3);cursor:not-allowed}
 #resKpis{margin-top:16px}
 .status{white-space:nowrap}
+.sw{display:inline-flex;align-items:center;gap:9px;cursor:pointer}.sw input{position:absolute;opacity:0;width:1px;height:1px}
+.sw span{width:34px;height:19px;border-radius:20px;background:var(--line2);position:relative;transition:background .15s;flex:none}
+.sw span::after{content:"";position:absolute;top:2px;left:2px;width:15px;height:15px;border-radius:50%;background:#fff;transition:transform .15s}
+.sw input:checked+span{background:var(--green)}.sw input:checked+span::after{transform:translateX(15px)}
+.sw input:focus-visible+span{outline:2px solid var(--orange);outline-offset:2px}
+.sw em{font-style:normal;font-size:12.5px;color:var(--green);font-weight:600}.sw em.off{color:var(--ink3)}
+i.dot{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:8px;vertical-align:0}
+table.matriz td,table.matriz th{text-align:center}table.matriz td:first-child,table.matriz th:first-child{text-align:left}
+table.matriz td.hm{cursor:pointer;font-weight:600;border:2px solid var(--panel)}table.matriz td.hm:hover{outline:2px solid var(--orange)}
+table.matriz td.vz{color:var(--line2)}
 .vitrine{min-height:150px}.palco{height:150px}.peca img{height:96px}.peca.foto img{height:84px;width:84px}
 </style>
 
@@ -349,7 +360,9 @@ main{max-width:none;padding:18px 26px 48px}
     <div class="acoes"><span class="chip" id="chip"><i></i><span id="chipTxt">—</span></span><button class="bt" id="atualizar" type="button">Atualizar</button></div>
   </div>
   <div class="filtros" id="barraFiltros"><div class="in">
-    <div class="f per"><label for="fPeriodo">Período</label><select id="fPeriodo"><option value="mes">Mês</option><option value="ano">Ano até o mês</option><option value="12m">Últimos 12 meses</option></select></div>
+    <div class="f per"><label for="fPeriodo">Período</label><select id="fPeriodo"><option value="mes">Mês</option><option value="ano">Ano até o mês</option><option value="12m">Últimos 12 meses</option><option value="faixa">Período personalizado</option></select></div>
+    <div class="f per2" hidden><label for="fDe">De</label><input id="fDe" type="date"></div>
+    <div class="f per2" hidden><label for="fAte">Até</label><input id="fAte" type="date"></div>
     <div class="f per"><label for="fMes">Mês</label><select id="fMes"></select></div>
     <div class="f com"><label for="fVendedor">Vendedor</label><select id="fVendedor" data-campo="v"></select></div>
     <div class="f com"><label for="fTipoVenda">Tipo de venda</label><select id="fTipoVenda" data-campo="tv"></select></div>
@@ -408,20 +421,19 @@ main{max-width:none;padding:18px 26px 48px}
   </section>
 
   <section data-pagina="produtos" hidden>
-    <div class="pg-tools"><div class="seg" role="group" aria-label="Medida dos rankings"><button type="button" data-med="pecas" aria-pressed="true">Peças</button><button type="button" data-med="valor" aria-pressed="false">R$</button></div></div>
-    <div class="g3">
-      <div class="card"><div class="hd"><div><h3>Tipo de produto<span class="req">R4</span></h3></div></div><div class="rank" id="rkProduto"></div></div>
-      <div class="card"><div class="hd"><div><h3>Material / tecido<span class="req">R4</span></h3></div></div><div class="rank" id="rkMaterial"></div></div>
-      <div class="card"><div class="hd"><div><h3>Cor<span class="req">R4</span></h3></div></div><div class="rank" id="rkCor"></div></div>
+    <div class="pg-tools"><div class="seg" role="group" aria-label="Medida"><button type="button" data-med="pecas" aria-pressed="true">Peças</button><button type="button" data-med="valor" aria-pressed="false">R$</button></div></div>
+    <div class="kpis" id="prodKpis"></div>
+    <div class="g2" style="margin-top:16px">
+      <div class="card"><div class="hd"><div><h3>Mix por tipo de produto<span class="req">R4</span></h3><div class="sub" id="mixSub">—</div></div></div><div id="mixTipo"></div></div>
+      <div class="card"><div class="hd"><div><h3>Evolução do mix</h3><div class="sub" id="mixEvolSub">Participação de cada tipo nos últimos 6 meses</div></div></div><div id="mixEvol"></div><div class="leg" id="mixEvolLeg"></div></div>
     </div>
+    <div class="card" style="margin-top:16px"><div class="hd"><div><h3>Matriz tecido × cor<span class="req">R4</span></h3><div class="sub" id="matrizSub">Onde está o volume: base para a compra de matéria-prima</div></div></div><div class="tw" id="matriz"></div></div>
     <div class="g2e" style="margin-top:16px">
-      <div class="card"><div class="hd"><div><h3>Material e cor mais vendidos<span class="req">R4</span></h3><div class="sub">A combinação que puxa a compra de tecido</div></div></div><div class="rank" id="rkMatCor"></div></div>
-      <div class="card"><div class="hd"><div><h3>Ticket médio por tecido<span class="req">R2</span></h3><div class="sub">Faturamento do tecido ÷ pedidos que levaram esse tecido</div></div></div>
-        <div class="tw"><table><thead><tr><th>Material</th><th class="v">Pedidos</th><th class="v">Peças</th><th class="v">Faturamento</th><th class="v">Ticket</th><th class="v">R$/peça</th></tr></thead><tbody id="tbTecido"></tbody></table></div></div>
-    </div>
-    <div class="card" style="margin-top:16px">
-      <div class="hd"><div><h3>Curva ABC e margem dos produtos<span class="req">C3</span></h3><div class="sub" id="abcProdSub">Faturamento, peças e margem bruta por produto</div></div></div>
-      <div class="tw" id="abcProd"></div>
+      <div class="card"><div class="hd"><div><h3>Curva ABC dos produtos<span class="req">C3</span></h3><div class="sub" id="abcProdSub">—</div></div></div><div id="paretoProd"></div>
+        <div class="leg"><span><i style="background:var(--s1)"></i>Classe A</span><span><i style="background:var(--barSoft)"></i>Classes B e C</span><span><i style="background:var(--orange);height:3px"></i>% acumulado</span></div>
+        <details class="tabela"><summary>Ver tabela completa</summary><div class="tw" id="abcProd"></div></details></div>
+      <div class="card"><div class="hd"><div><h3>Ticket e preço por tecido<span class="req">R2</span></h3><div class="sub">Ticket = faturamento do tecido ÷ pedidos que levaram esse tecido</div></div></div>
+        <div class="tw"><table><thead><tr><th>Tecido</th><th class="v">Pedidos</th><th class="v">Peças</th><th class="v">Faturamento</th><th class="v">Ticket</th><th class="v">R$/peça</th><th class="v">Margem</th></tr></thead><tbody id="tbTecido"></tbody></table></div></div>
     </div>
   </section>
 
@@ -445,6 +457,7 @@ main{max-width:none;padding:18px 26px 48px}
       <div class="tw"><table><thead><tr><th>Vendedor</th><th class="v">Faturamento</th><th class="v">Part.</th><th class="v">Pedidos</th><th class="v">Ticket médio</th><th class="v">Novos (R$)</th><th class="v">% novos</th><th class="v">Clientes novos</th><th class="v" id="thMargem">Margem</th><th id="thRegua">Régua da comissão</th></tr></thead><tbody id="tbVend"></tbody></table></div>
       <div class="nota" id="vendNota"></div>
     </div>
+    <div class="card" style="margin-top:16px" id="vendCfgCard" hidden><div class="hd"><div><h3>Quem é vendedor</h3><div class="sub">Marque como inativo quem aparece na Conta Azul mas não deve ser tratado como vendedor (financeiro, escritório, a própria empresa). As vendas dessas pessoas continuam no faturamento, agrupadas em "Não vendedores", sem régua de comissão.</div></div></div><div id="vendCfg"></div></div>
   </section>
 
   <section data-pagina="pedidos" hidden>
@@ -579,8 +592,9 @@ const nomeMes=(m)=>{const[a,b]=m.split('-');return MES_L[+b-1]+' de '+a};
 const somaMes=(m,n)=>{const[a,b]=m.split('-').map(Number);const d=new Date(Date.UTC(a,b-1+n,1));return d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0')};
 function delta(a,b,inv){ if(!b) return '<span class="delta eq">sem base</span>'; const d=(a-b)/b; const c=Math.abs(d)<.005?'eq':(d>0)!==!!inv?'up':'down'; return `<span class="delta ${c}">${d>0?'▲':d<0?'▼':'■'} ${pct(Math.abs(d))}</span>`; }
 
-const VERSAO='v14';
+const VERSAO='v15';
 const VERSOES=[
+ {v:'v15',data:'14/10/2026',tit:'Produtos gerencial, período personalizado e vendedores ativos',arq:'painel-visu-v15.zip',itens:['Produtos e mix redesenhado: indicadores do mix, participação por tipo com variação, evolução do mix em 6 meses, matriz tecido × cor e curva ABC em gráfico.','Margem bruta calculada só sobre os itens com custo cadastrado na Conta Azul, com o percentual de cobertura.','Filtro "Período personalizado" (de/até) nas páginas comerciais.','Vendedores: o ADM marca quem é ou não é vendedor; os inativos saem da lista e da régua de comissão.']},
  {v:'v14',data:'14/10/2026',tit:'Painel mais estável',arq:'painel-visu-v14-estavel.zip',itens:['Um erro em segundo plano (Conta Azul ou banco fora do ar) não derruba mais o painel inteiro.','Se o banco de dados não responder, o painel continua no ar e tenta de novo a cada minuto.','Aceita a DATABASE_URL copiada do Neon do jeito que ela vier (com psql e aspas).','Endereço /saude/banco para conferir se o banco está conectado.']},
  {v:'v13',data:'14/10/2026',tit:'Assinatura mais discreta',arq:'painel-visu-v13-assinatura.zip',itens:['"Desenvolvido por Seja Expert" virou uma linha pequena no pé do menu, com a versão ao lado, no estilo do FluxIA.']},
  {v:'v12',data:'14/10/2026',tit:'Assinatura Seja Expert no menu',arq:'painel-visu-v12-assinatura.zip',itens:['Rodapé do menu lateral com "Desenvolvido por", a marca Seja Expert, "Gestão Financeira e BPO" e a versão do painel.','A menção à Seja Expert saiu do topo do menu e do rodapé das páginas.']},
@@ -613,14 +627,20 @@ function janela(){
   const m=E.mes, hoje=new Date(Date.now()-3*3600e3), mesHoje=hoje.toISOString().slice(0,7), dia=hoje.getUTCDate();
   // mês em andamento: compara com os mesmos dias do período anterior
   const parcial=m===mesHoje;
-  if(E.periodo==='mes'){ const ma=somaMes(m,-1); return {atual:[m],ant:[ma],corte:parcial?{mes:ma,dia}:null,rot:nomeMes(m)+(parcial?` · até o dia ${dia}`:''),comp:parcial?`1 a ${dia} de ${MES_L[+ma.slice(5)-1]}`:'mês anterior'}; }
+  if(E.periodo==='faixa'&&E.de&&E.ate&&E.de<=E.ate){
+    const dias=Math.round((Date.parse(E.ate)-Date.parse(E.de))/864e5)+1, aDe=new Date(Date.parse(E.de)-dias*864e5).toISOString().slice(0,10), aAte=new Date(Date.parse(E.de)-864e5).toISOString().slice(0,10);
+    const meses=(a,b)=>{ const r=[]; let x=a.slice(0,7); while(x<=b.slice(0,7)){ r.push(x); x=somaMes(x,1); } return r; };
+    const br=(d)=>d.split('-').reverse().join('/');
+    return {atual:Object.assign(meses(E.de,E.ate),{faixa:[E.de,E.ate]}),ant:Object.assign(meses(aDe,aAte),{faixa:[aDe,aAte]}),corte:null,rot:`${br(E.de)} a ${br(E.ate)}`,comp:`${br(aDe)} a ${br(aAte)}`};
+  }
+  if(E.periodo==='mes'||E.periodo==='faixa'){ const ma=somaMes(m,-1); return {atual:[m],ant:[ma],corte:parcial?{mes:ma,dia}:null,rot:nomeMes(m)+(parcial?` · até o dia ${dia}`:''),comp:parcial?`1 a ${dia} de ${MES_L[+ma.slice(5)-1]}`:'mês anterior'}; }
   if(E.periodo==='ano'){ const [a,b]=m.split('-').map(Number); const at=[],an=[]; for(let i=1;i<=b;i++){at.push(a+'-'+String(i).padStart(2,'0'));an.push((a-1)+'-'+String(i).padStart(2,'0'));}
     return {atual:at,ant:an,corte:parcial?{mes:an[an.length-1],dia}:null,rot:`janeiro a ${MES_L[b-1]} de ${a}`,comp:`mesmo período de ${a-1}`}; }
   const at=[],an=[]; for(let i=11;i>=0;i--){at.push(somaMes(m,-i));an.push(somaMes(m,-i-12));}
   return {atual:at,ant:an,corte:parcial?{mes:an[an.length-1],dia}:null,rot:`12 meses até ${nomeMes(m)}`,comp:'12 meses anteriores'};
 }
 const passaFiltros=(l)=>Object.entries(E.filtros).every(([k,v])=>!v||(k==='nr'?(v==='sem'?!l.nr:l.nr===v):l[k]===v));
-function linhas(meses,corte){ const s=new Set(meses); return E.dados.linhas.filter(l=>s.has(l.m)&&passaFiltros(l)&&!(corte&&l.m===corte.mes&&l.d&&+l.d.slice(8)>corte.dia)); }
+function linhas(meses,corte){ const s=new Set(meses), fx=meses.faixa; return E.dados.linhas.filter(l=>s.has(l.m)&&passaFiltros(l)&&!(corte&&l.m===corte.mes&&l.d&&+l.d.slice(8)>corte.dia)&&!(fx&&l.d&&(l.d<fx[0]||l.d>fx[1]))); }
 const pl=(n,um,varios)=>`${int(n)} ${Math.round(n)===1?um:varios}`;
 
 function resumo(ls){
@@ -660,12 +680,24 @@ function marcarFiltros(){
 }
 
 // ---------- carga ----------
+// vendedores marcados como inativos pelo ADM somem da lista e da régua; as vendas deles ficam em "Não vendedores"
+const NAO_VEND='Não vendedores';
+function aplicarVendedores(){
+  const ina=new Set((E.vcfg?.inativos||[]).map(x=>x.toLowerCase()));
+  E.dados.linhas.forEach(l=>{ if(l.vo===undefined) l.vo=l.v; l.v=l.vo&&ina.has(String(l.vo).toLowerCase())?NAO_VEND:l.vo; });
+}
+async function salvarVendedores(inativos){
+  E.vcfg={inativos};
+  if(!PREVIA) await api('/api/vendedores',{method:'POST',body:JSON.stringify({inativos})});
+  aplicarVendedores(); montarFiltros(); desenhar();
+}
 async function carregar(forcar){
   try{
     let d;
     if(PREVIA) d=window.__DADOS__;
     else{ const r=await fetch('/api/vendas'+(forcar?'?forcar=1':''),{headers:{Accept:'application/json'}}); if(r.status===401){location.href='/login';return;} d=await r.json(); if(!r.ok) throw new Error(d.erro||('erro '+r.status)); }
-    E.dados=d; $('avisoErro').hidden=true;
+    try{ E.vcfg=PREVIA?(E.vcfg||{inativos:[]}):await (await fetch('/api/vendedores',{headers:{Accept:'application/json'}})).json(); }catch(e){ E.vcfg={inativos:[]}; }
+    E.dados=d; aplicarVendedores(); $('avisoErro').hidden=true;
     montarFiltros(); desenhar();
   }catch(e){ const a=$('avisoErro'); a.hidden=false; a.textContent='Não foi possível carregar as vendas: '+e.message; }
 }
@@ -686,7 +718,8 @@ function desenhar(){
   const permit=paginasAtivas(); if(!permit.includes(E.pagina)) E.pagina=permit[0]||'painel';
   montarMenu();
   document.querySelectorAll('section[data-pagina]').forEach(s=>s.hidden=s.dataset.pagina!==E.pagina);
-  const j=janela(), it=ITEM[E.pagina], grupo=it.grupo, comercial=grupo==='Comercial';
+  const it=ITEM[E.pagina], grupo=it.grupo, comercial=grupo==='Comercial';
+  const perSalvo=E.periodo; if(!comercial) E.periodo='mes'; const j=janela(); E.periodo=perSalvo;
   $('pgTit').textContent=it.rot;
   const per=['usuarios','versoes','dados'].includes(E.pagina)?'':grupo==='Comercial'?j.rot:nomeMes(E.mes);
   $('pgCtx').innerHTML=`<b>${grupo}</b>${esc(it.ctx)}${per?' · '+esc(per):''}`;
@@ -694,6 +727,8 @@ function desenhar(){
   $('barraFiltros').hidden=['usuarios','versoes','dados'].includes(E.pagina);
   document.querySelectorAll('.f.com').forEach(f=>f.hidden=!comercial);
   document.querySelectorAll('.f.per')[0].hidden=!comercial;
+  const fx=comercial&&E.periodo==='faixa'; document.querySelectorAll('.f.per2').forEach(f=>f.hidden=!fx); document.querySelectorAll('.f.per')[1].hidden=fx;
+  if(!comercial&&E.periodo==='faixa'){ /* páginas financeiras usam o mês */ }
   $('limpar').hidden=!comercial||!Object.values(E.filtros).some(Boolean);
   avisoFin();
   const S=$('simula'); if(E.verComo){ S.hidden=false; S.innerHTML=`<span>Visualizando o painel como <b>${esc(E.verComo.nome||PERF[E.verComo.perfil])}</b>. O menu mostra exatamente o que esse perfil vê.</span><button class="bt2" type="button" id="simSair">Voltar para ADM</button>`; $('simSair').onclick=()=>{ E.verComo=null; $('verComo').value=''; desenhar(); }; } else S.hidden=true;
@@ -703,7 +738,7 @@ function desenhar(){
 // ---------- 1. visão geral ----------
 function pgGeral(j){
   const a=resumo(linhas(j.atual)), b=resumo(linhas(j.ant,j.corte)), R=E.dados.regras;
-  const cuA=linhas(j.atual).reduce((x,l)=>x+(l.cu||0),0), mgA=cuA&&a.fat?(a.fat-cuA)/a.fat:null;
+  const MG=margem(linhas(j.atual)), mgA=MG.mg;
   const hojeD=new Date(Date.now()-3*3600e3), parcialM=E.periodo==='mes'&&E.mes===mesHojeBR(), dm=new Date(+E.mes.slice(0,4),+E.mes.slice(5),0).getDate();
   const peV=E.periodo==='mes'?peRef().valor:0, lsK=linhas(j.atual);
   $('kpis').innerHTML=kpiHtml([
@@ -713,7 +748,7 @@ function pgGeral(j){
     ['Vendas a clientes novos',pct(a.fat?a.nr.novo.t/a.fat:0),`<span>${brl(a.nr.novo.t)} · ${pl(a.nr.novo.c.size,'cliente novo','clientes novos')}</span>`,'','R3',()=>detPedidos('Vendas a clientes novos',lsK.filter(l=>a.ped.get(l.p)?.nr==='novo'))],
     ['Peças vendidas',int(a.pecas),`${delta(a.pecas,b.pecas)}<span>${j.comp}</span>`,'','',()=>detItens('Peças vendidas',lsK)],
     ['Clientes que compraram',int(a.clientes),`<span>${int(a.nr.recompra.c.size)} de recompra</span>`,'','',()=>detClientes('Clientes que compraram',lsK)],
-    ['Margem bruta das vendas',mgA==null?'—':pct(mgA),`<span>${mgA==null?'sem custo dos produtos nesta fonte':mgA<0.4?'abaixo do mínimo de 40%':'acima do mínimo de 40%'}</span>`,'','',()=>detPedidos('Margem por pedido',lsK)],
+    ['Margem bruta das vendas',mgA==null?'—':pct(mgA),`<span>${txtMg(MG)}</span>`,'','',()=>detPedidos('Margem por pedido',lsK)],
     parcialM?['Projeção do mês',brl(a.fat/hojeD.getUTCDate()*dm),`<span>pelo ritmo de ${hojeD.getUTCDate()} dias${peV?` · PE ${curto(peV)}`:''}</span>`,'','C1',()=>detPedidos('Vendas do mês até hoje',lsK)]
       :['Cobertura do equilíbrio',peV?pct(a.fat/peV):'—',`<span>${peV?`PE ${brl(peV)}`:'período maior que um mês'}</span>`,'','C1',()=>detPedidos('Vendas do período',lsK)],
   ]);
@@ -768,28 +803,63 @@ function ranking(id,lista,meta,vazio,limite,abrir){
   el.innerHTML=lista.slice(0,limite||8).map((g,i)=>`<div class="r"${abrir?D(()=>abrir(g))+' tabindex="0"':''}><span class="pos">${i+1}</span><span class="nm" title="${esc(g.nome)}">${esc(g.nome)}</span><span class="vl">${g.rot}</span><span class="tr"><i style="width:${Math.max(g.val/max*100,1.5)}%"></i></span><span class="mt">${meta(g)}</span></div>`).join('');
 }
 function pgProdutos(j){
-  const ls=linhas(j.atual), pc=E.medida==='pecas', totQ=ls.reduce((s,l)=>s+l.q,0)||1, totT=ls.reduce((s,l)=>s+l.t,0)||1;
-  const semProd=!E.dados.linhas.some(l=>l.mt||l.tp||l.cr||l.pr);
-  const msg=semProd?'Esta fonte não tem tipo de produto, material e cor. O mix aparece quando a planilha de vendas for ligada.':null;
-  const prep=(arr)=>arr.map(g=>({...g,val:pc?g.q:g.t,rot:pc?int(g.q)+' pç':brl(g.t)})).sort((a,b)=>b.val-a.val);
-  const meta=(g)=>pc?`${pct(g.q/totQ)} das peças · ${brl(g.t)} · ${pl(g.pedidos,'pedido','pedidos')}`:`${pct(g.t/totT)} do faturamento · ${int(g.q)} peças · ${pl(g.pedidos,'pedido','pedidos')}`;
-  const mc=new Map(); ls.forEach(l=>{ if(!l.mt&&!l.cr) return; const k=(l.mt||'(sem material)')+' · '+(l.cr||'(sem cor)'); const g=mc.get(k)||{nome:k,t:0,q:0,ped:new Set()}; g.t+=l.t; g.q+=l.q; g.ped.add(l.p); mc.set(k,g); });
-  ranking('rkMatCor',prep([...mc.values()].map(g=>({...g,pedidos:g.ped.size}))),meta,msg,10,(g)=>detItens(g.nome,ls.filter(l=>(l.mt||'(sem material)')+' · '+(l.cr||'(sem cor)')===g.nome)));
-  const sem=(c)=>agrupar(ls.filter(l=>l[c]),c);
-  ranking('rkProduto',prep(agrupar(ls.filter(l=>l.tp||l.pr).map(l=>({...l,tp:l.tp||l.pr})),'tp')),meta,E.dados.itens_pendentes?'Buscando os produtos das vendas na Conta Azul…':msg,8,(g)=>detItens(g.nome,ls.filter(l=>(l.tp||l.pr||'(em branco)')===g.nome)));
-  ranking('rkMaterial',prep(sem('mt')),meta,msg,8,(g)=>detItens('Material: '+g.nome,ls.filter(l=>l.mt===g.nome)));
-  ranking('rkCor',prep(sem('cr')),meta,msg,8,(g)=>detItens('Cor: '+g.nome,ls.filter(l=>l.cr===g.nome)));
-  const tec=sem('mt').sort((a,b)=>b.t-a.t), tot=resumo(ls);
-  $('tbTecido').innerHTML=tec.length?tec.map(g=>`<tr${D(()=>detItens('Tecido: '+g.nome,ls.filter(l=>l.mt===g.nome)))}><td class="lk">${esc(g.nome)}</td><td class="v">${int(g.pedidos)}</td><td class="v">${int(g.q)}</td><td class="v">${brl(g.t)}</td><td class="v">${brl(g.pedidos?g.t/g.pedidos:0)}</td><td class="v">${brl2(g.q?g.t/g.q:0)}</td></tr>`).join('')
-    +`<tr class="tot"><td>Todos os tecidos</td><td class="v">${int(tot.pedidos)}</td><td class="v">${int(tot.pecas)}</td><td class="v">${brl(tot.fat)}</td><td class="v">${brl(tot.ticket)}</td><td class="v">${brl2(tot.pecas?tot.fat/tot.pecas:0)}</td></tr>`
-    :`<tr><td colspan="6" class="vazio">${msg||'Sem vendas com esses filtros.'}</td></tr>`;
+  const ls=linhas(j.atual), ant=linhas(j.ant,j.corte), pc=E.medida==='pecas', V=(g)=>pc?g.q:g.t, F=(v)=>pc?int(v)+' pç':brl(v);
   document.querySelectorAll('[data-med]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.med===E.medida)));
-  const pr=new Map(); ls.forEach(l=>{ const k=l.pr||[l.tp,l.mt,l.cr].filter(Boolean).join(' · ')||'(sem produto)'; const g=pr.get(k)||{nome:k,t:0,q:0,cu:0,ped:new Set()}; g.t+=l.t; g.q+=l.q; g.cu+=l.cu||0; g.ped.add(l.p); pr.set(k,g); });
-  const lp=[...pr.values()].sort((a,b)=>b.t-a.t), totP=lp.reduce((s2,x)=>s2+x.t,0)||1, temCusto=lp.some(x=>x.cu>0);
-  let ac=0;
-  $('abcProdSub').textContent=`${int(lp.length)} produtos · A = 80% do faturamento, B = 15%, C = 5%`+(temCusto?' · margem pelo custo cadastrado na Conta Azul':' · margem aparece quando houver custo do produto');
-  $('abcProd').innerHTML=lp.length?`<table><thead><tr><th>Classe</th><th>Produto</th><th class="v">Peças</th><th class="v">Pedidos</th><th class="v">Faturamento</th><th class="v">% acumulado</th>${temCusto?'<th class="v">Margem bruta</th>':''}</tr></thead><tbody>${lp.slice(0,15).map(x=>{ const antes=ac/totP; ac+=x.t; const k=antes<.8?'A':antes<.95?'B':'C'; const mg=x.cu?(x.t-x.cu)/x.t:null;
-    return `<tr${D(()=>detItens('Produto: '+x.nome,ls.filter(l=>(l.pr||[l.tp,l.mt,l.cr].filter(Boolean).join(' · ')||'(sem produto)')===x.nome)))}><td><span class="pill p-${k}">${k}</span></td><td class="el lk" title="${esc(x.nome)}">${esc(x.nome)}</td><td class="v">${int(x.q)}</td><td class="v">${x.ped.size}</td><td class="v">${brl(x.t)}</td><td class="v">${pct(ac/totP)}</td>${temCusto?`<td class="v">${mg==null?'—':`<span class="pill ${mg<0.4?'p-no':'p-ok'}" style="${mg<0.4?'background:var(--redSoft);color:var(--red)':''}">${pct(mg)}</span>`}</td>`:''}</tr>`; }).join('')}</tbody></table>`:'<div class="vazio">Sem vendas com esses filtros.</div>';
+  const semProd=!E.dados.linhas.some(l=>l.mt||l.tp||l.cr||l.pr);
+  const vazio=(m)=>`<div class="vazio">${E.dados.itens_pendentes?'Buscando os produtos das vendas na Conta Azul… o mix completa sozinho em alguns minutos.':semProd?'Esta fonte ainda não tem tipo de produto, material e cor.':m||'Sem vendas com esses filtros.'}</div>`;
+  const tipoDe=(l)=>l.tp||l.pr||'(sem tipo)', prodDe=(l)=>l.pr||[l.tp,l.mt,l.cr].filter(Boolean).join(' · ')||'(sem produto)';
+  const tot=resumo(ls), totA=resumo(ant), M=margem(ls);
+  const prodSet=new Set(ls.map(prodDe));
+  const grp=(arr,fn)=>{ const m=new Map(); arr.forEach(l=>{ const k=fn(l); const g=m.get(k)||{nome:k,t:0,q:0,ls:[],ped:new Set()}; g.t+=l.t; g.q+=l.q; g.ls.push(l); g.ped.add(l.p); m.set(k,g); }); return [...m.values()]; };
+  const tipos=grp(ls,tipoDe).sort((a,b)=>V(b)-V(a)), tiposA=new Map(grp(ant,tipoDe).map(g=>[g.nome,g]));
+  const top3=tipos.slice(0,3).reduce((s2,g)=>s2+g.t,0);
+  $('prodKpis').innerHTML=kpiHtml([
+    ['Peças vendidas',int(tot.pecas),`${delta(tot.pecas,totA.pecas)}<span>${j.comp}</span>`,'dest','',()=>detItens('Peças vendidas',ls)],
+    ['Preço médio por peça',brl2(tot.pecas?tot.fat/tot.pecas:0),`${delta(tot.pecas?tot.fat/tot.pecas:0,totA.pecas?totA.fat/totA.pecas:0)}<span>${j.comp}</span>`,'','',()=>detItens('Itens vendidos',ls)],
+    ['Produtos diferentes',int(prodSet.size),`<span>${int(tipos.length)} tipos · 3 maiores = ${pct(tot.fat?top3/tot.fat:0)} do faturamento</span>`,'','',()=>detItens('Itens vendidos',ls)],
+    ['Margem bruta do mix',M.mg==null?'—':pct(M.mg),`<span>${txtMg(M)}</span>`,'','',()=>detPedidos('Margem por pedido',ls)],
+  ]);
+  // mix por tipo: barra 100% + tabela
+  const cores=['var(--s1)','var(--s2)','var(--s3)','#8A2E9A','#C9A227','#5ABAB4','#D7245F','var(--sNone)'];
+  const totV=tipos.reduce((s2,g)=>s2+V(g),0)||1, tipos7=tipos.slice(0,7), outros=tipos.slice(7);
+  const cor=new Map(tipos7.map((g,i)=>[g.nome,cores[i]]));
+  $('mixSub').textContent=`${pc?'Em peças':'Em faturamento'} · ${j.rot} · comparado com ${j.comp}`;
+  $('mixTipo').innerHTML=tipos.length?`<div class="barra2" style="height:26px">${tipos7.map(g=>`<span style="flex:${V(g)};background:${cor.get(g.nome)}" title="${esc(g.nome)}"></span>`).join('')}${outros.length?`<span style="flex:${outros.reduce((s2,g)=>s2+V(g),0)};background:var(--sNone)"></span>`:''}</div>
+    <div class="tw" style="margin-top:12px"><table class="mix"><thead><tr><th>Tipo de produto</th><th class="v">${pc?'Peças':'Faturamento'}</th><th class="v">Part.</th><th class="v">Var.</th><th class="v">${pc?'Faturamento':'Peças'}</th><th class="v">R$/peça</th><th class="v">Margem</th></tr></thead><tbody>${tipos.slice(0,10).map(g=>{ const a=tiposA.get(g.nome), mg=margem(g.ls).mg;
+      return `<tr${D(()=>detItens('Tipo: '+g.nome,g.ls))}><td><i class="dot" style="background:${cor.get(g.nome)||'var(--sNone)'}"></i><span class="lk">${esc(g.nome)}</span></td><td class="v"><b>${F(V(g))}</b></td><td class="v">${pct(V(g)/totV)}</td><td class="v">${a?delta(V(g),V(a)):'<span class="delta eq">novo</span>'}</td><td class="v">${pc?brl(g.t):int(g.q)}</td><td class="v">${brl2(g.q?g.t/g.q:0)}</td><td class="v">${mg==null?'—':`<span style="color:${mg<0.4?'var(--red)':'var(--green)'};font-weight:700">${pct(mg)}</span>`}</td></tr>`; }).join('')}</tbody></table></div>`:vazio();
+  // evolução do mix (6 meses, 100%)
+  const ms=[]; for(let i=5;i>=0;i--) ms.push(somaMes(E.mes,-i));
+  const porMes=ms.map(mm=>{ const g=new Map(); linhas([mm]).forEach(l=>{ const k=cor.has(tipoDe(l))?tipoDe(l):'Outros'; g.set(k,(g.get(k)||0)+(pc?l.q:l.t)); }); return {mm,g,tot:[...g.values()].reduce((a,b)=>a+b,0)}; });
+  const W=520,H=230,L=34,R=8,T=10,B=26,w=W-L-R,h=H-T-B,slot=w/ms.length,bw=Math.min(slot*.6,44);
+  let sv=''; [0,.25,.5,.75,1].forEach(v=>{ const y=T+h-v*h; sv+=`<line x1="${L}" x2="${W-R}" y1="${y}" y2="${y}" stroke="var(--line)"/><text x="${L-6}" y="${y+4}" text-anchor="end">${v*100}%</text>`; });
+  porMes.forEach((x,i)=>{ const cx=L+i*slot+slot/2; let ac=0; [...tipos7.map(g=>g.nome),'Outros'].forEach(k=>{ const v=x.g.get(k)||0; if(!v||!x.tot) return; const hh=v/x.tot*h; sv+=`<rect x="${cx-bw/2}" y="${T+h-(ac+hh)}" width="${bw}" height="${Math.max(hh-1,0.5)}" fill="${cor.get(k)||'var(--sNone)'}"><title>${esc(k)}: ${pct(v/x.tot)}</title></rect>`; ac+=hh; });
+    sv+=`<text x="${cx}" y="${H-8}" text-anchor="middle" style="${x.mm===E.mes?'fill:var(--ink);font-weight:700':''}">${MES_C[+x.mm.slice(5)-1]}</text>`; });
+  $('mixEvol').innerHTML=tipos.length?`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Evolução do mix por tipo">${sv}</svg>`:vazio();
+  $('mixEvolLeg').innerHTML=tipos7.map(g=>`<span><i style="background:${cor.get(g.nome)}"></i>${esc(g.nome)}</span>`).join('')+(outros.length?'<span><i style="background:var(--sNone)"></i>Outros</span>':'');
+  // matriz tecido × cor
+  const mats=grp(ls.filter(l=>l.mt),l=>l.mt).sort((a,b)=>V(b)-V(a)), crs=grp(ls.filter(l=>l.cr),l=>l.cr).sort((a,b)=>V(b)-V(a));
+  const cols=crs.slice(0,8).map(c=>c.nome), temOutras=crs.length>8;
+  const cel=new Map(); ls.forEach(l=>{ if(!l.mt||!l.cr) return; const c=cols.includes(l.cr)?l.cr:'Outras'; const k=l.mt+'|'+c; const g=cel.get(k)||{v:0,ls:[]}; g.v+=pc?l.q:l.t; g.ls.push(l); cel.set(k,g); });
+  const mx=Math.max(...[...cel.values()].map(x=>x.v),1), allCols=[...cols,...(temOutras?['Outras']:[])];
+  $('matrizSub').textContent=`${pc?'Peças':'Faturamento'} por tecido e cor · ${j.rot} · quanto mais escuro, maior o volume`;
+  $('matriz').innerHTML=mats.length&&cols.length?`<table class="matriz"><thead><tr><th>Tecido</th>${allCols.map(c=>`<th class="v">${esc(c)}</th>`).join('')}<th class="v">Total</th></tr></thead><tbody>${mats.map(mt=>`<tr><td><b>${esc(mt.nome)}</b></td>${allCols.map(c=>{ const x=cel.get(mt.nome+'|'+c); if(!x) return '<td class="v vz">·</td>'; const a=x.v/mx; return `<td class="v hm"${D(()=>detItens(mt.nome+' · '+c,x.ls))} style="background:color-mix(in srgb,var(--s1) ${Math.round(8+a*82)}%,transparent);color:${a>.45?'#fff':'var(--ink)'}">${pc?int(x.v):curto(x.v)}</td>`; }).join('')}<td class="v"><b>${pc?int(mt.q):brl(mt.t)}</b></td></tr>`).join('')}
+    <tr class="tot"><td>Total</td>${allCols.map(c=>{ const v=c==='Outras'?crs.slice(8).reduce((s2,g)=>s2+V(g),0):V(crs.find(g=>g.nome===c)); return `<td class="v">${pc?int(v):curto(v)}</td>`; }).join('')}<td class="v">${pc?int(tot.pecas):brl(tot.fat)}</td></tr></tbody></table>`:vazio('Sem tecido e cor nas vendas deste período.');
+  // ABC (Pareto)
+  const lp=grp(ls,prodDe).sort((a,b)=>b.t-a.t), totP=lp.reduce((s2,x)=>s2+x.t,0)||1;
+  let ac=0; lp.forEach(x=>{ const antes=ac/totP; ac+=x.t; x.cls=antes<.8?'A':antes<.95?'B':'C'; x.acum=ac/totP; x.mg=margem(x.ls).mg; });
+  const nA=lp.filter(x=>x.cls==='A').length;
+  $('abcProdSub').textContent=lp.length?`${int(nA)} de ${int(lp.length)} produtos (${pct(nA/lp.length)}) fazem 80% do faturamento`:'—';
+  const top=lp.slice(0,20), W2=560,H2=240,L2=8,R2=34,T2=12,B2=14,w2=W2-L2-R2,h2=H2-T2-B2,sl=w2/Math.max(top.length,1),mxT=top[0]?.t||1;
+  let pv=`<line x1="${L2}" x2="${W2-R2}" y1="${T2+h2*.2}" y2="${T2+h2*.2}" stroke="var(--orange)" stroke-dasharray="3 4" opacity=".6"/><text x="${W2-R2+4}" y="${T2+h2*.2+4}" style="fill:var(--orange)">80%</text>`;
+  const pts=[]; top.forEach((x,i)=>{ const cx=L2+i*sl+sl/2, bh=x.t/mxT*h2*.95; pv+=`<rect x="${cx-sl*.36}" y="${T2+h2-bh}" width="${sl*.72}" height="${bh}" rx="2" fill="${x.cls==='A'?'var(--s1)':'var(--barSoft)'}"${D(()=>detItens('Produto: '+x.nome,x.ls))}><title>${esc(x.nome)}: ${brl(x.t)} · acumulado ${pct(x.acum)}</title></rect>`; pts.push(`${cx},${T2+h2-x.acum*h2}`); });
+  pv+=`<polyline points="${pts.join(' ')}" fill="none" stroke="var(--orange)" stroke-width="2.2"/>`;
+  $('paretoProd').innerHTML=lp.length?`<svg viewBox="0 0 ${W2} ${H2}" width="100%" role="img" aria-label="Curva ABC dos 20 maiores produtos">${pv}</svg><div class="nota">Os 20 maiores produtos por faturamento. Barras escuras = classe A. Clique numa barra para ver as vendas.</div>`:vazio();
+  $('abcProd').innerHTML=lp.length?`<table><thead><tr><th>Classe</th><th>Produto</th><th class="v">Peças</th><th class="v">Pedidos</th><th class="v">Faturamento</th><th class="v">% acumulado</th><th class="v">Margem</th></tr></thead><tbody>${lp.slice(0,40).map(x=>`<tr${D(()=>detItens('Produto: '+x.nome,x.ls))}><td><span class="pill p-${x.cls}">${x.cls}</span></td><td class="el lk" title="${esc(x.nome)}">${esc(x.nome)}</td><td class="v">${int(x.q)}</td><td class="v">${x.ped.size}</td><td class="v">${brl(x.t)}</td><td class="v">${pct(x.acum)}</td><td class="v">${x.mg==null?'—':pct(x.mg)}</td></tr>`).join('')}</tbody></table>`:'';
+  // tecido
+  const tec=grp(ls.filter(l=>l.mt),l=>l.mt).sort((a,b)=>b.t-a.t);
+  $('tbTecido').innerHTML=tec.length?tec.map(g=>{ const mg=margem(g.ls).mg; return `<tr${D(()=>detItens('Tecido: '+g.nome,g.ls))}><td class="lk">${esc(g.nome)}</td><td class="v">${int(g.ped.size)}</td><td class="v">${int(g.q)}</td><td class="v">${brl(g.t)}</td><td class="v">${brl(g.ped.size?g.t/g.ped.size:0)}</td><td class="v">${brl2(g.q?g.t/g.q:0)}</td><td class="v">${mg==null?'—':pct(mg)}</td></tr>`; }).join('')
+    +`<tr class="tot"><td>Todos</td><td class="v">${int(tot.pedidos)}</td><td class="v">${int(tot.pecas)}</td><td class="v">${brl(tot.fat)}</td><td class="v">${brl(tot.ticket)}</td><td class="v">${brl2(tot.pecas?tot.fat/tot.pecas:0)}</td><td class="v">${M.mg==null?'—':pct(M.mg)}</td></tr>`
+    :`<tr><td colspan="7">${vazio()}</td></tr>`;
 }
 
 // ---------- 3. clientes ----------
@@ -816,19 +886,30 @@ function pgClientes(j){
 }
 
 // ---------- 4. vendedores ----------
+function cfgVendedores(){
+  const adm=(E.verComo?E.verComo.perfil:E.eu?.perfil)==='adm'; $('vendCfgCard').hidden=!adm; if(!adm) return;
+  const ina=new Set((E.vcfg?.inativos||[]).map(x=>x.toLowerCase()));
+  const nomes=new Map(); E.dados.linhas.forEach(l=>{ if(!l.vo) return; const g=nomes.get(l.vo)||{nome:l.vo,t:0,ult:''}; g.t+=l.t; if((l.d||'')>g.ult) g.ult=l.d; nomes.set(l.vo,g); });
+  (E.dados.vendedores_cadastrados||[]).forEach(n=>{ if(n&&![...nomes.keys()].some(k=>k.toLowerCase()===n.toLowerCase())) nomes.set(n,{nome:n,t:0,ult:''}); });
+  const lista=[...nomes.values()].sort((a,b)=>b.t-a.t);
+  $('vendCfg').innerHTML=`<div class="tw"><table><thead><tr><th>Nome na Conta Azul</th><th class="v">Vendas (24 meses)</th><th class="v">Última venda</th><th>Situação</th></tr></thead><tbody>${lista.map(v=>{ const off=ina.has(v.nome.toLowerCase()); return `<tr><td><b>${esc(v.nome)}</b></td><td class="v">${brl(v.t)}</td><td class="v">${v.ult?v.ult.split('-').reverse().join('/'):'—'}</td><td><label class="sw"><input type="checkbox" data-vend="${esc(v.nome)}" ${off?'':'checked'}><span></span>${off?'<em class="off">Inativo · não é vendedor</em>':'<em>Ativo · vendedor</em>'}</label></td></tr>`; }).join('')}</tbody></table></div>`;
+  $('vendCfg').querySelectorAll('[data-vend]').forEach(c=>c.addEventListener('change',()=>{ const n=c.dataset.vend; let l=(E.vcfg?.inativos||[]).filter(x=>x.toLowerCase()!==n.toLowerCase()); if(!c.checked) l.push(n); salvarVendedores(l).catch(e=>alert(e.message)); }));
+}
 function pgVendedores(j){
   const ls=linhas(j.atual), tot=ls.reduce((s,l)=>s+l.t,0)||1, R=E.dados.regras, mesMode=E.periodo==='mes';
   const porV=new Map(); ls.forEach(l=>{ const g=porV.get(l.v)||[]; g.push(l); porV.set(l.v,g); });
-  const lista=[...porV.entries()].map(([nome,g])=>({nome,r:resumo(g),cu:g.reduce((s2,l)=>s2+(l.cu||0),0)})).sort((a,b)=>b.r.fat-a.r.fat);
+  const lista=[...porV.entries()].map(([nome,g])=>({nome,r:resumo(g),M:margem(g)})).sort((a,b)=>(a.nome===NAO_VEND)-(b.nome===NAO_VEND)||b.r.fat-a.r.fat);
+  cfgVendedores();
   $('thRegua').hidden=!mesMode;
-  (E.dados.vendedores_cadastrados||[]).forEach(nm=>{ if(!porV.has(nm)&&!Object.values(E.filtros).some(Boolean)) lista.push({nome:nm,r:resumo([])}); });
+  const inaS=new Set((E.vcfg?.inativos||[]).map(x=>x.toLowerCase()));
+  (E.dados.vendedores_cadastrados||[]).forEach(nm=>{ if(!porV.has(nm)&&!inaS.has(nm.toLowerCase())&&![...porV.keys()].some(k=>String(k).toLowerCase()===nm.toLowerCase().trim())&&!Object.values(E.filtros).some(Boolean)) lista.push({nome:nm,r:resumo([])}); });
   $('vendNota').textContent=mesMode?'Comissão sobre o faturamento (data e valor da venda), como a Visu pratica. A régua compara o faturamento do mês com R$ 15 mil (começa em 1%) e R$ 50 mil (libera 5%, sem teto). Os traços na barra marcam esses dois pontos.':'A régua da comissão aparece quando o período é um mês só, porque a comissão é apurada mês a mês.';
   const esc2=Math.max(R.comissao_teto*1.15,...lista.map(v=>v.r.fat));
   $('tbVend').innerHTML=lista.length?lista.map(v=>{ const f=v.r.fat, n=v.r.nr.novo;
     const st=f>=R.comissao_teto?['p-ok','5% liberado']:f>=R.comissao_inicio?['p-mid',`faltam ${brl(R.comissao_teto-f)} p/ 5%`]:['p-no',`faltam ${brl(R.comissao_inicio-f)} p/ 1%`];
     const lsV=ls.filter(l=>l.v===v.nome);
-    return `<tr${D(()=>detPedidos('Vendedor: '+v.nome,lsV))}><td class="el"><b class="lk">${esc(v.nome)}</b></td><td class="v lk">${brl(f)}</td><td class="v">${pct(f/tot)}</td><td class="v">${int(v.r.pedidos)}</td><td class="v">${brl(v.r.ticket)}</td><td class="v">${brl(n.t)}</td><td class="v">${pct(f?n.t/f:0)}</td><td class="v">${int(n.c.size)}</td><td class="v">${(()=>{const c=v.cu||0; return c?pct((f-c)/f):'—';})()}</td>
-      ${mesMode?`<td style="min-width:230px"><div style="display:flex;gap:8px;align-items:center"><div class="mini" style="flex:1"><i style="width:${Math.min(f/esc2*100,100)}%"></i><u style="left:${R.comissao_inicio/esc2*100}%"></u><u style="left:${R.comissao_teto/esc2*100}%"></u></div><span class="pill ${st[0]}">${st[1]}</span></div></td>`:''}</tr>`; }).join('')
+    return `<tr${D(()=>detPedidos('Vendedor: '+v.nome,lsV))}><td class="el"><b class="lk">${esc(v.nome)}</b></td><td class="v lk">${brl(f)}</td><td class="v">${pct(f/tot)}</td><td class="v">${int(v.r.pedidos)}</td><td class="v">${brl(v.r.ticket)}</td><td class="v">${brl(n.t)}</td><td class="v">${pct(f?n.t/f:0)}</td><td class="v">${int(n.c.size)}</td><td class="v">${(v.M&&v.M.mg!=null?`<span class="pill ${v.M.mg<0.4?'':'p-ok'}" style="${v.M.mg<0.4?'background:var(--redSoft);color:var(--red)':''}">${pct(v.M.mg)}</span>`:'—')}</td>
+      ${mesMode&&v.nome===NAO_VEND?'<td><span style="color:var(--ink3);font-size:12px">sem comissão</span></td>':mesMode?`<td style="min-width:230px"><div style="display:flex;gap:8px;align-items:center"><div class="mini" style="flex:1"><i style="width:${Math.min(f/esc2*100,100)}%"></i><u style="left:${R.comissao_inicio/esc2*100}%"></u><u style="left:${R.comissao_teto/esc2*100}%"></u></div><span class="pill ${st[0]}">${st[1]}</span></div></td>`:''}</tr>`; }).join('')
     :'<tr><td colspan="9" class="vazio">Sem vendas com esses filtros.</td></tr>';
 }
 
@@ -948,12 +1029,12 @@ function pgResumo(j){
   const m=f?mesFin():E.mes, ma=somaMes(m,-1);
   const res=f&&!incompleto(m)?f.resultado[m]||0:null, rec=f?f.receita[m]||0:0;
   const proj30=f?f.projecao.semanas[3]?.saldo:null;
-  const lsR=linhas(j.atual), custo=lsR.reduce((s2,l)=>s2+(l.cu||0),0), margem=custo?(a.fat-custo)/a.fat:null;
+  const lsR=linhas(j.atual), MGR=margem(lsR), custo=MGR.cu, mgR=MGR.mg;
   $('resKpis').innerHTML=[
     ['Vendas',brl(a.fat),`${delta(a.fat,b.fat)}<span>${j.comp}</span>`,'dest',()=>detPedidos('Vendas',lsR)],
     ['Pedidos · ticket',`${int(a.pedidos)} · ${brl(a.ticket)}`,`${delta(a.ticket,b.ticket)}<span>ticket</span>`,'',()=>detPedidos('Pedidos',lsR)],
     ['Clientes novos',pct(a.fat?a.nr.novo.t/a.fat:0),`<span>${int(a.nr.novo.c.size)} clientes · ${brl(a.nr.novo.t)}</span>`,'',()=>detPedidos('Vendas a clientes novos',lsR.filter(l=>a.ped.get(l.p)?.nr==='novo'))],
-    ['Margem bruta das vendas',margem==null?'—':pct(margem),`<span>${margem==null?'sem custo dos produtos nesta fonte':margem<0.4?'abaixo dos 40% mínimos':'acima dos 40% mínimos'}</span>`,'',()=>detPedidos('Margem por pedido',lsR)],
+    ['Margem bruta das vendas',mgR==null?'—':pct(mgR),`<span>${txtMg(MGR)}</span>`,'',()=>detPedidos('Margem por pedido',lsR)],
     ['Resultado do mês',f?(res==null?'—':`<span class="${res<0?'neg':''}">${brl(res)}</span>`):'…',f?(res==null?'<span>despesas não lançadas no mês</span>':`<span>margem líquida ${pct(rec?res/rec:0)}</span>`):'<span>carregando</span>','',f?()=>detLanc('Lançamentos de '+nomeMes(m),l=>l[0]===m):null],
     ['Saldo em caixa',f?brl(f.saldo_atual):'…',f?`<span>${f.saldos.length} ${f.saldos.length===1?'conta':'contas'}</span>`:'','',f?()=>abrirDet('Saldos bancários','Saldo atual de cada conta financeira',[{rot:'Conta'},{rot:'Saldo',t:'brl',total:1}],f.saldos.map(c=>[c.nome,c.saldo])):null],
     ['Caixa em 4 semanas',f?`<span class="${proj30<0?'neg':''}">${brl(proj30)}</span>`:'…',f?`<span>projeção pelo a receber e a pagar</span>`:'','',f?()=>detAbertos('Contas a vencer em 4 semanas',x=>x[1]>=hojeISO()&&x[1]<=f.projecao.semanas[3].fim):null],
@@ -985,7 +1066,7 @@ function pgResumo(j){
     const topDesp=f.despesas_categoria.map(x=>({n:x.nome,a:x.valores[m]||0,b:x.valores[ma]||0})).filter(x=>x.b>0&&x.a>x.b*1.25&&x.a-x.b>2000).sort((p,q)=>(q.a-q.b)-(p.a-p.b))[0];
     if(topDesp) al.push([`Despesa em alta: ${topDesp.n}`,topDesp.a-topDesp.b,`Subiu ${pct((topDesp.a-topDesp.b)/topDesp.b)} em relação a ${nomeMes(ma)}.`,'var(--amber)',()=>detLanc(topDesp.n+' · '+nomeMes(m),l=>l[1]==='p'&&l[0]===m&&l[2]===topDesp.n)]);
   }
-  const abaixo=[...a.ped.values()].length&&custo?(()=>{ const pm=new Map(); lsR.forEach(l=>{const p=pm.get(l.p)||{t:0,c:0,k:l.p};p.t+=l.t;p.c+=l.cu||0;pm.set(l.p,p)}); return [...pm.values()].filter(p=>p.c&&p.t&&(p.t-p.c)/p.t<0.4); })():[];
+  const abaixo=[...a.ped.values()].length&&custo?(()=>{ const pm=new Map(); lsR.forEach(l=>{const p=pm.get(l.p)||{t:0,tc:0,c:0,k:l.p};p.t+=l.t;if(l.cu>0){p.tc+=l.t;p.c+=l.cu;}pm.set(l.p,p)}); return [...pm.values()].filter(p=>p.c&&p.tc&&(p.tc-p.c)/p.tc<0.4); })():[];
   const abaixoK=new Set(abaixo.map(p=>p.k));
   if(abaixo.length) al.push(['Vendas abaixo de 40% de margem',abaixo.reduce((s2,p)=>s2+p.t,0),`${pl(abaixo.length,'pedido','pedidos')} com margem abaixo da faixa verde; pela regra da Visu, precisam de autorização do Egberto.`,'var(--orange)',(()=>{const x=lsR.filter(l=>abaixoK.has(l.p));return ()=>detPedidos('Vendas abaixo de 40% de margem',x);})()]);
   const inat=clientesInativos(); if(inat.length) al.push(['Clientes que pararam de comprar',inat.reduce((s2,c)=>s2+c.t,0),`${pl(inat.length,'cliente','clientes')} com compras nos últimos 12 meses e nada há mais de 90 dias. Bom alvo para o comercial.`,'var(--s1)',()=>abrirDet('Clientes que pararam de comprar','Compraram nos últimos 12 meses e estão há mais de 90 dias sem pedido',[{rot:'Cliente'},{rot:'Último vendedor'},{rot:'Última compra',t:'data'},{rot:'Dias sem comprar',t:'int'},{rot:'Pedidos',t:'int'},{rot:'Comprou em 12 meses',t:'brl',total:1}],inat.map(c=>[c.nome,c.v,c.ult,diasAtr(c.ult),c.ped.size,c.t]))]);
@@ -1128,6 +1209,12 @@ function pgConciliacao(){
     :`<table><thead><tr><th>Venda</th><th>Data</th><th>Cadastrada em</th><th>Cliente</th><th>Situação</th><th class="v">Valor</th></tr></thead><tbody>${[...andamento,...lancMesSeguinte,...criadoDepois].slice(0,30).map(v=>`<tr><td>${esc(v.n)}</td><td class="num">${v.d.split('-').reverse().join('/')}</td><td class="num">${v.e?v.e.split('-').reverse().join('/'):'—'}</td><td class="el">${esc(v.c)}</td><td>${v.s==='EM_ANDAMENTO'?'Em andamento':v.s==='APROVADO'?'Aprovada':v.s==='FATURADO'?'Faturada':v.s}</td><td class="v">${brl2(v.t)}</td></tr>`).join('')||'<tr><td colspan="6" class="vazio">Nenhuma venda pendente ou fora do mês.</td></tr>'}</tbody></table>`;
 }
 
+// ---------- margem bruta ----------
+// Margem bruta = (faturamento − custo dos produtos) ÷ faturamento, só nos itens que têm custo cadastrado na Conta Azul.
+// Itens sem custo ficam de fora (senão a margem sairia inflada); a cobertura mostra quanto do faturamento tem custo.
+function margem(ls){ let fat=0,fc=0,cu=0; for(const l of ls){ fat+=l.t; if(l.cu>0){ fc+=l.t; cu+=l.cu; } } return {mg:fc?(fc-cu)/fc:null,cob:fat?fc/fat:0,fc,cu,lucro:fc-cu}; }
+const txtMg=(M)=>M.mg==null?'sem custo dos produtos cadastrado na Conta Azul':`${M.mg<0.4?'abaixo':'acima'} do mínimo de 40% · custo em ${pct(M.cob)} do faturamento`;
+
 // ---------- detalhamento ao clicar nos valores ----------
 const REG=new Map(); let regN=0;
 const dk=(fn)=>{ const k='d'+(regN++); REG.set(k,fn); return k; };
@@ -1161,8 +1248,8 @@ document.addEventListener('keydown',e=>{ if(e.key==='Enter'){ const el=e.target.
 // pedidos (vendas) por trás de um total comercial
 const rotNR=(x)=>x==='novo'?'Novo':x==='recompra'?'Recompra':'—';
 function detPedidos(titulo,ls,sub){
-  const m=new Map(); ls.forEach(l=>{ const p=m.get(l.p)||{d:l.d||l.m,p:l.p,c:l.c,v:l.v,nr:l.nr,prod:new Set(),q:0,t:0,cu:0}; if(l.d&&(!p.d||l.d<p.d)) p.d=l.d; p.q+=l.q; p.t+=l.t; p.cu+=l.cu||0; if(!p.nr&&l.nr) p.nr=l.nr; const pr=l.pr||[l.tp,l.mt,l.cr].filter(Boolean).join(' · '); if(pr) p.prod.add(pr); m.set(l.p,p); });
-  const rows=[...m.values()].map(p=>[p.d,p.p,p.c,p.v,rotNR(p.nr),[...p.prod].slice(0,3).join(' / ')+(p.prod.size>3?` +${p.prod.size-3}`:''),p.q,p.t,p.cu&&p.t?(p.t-p.cu)/p.t:null]);
+  const m=new Map(); ls.forEach(l=>{ const p=m.get(l.p)||{d:l.d||l.m,p:l.p,c:l.c,v:l.v,nr:l.nr,prod:new Set(),q:0,t:0,cu:0,tc:0}; if(l.d&&(!p.d||l.d<p.d)) p.d=l.d; p.q+=l.q; p.t+=l.t; if(l.cu>0){ p.cu+=l.cu; p.tc+=l.t; } if(!p.nr&&l.nr) p.nr=l.nr; const pr=l.pr||[l.tp,l.mt,l.cr].filter(Boolean).join(' · '); if(pr) p.prod.add(pr); m.set(l.p,p); });
+  const rows=[...m.values()].map(p=>[p.d,p.p,p.c,p.v,rotNR(p.nr),[...p.prod].slice(0,3).join(' / ')+(p.prod.size>3?` +${p.prod.size-3}`:''),p.q,p.t,p.cu&&p.tc?(p.tc-p.cu)/p.tc:null]);
   abrirDet(titulo,sub||`${pl(rows.length,'pedido','pedidos')} · ${janela().rot}`,[{rot:'Data',t:'data'},{rot:'Pedido'},{rot:'Cliente'},{rot:'Vendedor'},{rot:'Novo/recompra'},{rot:'Produtos',wr:1},{rot:'Peças',t:'int'},{rot:'Valor',t:'brl',total:1},{rot:'Margem',t:'pct'}],rows);
 }
 function detItens(titulo,ls,sub){
@@ -1313,7 +1400,7 @@ function quadro(){
     ['Ticket médio',mm=>vs.get(mm).ticket,'brl','R2'],
     ['Vendas para clientes novos',mm=>{const s=vs.get(mm);return s.fat?s.nr.novo.t/s.fat:null},'pct','R3'],
     ['Clientes que compraram',mm=>vs.get(mm).clientes,'int',null,0,0,mm=>detClientes('Clientes de '+nomeMes(mm),linhas([mm]))],
-    ['Margem bruta das vendas',mm=>{const c=cu.get(mm),t=vs.get(mm).fat;return c&&t?(t-c)/t:null},'pct'],
+    ['Margem bruta das vendas',mm=>margem(linhas([mm])).mg,'pct'],
     ['Financeiro (competência)'],
     ['Receita',mm=>I(mm)?.receita,'brl',null,0,0,mm=>detLanc('Receitas de '+nomeMes(mm),l=>l[1]==='r'&&l[0]===mm)],
     ['Margem de contribuição',mm=>incompleto(mm)?null:I(mm)?.mc_pct,'pct'],
@@ -1462,7 +1549,11 @@ $('usPermSalvar').addEventListener('click',async()=>{ if(!PERMU) return; const s
 $('hamb').addEventListener('click',()=>{ $('sb').classList.toggle('aberto'); $('scrim').classList.toggle('on'); });
 $('scrim').addEventListener('click',fecharMenu);
 window.addEventListener('hashchange',()=>{ const h=location.hash.slice(1); if(MESES_PAG[h]&&h!==E.pagina){ E.pagina=h; desenhar(); } });
-$('fPeriodo').addEventListener('change',e=>{E.periodo=e.target.value;desenhar()});
+$('fPeriodo').addEventListener('change',e=>{ E.periodo=e.target.value;
+  if(E.periodo==='faixa'&&!E.de){ E.de=E.mes+'-01'; const [a,b]=E.mes.split('-').map(Number); E.ate=new Date(Date.UTC(a,b,0)).toISOString().slice(0,10); const h=new Date(Date.now()-3*3600e3).toISOString().slice(0,10); if(E.ate>h) E.ate=h; $('fDe').value=E.de; $('fAte').value=E.ate; }
+  desenhar(); });
+$('fDe').addEventListener('change',e=>{ E.de=e.target.value; if(E.ate&&E.de>E.ate){ E.ate=E.de; $('fAte').value=E.ate; } desenhar(); });
+$('fAte').addEventListener('change',e=>{ E.ate=e.target.value; if(E.de&&E.ate<E.de){ E.de=E.ate; $('fDe').value=E.de; } desenhar(); });
 $('fMes').addEventListener('change',e=>{E.mes=e.target.value;desenhar()});
 document.querySelectorAll('select[data-campo]').forEach(s=>s.addEventListener('change',()=>{E.filtros[s.dataset.campo]=s.value;desenhar()}));
 $('limpar').addEventListener('click',()=>{E.filtros={};document.querySelectorAll('select[data-campo]').forEach(s=>s.value='');desenhar()});

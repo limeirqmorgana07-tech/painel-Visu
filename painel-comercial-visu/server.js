@@ -11,7 +11,7 @@ import { dadosFinanceiros } from './src/financeiro.js';
 import { planilhaConfigurada } from './src/planilha.js';
 import * as usuarios from './src/usuarios.js';
 import { paginasDe, veFinanceiro, veVendas } from './src/paginas.js';
-import { statusBanco } from './src/tokenStore.js';
+import { statusBanco, lerKV, salvarKV } from './src/tokenStore.js';
 
 const raiz = path.dirname(fileURLToPath(import.meta.url));
 
@@ -196,6 +196,14 @@ app.get('/api/vendas', exigeLogin, async (req, res) => {
 });
 
 // Gestão financeira (DRE, caixa, contas a receber/pagar, saldos) pela API da Conta Azul
+// Quem é (ou não é) vendedor: o ADM marca como inativo quem aparece na Conta Azul mas não vende (financeiro, escritório etc.)
+app.get('/api/vendedores', exigeLogin, async (req, res) => res.json((await lerKV('vendedores_config').catch(() => null)) || { inativos: [] }));
+app.post('/api/vendedores', exigeAdm, async (req, res) => {
+  const inativos = [...new Set((Array.isArray(req.body?.inativos) ? req.body.inativos : []).map((x) => String(x).trim()).filter(Boolean))];
+  await salvarKV('vendedores_config', { inativos, atualizado_em: new Date().toISOString(), por: req.usuario.nome });
+  res.json({ inativos });
+});
+
 app.get('/api/financeiro', exigeLogin, async (req, res) => {
   if (!veFinanceiro(req.usuario)) return res.status(403).json({ erro: 'seu perfil não tem acesso ao financeiro' });
   try { res.json(await dadosFinanceiros(req.query.forcar === '1')); }
