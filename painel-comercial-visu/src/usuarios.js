@@ -3,7 +3,7 @@
 // As senhas ficam só como hash (scrypt) no banco (DATABASE_URL) ou no arquivo local.
 import crypto from 'node:crypto';
 import { config } from './config.js';
-import { lerKV, salvarKV } from './tokenStore.js';
+import { lerKV, salvarKV, statusBanco } from './tokenStore.js';
 
 export const PERFIS = { adm: 'ADM', diretor: 'Diretor', comercial: 'Comercial', financeiro: 'Financeiro' };
 const CHAVE = 'usuarios';
@@ -183,4 +183,4 @@ export async function lerSessao(valor) {
   return u;
 }
 export const ADMIN_MESTRE = { id: '__admin', ver: 0 };
-export const bancoConfigurado = () => !!config.databaseUrl;
+export const bancoConfigurado = async () => (await statusBanco().catch(() => ({}))).conectado === true;

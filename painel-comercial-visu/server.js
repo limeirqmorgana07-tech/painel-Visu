@@ -11,8 +11,13 @@ import { dadosFinanceiros } from './src/financeiro.js';
 import { planilhaConfigurada } from './src/planilha.js';
 import * as usuarios from './src/usuarios.js';
 import { paginasDe, veFinanceiro, veVendas } from './src/paginas.js';
+import { statusBanco } from './src/tokenStore.js';
 
 const raiz = path.dirname(fileURLToPath(import.meta.url));
+
+// Um erro inesperado em segundo plano (API fora do ar, banco instável) não pode derrubar o painel inteiro.
+process.on('unhandledRejection', (e) => console.error('[erro em segundo plano]', e?.message || e));
+process.on('uncaughtException', (e) => console.error('[erro inesperado]', e?.message || e));
 const app = express();
 app.set('trust proxy', 1);
 app.use(express.urlencoded({ extended: false }));
@@ -130,7 +135,7 @@ app.post('/convite/:token', async (req, res) => {
 // ---------- usuários (perfil ADM) ----------
 app.use(express.json());
 app.get('/api/eu', exigeLogin, (req, res) => res.json({ id: req.usuario.id, nome: req.usuario.nome, email: req.usuario.email || '', perfil: req.usuario.perfil, paginas: paginasDe(req.usuario) }));
-app.get('/api/usuarios', exigeAdm, async (req, res) => res.json({ usuarios: await usuarios.listar(), perfis: usuarios.PERFIS, banco: usuarios.bancoConfigurado() }));
+app.get('/api/usuarios', exigeAdm, async (req, res) => res.json({ usuarios: await usuarios.listar(), perfis: usuarios.PERFIS, banco: await usuarios.bancoConfigurado() }));
 app.post('/api/usuarios', exigeAdm, async (req, res) => {
   try { res.json(await usuarios.salvar(req.body || {})); } catch (e) { res.status(400).json({ erro: e.message }); }
 });
@@ -146,6 +151,7 @@ app.post('/api/usuarios/:id/convite', exigeAdm, async (req, res) => {
 });
 
 app.get('/saude', (req, res) => res.json({ ok: true }));
+app.get('/saude/banco', async (req, res) => res.json(await statusBanco().catch((e) => ({ erro: e.message }))));
 app.get(['/logo.png', '/logo-visu.png'], (req, res) => res.sendFile(path.join(raiz, 'public', req.path.slice(1))));
 app.use('/vitrine', express.static(path.join(raiz, 'public', 'vitrine'), { maxAge: '7d' }));
 
@@ -221,4 +227,5 @@ app.listen(config.porta, () => {
   if (!config.senhaPainel) console.warn('ATENÇÃO: PAINEL_SENHA não definida — sem senha mestra de ADM; só entram usuários com convite aceito.');
   if (!config.databaseUrl) console.warn('ATENÇÃO: sem DATABASE_URL, usuários e senhas ficam em arquivo e se perdem quando o servidor reinicia.');
   console.log(`URL de redirecionamento para cadastrar na Conta Azul: ${redirectUri()}`);
+  if (config.databaseUrl) statusBanco().then((b) => console.log(b.conectado ? '[banco] DATABASE_URL ok: usuários, senhas e a conexão com a Conta Azul ficam guardados' : `[banco] DATABASE_URL configurada, mas sem conexão: ${b.erro}`));
 });

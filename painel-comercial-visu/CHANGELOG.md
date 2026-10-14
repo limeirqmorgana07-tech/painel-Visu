@@ -2,6 +2,13 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v14 — 14/10/2026 · Painel mais estável
+Arquivo: `painel-visu-v14-estavel.zip`
+- Um erro em segundo plano (Conta Azul ou banco fora do ar) não derruba mais o painel inteiro.
+- Se o banco de dados não responder, o painel continua no ar e tenta de novo a cada minuto.
+- Aceita a DATABASE_URL copiada do Neon do jeito que ela vier (com psql e aspas).
+- Endereço /saude/banco para conferir se o banco está conectado.
+
 ## v13 — 14/10/2026 · Assinatura mais discreta
 Arquivo: `painel-visu-v13-assinatura.zip`
 - "Desenvolvido por Seja Expert" virou uma linha pequena no pé do menu, com a versão ao lado, no estilo do FluxIA.

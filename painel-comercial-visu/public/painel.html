@@ -579,8 +579,9 @@ const nomeMes=(m)=>{const[a,b]=m.split('-');return MES_L[+b-1]+' de '+a};
 const somaMes=(m,n)=>{const[a,b]=m.split('-').map(Number);const d=new Date(Date.UTC(a,b-1+n,1));return d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0')};
 function delta(a,b,inv){ if(!b) return '<span class="delta eq">sem base</span>'; const d=(a-b)/b; const c=Math.abs(d)<.005?'eq':(d>0)!==!!inv?'up':'down'; return `<span class="delta ${c}">${d>0?'▲':d<0?'▼':'■'} ${pct(Math.abs(d))}</span>`; }
 
-const VERSAO='v13';
+const VERSAO='v14';
 const VERSOES=[
+ {v:'v14',data:'14/10/2026',tit:'Painel mais estável',arq:'painel-visu-v14-estavel.zip',itens:['Um erro em segundo plano (Conta Azul ou banco fora do ar) não derruba mais o painel inteiro.','Se o banco de dados não responder, o painel continua no ar e tenta de novo a cada minuto.','Aceita a DATABASE_URL copiada do Neon do jeito que ela vier (com psql e aspas).','Endereço /saude/banco para conferir se o banco está conectado.']},
  {v:'v13',data:'14/10/2026',tit:'Assinatura mais discreta',arq:'painel-visu-v13-assinatura.zip',itens:['"Desenvolvido por Seja Expert" virou uma linha pequena no pé do menu, com a versão ao lado, no estilo do FluxIA.']},
  {v:'v12',data:'14/10/2026',tit:'Assinatura Seja Expert no menu',arq:'painel-visu-v12-assinatura.zip',itens:['Rodapé do menu lateral com "Desenvolvido por", a marca Seja Expert, "Gestão Financeira e BPO" e a versão do painel.','A menção à Seja Expert saiu do topo do menu e do rodapé das páginas.']},
  {v:'v11',data:'14/10/2026',tit:'Correções de usuários e menu',arq:'painel-visu-v11-correcoes.zip',itens:['Tiago Sobral (ADM, tiago.sobral@sejaexpertgestao.com) passa a fazer parte dos perfis iniciais, no lugar de "Gestor Seja Expert".','E-mail da Morgana corrigido para @sejaexpertgestao.com.','Menu lateral abre os módulos quando nenhum está aberto; rodapé do menu não fica mais cortado.','Aviso mais claro sobre a falta do banco de dados (DATABASE_URL).']},
