@@ -2,6 +2,10 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v21 · 15/10/2026
+- /api/usuarios devolve banco_status; o aviso em Usuários separa "sem DATABASE_URL" de "DATABASE_URL com erro" e mostra o erro.
+- Foco do menu lateral na cor do tema.
+
 ## v20 · 15/10/2026
 - Conectar Google (OAuth, só leitura do Drive): a planilha de vendas é baixada direto da conta que tem acesso, a cada atualização. Rotas /google/conectar, /google/callback, /google/desconectar e /api/google; token na chave google_token. Novas variáveis GOOGLE_CLIENT_ID e GOOGLE_CLIENT_SECRET. Dependência xlsx para ler o arquivo.
 

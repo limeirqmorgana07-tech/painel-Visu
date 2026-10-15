@@ -301,6 +301,7 @@ td.lk,span.lk{text-decoration:underline dotted var(--line2);text-underline-offse
 .sb .quem .p{font-size:11.5px;color:var(--sbMuted)}.sb .quem .p a{color:inherit}
 .sb .quem .v{font-size:10.5px;color:var(--sbMuted);margin-top:2px}
 .sb .ib{border:1px solid var(--sbLine2);border-radius:8px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;color:var(--sbHi);text-decoration:none;font-size:15px;flex:none}
+.sb :focus-visible{outline:2px solid var(--sbAcc);outline-offset:-3px;border-radius:6px}
 .sb .ib:hover{border-color:var(--sbHi);background:var(--sbLine)}
 .main-col{flex:1;min-width:0;display:flex;flex-direction:column}
 .topbar{display:flex;align-items:flex-start;gap:14px;padding:22px 26px 10px;flex-wrap:wrap}
@@ -703,8 +704,9 @@ const nomeMes=(m)=>{const[a,b]=m.split('-');return MES_L[+b-1]+' de '+a};
 const somaMes=(m,n)=>{const[a,b]=m.split('-').map(Number);const d=new Date(Date.UTC(a,b-1+n,1));return d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0')};
 function delta(a,b,inv){ if(!b) return '<span class="delta eq">sem base</span>'; const d=(a-b)/b; const c=Math.abs(d)<.005?'eq':(d>0)!==!!inv?'up':'down'; return `<span class="delta ${c}">${d>0?'▲':d<0?'▼':'■'} ${pct(Math.abs(d))}</span>`; }
 
-const VERSAO='v20';
+const VERSAO='v21';
 const VERSOES=[
+ {v:'v21',data:'15/10/2026',tit:'Aviso do banco mais claro',arq:'painel-visu-v21.zip',itens:['Em Usuários, o aviso diz se falta a variável DATABASE_URL ou se ela existe mas o banco recusou a conexão (com o erro), e o passo a passo para corrigir.','Contorno de foco do menu lateral mais discreto.']},
  {v:'v20',data:'15/10/2026',tit:'Planilha em tempo real',arq:'painel-visu-v20.zip',itens:['Botão Conectar Google em Planilha × sistema: o ADM entra uma vez com a conta que abre a planilha e o painel passa a lê-la sozinho a cada 5 minutos, sem publicar nem compartilhar o arquivo.','Funciona com planilha do Google e com .xlsx no Drive; a aba de vendas é encontrada automaticamente.']},
  {v:'v19',data:'15/10/2026',tit:'Escolha de visual',arq:'painel-visu-v19.zip',itens:['Botão Visual no topo com seis estilos, todos com as cores do logo da Visu: Clássico, Cores da Visu, Pôr do sol, Turquesa, Fio Visu e Noite, e espaçamento Confortável ou Compacto.','Cada pessoa escolhe o seu no próprio navegador; o ADM pode definir o visual padrão de todos.']},
  {v:'v18',data:'15/10/2026',tit:'Planilha abre na conta Google certa',arq:'painel-visu-v18.zip',itens:['O botão Abrir planilha abre o Google Planilhas já na conta do usuário logado no painel (ou na conta definida em PLANILHA_CONTA), mesmo que o navegador esteja em outra conta Google.']},
@@ -1658,7 +1660,11 @@ function previaApi(url,op){ const m=op.method||'GET';
   if(url.endsWith('/convite')){ const id=url.split('/')[3]; const u=PV.find(x=>x.id===id); u.senha_criada=false; return {link:`https://painel-visu.onrender.com/convite/exemplo-${id}`,expira_em:new Date(Date.now()+7*864e5).toISOString(),usuario:u}; } }
 async function pgUsuarios(){
   try{ const d=await api('/api/usuarios'); US.lista=d.usuarios; US.banco=d.banco; }catch(e){ $('usLista').innerHTML=`<div class="aviso erro">${esc(e.message)}</div>`; return; }
-  $('usBanco').hidden=US.banco; $('usBanco').innerHTML='<span><b>Sem banco de dados: usuários, senhas e a conexão com a Conta Azul se apagam toda vez que o Render reinicia.</b> Por isso cadastros somem e o painel volta para os dados de demonstração. Configure a variável DATABASE_URL no Render (banco gratuito do Neon) para guardar tudo de forma permanente.</span>';
+  const BS=US.banco_status||{};
+  $('usBanco').hidden=US.banco;
+  $('usBanco').innerHTML=BS.configurado
+    ?`<span><b>A variável DATABASE_URL está no Render, mas o painel não conseguiu entrar no banco.</b> Enquanto isso, usuários, senhas e a conexão com a Conta Azul se apagam a cada reinício. ${BS.erro?`Erro do banco: <code>${esc(BS.erro)}</code>. `:''}Confira no Neon se copiou o link inteiro (começa com <code>postgresql://</code> e termina com <code>?sslmode=require</code>), cole de novo no Render e salve.</span>`
+    :'<span><b>Sem banco de dados: usuários, senhas e a conexão com a Conta Azul se apagam toda vez que o Render reinicia.</b> Por isso cadastros somem e o painel volta para os dados de demonstração. No Render, abra o serviço → <b>Environment</b> → <b>Add Environment Variable</b>, nome <code>DATABASE_URL</code> e, como valor, o link do banco gratuito do Neon (neon.tech → seu projeto → <b>Connect</b>). Salve e espere o painel reiniciar.</span>';
   const n=(p)=>US.lista.filter(u=>u.perfil===p).length;
   $('usSub').textContent=`${pl(n('diretor'),'diretor','diretores')} · ${pl(n('adm'),'ADM','ADMs')} · senha temporária vale 7 dias e precisa ser trocada no primeiro acesso`;
   const dt=(x)=>x?new Date(x).toLocaleDateString('pt-BR')+' '+new Date(x).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):'—';

@@ -144,7 +144,7 @@ app.post('/api/visual', exigeAdm, async (req, res) => {
   await salvarKV('visual_padrao', { t, d, atualizado_em: new Date().toISOString(), por: req.usuario.nome });
   res.json({ ok: true, t, d });
 });
-app.get('/api/usuarios', exigeAdm, async (req, res) => res.json({ usuarios: await usuarios.listar(), perfis: usuarios.PERFIS, banco: await usuarios.bancoConfigurado() }));
+app.get('/api/usuarios', exigeAdm, async (req, res) => res.json({ usuarios: await usuarios.listar(), perfis: usuarios.PERFIS, banco: await usuarios.bancoConfigurado(), banco_status: await statusBanco().catch((e) => ({ erro: e.message })) }));
 app.post('/api/usuarios', exigeAdm, async (req, res) => {
   try { res.json(await usuarios.salvar(req.body || {})); } catch (e) { res.status(400).json({ erro: e.message }); }
 });
