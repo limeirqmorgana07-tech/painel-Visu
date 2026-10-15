@@ -3,8 +3,7 @@
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
 ## v19 · 15/10/2026
-- Botão "Visual": temas Clássico, Cores da Visu, Noite e Leve, e espaçamento Confortável/Compacto. A escolha fica no navegador de cada pessoa; o ADM define o padrão de todos (POST /api/visual, chave visual_padrao).
-- Logo com texto escuro (public/logo-visu-escuro.png) para o tema Leve.
+- Botão "Visual": seis temas com as cores do logo (Clássico, Cores da Visu, Pôr do sol, Turquesa, Fio Visu e Noite), e espaçamento Confortável/Compacto. A escolha fica no navegador de cada pessoa; o ADM define o padrão de todos (POST /api/visual, chave visual_padrao).
 
 ## v18 · 15/10/2026
 - "Abrir planilha" abre o Google Planilhas na conta do usuário logado (parâmetro authuser), ou na conta da variável PLANILHA_CONTA (padrão: morgana.limeira@sejaexpertgestao.com).

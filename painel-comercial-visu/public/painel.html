@@ -1,7 +1,7 @@
 <title>Painel de Gestão Visu</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Space+Grotesk:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap">
-<script>try{var _v=JSON.parse(localStorage.getItem('visu-visual')||'{}');if(_v.t&&_v.t!=='classico'){document.documentElement.dataset.visual=_v.t;document.documentElement.dataset.theme=_v.t==='noite'?'dark':'light'}if(_v.d)document.documentElement.dataset.densidade=_v.d}catch(e){}</script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap">
+<script>try{var _v=JSON.parse(localStorage.getItem('visu-visual')||'{}');if(_v.t&&_v.t!=='classico'&&_v.t!=='leve'){document.documentElement.dataset.visual=_v.t;document.documentElement.dataset.theme=_v.t==='noite'?'dark':'light'}if(_v.d)document.documentElement.dataset.densidade=_v.d}catch(e){}</script>
 <style>
 /* Layout: faixa azul-noite com a logo e o fio colorido do catálogo · abas por página · filtros fixos · cartões brancos sobre cinza claro, como as páginas internas do catálogo */
 :root{
@@ -369,35 +369,55 @@ table.matriz td.vz{color:var(--line2)}
 :root[data-visual="vibrante"] .card{border-color:transparent}
 
 :root[data-visual="noite"]{
-  --bg:#0B0A16; --panel:#15132A; --ink:#F3F1FF; --ink2:#C3BEE6; --ink3:#8D88B3; --line:#26224A; --line2:#39346A;
-  --navy:#08070F; --navy2:#1F1A3F; --onNavy:#fff; --orange:#FF4FA3; --orangeSoft:#3A1530; --teal:#2FE6D0;
-  --s1:#8B5CFF; --s2:#FF4FA3; --s3:#2FE6D0; --sNone:#4A4570; --bar:#8B5CFF; --barSoft:#2A2550;
-  --green:#3BE58F; --greenSoft:#10331F; --red:#FF6B81; --redSoft:#3A1520; --amber:#FFC857; --amberSoft:#33290F;
-  --fio:linear-gradient(90deg,#2FE6D0,#8B5CFF 50%,#FF4FA3);
-  --sombra:0 0 0 1px rgba(139,92,255,.10),0 10px 30px -18px rgba(139,92,255,.6); --raio:18px;
-  --sbBg:#08070F; --sbInk:#CFCAF0; --sbMuted:#7E79A6; --sbHi:#fff; --sbAct:#1F1A3F; --sbAcc:#2FE6D0; --sbLine:#1C1934; --sbLine2:#332E5C; --sbHover:#14122A;
+  --bg:#0E0B1F; --panel:#181433; --ink:#F3F1FF; --ink2:#C3BEE6; --ink3:#8D88B3; --line:#27224A; --line2:#3A3468;
+  --navy:#0A081A; --navy2:#221C48; --onNavy:#fff; --orange:#F0802C; --orangeSoft:#3A2414; --teal:#5ABAB4;
+  --s1:#7D88F0; --s2:#F0802C; --s3:#5ABAB4; --sNone:#4A4570; --bar:#7D88F0; --barSoft:#2A2858;
+  --green:#4FD98E; --greenSoft:#10331F; --red:#FF6B81; --redSoft:#3A1520; --amber:#FFC857; --amberSoft:#33290F;
+  --sombra:0 0 0 1px rgba(125,136,240,.10),0 10px 30px -18px rgba(215,36,95,.55); --raio:18px;
+  --sbBg:#0A081A; --sbInk:#CFCAF0; --sbMuted:#7E79A6; --sbHi:#fff; --sbAct:#221C48; --sbAcc:#D7245F; --sbLine:#1C1934; --sbLine2:#332E5C; --sbHover:#15122C;
   color-scheme:dark;
 }
 :root[data-visual="noite"] .kpi::before{background:var(--fio);height:2px}
-:root[data-visual="noite"] .kpi .v{text-shadow:0 0 18px rgba(139,92,255,.35)}
+:root[data-visual="noite"] .kpi .v{text-shadow:0 0 18px rgba(215,36,95,.3)}
 
-:root[data-visual="leve"]{
-  --bg:#F6F5F0; --panel:#FFFFFF; --ink:#1D1B26; --ink2:#4D4A5C; --ink3:#8E8AA3; --line:#ECEAF0; --line2:#DCD9E4;
-  --navy:#1D1B26; --navy2:#2E2B3D; --orange:#FF6B2C; --orangeSoft:#FFEDE3; --teal:#2EC4B6;
-  --s1:#6C63FF; --s2:#FF8A4C; --s3:#2EC4B6; --sNone:#D3D0DC; --bar:#6C63FF; --barSoft:#ECEBFF;
-  --sombra:0 10px 30px -18px rgba(29,27,38,.18); --raio:22px;
-  --sbBg:#FFFFFF; --sbInk:#3B3850; --sbMuted:#8E8AA3; --sbHi:#1D1B26; --sbAct:#FFF0E6; --sbAcc:#FF6B2C; --sbLine:#EEEDF2; --sbLine2:#DCD9E4; --sbHover:#F6F5FA;
-  --display:"Space Grotesk","Plus Jakarta Sans",system-ui,sans-serif;
+/* Pôr do sol: o lado magenta → laranja do logo */
+:root[data-visual="sol"]{
+  --bg:#FFF6F1; --panel:#FFFFFF; --ink:#2A1430; --ink2:#5C4460; --ink3:#93798F; --line:#F6E3DA; --line2:#ECCFC2;
+  --navy:#5A1446; --navy2:#8A2E9A; --orange:#E4402A; --orangeSoft:#FDE4DC; --teal:#5ABAB4;
+  --s1:#8A2E9A; --s2:#EA780C; --s3:#D7245F; --sNone:#DCC7CF; --bar:#8A2E9A; --barSoft:#F1DDF3;
+  --sombra:0 8px 24px -14px rgba(215,36,95,.3); --raio:18px;
+  --sbBg:linear-gradient(185deg,#7A1C78 0%,#C21F5E 50%,#E5602A 100%); --sbInk:#FFF0EC; --sbMuted:#F7C9C0; --sbHi:#fff; --sbAct:rgba(255,255,255,.18); --sbAcc:#FFD36B; --sbLine:rgba(255,255,255,.16); --sbLine2:rgba(255,255,255,.32); --sbHover:rgba(255,255,255,.1);
 }
-:root[data-visual="leve"] .sb{border-right:1px solid var(--line)}
-:root[data-visual="leve"] .card,:root[data-visual="leve"] .kpi{border-color:transparent}
-:root[data-visual="leve"] .kpi::before{display:none}
-:root[data-visual="leve"] .kpis>.kpi:nth-child(4n+1){background:#F0EEFF}
-:root[data-visual="leve"] .kpis>.kpi:nth-child(4n+2){background:#FFF1E8}
-:root[data-visual="leve"] .kpis>.kpi:nth-child(4n+3){background:#E5F7F4}
-:root[data-visual="leve"] .kpis>.kpi:nth-child(4n+4){background:#FFF7D9}
-:root[data-visual="leve"] .nm-item.ativo{border-left-color:transparent;border-radius:12px;margin:2px 10px;width:calc(100% - 20px);padding-left:31px;color:#C2410C}
-:root[data-visual="leve"] .sb .fio{height:3px}
+:root[data-visual="sol"] .kpi::before{height:4px;background:linear-gradient(90deg,#8A2E9A,#D7245F 50%,#EA780C)}
+:root[data-visual="sol"] .card,:root[data-visual="sol"] .kpi{border-color:transparent}
+:root[data-visual="sol"] .kpi .v{font-weight:700}
+
+/* Turquesa: o lado verde-água → azul do logo */
+:root[data-visual="turquesa"]{
+  --bg:#EFF7F7; --panel:#FFFFFF; --ink:#132447; --ink2:#43536F; --ink3:#7A889F; --line:#DCEBEC; --line2:#C3DCDE;
+  --navy:#1B2A6B; --navy2:#2B3F95; --orange:#EA780C; --orangeSoft:#FDEBD8; --teal:#2E9C96;
+  --s1:#3A48A8; --s2:#EA780C; --s3:#2E9C96; --sNone:#C3CCD8; --bar:#3A48A8; --barSoft:#DCE1F6;
+  --sombra:0 8px 24px -14px rgba(58,72,168,.28); --raio:18px;
+  --sbBg:linear-gradient(185deg,#1B2A6B 0%,#2B4A9A 50%,#2E8C8C 100%); --sbInk:#E8F4F6; --sbMuted:#A9C8D4; --sbHi:#fff; --sbAct:rgba(255,255,255,.16); --sbAcc:#5ABAB4; --sbLine:rgba(255,255,255,.14); --sbLine2:rgba(255,255,255,.3); --sbHover:rgba(255,255,255,.08);
+}
+:root[data-visual="turquesa"] .kpi::before{height:4px;background:linear-gradient(90deg,#5ABAB4,#3A48A8)}
+:root[data-visual="turquesa"] .card,:root[data-visual="turquesa"] .kpi{border-color:transparent}
+
+/* Fio Visu: o degradê completo do logo como faixa de topo e cores nos indicadores */
+:root[data-visual="fio"]{ --raio:16px; --bg:#F4F3F8; }
+:root[data-visual="fio"] .topbar{background:linear-gradient(100deg,#3A48A8 0%,#8A2E9A 38%,#D7245F 68%,#EA780C 100%);padding-bottom:18px}
+:root[data-visual="fio"] .topbar h1,:root[data-visual="fio"] .topbar .ctx{color:#fff}
+:root[data-visual="fio"] .topbar .ctx b{color:#FFE08A}
+:root[data-visual="fio"] .topbar .chip,:root[data-visual="fio"] .topbar .bt{background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.4);color:#fff}
+:root[data-visual="fio"] .kpi::before{inset:0 auto 0 0;width:5px;height:auto}
+:root[data-visual="fio"] .kpis>.kpi:nth-child(6n+1)::before{background:#5ABAB4}
+:root[data-visual="fio"] .kpis>.kpi:nth-child(6n+2)::before{background:#3A48A8}
+:root[data-visual="fio"] .kpis>.kpi:nth-child(6n+3)::before{background:#8A2E9A}
+:root[data-visual="fio"] .kpis>.kpi:nth-child(6n+4)::before{background:#D7245F}
+:root[data-visual="fio"] .kpis>.kpi:nth-child(6n+5)::before{background:#E4402A}
+:root[data-visual="fio"] .kpis>.kpi:nth-child(6n+6)::before{background:#EA780C}
+:root[data-visual="fio"] .kpi{padding-left:20px}
+:root[data-visual="fio"] .sb .fio{height:6px}
 
 /* densidade compacta */
 :root[data-densidade="compacta"] main{gap:10px;padding-block:12px 36px}
@@ -408,10 +428,10 @@ table.matriz td.vz{color:var(--line2)}
 :root[data-densidade="compacta"] td,:root[data-densidade="compacta"] th{padding-top:5px!important;padding-bottom:5px!important}
 
 /* seletor de visual */
-.vis-pop{position:absolute;right:0;top:calc(100% + 8px);z-index:60;width:min(440px,92vw);background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:16px;box-shadow:0 18px 50px -12px rgba(20,16,50,.35);padding:16px}
+.vis-pop{position:absolute;right:0;top:calc(100% + 8px);z-index:60;width:min(560px,94vw);background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:16px;box-shadow:0 18px 50px -12px rgba(20,16,50,.35);padding:16px}
 .vis-pop h4{margin:0 0 2px;font-family:var(--display);font-size:15px}
 .vis-pop .sub{font-size:12px;color:var(--ink3);margin-bottom:12px}
-.vis-op{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.vis-op{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}@media (max-width:560px){.vis-op{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .vis-op button{all:unset;cursor:pointer;border:2px solid var(--line);border-radius:12px;padding:8px;display:flex;flex-direction:column;gap:6px;transition:border-color .12s}
 .vis-op button:hover{border-color:var(--line2)}
 .vis-op button[aria-pressed="true"]{border-color:var(--orange)}
@@ -684,7 +704,7 @@ function delta(a,b,inv){ if(!b) return '<span class="delta eq">sem base</span>';
 
 const VERSAO='v19';
 const VERSOES=[
- {v:'v19',data:'15/10/2026',tit:'Escolha de visual',arq:'painel-visu-v19.zip',itens:['Botão Visual no topo com quatro estilos: Clássico, Cores da Visu (degradê da marca), Noite (escuro com neon) e Leve (claro com tons pastel), e espaçamento Confortável ou Compacto.','Cada pessoa escolhe o seu no próprio navegador; o ADM pode definir o visual padrão de todos.']},
+ {v:'v19',data:'15/10/2026',tit:'Escolha de visual',arq:'painel-visu-v19.zip',itens:['Botão Visual no topo com seis estilos, todos com as cores do logo da Visu: Clássico, Cores da Visu, Pôr do sol, Turquesa, Fio Visu e Noite, e espaçamento Confortável ou Compacto.','Cada pessoa escolhe o seu no próprio navegador; o ADM pode definir o visual padrão de todos.']},
  {v:'v18',data:'15/10/2026',tit:'Planilha abre na conta Google certa',arq:'painel-visu-v18.zip',itens:['O botão Abrir planilha abre o Google Planilhas já na conta do usuário logado no painel (ou na conta definida em PLANILHA_CONTA), mesmo que o navegador esteja em outra conta Google.']},
  {v:'v17',data:'14/10/2026',tit:'Clientes, contas a pagar e produtos mais gerenciais',arq:'painel-visu-v17.zip',itens:['Clientes redesenhado: indicadores da carteira, 10 maiores com barra e variação, concentração A/B/C, faixas de valor em colunas e clientes parados em tabela compacta.','Contas a pagar em tabelas compactas, com mês atual, mês anterior e variação por categoria.','Produtos e mix: clicar num tipo destaca a evolução dele mês a mês; novo filtro Produto; vendas ainda sem itens carregados ficam fora do mix.','Nomes padronizados (BONÉ → Boné, EGBERTO → Egberto), rótulos de valor no gráfico de vendas, botão Filtrar no período personalizado e link da planilha em Planilha × sistema.']},
  {v:'v16',data:'14/10/2026',tit:'Sem margem bruta por produto',arq:'painel-visu-v16.zip',itens:['Margem bruta retirada de produtos, vendedores, pedidos, painel executivo e quadro de indicadores, porque o custo dos produtos na Conta Azul ainda não tem o refinamento necessário.','No lugar: preço médio por peça, peças por pedido e peças vendidas.','Margem de contribuição e ponto de equilíbrio continuam no Financeiro, calculados pela DRE.']},
@@ -1717,22 +1737,23 @@ document.querySelectorAll('[data-reg]').forEach(b=>b.addEventListener('click',()
 // ---------- visual (tema) ----------
 const VISUAIS=[
   {id:'classico',nome:'Clássico',ds:'Marinho da marca, sóbrio',c:['#241E48','#F0F0F2','#FFFFFF','#3A48A8','#D96A05']},
-  {id:'vibrante',nome:'Cores da Visu',ds:'Degradê da marca e cantos redondos',c:['linear-gradient(185deg,#2A1670,#5A1E96 55%,#B3166A)','#F6F3FF','#FFFFFF','#5B3FD9','#FF6B2C']},
-  {id:'noite',nome:'Noite',ds:'Fundo escuro com neon',c:['#08070F','#0B0A16','#15132A','#8B5CFF','#FF4FA3']},
-  {id:'leve',nome:'Leve',ds:'Claro, menu branco, tons pastel',c:['#FFFFFF','#F6F5F0','#F0EEFF','#6C63FF','#FF8A4C']}];
+  {id:'vibrante',nome:'Cores da Visu',ds:'Roxo e magenta do logo',c:['linear-gradient(185deg,#2A1670,#5A1E96 55%,#B3166A)','#F6F3FF','#FFFFFF','#5B3FD9','#FF6B2C']},
+  {id:'sol',nome:'Pôr do sol',ds:'Magenta e laranja do logo',c:['linear-gradient(185deg,#7A1C78,#C21F5E 50%,#E5602A)','#FFF6F1','#FFFFFF','#8A2E9A','#EA780C']},
+  {id:'turquesa',nome:'Turquesa',ds:'Verde-água e azul do logo',c:['linear-gradient(185deg,#1B2A6B,#2B4A9A 50%,#2E8C8C)','#EFF7F7','#FFFFFF','#3A48A8','#EA780C']},
+  {id:'fio',nome:'Fio Visu',ds:'Degradê inteiro do logo no topo',c:['#241E48','linear-gradient(100deg,#3A48A8,#8A2E9A 38%,#D7245F 68%,#EA780C) top/100% 30% no-repeat,#F4F3F8','#FFFFFF','#3A48A8','#D96A05']},
+  {id:'noite',nome:'Noite',ds:'Escuro, com as cores do logo',c:['#0A081A','#0E0B1F','#181433','#7D88F0','#F0802C']}];
 let VIS={t:'classico',d:'normal'}, VIS_PADRAO=null, VIS_PROPRIO=false;
-try{ const v=JSON.parse(localStorage.getItem('visu-visual')||'null'); if(v&&v.t){ VIS={t:v.t,d:v.d||'normal'}; VIS_PROPRIO=true; } }catch(e){}
+try{ const v=JSON.parse(localStorage.getItem('visu-visual')||'null'); if(v&&v.t&&VISUAIS.some(x=>x.id===v.t)){ VIS={t:v.t,d:v.d||'normal'}; VIS_PROPRIO=true; } }catch(e){}
 function aplicarVisual(){
   const r=document.documentElement;
   if(VIS.t==='classico'){ delete r.dataset.visual; delete r.dataset.theme; } else { r.dataset.visual=VIS.t; r.dataset.theme=VIS.t==='noite'?'dark':'light'; }
   if(VIS.d==='compacta') r.dataset.densidade='compacta'; else delete r.dataset.densidade;
-  const lg=$('logo'); if(lg){ const claro=VIS.t==='leve'; lg.src=claro?(PREVIA?(window.__LOGO2__||lg.src):'/logo-visu-escuro.png'):(PREVIA?(window.__LOGO__||lg.src):'/logo-visu.png'); }
 }
 function montarVisual(){
   const adm=E.eu?.perfil==='adm';
   const nomeDe=(id)=>(VISUAIS.find(v=>v.id===id)||VISUAIS[0]).nome;
   $('visPop').innerHTML=`<h4>Visual do painel</h4><div class="sub">Muda só as cores e o formato; os números continuam os mesmos.</div>
-  <div class="vis-op">${VISUAIS.map(v=>`<button type="button" data-vis="${v.id}" aria-pressed="${VIS.t===v.id}"><span class="mini" style="background:${v.c[1]}"><span class="l" style="background:${v.c[0]};${v.id==='leve'?'border-right:1px solid #ECEAF0':''}"></span><span class="r"><i style="background:${v.c[2]};width:70%"></i><em><b style="background:${v.c[3]};height:60%"></b><b style="background:${v.c[4]};height:90%"></b><b style="background:${v.c[3]};height:40%"></b><b style="background:${v.c[4]};height:75%"></b></em></span></span><span class="nome">${v.nome}</span><span class="ds">${v.ds}</span></button>`).join('')}</div>
+  <div class="vis-op">${VISUAIS.map(v=>`<button type="button" data-vis="${v.id}" aria-pressed="${VIS.t===v.id}"><span class="mini" style="background:${v.c[1]}"><span class="l" style="background:${v.c[0]};"></span><span class="r"><i style="background:${v.c[2]};width:70%"></i><em><b style="background:${v.c[3]};height:60%"></b><b style="background:${v.c[4]};height:90%"></b><b style="background:${v.c[3]};height:40%"></b><b style="background:${v.c[4]};height:75%"></b></em></span></span><span class="nome">${v.nome}</span><span class="ds">${v.ds}</span></button>`).join('')}</div>
   <div class="vis-den">Espaçamento: <button type="button" data-den="normal" aria-pressed="${VIS.d!=='compacta'}">Confortável</button><button type="button" data-den="compacta" aria-pressed="${VIS.d==='compacta'}">Compacto</button></div>
   ${adm?`<div class="vis-adm"><button class="bt2 pri" type="button" id="visPadrao">Usar como padrão para todos</button><span id="visPadraoTxt">${VIS_PADRAO?`Padrão atual: ${nomeDe(VIS_PADRAO.t)}${VIS_PADRAO.d==='compacta'?' · compacto':''}`:'Padrão atual: Clássico'}</span></div>`:''}
   ${VIS_PROPRIO&&VIS_PADRAO?`<div class="vis-adm"><button class="bt2" type="button" id="visVoltar">Voltar ao padrão do painel</button></div>`:''}`;
@@ -1744,7 +1765,7 @@ function montarVisual(){
 function salvarVisual(){ VIS_PROPRIO=true; try{localStorage.setItem('visu-visual',JSON.stringify(VIS))}catch(e){} aplicarVisual(); montarVisual(); }
 function iniciarVisual(){
   VIS_PADRAO=E.eu?.visual_padrao||null;
-  if(!VIS_PROPRIO&&VIS_PADRAO) VIS={t:VIS_PADRAO.t||'classico',d:VIS_PADRAO.d||'normal'};
+  if(!VIS_PROPRIO&&VIS_PADRAO) VIS={t:VISUAIS.some(x=>x.id===VIS_PADRAO.t)?VIS_PADRAO.t:'classico',d:VIS_PADRAO.d||'normal'};
   aplicarVisual(); montarVisual();
 }
 $('btVisual').addEventListener('click',(e)=>{ e.stopPropagation(); const p=$('visPop'); p.hidden=!p.hidden; $('btVisual').setAttribute('aria-expanded',String(!p.hidden)); });

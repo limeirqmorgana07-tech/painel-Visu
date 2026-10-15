@@ -136,7 +136,7 @@ app.post('/convite/:token', async (req, res) => {
 app.use(express.json());
 app.get('/api/eu', exigeLogin, async (req, res) => res.json({ id: req.usuario.id, nome: req.usuario.nome, email: req.usuario.email || '', perfil: req.usuario.perfil, paginas: paginasDe(req.usuario), visual_padrao: (await lerKV('visual_padrao').catch(() => null)) || null }));
 // visual (tema) padrão do painel: o ADM escolhe; cada pessoa ainda pode trocar só no navegador dela
-const VISUAIS = ['classico', 'vibrante', 'noite', 'leve'];
+const VISUAIS = ['classico', 'vibrante', 'sol', 'turquesa', 'fio', 'noite'];
 app.post('/api/visual', exigeAdm, async (req, res) => {
   const t = VISUAIS.includes(req.body?.t) ? req.body.t : 'classico';
   const d = req.body?.d === 'compacta' ? 'compacta' : 'normal';
