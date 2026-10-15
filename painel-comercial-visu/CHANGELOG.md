@@ -2,6 +2,13 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v17 — 14/10/2026 · Clientes, contas a pagar e produtos mais gerenciais
+Arquivo: `painel-visu-v17.zip`
+- Clientes redesenhado: indicadores da carteira, 10 maiores com barra e variação, concentração A/B/C, faixas de valor em colunas e clientes parados em tabela compacta.
+- Contas a pagar em tabelas compactas, com mês atual, mês anterior e variação por categoria.
+- Produtos e mix: clicar num tipo destaca a evolução dele mês a mês; novo filtro Produto; vendas ainda sem itens carregados ficam fora do mix.
+- Nomes padronizados (BONÉ → Boné, EGBERTO → Egberto), rótulos de valor no gráfico de vendas, botão Filtrar no período personalizado e link da planilha em Planilha × sistema.
+
 ## v16 — 14/10/2026 · Sem margem bruta por produto
 Arquivo: `painel-visu-v16.zip`
 - Margem bruta retirada de produtos, vendedores, pedidos, painel executivo e quadro de indicadores, porque o custo dos produtos na Conta Azul ainda não tem o refinamento necessário.

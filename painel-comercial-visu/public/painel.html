@@ -330,6 +330,15 @@ main{max-width:none;padding:18px 26px 48px}
 .perm-grupo label.off{color:var(--ink3);cursor:not-allowed}
 #resKpis{margin-top:16px}
 .status{white-space:nowrap}
+table.compacta td,.compactas td{padding:7px 8px;font-size:13px}table.compacta tr[data-d]{cursor:pointer}
+table.compacta td.pos{color:var(--ink3);font-weight:700;font-size:12px}
+.mbar{height:6px;border-radius:3px;background:var(--barSoft);overflow:hidden}.mbar i{display:block;height:100%;background:var(--s1);border-radius:3px}
+.abc2{display:flex;flex-direction:column;gap:14px}.abc2-l{cursor:pointer;padding:4px 0}.abc2-l:hover .abc2-h b{color:var(--orange)}
+.abc2-h{display:flex;align-items:baseline;gap:8px}.abc2-h b{font-family:var(--display);font-size:20px;font-weight:600}.abc2-h span:last-child{font-size:12.5px;color:var(--ink2)}
+.abc2-b{height:10px;border-radius:5px;background:var(--barSoft);margin:6px 0 4px;overflow:hidden}.abc2-b i{display:block;height:100%;border-radius:5px}
+.abc2-s{font-size:12px;color:var(--ink3)}
+table.mix tr.foc{cursor:pointer}table.mix tr.foc:hover td{background:var(--bg)}table.mix tr.foc.on td{background:var(--orangeSoft)}table.mix tr.foc.on td:first-child{box-shadow:inset 3px 0 0 var(--orange)}
+.ver{border:0;background:none;color:var(--ink3);cursor:pointer;font-size:12px;padding:0 4px;opacity:0;transition:opacity .15s}tr:hover .ver{opacity:1}.ver:hover{color:var(--orange)}
 .sw{display:inline-flex;align-items:center;gap:9px;cursor:pointer}.sw input{position:absolute;opacity:0;width:1px;height:1px}
 .sw span{width:34px;height:19px;border-radius:20px;background:var(--line2);position:relative;transition:background .15s;flex:none}
 .sw span::after{content:"";position:absolute;top:2px;left:2px;width:15px;height:15px;border-radius:50%;background:#fff;transition:transform .15s}
@@ -363,11 +372,13 @@ table.matriz td.vz{color:var(--line2)}
     <div class="f per"><label for="fPeriodo">Período</label><select id="fPeriodo"><option value="mes">Mês</option><option value="ano">Ano até o mês</option><option value="12m">Últimos 12 meses</option><option value="faixa">Período personalizado</option></select></div>
     <div class="f per2" hidden><label for="fDe">De</label><input id="fDe" type="date"></div>
     <div class="f per2" hidden><label for="fAte">Até</label><input id="fAte" type="date"></div>
+    <div class="f per2" hidden><label>&nbsp;</label><button class="bt2 pri" id="fAplicar" type="button">Filtrar</button></div>
     <div class="f per"><label for="fMes">Mês</label><select id="fMes"></select></div>
     <div class="f com"><label for="fVendedor">Vendedor</label><select id="fVendedor" data-campo="v"></select></div>
     <div class="f com"><label for="fTipoVenda">Tipo de venda</label><select id="fTipoVenda" data-campo="tv"></select></div>
     <div class="f com"><label for="fNR">Novo ou recompra</label><select id="fNR" data-campo="nr"></select></div>
     <div class="f com"><label for="fProduto">Tipo de produto</label><select id="fProduto" data-campo="tp"></select></div>
+    <div class="f com"><label for="fProdutoNome">Produto</label><select id="fProdutoNome" data-campo="pr"></select></div>
     <div class="f com"><label for="fMaterial">Material</label><select id="fMaterial" data-campo="mt"></select></div>
     <div class="f com"><label for="fCor">Cor</label><select id="fCor" data-campo="cr"></select></div>
     <button class="limpar" id="limpar" type="button" hidden>Limpar filtros</button>
@@ -438,16 +449,17 @@ table.matriz td.vz{color:var(--line2)}
   </section>
 
   <section data-pagina="clientes" hidden>
-    
-    <div class="g2e">
-      <div class="card"><div class="hd"><div><h3>Curva ABC<span class="req">C3</span></h3><div class="sub" id="abcSub">—</div></div></div><div id="abc"></div></div>
-      <div class="card"><div class="hd"><div><h3>Pedidos por faixa de valor<span class="req">C5</span></h3><div class="sub" id="fxSub">—</div></div></div><div id="faixas"></div></div>
+    <div class="kpis" id="cliKpis"></div>
+    <div class="g2" style="margin-top:16px">
+      <div class="card"><div class="hd"><div><h3>10 maiores clientes<span class="req">C3</span></h3><div class="sub" id="topSub">—</div></div></div><div class="tw" id="topCli"></div></div>
+      <div class="card"><div class="hd"><div><h3>Concentração do faturamento<span class="req">C3</span></h3><div class="sub" id="abcSub">—</div></div></div><div id="abc"></div></div>
     </div>
     <div class="g2e" style="margin-top:16px">
-      <div class="card"><div class="hd"><div><h3>10 maiores clientes<span class="req">C3</span></h3><div class="sub">Por faturamento no período</div></div></div><div class="rank" id="rkClientes"></div></div>
-      <div class="card"><div class="hd"><div><h3>Segmento de cliente<span class="req">C6</span></h3><div class="sub">Depende da coluna "Segmento" na planilha</div></div></div><div class="rank" id="rkSegmento"></div></div>
+      <div class="card"><div class="hd"><div><h3>Pedidos por faixa de valor<span class="req">C5</span></h3><div class="sub" id="fxSub">—</div></div></div><div id="faixas"></div></div>
+      <div class="card"><div class="hd"><div><h3>Novos × recompra<span class="req">R3</span></h3><div class="sub" id="nrCliSub">—</div></div></div><div id="nrCli"></div>
+        <h3 style="margin-top:20px">Segmento<span class="req">C6</span></h3><div id="rkSegmento" style="margin-top:8px"></div></div>
     </div>
-    <div class="card" style="margin-top:16px"><div class="hd"><div><h3>Clientes que pararam de comprar</h3><div class="sub">Compraram nos últimos 12 meses e estão há mais de 90 dias sem pedido · foco da Visu em clientes novos e recompra</div></div></div><div class="tw" id="inativos"></div></div>
+    <div class="card" style="margin-top:16px"><div class="hd"><div><h3>Clientes que pararam de comprar</h3><div class="sub" id="inatSub">Compraram nos últimos 12 meses e estão há mais de 90 dias sem pedido</div></div></div><div class="tw" id="inativos"></div></div>
   </section>
 
   <section data-pagina="vendedores" hidden>
@@ -501,7 +513,8 @@ table.matriz td.vz{color:var(--line2)}
     
     <div class="kpis" id="rcKpis"></div>
     <div class="g3" style="margin-top:16px">
-      <div class="card"><div class="hd"><div><h3>Atraso por idade</h3><div class="sub">Valor vencido e não recebido</div></div></div><div id="rcIdade"></div></div>
+      <div class="card"><div class="hd"><div><h3>Atraso por idade</h3><div class="sub">Valor vencido e não recebido</div></div></div><div id="rcIdade"></div>
+        <h3 style="margin-top:22px">Receitas por categoria</h3><div class="sub" id="rcCatSub" style="margin-bottom:8px">Competência</div><div id="rcCat"></div></div>
       <div class="card"><div class="hd"><div><h3>Maiores atrasos por cliente</h3><div class="sub">Para a cobrança</div></div></div><div class="tw" id="rcPessoas"></div></div>
       <div class="card"><div class="hd"><div><h3>Próximos recebimentos</h3><div class="sub">Em ordem de vencimento</div></div></div><div class="tw" id="rcProx"></div></div>
     </div>
@@ -511,17 +524,17 @@ table.matriz td.vz{color:var(--line2)}
     
     <div class="kpis" id="pgKpis"></div>
     <div class="g2" style="margin-top:16px">
-      <div class="card"><div class="hd"><div><h3>Despesas por categoria</h3><div class="sub" id="pgCatSub">—</div></div></div><div class="rank" id="pgCat"></div></div>
-      <div class="card"><div class="hd"><div><h3>Por centro de custo</h3><div class="sub">No mês selecionado</div></div></div><div class="rank" id="pgCentro"></div>
-        <h3 style="margin-top:22px">Receitas por categoria</h3><div class="sub" id="rcCatSub" style="margin-bottom:12px">Competência</div><div class="rank" id="rcCat"></div></div>
+      <div class="card"><div class="hd"><div><h3>Despesas por categoria</h3><div class="sub" id="pgCatSub">—</div></div></div><div class="tw" id="pgCat"></div></div>
+      <div class="card"><div class="hd"><div><h3>Por centro de custo</h3><div class="sub">No mês selecionado</div></div></div><div id="pgCentro"></div></div>
     </div>
     <div class="g2e" style="margin-top:16px">
-      <div class="card"><div class="hd"><div><h3>Maiores fornecedores</h3><div class="sub">Últimos 12 meses</div></div></div><div class="rank" id="pgForn"></div></div>
-      <div class="card"><div class="hd"><div><h3>Próximos pagamentos</h3><div class="sub">Em ordem de vencimento</div></div></div><div class="tw" id="pgProx"></div></div>
+      <div class="card"><div class="hd"><div><h3>Maiores fornecedores</h3><div class="sub">Últimos 12 meses</div></div></div><div class="tw" id="pgForn"></div></div>
+      <div class="card"><div class="hd"><div><h3>Próximos pagamentos</h3><div class="sub">Em ordem de vencimento</div></div></div><div class="tw compactas" id="pgProx"></div></div>
     </div>
   </section>
 
   <section data-pagina="conciliacao" hidden>
+    <div class="aviso" id="concPlan"></div>
     
     <div class="g2">
       <div class="card"><div class="hd"><div><h3>De onde vem a diferença</h3><div class="sub" id="concSub">—</div></div></div><div id="ponte"></div></div>
@@ -592,8 +605,9 @@ const nomeMes=(m)=>{const[a,b]=m.split('-');return MES_L[+b-1]+' de '+a};
 const somaMes=(m,n)=>{const[a,b]=m.split('-').map(Number);const d=new Date(Date.UTC(a,b-1+n,1));return d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0')};
 function delta(a,b,inv){ if(!b) return '<span class="delta eq">sem base</span>'; const d=(a-b)/b; const c=Math.abs(d)<.005?'eq':(d>0)!==!!inv?'up':'down'; return `<span class="delta ${c}">${d>0?'▲':d<0?'▼':'■'} ${pct(Math.abs(d))}</span>`; }
 
-const VERSAO='v16';
+const VERSAO='v17';
 const VERSOES=[
+ {v:'v17',data:'14/10/2026',tit:'Clientes, contas a pagar e produtos mais gerenciais',arq:'painel-visu-v17.zip',itens:['Clientes redesenhado: indicadores da carteira, 10 maiores com barra e variação, concentração A/B/C, faixas de valor em colunas e clientes parados em tabela compacta.','Contas a pagar em tabelas compactas, com mês atual, mês anterior e variação por categoria.','Produtos e mix: clicar num tipo destaca a evolução dele mês a mês; novo filtro Produto; vendas ainda sem itens carregados ficam fora do mix.','Nomes padronizados (BONÉ → Boné, EGBERTO → Egberto), rótulos de valor no gráfico de vendas, botão Filtrar no período personalizado e link da planilha em Planilha × sistema.']},
  {v:'v16',data:'14/10/2026',tit:'Sem margem bruta por produto',arq:'painel-visu-v16.zip',itens:['Margem bruta retirada de produtos, vendedores, pedidos, painel executivo e quadro de indicadores, porque o custo dos produtos na Conta Azul ainda não tem o refinamento necessário.','No lugar: preço médio por peça, peças por pedido e peças vendidas.','Margem de contribuição e ponto de equilíbrio continuam no Financeiro, calculados pela DRE.']},
  {v:'v15',data:'14/10/2026',tit:'Produtos gerencial, período personalizado e vendedores ativos',arq:'painel-visu-v15.zip',itens:['Produtos e mix redesenhado: indicadores do mix, participação por tipo com variação, evolução do mix em 6 meses, matriz tecido × cor e curva ABC em gráfico.','Margem bruta calculada só sobre os itens com custo cadastrado na Conta Azul, com o percentual de cobertura.','Filtro "Período personalizado" (de/até) nas páginas comerciais.','Vendedores: o ADM marca quem é ou não é vendedor; os inativos saem da lista e da régua de comissão.']},
  {v:'v14',data:'14/10/2026',tit:'Painel mais estável',arq:'painel-visu-v14-estavel.zip',itens:['Um erro em segundo plano (Conta Azul ou banco fora do ar) não derruba mais o painel inteiro.','Se o banco de dados não responder, o painel continua no ar e tenta de novo a cada minuto.','Aceita a DATABASE_URL copiada do Neon do jeito que ela vier (com psql e aspas).','Endereço /saude/banco para conferir se o banco está conectado.']},
@@ -681,6 +695,20 @@ function marcarFiltros(){
 }
 
 // ---------- carga ----------
+// nomes padronizados: "BONÉ" → "Boné", "academia exemplo" → "Academia Exemplo"; siglas continuam em maiúsculas
+const MINUSC=new Set(['de','da','do','das','dos','e','com','sem','para','por','em','na','no','nas','nos','à','ao','c/','s/']);
+const SIGLAS=new Set(['LTDA','ME','EPP','EIRELI','SA','S/A','MEI','PJ','PF','BPO','DTF','UV','PP','P','M','G','GG','XG','XGG','EXG','EXGG','G1','G2','G3','B2B','B2C','TI','RH','DP','ADM','ONG','UFPB','UFCG','IFPB','PB','PE','RN','CE','SP','RJ','II','III','IV','MAS/FEM','FEM','MASC','UN','CX','KG','PCT','DRY','FIT','EVA','PVC','POLO']);
+function nomeBonito(t){
+  t=String(t??'').trim().replace(/\s+/g,' '); if(!t) return t;
+  const letras=t.replace(/[^A-Za-zÀ-ÿ]/g,''); if(letras.length<2) return t;
+  const mai=letras.replace(/[^A-ZÀ-Þ]/g,'').length, todasMai=mai/letras.length>0.7, todasMin=mai===0;
+  if(!todasMai&&!todasMin) return t;
+  return t.toLowerCase().split(' ').map((w,i)=>{ const W=w.toUpperCase(); if(SIGLAS.has(W.replace(/[.,;:]/g,''))&&W!=='POLO'&&W!=='DRY'&&W!=='FIT') return W; if(i>0&&MINUSC.has(w)) return w;
+    return w.replace(/^([^\p{L}]*)(\p{L})/u,(m,a,b)=>a+b.toUpperCase()).replace(/([\/-])(\p{L})/gu,(m,a,b)=>a+b.toUpperCase()); }).join(' ');
+}
+function padronizarNomes(){ E.dados.linhas.forEach(l=>{ if(l._nb) return; l._nb=1; if(!l.pr&&l.tp) l.pr=[l.tp,l.mt,l.cr].filter(Boolean).join(' · '); ['c','v','tp','pr','mt','cr','sg'].forEach(k=>{ if(l[k]) l[k]=nomeBonito(l[k]); }); }); if(E.dados.vendedores_cadastrados) E.dados.vendedores_cadastrados=[...new Set(E.dados.vendedores_cadastrados.map(nomeBonito))]; (E.dados.conta_azul?.vendas||[]).forEach(v=>{ v.c=nomeBonito(v.c); }); }
+function padronizarFin(f){ if(!f||f._nb) return; f._nb=1; (f.det_competencia||[]).concat(f.det_caixa||[]).forEach(x=>{ x[4]=nomeBonito(x[4]); }); (f.det_abertos||[]).forEach(x=>{ x[2]=nomeBonito(x[2]); }); ['receber','pagar'].forEach(k=>{ (f[k]?.atraso_por_pessoa||[]).forEach(x=>x.pessoa=nomeBonito(x.pessoa)); (f[k]?.proximos||[]).forEach(x=>x.pessoa=nomeBonito(x.pessoa)); }); (f.fornecedores||[]).forEach(x=>x.nome=nomeBonito(x.nome)); }
+
 // vendedores marcados como inativos pelo ADM somem da lista e da régua; as vendas deles ficam em "Não vendedores"
 const NAO_VEND='Não vendedores';
 function aplicarVendedores(){
@@ -698,7 +726,7 @@ async function carregar(forcar){
     if(PREVIA) d=window.__DADOS__;
     else{ const r=await fetch('/api/vendas'+(forcar?'?forcar=1':''),{headers:{Accept:'application/json'}}); if(r.status===401){location.href='/login';return;} d=await r.json(); if(!r.ok) throw new Error(d.erro||('erro '+r.status)); }
     try{ E.vcfg=PREVIA?(E.vcfg||{inativos:[]}):await (await fetch('/api/vendedores',{headers:{Accept:'application/json'}})).json(); }catch(e){ E.vcfg={inativos:[]}; }
-    E.dados=d; aplicarVendedores(); $('avisoErro').hidden=true;
+    E.dados=d; padronizarNomes(); aplicarVendedores(); $('avisoErro').hidden=true;
     montarFiltros(); desenhar();
   }catch(e){ const a=$('avisoErro'); a.hidden=false; a.textContent='Não foi possível carregar as vendas: '+e.message; }
 }
@@ -783,10 +811,11 @@ function graficoEvolucao(serie,pe){
   const barras=serie.map((x,i)=>{ const cx=L+i*slot+slot/2, sel=x.m===E.mes, total=tot(x.s); let acum=0, out='';
     [['recompra','s1'],['novo','s2'],['','sNone']].forEach(([k,c])=>{ const v=get(x.s,k); if(v<=0) return; const y1=y(acum), y2=y(acum+v), topo=Math.abs(acum+v-total)<1e-6;
       out+=`<rect x="${cx-bw/2}" y="${y2+(acum?0:0)}" width="${bw}" height="${Math.max(y1-y2-(acum?2:0),1)}" fill="var(--${c})" rx="${topo?3:0}"/>`; acum+=v; });
-    return `<g class="bm" data-i="${i}" style="cursor:pointer"><rect x="${L+i*slot}" y="${T}" width="${slot}" height="${h}" fill="transparent"/>${out}
+    const rot=total>0?`<text x="${cx}" y="${y(total)-5}" text-anchor="middle" style="font-size:10px;fill:var(--ink3)${sel?';font-weight:700;fill:var(--ink2)':''}">${val?curto(total):int(total)}</text>`:'';
+    return `<g class="bm" data-i="${i}" style="cursor:pointer"><rect x="${L+i*slot}" y="${T}" width="${slot}" height="${h}" fill="transparent"/>${out}${rot}
       <text x="${cx}" y="${H-10}" text-anchor="middle" style="${sel?'fill:var(--ink);font-weight:700':''}">${MES_C[+x.m.slice(5)-1]}</text>${sel?`<rect x="${cx-bw/2}" y="${H-5}" width="${bw}" height="3" rx="1.5" fill="var(--orange)"/>`:''}</g>`; }).join('');
-  const peL=usePE?`<line x1="${L}" x2="${W-R}" y1="${y(pe)}" y2="${y(pe)}" stroke="var(--ink2)" stroke-width="1.5" stroke-dasharray="3 4" pointer-events="none"/><text x="${W-R}" y="${y(pe)-6}" text-anchor="end" style="fill:var(--ink2);font-weight:700" pointer-events="none">Ponto de equilíbrio ${curto(pe)}</text>`:'';
-  $('legPE').hidden=!usePE;
+  const peL=usePE?`<line x1="${L}" x2="${W-R}" y1="${y(pe)}" y2="${y(pe)}" stroke="var(--ink2)" stroke-width="1.5" stroke-dasharray="3 4" pointer-events="none"/>`:'';
+  $('legPE').hidden=!usePE; if(usePE) $('legPE').innerHTML=`<i style="background:var(--ink2);height:2px"></i>Ponto de equilíbrio (${brl(pe)})`;
   $('evolSub').textContent=`${val?'Faturamento':'Pedidos'} dos 12 meses até ${nomeMes(E.mes)} · clique num mês para abri-lo`;
   $('evolucao').innerHTML=`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Evolução mensal de ${val?'faturamento':'pedidos'}">${g}${barras}${peL}</svg>`;
   $('evolucao').querySelectorAll('.bm').forEach(el=>{ const x=serie[+el.dataset.i];
@@ -797,13 +826,22 @@ function graficoEvolucao(serie,pe){
 }
 
 // ---------- 2. produtos ----------
+// lista compacta em tabela: nome · barra fina · valor · colunas extras
+function rankTab(id,lista,o){
+  const el=$(id); if(!lista.length){ el.innerHTML=`<div class="vazio">${o.vazio||'Sem dados.'}</div>`; return; }
+  const mx=Math.max(...lista.map(g=>g.val),1), L=lista.slice(0,o.limite||10);
+  el.innerHTML=`<table class="compacta"><thead><tr><th>${o.nome||'Nome'}</th><th style="width:28%"></th><th class="v">${o.valor||'Valor'}</th>${(o.cab||[]).map(c=>`<th class="v">${c}</th>`).join('')}</tr></thead><tbody>${L.map(g=>`<tr${o.abrir?D(()=>o.abrir(g)):''}><td class="el"><span class="lk" title="${esc(g.nome)}">${esc(g.nome)}</span></td><td><div class="mbar"><i style="width:${Math.max(g.val/mx*100,1)}%"></i></div></td><td class="v"><b>${brl(g.val)}</b></td>${(o.extra?o.extra(g):[]).map(c=>`<td class="v">${c}</td>`).join('')}</tr>`).join('')}</tbody></table>${lista.length>L.length?`<div class="nota">Mostrando ${L.length} de ${lista.length}.</div>`:''}`;
+}
 function ranking(id,lista,meta,vazio,limite,abrir){
   const el=$(id); if(!lista.length){ el.innerHTML=`<div class="vazio">${vazio||'Sem vendas com esses filtros.'}</div>`; return; }
   const max=lista[0].val||1;
   el.innerHTML=lista.slice(0,limite||8).map((g,i)=>`<div class="r"${abrir?D(()=>abrir(g))+' tabindex="0"':''}><span class="pos">${i+1}</span><span class="nm" title="${esc(g.nome)}">${esc(g.nome)}</span><span class="vl">${g.rot}</span><span class="tr"><i style="width:${Math.max(g.val/max*100,1.5)}%"></i></span><span class="mt">${meta(g)}</span></div>`).join('');
 }
+const janelaAtual=()=>janela();
 function pgProdutos(j){
-  const ls=linhas(j.atual), ant=linhas(j.ant,j.corte), pc=E.medida==='pecas', V=(g)=>pc?g.q:g.t, F=(v)=>pc?int(v)+' pç':brl(v);
+  const semItem=(l)=>!l.tp&&!l.pr&&!l.mt&&!l.q;
+  const ls0=linhas(j.atual), ls=ls0.filter(l=>!semItem(l)), ant=linhas(j.ant,j.corte).filter(l=>!semItem(l)), pc=E.medida==='pecas', V=(g)=>pc?g.q:g.t, F=(v)=>pc?int(v)+' pç':brl(v);
+  const pend=ls0.filter(semItem), pendT=pend.reduce((a,l)=>a+l.t,0), pendP=new Set(pend.map(l=>l.p)).size;
   document.querySelectorAll('[data-med]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.med===E.medida)));
   const semProd=!E.dados.linhas.some(l=>l.mt||l.tp||l.cr||l.pr);
   const vazio=(m)=>`<div class="vazio">${E.dados.itens_pendentes?'Buscando os produtos das vendas na Conta Azul… o mix completa sozinho em alguns minutos.':semProd?'Esta fonte ainda não tem tipo de produto, material e cor.':m||'Sem vendas com esses filtros.'}</div>`;
@@ -823,17 +861,25 @@ function pgProdutos(j){
   const cores=['var(--s1)','var(--s2)','var(--s3)','#8A2E9A','#C9A227','#5ABAB4','#D7245F','var(--sNone)'];
   const totV=tipos.reduce((s2,g)=>s2+V(g),0)||1, tipos7=tipos.slice(0,7), outros=tipos.slice(7);
   const cor=new Map(tipos7.map((g,i)=>[g.nome,cores[i]]));
-  $('mixSub').textContent=`${pc?'Em peças':'Em faturamento'} · ${j.rot} · comparado com ${j.comp}`;
+  if(E.focoTipo&&!tipos.some(g=>g.nome===E.focoTipo)) E.focoTipo=null;
+  $('mixSub').innerHTML=`${pc?'Em peças':'Em faturamento'} · ${esc(j.rot)} · comparado com ${esc(j.comp)} · <b>clique num tipo para destacá-lo na evolução</b>`+(pendP?`<br><span style="color:var(--amber)">${brl(pendT)} em ${pl(pendP,'venda','vendas')} ainda sem os produtos carregados da Conta Azul ficam fora do mix até a busca terminar.</span>`:'');
   $('mixTipo').innerHTML=tipos.length?`<div class="barra2" style="height:26px">${tipos7.map(g=>`<span style="flex:${V(g)};background:${cor.get(g.nome)}" title="${esc(g.nome)}"></span>`).join('')}${outros.length?`<span style="flex:${outros.reduce((s2,g)=>s2+V(g),0)};background:var(--sNone)"></span>`:''}</div>
     <div class="tw" style="margin-top:12px"><table class="mix"><thead><tr><th>Tipo de produto</th><th class="v">${pc?'Peças':'Faturamento'}</th><th class="v">Part.</th><th class="v">Var.</th><th class="v">${pc?'Faturamento':'Peças'}</th><th class="v">R$/peça</th></tr></thead><tbody>${tipos.slice(0,10).map(g=>{ const a=tiposA.get(g.nome);
-      return `<tr${D(()=>detItens('Tipo: '+g.nome,g.ls))}><td><i class="dot" style="background:${cor.get(g.nome)||'var(--sNone)'}"></i><span class="lk">${esc(g.nome)}</span></td><td class="v"><b>${F(V(g))}</b></td><td class="v">${pct(V(g)/totV)}</td><td class="v">${a?delta(V(g),V(a)):'<span class="delta eq">novo</span>'}</td><td class="v">${pc?brl(g.t):int(g.q)}</td><td class="v">${brl2(g.q?g.t/g.q:0)}</td></tr>`; }).join('')}</tbody></table></div>`:vazio();
+      const foco=E.focoTipo===g.nome;
+      return `<tr class="foc ${foco?'on':''}" data-foco="${esc(g.nome)}" title="Clique para destacar na evolução do mix"><td><i class="dot" style="background:${cor.get(g.nome)||'var(--sNone)'}"></i><span>${esc(g.nome)}</span> <button class="ver" type="button"${D(()=>detItens('Tipo: '+g.nome,g.ls))} title="Ver as vendas" aria-label="Ver as vendas de ${esc(g.nome)}">↗</button></td><td class="v"><b>${F(V(g))}</b></td><td class="v">${pct(V(g)/totV)}</td><td class="v">${a?delta(V(g),V(a)):'<span class="delta eq">novo</span>'}</td><td class="v">${pc?brl(g.t):int(g.q)}</td><td class="v">${brl2(g.q?g.t/g.q:0)}</td></tr>`; }).join('')}</tbody></table></div>`:vazio();
+  $('mixTipo').querySelectorAll('tr[data-foco]').forEach(tr=>tr.addEventListener('click',e=>{ if(e.target.closest('.ver')) return; const n=tr.dataset.foco; E.focoTipo=E.focoTipo===n?null:n; pgProdutos(janelaAtual()); }));
   // evolução do mix (6 meses, 100%)
   const ms=[]; for(let i=5;i>=0;i--) ms.push(somaMes(E.mes,-i));
-  const porMes=ms.map(mm=>{ const g=new Map(); linhas([mm]).forEach(l=>{ const k=cor.has(tipoDe(l))?tipoDe(l):'Outros'; g.set(k,(g.get(k)||0)+(pc?l.q:l.t)); }); return {mm,g,tot:[...g.values()].reduce((a,b)=>a+b,0)}; });
+  const porMes=ms.map(mm=>{ const g=new Map(); linhas([mm]).filter(l=>!semItem(l)).forEach(l=>{ const k=cor.has(tipoDe(l))?tipoDe(l):'Outros'; g.set(k,(g.get(k)||0)+(pc?l.q:l.t)); }); return {mm,g,tot:[...g.values()].reduce((a,b)=>a+b,0)}; });
   const W=520,H=230,L=34,R=8,T=10,B=26,w=W-L-R,h=H-T-B,slot=w/ms.length,bw=Math.min(slot*.6,44);
   let sv=''; [0,.25,.5,.75,1].forEach(v=>{ const y=T+h-v*h; sv+=`<line x1="${L}" x2="${W-R}" y1="${y}" y2="${y}" stroke="var(--line)"/><text x="${L-6}" y="${y+4}" text-anchor="end">${v*100}%</text>`; });
-  porMes.forEach((x,i)=>{ const cx=L+i*slot+slot/2; let ac=0; [...tipos7.map(g=>g.nome),'Outros'].forEach(k=>{ const v=x.g.get(k)||0; if(!v||!x.tot) return; const hh=v/x.tot*h; sv+=`<rect x="${cx-bw/2}" y="${T+h-(ac+hh)}" width="${bw}" height="${Math.max(hh-1,0.5)}" fill="${cor.get(k)||'var(--sNone)'}"><title>${esc(k)}: ${pct(v/x.tot)}</title></rect>`; ac+=hh; });
+  const FO=E.focoTipo&&cor.has(E.focoTipo)?E.focoTipo:null, ordem=FO?[FO,...tipos7.map(g=>g.nome).filter(k=>k!==FO),'Outros']:[...tipos7.map(g=>g.nome),'Outros'];
+  porMes.forEach((x,i)=>{ const cx=L+i*slot+slot/2; let ac=0; ordem.forEach(k=>{ const v=x.g.get(k)||0; if(!v||!x.tot) return; const hh=v/x.tot*h; const apaga=FO&&k!==FO;
+      sv+=`<rect x="${cx-bw/2}" y="${T+h-(ac+hh)}" width="${bw}" height="${Math.max(hh-1,0.5)}" fill="${apaga?'var(--barSoft)':cor.get(k)||'var(--sNone)'}"><title>${esc(k)}: ${pct(v/x.tot)}</title></rect>`;
+      if(FO&&k===FO) sv+=`<text x="${cx}" y="${Math.max(T+h-hh-5,T+9)}" text-anchor="middle" style="font-size:10.5px;font-weight:700;fill:var(--ink)">${pct(v/x.tot)}</text>`;
+      ac+=hh; });
     sv+=`<text x="${cx}" y="${H-8}" text-anchor="middle" style="${x.mm===E.mes?'fill:var(--ink);font-weight:700':''}">${MES_C[+x.mm.slice(5)-1]}</text>`; });
+  $('mixEvolSub').textContent=FO?`Participação de ${FO} em cada mês (${pc?'peças':'R$'}) · clique de novo no tipo para ver todos`:'Participação de cada tipo nos últimos 6 meses';
   $('mixEvol').innerHTML=tipos.length?`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Evolução do mix por tipo">${sv}</svg>`:vazio();
   $('mixEvolLeg').innerHTML=tipos7.map(g=>`<span><i style="background:${cor.get(g.nome)}"></i>${esc(g.nome)}</span>`).join('')+(outros.length?'<span><i style="background:var(--sNone)"></i>Outros</span>':'');
   // matriz tecido × cor
@@ -865,24 +911,50 @@ function pgProdutos(j){
 // ---------- 3. clientes ----------
 const FAIXAS=[[1000,'Até R$ 1 mil'],[3000,'R$ 1 a 3 mil'],[5000,'R$ 3 a 5 mil'],[10000,'R$ 5 a 10 mil'],[20000,'R$ 10 a 20 mil'],[Infinity,'Acima de R$ 20 mil']];
 function pgClientes(j){
-  const ls=linhas(j.atual), a=resumo(ls), porCli=agrupar(ls,'c').sort((x,y)=>y.t-x.t), tot=a.fat||1;
-  let acum=0; const cls={A:{n:0,t:0},B:{n:0,t:0},C:{n:0,t:0}}; const classe=new Map();
-  porCli.forEach(c=>{ const antes=acum/tot; acum+=c.t; const k=antes<.8?'A':antes<.95?'B':'C'; cls[k].n++; cls[k].t+=c.t; classe.set(c.nome,k); });
-  const top10=porCli.slice(0,10).reduce((s,c)=>s+c.t,0);
-  $('abcSub').textContent=porCli.length?`${int(porCli.length)} clientes compraram · os 10 maiores somam ${pct(top10/tot)}`:'—';
-  $('abc').innerHTML=porCli.length?`<div class="tw"><table><thead><tr><th>Classe</th><th class="v">Clientes</th><th class="v">Faturamento</th><th class="v">% do total</th></tr></thead><tbody>
-    ${Object.entries(cls).map(([k,g])=>`<tr${D(()=>detClientes('Clientes da classe '+k,ls.filter(l=>classe.get(l.c)===k)))}><td><span class="pill p-${k}">${k}</span></td><td class="v">${int(g.n)}</td><td class="v">${brl(g.t)}</td><td class="v">${pct(g.t/tot)}</td></tr>`).join('')}</tbody></table></div>
-    <div class="nota">A: clientes que somam os primeiros 80% do faturamento · B: os 15% seguintes · C: os 5% finais.</div>`:'<div class="vazio">Sem vendas com esses filtros.</div>';
-  const peds=[...a.ped.values()]; const maior=peds.reduce((m,p)=>!m||p.t>m.t?p:m,null);
+  const ls=linhas(j.atual), ant=linhas(j.ant,j.corte), a=resumo(ls), b=resumo(ant), tot=a.fat||1;
+  const grp=(arr)=>{ const m=new Map(); arr.forEach(l=>{ const g=m.get(l.c)||{nome:l.c,t:0,q:0,ped:new Set(),ls:[],ult:'',v:l.v}; g.t+=l.t; g.q+=l.q; g.ped.add(l.p); g.ls.push(l); if((l.d||'')>g.ult){ g.ult=l.d; g.v=l.v; } m.set(l.c,g); }); return [...m.values()].sort((x,y)=>y.t-x.t); };
+  const cli=grp(ls), cliA=new Map(grp(ant).map(c=>[c.nome,c]));
+  let acum=0; const cls={A:{n:0,t:0,ls:[]},B:{n:0,t:0,ls:[]},C:{n:0,t:0,ls:[]}};
+  cli.forEach(c=>{ const antes=acum/tot; acum+=c.t; c.cls=antes<.8?'A':antes<.95?'B':'C'; const g=cls[c.cls]; g.n++; g.t+=c.t; g.ls.push(...c.ls); });
+  const top10=cli.slice(0,10), t10=top10.reduce((x,c)=>x+c.t,0), novos=cli.filter(c=>a.ped.get([...c.ped][0])?.nr==='novo'||[...c.ped].some(p=>a.ped.get(p)?.nr==='novo'));
+  $('cliKpis').innerHTML=kpiHtml([
+    ['Clientes que compraram',int(cli.length),`${delta(cli.length,b.clientes)}<span>${j.comp}: ${int(b.clientes)}</span>`,'dest','',()=>detClientes('Clientes que compraram',ls)],
+    ['Clientes novos',int(a.nr.novo.c.size),`<span>${brl(a.nr.novo.t)} · ${pct(a.fat?a.nr.novo.t/a.fat:0)} do faturamento</span>`,'','R3',()=>detClientes('Clientes novos',ls.filter(l=>a.ped.get(l.p)?.nr==='novo'))],
+    ['Faturamento por cliente',brl(cli.length?a.fat/cli.length:0),`${delta(cli.length?a.fat/cli.length:0,b.clientes?b.fat/b.clientes:0)}<span>média do período</span>`,'','',()=>detClientes('Clientes que compraram',ls)],
+    ['Concentração · 10 maiores',pct(t10/tot),`<span>${t10/tot>.5?'alta dependência de poucos clientes':'faturamento bem distribuído'}</span>`,'','C3',()=>detClientes('10 maiores clientes',ls.filter(l=>top10.some(c=>c.nome===l.c)))],
+  ]);
+  // top 10 com barra
+  $('topSub').textContent=cli.length?`${j.rot} · ${pct(t10/tot)} do faturamento`:'—';
+  const mxC=top10[0]?.t||1;
+  $('topCli').innerHTML=cli.length?`<table class="compacta"><thead><tr><th style="width:24px">#</th><th>Cliente</th><th class="v">Faturamento</th><th style="width:22%"></th><th class="v">Part.</th><th class="v">Pedidos</th><th class="v">Var.</th><th>Classe</th></tr></thead><tbody>${top10.map((c,i)=>{ const pa=cliA.get(c.nome);
+    return `<tr${D(()=>detPedidos('Cliente: '+c.nome,c.ls))}><td class="pos">${i+1}</td><td class="el"><span class="lk">${esc(c.nome)}</span></td><td class="v"><b>${brl(c.t)}</b></td><td><div class="mbar"><i style="width:${c.t/mxC*100}%"></i></div></td><td class="v">${pct(c.t/tot)}</td><td class="v">${c.ped.size}</td><td class="v">${pa?delta(c.t,pa.t):'<span class="delta eq">novo</span>'}</td><td><span class="pill p-${c.cls}">${c.cls}</span></td></tr>`; }).join('')}</tbody></table>`:'<div class="vazio">Sem vendas com esses filtros.</div>';
+  // concentração ABC
+  $('abcSub').textContent=cli.length?`${int(cls.A.n)} de ${int(cli.length)} clientes (${pct(cls.A.n/cli.length)}) fazem 80% do faturamento`:'—';
+  const corC={A:'var(--s1)',B:'var(--s3)',C:'var(--sNone)'};
+  $('abc').innerHTML=cli.length?`<div class="abc2">${['A','B','C'].map(k=>`<div class="abc2-l"${D(()=>detClientes('Clientes da classe '+k,cls[k].ls))}><div class="abc2-h"><span class="pill p-${k}">${k}</span><b>${pct(cls[k].t/tot)}</b><span>do faturamento</span></div>
+      <div class="abc2-b"><i style="width:${cls[k].t/tot*100}%;background:${corC[k]}"></i></div><div class="abc2-s">${pl(cls[k].n,'cliente','clientes')} · ${pct(cls[k].n/cli.length)} da carteira · ${brl(cls[k].t)}</div></div>`).join('')}</div>
+    <div class="nota">A = clientes que somam os primeiros 80% do faturamento · B = os 15% seguintes · C = os 5% finais.</div>`:'<div class="vazio">—</div>';
+  // faixas: colunas
+  const peds=[...a.ped.entries()].map(([k,p])=>({...p,k})); const maior=peds.reduce((m,p)=>!m||p.t>m.t?p:m,null);
   $('fxSub').textContent=peds.length?`Ticket médio ${brl(a.ticket)} · maior pedido ${brl(maior.t)} (${maior.c})`:'—';
-  const fx=FAIXAS.map(([ate,rot],i)=>{const de=i?FAIXAS[i-1][0]:0; const ps=peds.filter(p=>p.t>de&&p.t<=ate); return {nome:rot,val:ps.length,t:ps.reduce((s,p)=>s+p.t,0)};});
-  const mx=Math.max(...fx.map(f=>f.val),1);
-  $('faixas').innerHTML=peds.length?`<div class="rank fx">${fx.map((f,i)=>`<div class="r"${D(()=>{ const de=i?FAIXAS[i-1][0]:0, ate=FAIXAS[i][0]; detPedidos('Pedidos '+f.nome.toLowerCase(),ls.filter(l=>{const t=a.ped.get(l.p).t; return t>de&&t<=ate;})); })}><span class="nm" style="font-weight:500">${f.nome}</span><span class="tr"><i style="width:${f.val?Math.max(f.val/mx*100,2):0}%"></i></span><span class="vl">${int(f.val)} <span style="color:var(--ink3);font-weight:500">· ${brl(f.t)}</span></span></div>`).join('')}</div>`:'<div class="vazio">Sem pedidos.</div>';
-  ranking('rkClientes',porCli.map(c=>({...c,val:c.t,rot:brl(c.t)})),(g)=>`${pl(g.pedidos,'pedido','pedidos')} · ${int(g.q)} peças · ${pct(g.t/tot)} · classe ${classe.get(g.nome)}`,null,10,(g)=>detPedidos('Cliente: '+g.nome,ls.filter(l=>l.c===g.nome)));
-  const inat=clientesInativos(), hj=Date.now()-3*3600e3;
-  $('inativos').innerHTML=inat.length?`<table><thead><tr><th>Cliente</th><th>Último vendedor</th><th class="v">Última compra</th><th class="v">Sem comprar</th><th class="v">Pedidos em 12 meses</th><th class="v">Comprou em 12 meses</th></tr></thead><tbody>${inat.slice(0,12).map(c=>`<tr${D(()=>detPedidos('Histórico: '+c.nome,E.dados.linhas.filter(l=>l.c===c.nome),'Pedidos dos últimos 24 meses'))}><td class="el lk">${esc(c.nome)}</td><td class="el">${esc(c.v)}</td><td class="v">${c.ult.split('-').reverse().join('/')}</td><td class="v"><span class="pill p-mid">${Math.round((hj-Date.parse(c.ult))/864e5)} d</span></td><td class="v">${c.ped.size}</td><td class="v">${brl(c.t)}</td></tr>`).join('')}</tbody></table>`:'<div class="vazio">Nenhum cliente parado há mais de 90 dias.</div>';
-  if(E.dados.linhas.some(l=>l.sg)) ranking('rkSegmento',agrupar(ls.filter(l=>l.sg),'sg').map(g=>({...g,val:g.t,rot:brl(g.t)})).sort((a,b)=>b.val-a.val),(g)=>`${pl(g.pedidos,'pedido','pedidos')} · ${pct(g.t/tot)}`,null,8,(g)=>detPedidos('Segmento: '+g.nome,ls.filter(l=>l.sg===g.nome)));
-  else $('rkSegmento').innerHTML='<div class="vazio">A planilha ainda não tem a coluna "Segmento". Se a Visu aprovar esta análise, a coluna entra com lista suspensa de poucos grupos (ex.: academias, escolas, indústria).</div>';
+  const fx=FAIXAS.map(([ate,rot],i)=>{ const de=i?FAIXAS[i-1][0]:0; const ps=peds.filter(p=>p.t>de&&p.t<=ate); return {nome:rot.replace('Acima de ','> ').replace('Até ','≤ '),val:ps.length,t:ps.reduce((x,p)=>x+p.t,0),ks:new Set(ps.map(p=>p.k))}; });
+  const W=520,H=200,L=8,R=8,T=26,B=34,w=W-L-R,h=H-T-B,sl=w/fx.length,mx=Math.max(...fx.map(f=>f.val),1);
+  let sv=''; fx.forEach((f,i)=>{ const cx=L+i*sl+sl/2, bh=f.val/mx*h; sv+=`<g${D(()=>detPedidos('Pedidos '+FAIXAS[i][1].toLowerCase(),ls.filter(l=>f.ks.has(l.p))))} style="cursor:pointer"><rect x="${L+i*sl}" y="${T}" width="${sl}" height="${h}" fill="transparent"/><rect x="${cx-sl*.32}" y="${T+h-bh}" width="${sl*.64}" height="${Math.max(bh,1)}" rx="3" fill="var(--s1)"/>
+      <text x="${cx}" y="${T+h-bh-14}" text-anchor="middle" style="font-size:11.5px;font-weight:700;fill:var(--ink)">${f.val}</text><text x="${cx}" y="${T+h-bh-3}" text-anchor="middle" style="font-size:9.5px">${f.t?curto(f.t):''}</text>
+      <text x="${cx}" y="${H-16}" text-anchor="middle" style="font-size:10.5px">${esc(f.nome)}</text></g>`; });
+  $('faixas').innerHTML=peds.length?`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Pedidos por faixa de valor">${sv}</svg><div class="nota">Número de pedidos em cada faixa e o faturamento somado (em cinza).</div>`:'<div class="vazio">Sem pedidos.</div>';
+  // novos × recompra
+  const n=a.nr.novo, r=a.nr.recompra, x0=a.nr[''];
+  $('nrCliSub').textContent=j.rot;
+  $('nrCli').innerHTML=a.pedidos?`<div class="abc2">${[['Novos',n,'var(--s2)','novo'],['Recompra',r,'var(--s1)','recompra']].concat(x0.p?[['Sem classificação',x0,'var(--sNone)','']]:[]).map(([rot,g,c,k])=>`<div class="abc2-l"${D(()=>detClientes('Clientes · '+rot.toLowerCase(),ls.filter(l=>(a.ped.get(l.p)?.nr||'')===k)))}><div class="abc2-h"><b>${pct(g.t/tot)}</b><span>${rot} · ${pl(g.c.size,'cliente','clientes')} · ${pl(g.p,'pedido','pedidos')}</span></div><div class="abc2-b"><i style="width:${g.t/tot*100}%;background:${c}"></i></div><div class="abc2-s">${brl(g.t)}</div></div>`).join('')}</div>`:'<div class="vazio">Sem pedidos.</div>';
+  if(E.dados.linhas.some(l=>l.sg)){ const sg=agrupar(ls.filter(l=>l.sg),'sg').sort((x,y)=>y.t-x.t); const ms=sg[0]?.t||1;
+    $('rkSegmento').innerHTML=`<table class="compacta"><tbody>${sg.map(g=>`<tr${D(()=>detPedidos('Segmento: '+g.nome,ls.filter(l=>l.sg===g.nome)))}><td class="el lk">${esc(g.nome)}</td><td style="width:35%"><div class="mbar"><i style="width:${g.t/ms*100}%"></i></div></td><td class="v">${brl(g.t)}</td><td class="v">${pct(g.t/tot)}</td></tr>`).join('')}</tbody></table>`; }
+  else $('rkSegmento').innerHTML='<div class="nota" style="margin-top:0">A planilha ainda não tem a coluna "Segmento". Se a Visu aprovar, a coluna entra com lista suspensa de poucos grupos (academias, escolas, indústria…).</div>';
+  // inativos
+  const inat=clientesInativos(), hj=Date.now()-3*3600e3, mxI=Math.max(...inat.map(c=>c.t),1);
+  $('inatSub').textContent=inat.length?`${pl(inat.length,'cliente','clientes')} · ${brl(inat.reduce((x,c)=>x+c.t,0))} comprados nos últimos 12 meses · alvo para recompra`:'Compraram nos últimos 12 meses e estão há mais de 90 dias sem pedido';
+  $('inativos').innerHTML=inat.length?`<table class="compacta"><thead><tr><th>Cliente</th><th>Último vendedor</th><th class="v">Última compra</th><th class="v">Dias sem comprar</th><th class="v">Comprou em 12 meses</th><th style="width:18%"></th><th class="v">Pedidos</th></tr></thead><tbody>${inat.slice(0,12).map(c=>{ const dd=Math.round((hj-Date.parse(c.ult))/864e5);
+    return `<tr${D(()=>detPedidos('Histórico: '+c.nome,E.dados.linhas.filter(l=>l.c===c.nome),'Pedidos dos últimos 24 meses'))}><td class="el"><span class="lk">${esc(c.nome)}</span></td><td class="el">${esc(c.v)}</td><td class="v">${c.ult.split('-').reverse().join('/')}</td><td class="v"><span style="color:${dd>180?'var(--red)':'var(--amber)'};font-weight:700">${dd}</span></td><td class="v">${brl(c.t)}</td><td><div class="mbar"><i style="width:${c.t/mxI*100}%"></i></div></td><td class="v">${c.ped.size}</td></tr>`; }).join('')}</tbody></table>${inat.length>12?`<div class="nota">Mostrando 12 de ${int(inat.length)}. <span class="lk"${D(()=>abrirDet('Clientes que pararam de comprar','Compraram nos últimos 12 meses e estão há mais de 90 dias sem pedido',[{rot:'Cliente'},{rot:'Último vendedor'},{rot:'Última compra',t:'data'},{rot:'Dias sem comprar',t:'int'},{rot:'Pedidos',t:'int'},{rot:'Comprou em 12 meses',t:'brl',total:1}],inat.map(c=>[c.nome,c.v,c.ult,diasAtr(c.ult),c.ped.size,c.t])))}>Ver todos</span></div>`:''}`:'<div class="vazio">Nenhum cliente parado há mais de 90 dias.</div>';
 }
 
 // ---------- 4. vendedores ----------
@@ -970,9 +1042,9 @@ function pgPedidos(j){
 
 // ---------- financeiro ----------
 async function carregarFin(forcar){
-  if(window.__FIN__){ E.fin=window.__FIN__; return; }
+  if(window.__FIN__){ E.fin=window.__FIN__; padronizarFin(E.fin); return; }
   const r=await fetch('/api/financeiro'+(forcar?'?forcar=1':''),{headers:{Accept:'application/json'}}); if(r.status===401){location.href='/login';return;}
-  const d=await r.json(); if(!r.ok) throw new Error(d.erro||('erro '+r.status)); E.fin=d;
+  const d=await r.json(); if(!r.ok) throw new Error(d.erro||('erro '+r.status)); padronizarFin(d); E.fin=d;
 }
 function precisaFin(alvo){
   if(E.fin) return false;
@@ -1122,7 +1194,7 @@ function pgReceber(){
   $('rcCatSub').textContent=`Competência · ${nomeMes(m)}`;
   const cats=f.receitas_categoria.map(x=>({nome:x.nome,val:x.valores[m]||0,t:x.total})).filter(x=>x.val>0).sort((a,b)=>b.val-a.val);
   const tot=cats.reduce((s2,x)=>s2+x.val,0)||1;
-  ranking('rcCat',cats.map(x=>({...x,rot:brl(x.val)})),(g)=>`${pct(g.val/tot)} da receita do mês`,'Sem receitas no mês.',8,(g)=>detLanc(g.nome+' · '+nomeMes(m),l=>l[1]==='r'&&l[0]===m&&l[2]===g.nome));
+  rankTab('rcCat',cats,{nome:'Categoria',valor:'Receita',cab:['Part.'],extra:(g)=>[pct(g.val/tot)],vazio:'Sem receitas no mês.',limite:8,abrir:(g)=>detLanc(g.nome+' · '+nomeMes(m),l=>l[1]==='r'&&l[0]===m&&l[2]===g.nome)});
 }
 
 // ---------- contas a pagar e despesas ----------
@@ -1138,19 +1210,21 @@ function pgPagar(){
   const totM=f.despesa[m]||1;
   $('pgCatSub').textContent=`${nomeMes(m)} · comparado com ${nomeMes(ma)}`;
   const cats=f.despesas_categoria.map(x=>({nome:x.nome,val:x.valores[m]||0,ant:x.valores[ma]||0})).filter(x=>x.val>0||x.ant>0).sort((a,b)=>b.val-a.val);
-  ranking('pgCat',cats.map(x=>({...x,rot:brl(x.val)})),(g)=>`${pct(g.val/totM)} das despesas · ${g.ant?`${g.val>=g.ant?'▲':'▼'} ${pct(Math.abs(g.val-g.ant)/g.ant)} vs. mês anterior`:'sem lançamento no mês anterior'}`,'Sem despesas no mês.',12,(g)=>detLanc(g.nome+' · '+nomeMes(m),l=>l[1]==='p'&&l[0]===m&&l[2]===g.nome));
+  rankTab('pgCat',cats,{nome:'Categoria',valor:nomeMes(m).split(' ')[0].replace(/^./,c=>c.toUpperCase()),cab:['Part.',nomeMes(ma).split(' ')[0].replace(/^./,c=>c.toUpperCase()),'Var.'],extra:(g)=>[pct(g.val/totM),brl(g.ant),g.ant?delta(g.val,g.ant,1):'<span class="delta eq">novo</span>'],vazio:'Sem despesas no mês.',limite:15,abrir:(g)=>detLanc(g.nome+' · '+nomeMes(m),l=>l[1]==='p'&&l[0]===m&&l[2]===g.nome)});
   const cc=f.despesas_centro.map(x=>({nome:x.nome,val:x.valores[m]||0})).filter(x=>x.val>0).sort((a,b)=>b.val-a.val);
-  ranking('pgCentro',cc.map(x=>({...x,rot:brl(x.val)})),(g)=>`${pct(g.val/totM)} das despesas`,'Sem centros de custo nos lançamentos.',8,(g)=>detLanc('Centro de custo: '+g.nome+' · '+nomeMes(m),l=>l[1]==='p'&&l[0]===m&&l[3]===g.nome));
+  rankTab('pgCentro',cc,{nome:'Centro de custo',valor:'Despesa',cab:['Part.'],extra:(g)=>[pct(g.val/totM)],vazio:'Sem centros de custo nos lançamentos.',limite:8,abrir:(g)=>detLanc('Centro de custo: '+g.nome+' · '+nomeMes(m),l=>l[1]==='p'&&l[0]===m&&l[3]===g.nome)});
   const fo=f.fornecedores.map(x=>({nome:x.nome||'—',val:x.total}));
   const totF=fo.reduce((s2,x)=>s2+x.val,0)||1;
-  ranking('pgForn',fo.map(x=>({...x,rot:brl(x.val)})),(g)=>`${pct(g.val/totF)} entre os 10 maiores`,'Sem fornecedores identificados.',10,(g)=>detLanc('Fornecedor: '+g.nome,l=>l[1]==='p'&&(l[4]||'—')===g.nome,0,'Lançamentos dos últimos 12 meses'));
-  $('pgProx').innerHTML=pg.proximos.length?`<table><thead><tr><th>Vencimento</th><th>Fornecedor / descrição</th><th>Categoria</th><th class="v">Valor</th></tr></thead><tbody>${pg.proximos.map(x=>`<tr${D(()=>detAbertos('A pagar: '+(x.pessoa||x.descricao),y=>y[0]==='p'&&y[2]===x.pessoa))}><td class="num">${x.vencimento.split('-').reverse().join('/')}</td><td class="el">${esc(x.pessoa||x.descricao)}</td><td class="el">${esc(x.categoria)}</td><td class="v">${brl2(x.aberto)}</td></tr>`).join('')}</tbody></table>`:'<div class="vazio">Nada a vencer.</div>';
+  rankTab('pgForn',fo,{nome:'Fornecedor',valor:'12 meses',cab:['Part.'],extra:(g)=>[pct(g.val/totF)],vazio:'Sem fornecedores identificados.',limite:10,abrir:(g)=>detLanc('Fornecedor: '+g.nome,l=>l[1]==='p'&&(l[4]||'—')===g.nome,0,'Lançamentos dos últimos 12 meses')});
+  $('pgProx').innerHTML=pg.proximos.length?`<table><thead><tr><th>Vencimento</th><th>Fornecedor · categoria</th><th class="v">Valor</th></tr></thead><tbody>${pg.proximos.map(x=>`<tr${D(()=>detAbertos('A pagar: '+(x.pessoa||x.descricao),y=>y[0]==='p'&&y[2]===x.pessoa))}><td class="num">${x.vencimento.split('-').reverse().join('/')}</td><td class="el">${esc(x.pessoa||x.descricao)}<div style="font-size:11.5px;color:var(--ink3)">${esc(x.categoria)}</div></td><td class="v">${brl2(x.aberto)}</td></tr>`).join('')}</tbody></table>`:'<div class="vazio">Nada a vencer.</div>';
 }
 
 // ---------- conciliação planilha x sistema ----------
 const kc=(s)=>String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/\s*[-–(]?\s*\blote\s*\d+\)?\s*$/,'').replace(/[^a-z0-9]+/g,' ').trim();
 let totalInformado={}; try{ totalInformado=JSON.parse(localStorage.getItem('visu-total-planilha')||'{}'); }catch(e){}
 function pgConciliacao(){
+  const link=E.dados.planilha_link||'https://docs.google.com/spreadsheets/d/1mWgFszLWSMepXLA4FMlOtRJ6jayKgODU/edit?gid=247671240', ligada=E.dados.fonte==='planilha';
+  $('concPlan').innerHTML=`<span><b>Planilha "Rotina de vendas_Gestão faturamento CLOUD"</b> · ${ligada?'ligada ao painel e lida automaticamente a cada atualização (5 min).':'ainda não está ligada ao painel: a comparação usa o total que você informar abaixo. Para ler automaticamente, a planilha precisa ser compartilhada com a conta de serviço do painel (veja o README).'}</span><a class="bt2 pri" style="text-decoration:none" href="${esc(link)}" target="_blank" rel="noopener">Abrir planilha ↗</a>`;
   const d=E.dados, m=E.mes, caD=d.conta_azul;
   if(!caD){ $('ponte').innerHTML='<div class="vazio">A Conta Azul ainda não está conectada. A conciliação compara a planilha com as vendas do sistema.</div>'; $('motivos').innerHTML=''; $('concMeses').innerHTML=''; $('concClientes').innerHTML=''; return; }
   const temPlanilha=d.fonte==='planilha'||d.fonte==='demo';
@@ -1549,6 +1623,7 @@ window.addEventListener('hashchange',()=>{ const h=location.hash.slice(1); if(ME
 $('fPeriodo').addEventListener('change',e=>{ E.periodo=e.target.value;
   if(E.periodo==='faixa'&&!E.de){ E.de=E.mes+'-01'; const [a,b]=E.mes.split('-').map(Number); E.ate=new Date(Date.UTC(a,b,0)).toISOString().slice(0,10); const h=new Date(Date.now()-3*3600e3).toISOString().slice(0,10); if(E.ate>h) E.ate=h; $('fDe').value=E.de; $('fAte').value=E.ate; }
   desenhar(); });
+$('fAplicar').addEventListener('click',()=>{ const de=$('fDe').value, ate=$('fAte').value; if(!de||!ate){ alert('Escolha as duas datas.'); return; } E.de=de<=ate?de:ate; E.ate=de<=ate?ate:de; $('fDe').value=E.de; $('fAte').value=E.ate; desenhar(); });
 $('fDe').addEventListener('change',e=>{ E.de=e.target.value; if(E.ate&&E.de>E.ate){ E.ate=E.de; $('fAte').value=E.ate; } desenhar(); });
 $('fAte').addEventListener('change',e=>{ E.ate=e.target.value; if(E.de&&E.ate<E.de){ E.de=E.ate; $('fDe').value=E.de; } desenhar(); });
 $('fMes').addEventListener('change',e=>{E.mes=e.target.value;desenhar()});
