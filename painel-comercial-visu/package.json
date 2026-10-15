@@ -1,6 +1,6 @@
 {
   "name": "painel-comercial-visu",
-  "version": "19.0.0",
+  "version": "20.0.0",
   "description": "Painel comercial da Visu com dados em tempo real da API v2 da Conta Azul (Seja Expert)",
   "type": "module",
   "main": "server.js",
@@ -12,7 +12,8 @@
     "node": ">=20"
   },
   "dependencies": {
-    "express": "^4.21.2"
+    "express": "^4.21.2",
+    "xlsx": "^0.18.5"
   },
   "optionalDependencies": {
     "pg": "^8.13.1"

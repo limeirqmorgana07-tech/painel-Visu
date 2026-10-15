@@ -9,6 +9,7 @@ import * as ca from './src/contaAzul.js';
 import { dadosDeVendas } from './src/vendas.js';
 import { dadosFinanceiros } from './src/financeiro.js';
 import { planilhaConfigurada } from './src/planilha.js';
+import * as google from './src/google.js';
 import * as usuarios from './src/usuarios.js';
 import { paginasDe, veFinanceiro, veVendas } from './src/paginas.js';
 import { statusBanco, lerKV, salvarKV } from './src/tokenStore.js';
@@ -181,6 +182,24 @@ app.get('/callback', exigeAdm, async (req, res) => {
   }
 });
 
+// ---------- conexão com o Google (planilha de vendas) ----------
+app.get('/google/conectar', exigeAdm, (req, res) => {
+  if (!google.credenciaisGoogle()) return res.status(500).send('<p>Faltam GOOGLE_CLIENT_ID e GOOGLE_CLIENT_SECRET nas variáveis de ambiente do Render (veja o README, seção "Planilha em tempo real").</p><p><a href="/#conciliacao">Voltar</a></p>');
+  res.redirect(google.urlAutorizacaoGoogle(config.planilhaConta));
+});
+app.get('/google/callback', exigeAdm, async (req, res) => {
+  try {
+    if (req.query.error) throw new Error(String(req.query.error_description || req.query.error));
+    await google.trocarCodigoGoogle(String(req.query.code || ''), String(req.query.state || ''));
+    dadosDeVendas(true).catch(() => {});
+    res.redirect('/?google=1#conciliacao');
+  } catch (e) {
+    res.status(400).send(`<p>Não foi possível conectar ao Google.</p><pre>${String(e.message).replace(/</g, '&lt;')}</pre><p><a href="/#conciliacao">Voltar</a></p>`);
+  }
+});
+app.post('/google/desconectar', exigeAdm, async (req, res) => { await google.desconectarGoogle(); dadosDeVendas(true).catch(() => {}); res.redirect('/#conciliacao'); });
+app.get('/api/google', exigeLogin, async (req, res) => res.json({ ...(await google.statusGoogle()), redirect_uri: google.redirectGoogle() }));
+
 app.post('/desconectar', exigeAdm, async (req, res) => {
   await ca.desconectar();
   res.redirect('/');
@@ -196,7 +215,7 @@ app.get('/api/status', exigeLogin, async (req, res) => {
 app.get('/api/vendas', exigeLogin, async (req, res) => {
   if (!veVendas(req.usuario)) return res.status(403).json({ erro: 'seu perfil não tem acesso aos dados de vendas' });
   try {
-    res.json({ ...(await dadosDeVendas(req.query.forcar === '1')), planilha_link: config.planilhaLink, planilha_conta: config.planilhaConta });
+    res.json({ ...(await dadosDeVendas(req.query.forcar === '1')), planilha_link: config.planilhaLink, planilha_conta: config.planilhaConta, google: await google.statusGoogle().catch(() => null) });
   } catch (e) {
     console.error('[vendas]', e);
     res.status(502).json({ erro: e.message });
@@ -238,6 +257,7 @@ app.get(['/', '/index.html'], exigeLogin, async (req, res) => {
   res.type('html').send(cabecalho + corpo + '</body></html>');
 });
 
+google.carregarGoogle().catch(() => {});
 app.listen(config.porta, () => {
   console.log(`Painel Comercial Visu em ${config.urlPublica} (porta ${config.porta})`);
   if (!config.senhaPainel) console.warn('ATENÇÃO: PAINEL_SENHA não definida — sem senha mestra de ADM; só entram usuários com convite aceito.');

@@ -70,6 +70,7 @@ main{max-width:1320px;margin:0 auto;padding-inline:20px;padding-block:18px 48px;
 .aviso{display:flex;gap:10px;flex-wrap:wrap;align-items:center;background:var(--amberSoft);border-left:4px solid var(--orange);border-radius:10px;padding:10px 14px;font-size:13px}
 .aviso b{font-family:var(--display);font-weight:600}
 .aviso.erro{background:var(--redSoft);border-left-color:var(--red)}
+.aviso.ok{background:var(--greenSoft);border-left-color:var(--green)}
 .pagina-titulo{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
 .pagina-titulo h2{font-family:var(--display);font-weight:600;font-size:24px;margin:0;letter-spacing:-.015em;text-wrap:balance}
 .pagina-titulo p{margin:2px 0 0;color:var(--ink3);font-size:13px}
@@ -702,8 +703,9 @@ const nomeMes=(m)=>{const[a,b]=m.split('-');return MES_L[+b-1]+' de '+a};
 const somaMes=(m,n)=>{const[a,b]=m.split('-').map(Number);const d=new Date(Date.UTC(a,b-1+n,1));return d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0')};
 function delta(a,b,inv){ if(!b) return '<span class="delta eq">sem base</span>'; const d=(a-b)/b; const c=Math.abs(d)<.005?'eq':(d>0)!==!!inv?'up':'down'; return `<span class="delta ${c}">${d>0?'▲':d<0?'▼':'■'} ${pct(Math.abs(d))}</span>`; }
 
-const VERSAO='v19';
+const VERSAO='v20';
 const VERSOES=[
+ {v:'v20',data:'15/10/2026',tit:'Planilha em tempo real',arq:'painel-visu-v20.zip',itens:['Botão Conectar Google em Planilha × sistema: o ADM entra uma vez com a conta que abre a planilha e o painel passa a lê-la sozinho a cada 5 minutos, sem publicar nem compartilhar o arquivo.','Funciona com planilha do Google e com .xlsx no Drive; a aba de vendas é encontrada automaticamente.']},
  {v:'v19',data:'15/10/2026',tit:'Escolha de visual',arq:'painel-visu-v19.zip',itens:['Botão Visual no topo com seis estilos, todos com as cores do logo da Visu: Clássico, Cores da Visu, Pôr do sol, Turquesa, Fio Visu e Noite, e espaçamento Confortável ou Compacto.','Cada pessoa escolhe o seu no próprio navegador; o ADM pode definir o visual padrão de todos.']},
  {v:'v18',data:'15/10/2026',tit:'Planilha abre na conta Google certa',arq:'painel-visu-v18.zip',itens:['O botão Abrir planilha abre o Google Planilhas já na conta do usuário logado no painel (ou na conta definida em PLANILHA_CONTA), mesmo que o navegador esteja em outra conta Google.']},
  {v:'v17',data:'14/10/2026',tit:'Clientes, contas a pagar e produtos mais gerenciais',arq:'painel-visu-v17.zip',itens:['Clientes redesenhado: indicadores da carteira, 10 maiores com barra e variação, concentração A/B/C, faixas de valor em colunas e clientes parados em tabela compacta.','Contas a pagar em tabelas compactas, com mês atual, mês anterior e variação por categoria.','Produtos e mix: clicar num tipo destaca a evolução dele mês a mês; novo filtro Produto; vendas ainda sem itens carregados ficam fora do mix.','Nomes padronizados (BONÉ → Boné, EGBERTO → Egberto), rótulos de valor no gráfico de vendas, botão Filtrar no período personalizado e link da planilha em Planilha × sistema.']},
@@ -1323,7 +1325,21 @@ const kc=(s)=>String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase(
 let totalInformado={}; try{ totalInformado=JSON.parse(localStorage.getItem('visu-total-planilha')||'{}'); }catch(e){}
 function pgConciliacao(){
   const conta=E.eu?.email||E.dados.planilha_conta||'morgana.limeira@sejaexpertgestao.com', base=E.dados.planilha_link||'https://docs.google.com/spreadsheets/d/1mWgFszLWSMepXLA4FMlOtRJ6jayKgODU/edit?gid=247671240', link=base+(base.includes('?')?'&':'?')+'authuser='+encodeURIComponent(conta), ligada=E.dados.fonte==='planilha';
-  $('concPlan').innerHTML=`<span><b>Planilha "Rotina de vendas_Gestão faturamento CLOUD"</b> · ${ligada?'ligada ao painel e lida automaticamente a cada atualização (5 min).':'ainda não está ligada ao painel: a comparação usa o total que você informar abaixo. Para ler automaticamente, a planilha precisa ser compartilhada com a conta de serviço do painel (veja o README).'}</span><a class="bt2 pri" style="text-decoration:none" href="${esc(link)}" target="_blank" rel="noopener">Abrir planilha ↗</a>`;
+  const G=E.dados.google||{}, arq=E.dados.planilha_arquivo, admG=E.eu?.perfil==='adm';
+  const quando=(iso)=>iso?new Date(iso).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'';
+  const txt=ligada&&G.conectado
+    ?`<b>ligada em tempo real</b> pela conta ${esc(G.email||'Google')}${arq?.aba?` · aba "${esc(arq.aba)}"`:''}${arq?.alterado_em?` · última edição na planilha: ${quando(arq.alterado_em)}`:''} · o painel relê a cada 5 minutos.`
+    :ligada?'ligada ao painel e lida automaticamente a cada atualização (5 min).'
+    :G.conectado?`Google conectado (${esc(G.email)}), mas a leitura falhou. Veja o aviso no topo da página.`
+    :`ainda não está ligada: a comparação usa o total que você informar abaixo.${admG?' Clique em <b>Conectar Google</b> e entre com a conta que abre a planilha; a partir daí os números entram sozinhos.':' Peça ao administrador para conectar o Google.'}`;
+  const botoes=[];
+  if(admG&&!PREVIA){
+    if(!G.conectado) botoes.push(G.credenciais===false?`<span class="nota" style="margin:0">Falta configurar GOOGLE_CLIENT_ID e GOOGLE_CLIENT_SECRET no Render.</span>`:`<a class="bt2 pri" style="text-decoration:none" href="/google/conectar">Conectar Google</a>`);
+    else botoes.push(`<form method="post" action="/google/desconectar" style="display:inline"><button class="bt2" type="submit">Desconectar Google</button></form>`);
+  } else if(admG&&PREVIA&&!G.conectado) botoes.push(`<button class="bt2 pri" type="button" disabled title="Na prévia não conecta">Conectar Google</button>`);
+  botoes.push(`<a class="bt2" style="text-decoration:none" href="${esc(link)}" target="_blank" rel="noopener">Abrir planilha ↗</a>`);
+  $('concPlan').innerHTML=`<span style="flex:1;min-width:260px"><b>Planilha "Rotina de vendas_Gestão faturamento CLOUD"</b> · ${txt}</span><span style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">${botoes.join('')}</span>`;
+  $('concPlan').classList.toggle('ok',!!(ligada&&G.conectado));
   const d=E.dados, m=E.mes, caD=d.conta_azul;
   if(!caD){ $('ponte').innerHTML='<div class="vazio">A Conta Azul ainda não está conectada. A conciliação compara a planilha com as vendas do sistema.</div>'; $('motivos').innerHTML=''; $('concMeses').innerHTML=''; $('concClientes').innerHTML=''; return; }
   const temPlanilha=d.fonte==='planilha'||d.fonte==='demo';

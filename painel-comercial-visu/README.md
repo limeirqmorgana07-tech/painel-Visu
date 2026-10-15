@@ -93,6 +93,21 @@ Quem tiver o link B consegue ver os dados. Use essa forma só para testes.
 
 **Nomes das colunas.** O painel procura as colunas pelos nomes da seção 5 da especificação, sem diferenciar maiúsculas e acentos, e aceita alguns apelidos. Se alguma coluna tiver outro nome, há duas saídas: renomear o cabeçalho na planilha ou usar a variável `COLUNAS_JSON`, por exemplo `{"cliente":"Nome do cliente","material":"Tecido"}`. A página **Qualidade dos dados** mostra o que foi reconhecido.
 
+## Planilha em tempo real (Conectar Google)
+
+O painel lê a planilha "Rotina de vendas_Gestão faturamento CLOUD" direto do Google Drive, com a conta de quem já tem acesso a ela. Não é preciso publicar nem compartilhar a planilha com ninguém.
+
+1. Em console.cloud.google.com, logada com a conta que abre a planilha (morgana.limeira@sejaexpertgestao.com), crie um projeto (ex.: "Painel Visu").
+2. APIs e serviços → Biblioteca → ative **Google Drive API**.
+3. APIs e serviços → Tela de consentimento OAuth → tipo **Interno** (só contas da Seja Expert). Se só aparecer "Externo", escolha Externo e, depois de configurar, clique em **Publicar app** (em "Teste" a autorização vence a cada 7 dias).
+4. Credenciais → Criar credenciais → **ID do cliente OAuth** → Aplicativo da Web → em "URIs de redirecionamento autorizados" coloque `https://SEU-PAINEL.onrender.com/google/callback`.
+5. Copie o ID e a chave secreta para o Render: `GOOGLE_CLIENT_ID` e `GOOGLE_CLIENT_SECRET`.
+6. No painel (ADM): Controle → Planilha × sistema → **Conectar Google** e entre com a conta da planilha.
+
+Depois disso o painel baixa a planilha a cada atualização (5 min). Funciona com planilha do Google e com arquivo .xlsx guardado no Drive. A aba de vendas é escolhida sozinha (a que tiver as colunas Data, Cliente e Total); para fixar, use `PLANILHA_ABA`. Outra planilha: `PLANILHA_ID`.
+A autorização fica guardada no banco (`DATABASE_URL`); sem banco, é preciso conectar de novo a cada reinício.
+Com a planilha ligada, as páginas comerciais usam a planilha como base (`FONTE_VENDAS=auto`). Para usar só a Conta Azul nas vendas, `FONTE_VENDAS=conta_azul`.
+
 ## Variáveis de ambiente (Render → Environment)
 
 | Variável | O que colocar |

@@ -223,6 +223,7 @@ async function montar(bruto) {
 
   return {
     fonte: origem,
+    planilha_arquivo: origem === 'planilha' ? base.arquivo || null : null,
     conta_azul_conectada: !!bruto.conectadoCA,
     credenciais_conta_azul: !!(config.clientId && config.clientSecret),
     atualizado_em: new Date().toISOString(),

@@ -3,9 +3,12 @@
 //
 // Duas formas de acesso, escolhidas pelas variáveis de ambiente:
 //   1) PLANILHA_CSV_URL — link CSV da aba de vendas (Arquivo → Compartilhar → Publicar na Web → CSV)
+//   0) Conectar Google (botão no painel, recomendado): lê o arquivo direto do Drive da conta que tem acesso
 //   2) GOOGLE_SERVICE_ACCOUNT_JSON + PLANILHA_ID (+ PLANILHA_ABA) — conta de serviço com acesso de leitor,
 //      sem deixar a planilha publicada (recomendado)
 import crypto from 'node:crypto';
+import XLSX from 'xlsx';
+import { googleConectado, baixarPlanilha } from './google.js';
 
 const env = process.env;
 
@@ -196,7 +199,7 @@ export function normalizarLinhas(matriz) {
 }
 
 // ---------- Acesso ----------
-export const planilhaConfigurada = () => !!(env.PLANILHA_CSV_URL || (env.GOOGLE_SERVICE_ACCOUNT_JSON && env.PLANILHA_ID));
+export const planilhaConfigurada = () => !!(googleConectado() || env.PLANILHA_CSV_URL || (env.GOOGLE_SERVICE_ACCOUNT_JSON && env.PLANILHA_ID));
 
 async function tokenContaServico() {
   const sa = JSON.parse(env.GOOGLE_SERVICE_ACCOUNT_JSON);
@@ -217,7 +220,31 @@ async function tokenContaServico() {
   return j.access_token;
 }
 
+// escolhe a aba: PLANILHA_ABA, senão a que tiver mais vendas reconhecidas
+export function lerXlsx(bytes, aba = env.PLANILHA_ABA) {
+  const wb = XLSX.read(bytes, { type: 'buffer', cellDates: false });
+  const nomes = aba ? wb.SheetNames.filter((n) => sem(n) === sem(aba)) : wb.SheetNames;
+  if (!nomes.length) throw new Error(`A planilha não tem a aba "${aba}". Abas: ${wb.SheetNames.join(', ')}.`);
+  let melhor = null;
+  for (const n of nomes) {
+    const matriz = XLSX.utils.sheet_to_json(wb.Sheets[n], { header: 1, raw: true, defval: '' });
+    let r; try { r = normalizarLinhas(matriz); } catch { continue; }
+    const ok = !(r.mapa?.obrigatorias_faltando?.length);
+    const nota = (ok ? 1e9 : 0) + (r.linhas?.length || 0);
+    if (!melhor || nota > melhor.nota) melhor = { nota, r, aba: n };
+  }
+  if (!melhor) throw new Error('Não encontrei a aba de vendas na planilha.');
+  melhor.r.aba = melhor.aba;
+  return melhor.r;
+}
+
 export async function lerPlanilha() {
+  if (googleConectado()) {
+    const arq = await baixarPlanilha();
+    const r = lerXlsx(arq.bytes);
+    r.arquivo = { nome: arq.nome, alterado_em: arq.alterado_em, aba: r.aba };
+    return r;
+  }
   if (env.PLANILHA_CSV_URL) {
     const r = await fetch(env.PLANILHA_CSV_URL, { redirect: 'follow' });
     if (!r.ok) throw new Error(`Não consegui baixar a planilha (${r.status}). Confira o link CSV publicado.`);
