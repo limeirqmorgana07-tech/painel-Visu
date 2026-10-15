@@ -433,7 +433,7 @@ table.matriz td.vz{color:var(--line2)}
         <div class="leg"><span><i style="background:var(--s1)"></i>Classe A</span><span><i style="background:var(--barSoft)"></i>Classes B e C</span><span><i style="background:var(--orange);height:3px"></i>% acumulado</span></div>
         <details class="tabela"><summary>Ver tabela completa</summary><div class="tw" id="abcProd"></div></details></div>
       <div class="card"><div class="hd"><div><h3>Ticket e preço por tecido<span class="req">R2</span></h3><div class="sub">Ticket = faturamento do tecido ÷ pedidos que levaram esse tecido</div></div></div>
-        <div class="tw"><table><thead><tr><th>Tecido</th><th class="v">Pedidos</th><th class="v">Peças</th><th class="v">Faturamento</th><th class="v">Ticket</th><th class="v">R$/peça</th><th class="v">Margem</th></tr></thead><tbody id="tbTecido"></tbody></table></div></div>
+        <div class="tw"><table><thead><tr><th>Tecido</th><th class="v">Pedidos</th><th class="v">Peças</th><th class="v">Faturamento</th><th class="v">Ticket</th><th class="v">R$/peça</th></tr></thead><tbody id="tbTecido"></tbody></table></div></div>
     </div>
   </section>
 
@@ -454,7 +454,7 @@ table.matriz td.vz{color:var(--line2)}
     
     <div class="card">
       <div class="hd"><div><h3>Desempenho por vendedor<span class="req">C7 · C8</span></h3><div class="sub">Comissão sobre o faturamento: começa em 1% a partir de R$ 15 mil e chega a 5% a partir de R$ 50 mil, sem teto</div></div></div>
-      <div class="tw"><table><thead><tr><th>Vendedor</th><th class="v">Faturamento</th><th class="v">Part.</th><th class="v">Pedidos</th><th class="v">Ticket médio</th><th class="v">Novos (R$)</th><th class="v">% novos</th><th class="v">Clientes novos</th><th class="v" id="thMargem">Margem</th><th id="thRegua">Régua da comissão</th></tr></thead><tbody id="tbVend"></tbody></table></div>
+      <div class="tw"><table><thead><tr><th>Vendedor</th><th class="v">Faturamento</th><th class="v">Part.</th><th class="v">Pedidos</th><th class="v">Ticket médio</th><th class="v">Novos (R$)</th><th class="v">% novos</th><th class="v">Clientes novos</th><th id="thRegua">Régua da comissão</th></tr></thead><tbody id="tbVend"></tbody></table></div>
       <div class="nota" id="vendNota"></div>
     </div>
     <div class="card" style="margin-top:16px" id="vendCfgCard" hidden><div class="hd"><div><h3>Quem é vendedor</h3><div class="sub">Marque como inativo quem aparece na Conta Azul mas não deve ser tratado como vendedor (financeiro, escritório, a própria empresa). As vendas dessas pessoas continuam no faturamento, agrupadas em "Não vendedores", sem régua de comissão.</div></div></div><div id="vendCfg"></div></div>
@@ -592,8 +592,9 @@ const nomeMes=(m)=>{const[a,b]=m.split('-');return MES_L[+b-1]+' de '+a};
 const somaMes=(m,n)=>{const[a,b]=m.split('-').map(Number);const d=new Date(Date.UTC(a,b-1+n,1));return d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0')};
 function delta(a,b,inv){ if(!b) return '<span class="delta eq">sem base</span>'; const d=(a-b)/b; const c=Math.abs(d)<.005?'eq':(d>0)!==!!inv?'up':'down'; return `<span class="delta ${c}">${d>0?'▲':d<0?'▼':'■'} ${pct(Math.abs(d))}</span>`; }
 
-const VERSAO='v15';
+const VERSAO='v16';
 const VERSOES=[
+ {v:'v16',data:'14/10/2026',tit:'Sem margem bruta por produto',arq:'painel-visu-v16.zip',itens:['Margem bruta retirada de produtos, vendedores, pedidos, painel executivo e quadro de indicadores, porque o custo dos produtos na Conta Azul ainda não tem o refinamento necessário.','No lugar: preço médio por peça, peças por pedido e peças vendidas.','Margem de contribuição e ponto de equilíbrio continuam no Financeiro, calculados pela DRE.']},
  {v:'v15',data:'14/10/2026',tit:'Produtos gerencial, período personalizado e vendedores ativos',arq:'painel-visu-v15.zip',itens:['Produtos e mix redesenhado: indicadores do mix, participação por tipo com variação, evolução do mix em 6 meses, matriz tecido × cor e curva ABC em gráfico.','Margem bruta calculada só sobre os itens com custo cadastrado na Conta Azul, com o percentual de cobertura.','Filtro "Período personalizado" (de/até) nas páginas comerciais.','Vendedores: o ADM marca quem é ou não é vendedor; os inativos saem da lista e da régua de comissão.']},
  {v:'v14',data:'14/10/2026',tit:'Painel mais estável',arq:'painel-visu-v14-estavel.zip',itens:['Um erro em segundo plano (Conta Azul ou banco fora do ar) não derruba mais o painel inteiro.','Se o banco de dados não responder, o painel continua no ar e tenta de novo a cada minuto.','Aceita a DATABASE_URL copiada do Neon do jeito que ela vier (com psql e aspas).','Endereço /saude/banco para conferir se o banco está conectado.']},
  {v:'v13',data:'14/10/2026',tit:'Assinatura mais discreta',arq:'painel-visu-v13-assinatura.zip',itens:['"Desenvolvido por Seja Expert" virou uma linha pequena no pé do menu, com a versão ao lado, no estilo do FluxIA.']},
@@ -738,7 +739,6 @@ function desenhar(){
 // ---------- 1. visão geral ----------
 function pgGeral(j){
   const a=resumo(linhas(j.atual)), b=resumo(linhas(j.ant,j.corte)), R=E.dados.regras;
-  const MG=margem(linhas(j.atual)), mgA=MG.mg;
   const hojeD=new Date(Date.now()-3*3600e3), parcialM=E.periodo==='mes'&&E.mes===mesHojeBR(), dm=new Date(+E.mes.slice(0,4),+E.mes.slice(5),0).getDate();
   const peV=E.periodo==='mes'?peRef().valor:0, lsK=linhas(j.atual);
   $('kpis').innerHTML=kpiHtml([
@@ -748,7 +748,7 @@ function pgGeral(j){
     ['Vendas a clientes novos',pct(a.fat?a.nr.novo.t/a.fat:0),`<span>${brl(a.nr.novo.t)} · ${pl(a.nr.novo.c.size,'cliente novo','clientes novos')}</span>`,'','R3',()=>detPedidos('Vendas a clientes novos',lsK.filter(l=>a.ped.get(l.p)?.nr==='novo'))],
     ['Peças vendidas',int(a.pecas),`${delta(a.pecas,b.pecas)}<span>${j.comp}</span>`,'','',()=>detItens('Peças vendidas',lsK)],
     ['Clientes que compraram',int(a.clientes),`<span>${int(a.nr.recompra.c.size)} de recompra</span>`,'','',()=>detClientes('Clientes que compraram',lsK)],
-    ['Margem bruta das vendas',mgA==null?'—':pct(mgA),`<span>${txtMg(MG)}</span>`,'','',()=>detPedidos('Margem por pedido',lsK)],
+    ['Preço médio por peça',brl2(a.pecas?a.fat/a.pecas:0),`${delta(a.pecas?a.fat/a.pecas:0,b.pecas?b.fat/b.pecas:0)}<span>${j.comp}</span>`,'','',()=>detItens('Itens vendidos',lsK)],
     parcialM?['Projeção do mês',brl(a.fat/hojeD.getUTCDate()*dm),`<span>pelo ritmo de ${hojeD.getUTCDate()} dias${peV?` · PE ${curto(peV)}`:''}</span>`,'','C1',()=>detPedidos('Vendas do mês até hoje',lsK)]
       :['Cobertura do equilíbrio',peV?pct(a.fat/peV):'—',`<span>${peV?`PE ${brl(peV)}`:'período maior que um mês'}</span>`,'','C1',()=>detPedidos('Vendas do período',lsK)],
   ]);
@@ -808,7 +808,7 @@ function pgProdutos(j){
   const semProd=!E.dados.linhas.some(l=>l.mt||l.tp||l.cr||l.pr);
   const vazio=(m)=>`<div class="vazio">${E.dados.itens_pendentes?'Buscando os produtos das vendas na Conta Azul… o mix completa sozinho em alguns minutos.':semProd?'Esta fonte ainda não tem tipo de produto, material e cor.':m||'Sem vendas com esses filtros.'}</div>`;
   const tipoDe=(l)=>l.tp||l.pr||'(sem tipo)', prodDe=(l)=>l.pr||[l.tp,l.mt,l.cr].filter(Boolean).join(' · ')||'(sem produto)';
-  const tot=resumo(ls), totA=resumo(ant), M=margem(ls);
+  const tot=resumo(ls), totA=resumo(ant);
   const prodSet=new Set(ls.map(prodDe));
   const grp=(arr,fn)=>{ const m=new Map(); arr.forEach(l=>{ const k=fn(l); const g=m.get(k)||{nome:k,t:0,q:0,ls:[],ped:new Set()}; g.t+=l.t; g.q+=l.q; g.ls.push(l); g.ped.add(l.p); m.set(k,g); }); return [...m.values()]; };
   const tipos=grp(ls,tipoDe).sort((a,b)=>V(b)-V(a)), tiposA=new Map(grp(ant,tipoDe).map(g=>[g.nome,g]));
@@ -817,7 +817,7 @@ function pgProdutos(j){
     ['Peças vendidas',int(tot.pecas),`${delta(tot.pecas,totA.pecas)}<span>${j.comp}</span>`,'dest','',()=>detItens('Peças vendidas',ls)],
     ['Preço médio por peça',brl2(tot.pecas?tot.fat/tot.pecas:0),`${delta(tot.pecas?tot.fat/tot.pecas:0,totA.pecas?totA.fat/totA.pecas:0)}<span>${j.comp}</span>`,'','',()=>detItens('Itens vendidos',ls)],
     ['Produtos diferentes',int(prodSet.size),`<span>${int(tipos.length)} tipos · 3 maiores = ${pct(tot.fat?top3/tot.fat:0)} do faturamento</span>`,'','',()=>detItens('Itens vendidos',ls)],
-    ['Margem bruta do mix',M.mg==null?'—':pct(M.mg),`<span>${txtMg(M)}</span>`,'','',()=>detPedidos('Margem por pedido',ls)],
+    ['Peças por pedido',tot.pedidos?(tot.pecas/tot.pedidos).toLocaleString('pt-BR',{maximumFractionDigits:0}):'—',`${delta(tot.pedidos?tot.pecas/tot.pedidos:0,totA.pedidos?totA.pecas/totA.pedidos:0)}<span>tamanho médio do pedido</span>`,'','',()=>detPedidos('Pedidos do período',ls)],
   ]);
   // mix por tipo: barra 100% + tabela
   const cores=['var(--s1)','var(--s2)','var(--s3)','#8A2E9A','#C9A227','#5ABAB4','#D7245F','var(--sNone)'];
@@ -825,8 +825,8 @@ function pgProdutos(j){
   const cor=new Map(tipos7.map((g,i)=>[g.nome,cores[i]]));
   $('mixSub').textContent=`${pc?'Em peças':'Em faturamento'} · ${j.rot} · comparado com ${j.comp}`;
   $('mixTipo').innerHTML=tipos.length?`<div class="barra2" style="height:26px">${tipos7.map(g=>`<span style="flex:${V(g)};background:${cor.get(g.nome)}" title="${esc(g.nome)}"></span>`).join('')}${outros.length?`<span style="flex:${outros.reduce((s2,g)=>s2+V(g),0)};background:var(--sNone)"></span>`:''}</div>
-    <div class="tw" style="margin-top:12px"><table class="mix"><thead><tr><th>Tipo de produto</th><th class="v">${pc?'Peças':'Faturamento'}</th><th class="v">Part.</th><th class="v">Var.</th><th class="v">${pc?'Faturamento':'Peças'}</th><th class="v">R$/peça</th><th class="v">Margem</th></tr></thead><tbody>${tipos.slice(0,10).map(g=>{ const a=tiposA.get(g.nome), mg=margem(g.ls).mg;
-      return `<tr${D(()=>detItens('Tipo: '+g.nome,g.ls))}><td><i class="dot" style="background:${cor.get(g.nome)||'var(--sNone)'}"></i><span class="lk">${esc(g.nome)}</span></td><td class="v"><b>${F(V(g))}</b></td><td class="v">${pct(V(g)/totV)}</td><td class="v">${a?delta(V(g),V(a)):'<span class="delta eq">novo</span>'}</td><td class="v">${pc?brl(g.t):int(g.q)}</td><td class="v">${brl2(g.q?g.t/g.q:0)}</td><td class="v">${mg==null?'—':`<span style="color:${mg<0.4?'var(--red)':'var(--green)'};font-weight:700">${pct(mg)}</span>`}</td></tr>`; }).join('')}</tbody></table></div>`:vazio();
+    <div class="tw" style="margin-top:12px"><table class="mix"><thead><tr><th>Tipo de produto</th><th class="v">${pc?'Peças':'Faturamento'}</th><th class="v">Part.</th><th class="v">Var.</th><th class="v">${pc?'Faturamento':'Peças'}</th><th class="v">R$/peça</th></tr></thead><tbody>${tipos.slice(0,10).map(g=>{ const a=tiposA.get(g.nome);
+      return `<tr${D(()=>detItens('Tipo: '+g.nome,g.ls))}><td><i class="dot" style="background:${cor.get(g.nome)||'var(--sNone)'}"></i><span class="lk">${esc(g.nome)}</span></td><td class="v"><b>${F(V(g))}</b></td><td class="v">${pct(V(g)/totV)}</td><td class="v">${a?delta(V(g),V(a)):'<span class="delta eq">novo</span>'}</td><td class="v">${pc?brl(g.t):int(g.q)}</td><td class="v">${brl2(g.q?g.t/g.q:0)}</td></tr>`; }).join('')}</tbody></table></div>`:vazio();
   // evolução do mix (6 meses, 100%)
   const ms=[]; for(let i=5;i>=0;i--) ms.push(somaMes(E.mes,-i));
   const porMes=ms.map(mm=>{ const g=new Map(); linhas([mm]).forEach(l=>{ const k=cor.has(tipoDe(l))?tipoDe(l):'Outros'; g.set(k,(g.get(k)||0)+(pc?l.q:l.t)); }); return {mm,g,tot:[...g.values()].reduce((a,b)=>a+b,0)}; });
@@ -846,7 +846,7 @@ function pgProdutos(j){
     <tr class="tot"><td>Total</td>${allCols.map(c=>{ const v=c==='Outras'?crs.slice(8).reduce((s2,g)=>s2+V(g),0):V(crs.find(g=>g.nome===c)); return `<td class="v">${pc?int(v):curto(v)}</td>`; }).join('')}<td class="v">${pc?int(tot.pecas):brl(tot.fat)}</td></tr></tbody></table>`:vazio('Sem tecido e cor nas vendas deste período.');
   // ABC (Pareto)
   const lp=grp(ls,prodDe).sort((a,b)=>b.t-a.t), totP=lp.reduce((s2,x)=>s2+x.t,0)||1;
-  let ac=0; lp.forEach(x=>{ const antes=ac/totP; ac+=x.t; x.cls=antes<.8?'A':antes<.95?'B':'C'; x.acum=ac/totP; x.mg=margem(x.ls).mg; });
+  let ac=0; lp.forEach(x=>{ const antes=ac/totP; ac+=x.t; x.cls=antes<.8?'A':antes<.95?'B':'C'; x.acum=ac/totP; });
   const nA=lp.filter(x=>x.cls==='A').length;
   $('abcProdSub').textContent=lp.length?`${int(nA)} de ${int(lp.length)} produtos (${pct(nA/lp.length)}) fazem 80% do faturamento`:'—';
   const top=lp.slice(0,20), W2=560,H2=240,L2=8,R2=34,T2=12,B2=14,w2=W2-L2-R2,h2=H2-T2-B2,sl=w2/Math.max(top.length,1),mxT=top[0]?.t||1;
@@ -854,12 +854,12 @@ function pgProdutos(j){
   const pts=[]; top.forEach((x,i)=>{ const cx=L2+i*sl+sl/2, bh=x.t/mxT*h2*.95; pv+=`<rect x="${cx-sl*.36}" y="${T2+h2-bh}" width="${sl*.72}" height="${bh}" rx="2" fill="${x.cls==='A'?'var(--s1)':'var(--barSoft)'}"${D(()=>detItens('Produto: '+x.nome,x.ls))}><title>${esc(x.nome)}: ${brl(x.t)} · acumulado ${pct(x.acum)}</title></rect>`; pts.push(`${cx},${T2+h2-x.acum*h2}`); });
   pv+=`<polyline points="${pts.join(' ')}" fill="none" stroke="var(--orange)" stroke-width="2.2"/>`;
   $('paretoProd').innerHTML=lp.length?`<svg viewBox="0 0 ${W2} ${H2}" width="100%" role="img" aria-label="Curva ABC dos 20 maiores produtos">${pv}</svg><div class="nota">Os 20 maiores produtos por faturamento. Barras escuras = classe A. Clique numa barra para ver as vendas.</div>`:vazio();
-  $('abcProd').innerHTML=lp.length?`<table><thead><tr><th>Classe</th><th>Produto</th><th class="v">Peças</th><th class="v">Pedidos</th><th class="v">Faturamento</th><th class="v">% acumulado</th><th class="v">Margem</th></tr></thead><tbody>${lp.slice(0,40).map(x=>`<tr${D(()=>detItens('Produto: '+x.nome,x.ls))}><td><span class="pill p-${x.cls}">${x.cls}</span></td><td class="el lk" title="${esc(x.nome)}">${esc(x.nome)}</td><td class="v">${int(x.q)}</td><td class="v">${x.ped.size}</td><td class="v">${brl(x.t)}</td><td class="v">${pct(x.acum)}</td><td class="v">${x.mg==null?'—':pct(x.mg)}</td></tr>`).join('')}</tbody></table>`:'';
+  $('abcProd').innerHTML=lp.length?`<table><thead><tr><th>Classe</th><th>Produto</th><th class="v">Peças</th><th class="v">Pedidos</th><th class="v">Faturamento</th><th class="v">% acumulado</th></tr></thead><tbody>${lp.slice(0,40).map(x=>`<tr${D(()=>detItens('Produto: '+x.nome,x.ls))}><td><span class="pill p-${x.cls}">${x.cls}</span></td><td class="el lk" title="${esc(x.nome)}">${esc(x.nome)}</td><td class="v">${int(x.q)}</td><td class="v">${x.ped.size}</td><td class="v">${brl(x.t)}</td><td class="v">${pct(x.acum)}</td></tr>`).join('')}</tbody></table>`:'';
   // tecido
   const tec=grp(ls.filter(l=>l.mt),l=>l.mt).sort((a,b)=>b.t-a.t);
-  $('tbTecido').innerHTML=tec.length?tec.map(g=>{ const mg=margem(g.ls).mg; return `<tr${D(()=>detItens('Tecido: '+g.nome,g.ls))}><td class="lk">${esc(g.nome)}</td><td class="v">${int(g.ped.size)}</td><td class="v">${int(g.q)}</td><td class="v">${brl(g.t)}</td><td class="v">${brl(g.ped.size?g.t/g.ped.size:0)}</td><td class="v">${brl2(g.q?g.t/g.q:0)}</td><td class="v">${mg==null?'—':pct(mg)}</td></tr>`; }).join('')
-    +`<tr class="tot"><td>Todos</td><td class="v">${int(tot.pedidos)}</td><td class="v">${int(tot.pecas)}</td><td class="v">${brl(tot.fat)}</td><td class="v">${brl(tot.ticket)}</td><td class="v">${brl2(tot.pecas?tot.fat/tot.pecas:0)}</td><td class="v">${M.mg==null?'—':pct(M.mg)}</td></tr>`
-    :`<tr><td colspan="7">${vazio()}</td></tr>`;
+  $('tbTecido').innerHTML=tec.length?tec.map(g=>{ return `<tr${D(()=>detItens('Tecido: '+g.nome,g.ls))}><td class="lk">${esc(g.nome)}</td><td class="v">${int(g.ped.size)}</td><td class="v">${int(g.q)}</td><td class="v">${brl(g.t)}</td><td class="v">${brl(g.ped.size?g.t/g.ped.size:0)}</td><td class="v">${brl2(g.q?g.t/g.q:0)}</td></tr>`; }).join('')
+    +`<tr class="tot"><td>Todos</td><td class="v">${int(tot.pedidos)}</td><td class="v">${int(tot.pecas)}</td><td class="v">${brl(tot.fat)}</td><td class="v">${brl(tot.ticket)}</td><td class="v">${brl2(tot.pecas?tot.fat/tot.pecas:0)}</td></tr>`
+    :`<tr><td colspan="6">${vazio()}</td></tr>`;
 }
 
 // ---------- 3. clientes ----------
@@ -898,7 +898,7 @@ function cfgVendedores(){
 function pgVendedores(j){
   const ls=linhas(j.atual), tot=ls.reduce((s,l)=>s+l.t,0)||1, R=E.dados.regras, mesMode=E.periodo==='mes';
   const porV=new Map(); ls.forEach(l=>{ const g=porV.get(l.v)||[]; g.push(l); porV.set(l.v,g); });
-  const lista=[...porV.entries()].map(([nome,g])=>({nome,r:resumo(g),M:margem(g)})).sort((a,b)=>(a.nome===NAO_VEND)-(b.nome===NAO_VEND)||b.r.fat-a.r.fat);
+  const lista=[...porV.entries()].map(([nome,g])=>({nome,r:resumo(g)})).sort((a,b)=>(a.nome===NAO_VEND)-(b.nome===NAO_VEND)||b.r.fat-a.r.fat);
   cfgVendedores();
   $('thRegua').hidden=!mesMode;
   const inaS=new Set((E.vcfg?.inativos||[]).map(x=>x.toLowerCase()));
@@ -908,7 +908,7 @@ function pgVendedores(j){
   $('tbVend').innerHTML=lista.length?lista.map(v=>{ const f=v.r.fat, n=v.r.nr.novo;
     const st=f>=R.comissao_teto?['p-ok','5% liberado']:f>=R.comissao_inicio?['p-mid',`faltam ${brl(R.comissao_teto-f)} p/ 5%`]:['p-no',`faltam ${brl(R.comissao_inicio-f)} p/ 1%`];
     const lsV=ls.filter(l=>l.v===v.nome);
-    return `<tr${D(()=>detPedidos('Vendedor: '+v.nome,lsV))}><td class="el"><b class="lk">${esc(v.nome)}</b></td><td class="v lk">${brl(f)}</td><td class="v">${pct(f/tot)}</td><td class="v">${int(v.r.pedidos)}</td><td class="v">${brl(v.r.ticket)}</td><td class="v">${brl(n.t)}</td><td class="v">${pct(f?n.t/f:0)}</td><td class="v">${int(n.c.size)}</td><td class="v">${(v.M&&v.M.mg!=null?`<span class="pill ${v.M.mg<0.4?'':'p-ok'}" style="${v.M.mg<0.4?'background:var(--redSoft);color:var(--red)':''}">${pct(v.M.mg)}</span>`:'—')}</td>
+    return `<tr${D(()=>detPedidos('Vendedor: '+v.nome,lsV))}><td class="el"><b class="lk">${esc(v.nome)}</b></td><td class="v lk">${brl(f)}</td><td class="v">${pct(f/tot)}</td><td class="v">${int(v.r.pedidos)}</td><td class="v">${brl(v.r.ticket)}</td><td class="v">${brl(n.t)}</td><td class="v">${pct(f?n.t/f:0)}</td><td class="v">${int(n.c.size)}</td>
       ${mesMode&&v.nome===NAO_VEND?'<td><span style="color:var(--ink3);font-size:12px">sem comissão</span></td>':mesMode?`<td style="min-width:230px"><div style="display:flex;gap:8px;align-items:center"><div class="mini" style="flex:1"><i style="width:${Math.min(f/esc2*100,100)}%"></i><u style="left:${R.comissao_inicio/esc2*100}%"></u><u style="left:${R.comissao_teto/esc2*100}%"></u></div><span class="pill ${st[0]}">${st[1]}</span></div></td>`:''}</tr>`; }).join('')
     :'<tr><td colspan="9" class="vazio">Sem vendas com esses filtros.</td></tr>';
 }
@@ -1029,12 +1029,12 @@ function pgResumo(j){
   const m=f?mesFin():E.mes, ma=somaMes(m,-1);
   const res=f&&!incompleto(m)?f.resultado[m]||0:null, rec=f?f.receita[m]||0:0;
   const proj30=f?f.projecao.semanas[3]?.saldo:null;
-  const lsR=linhas(j.atual), MGR=margem(lsR), custo=MGR.cu, mgR=MGR.mg;
+  const lsR=linhas(j.atual);
   $('resKpis').innerHTML=[
     ['Vendas',brl(a.fat),`${delta(a.fat,b.fat)}<span>${j.comp}</span>`,'dest',()=>detPedidos('Vendas',lsR)],
     ['Pedidos · ticket',`${int(a.pedidos)} · ${brl(a.ticket)}`,`${delta(a.ticket,b.ticket)}<span>ticket</span>`,'',()=>detPedidos('Pedidos',lsR)],
     ['Clientes novos',pct(a.fat?a.nr.novo.t/a.fat:0),`<span>${int(a.nr.novo.c.size)} clientes · ${brl(a.nr.novo.t)}</span>`,'',()=>detPedidos('Vendas a clientes novos',lsR.filter(l=>a.ped.get(l.p)?.nr==='novo'))],
-    ['Margem bruta das vendas',mgR==null?'—':pct(mgR),`<span>${txtMg(MGR)}</span>`,'',()=>detPedidos('Margem por pedido',lsR)],
+    ['Peças vendidas',int(a.pecas),`${delta(a.pecas,b.pecas)}<span>${int(a.clientes)} clientes compraram</span>`,'',()=>detItens('Peças vendidas',lsR)],
     ['Resultado do mês',f?(res==null?'—':`<span class="${res<0?'neg':''}">${brl(res)}</span>`):'…',f?(res==null?'<span>despesas não lançadas no mês</span>':`<span>margem líquida ${pct(rec?res/rec:0)}</span>`):'<span>carregando</span>','',f?()=>detLanc('Lançamentos de '+nomeMes(m),l=>l[0]===m):null],
     ['Saldo em caixa',f?brl(f.saldo_atual):'…',f?`<span>${f.saldos.length} ${f.saldos.length===1?'conta':'contas'}</span>`:'','',f?()=>abrirDet('Saldos bancários','Saldo atual de cada conta financeira',[{rot:'Conta'},{rot:'Saldo',t:'brl',total:1}],f.saldos.map(c=>[c.nome,c.saldo])):null],
     ['Caixa em 4 semanas',f?`<span class="${proj30<0?'neg':''}">${brl(proj30)}</span>`:'…',f?`<span>projeção pelo a receber e a pagar</span>`:'','',f?()=>detAbertos('Contas a vencer em 4 semanas',x=>x[1]>=hojeISO()&&x[1]<=f.projecao.semanas[3].fim):null],
@@ -1066,9 +1066,6 @@ function pgResumo(j){
     const topDesp=f.despesas_categoria.map(x=>({n:x.nome,a:x.valores[m]||0,b:x.valores[ma]||0})).filter(x=>x.b>0&&x.a>x.b*1.25&&x.a-x.b>2000).sort((p,q)=>(q.a-q.b)-(p.a-p.b))[0];
     if(topDesp) al.push([`Despesa em alta: ${topDesp.n}`,topDesp.a-topDesp.b,`Subiu ${pct((topDesp.a-topDesp.b)/topDesp.b)} em relação a ${nomeMes(ma)}.`,'var(--amber)',()=>detLanc(topDesp.n+' · '+nomeMes(m),l=>l[1]==='p'&&l[0]===m&&l[2]===topDesp.n)]);
   }
-  const abaixo=[...a.ped.values()].length&&custo?(()=>{ const pm=new Map(); lsR.forEach(l=>{const p=pm.get(l.p)||{t:0,tc:0,c:0,k:l.p};p.t+=l.t;if(l.cu>0){p.tc+=l.t;p.c+=l.cu;}pm.set(l.p,p)}); return [...pm.values()].filter(p=>p.c&&p.tc&&(p.tc-p.c)/p.tc<0.4); })():[];
-  const abaixoK=new Set(abaixo.map(p=>p.k));
-  if(abaixo.length) al.push(['Vendas abaixo de 40% de margem',abaixo.reduce((s2,p)=>s2+p.t,0),`${pl(abaixo.length,'pedido','pedidos')} com margem abaixo da faixa verde; pela regra da Visu, precisam de autorização do Egberto.`,'var(--orange)',(()=>{const x=lsR.filter(l=>abaixoK.has(l.p));return ()=>detPedidos('Vendas abaixo de 40% de margem',x);})()]);
   const inat=clientesInativos(); if(inat.length) al.push(['Clientes que pararam de comprar',inat.reduce((s2,c)=>s2+c.t,0),`${pl(inat.length,'cliente','clientes')} com compras nos últimos 12 meses e nada há mais de 90 dias. Bom alvo para o comercial.`,'var(--s1)',()=>abrirDet('Clientes que pararam de comprar','Compraram nos últimos 12 meses e estão há mais de 90 dias sem pedido',[{rot:'Cliente'},{rot:'Último vendedor'},{rot:'Última compra',t:'data'},{rot:'Dias sem comprar',t:'int'},{rot:'Pedidos',t:'int'},{rot:'Comprou em 12 meses',t:'brl',total:1}],inat.map(c=>[c.nome,c.v,c.ult,diasAtr(c.ult),c.ped.size,c.t]))]);
   $('alertas').innerHTML=al.length?al.map(([t,v,ds,c,fn])=>`<li${D(fn)}><i style="background:${c}"></i><b>${t}</b><span class="vv ${v<0?'neg':''}">${brl(v)}</span><span class="ds">${ds}</span></li>`).join(''):'<li><i style="background:var(--green)"></i><b>Nenhum ponto de atenção no período.</b><span></span></li>';
 }
@@ -1249,8 +1246,8 @@ document.addEventListener('keydown',e=>{ if(e.key==='Enter'){ const el=e.target.
 const rotNR=(x)=>x==='novo'?'Novo':x==='recompra'?'Recompra':'—';
 function detPedidos(titulo,ls,sub){
   const m=new Map(); ls.forEach(l=>{ const p=m.get(l.p)||{d:l.d||l.m,p:l.p,c:l.c,v:l.v,nr:l.nr,prod:new Set(),q:0,t:0,cu:0,tc:0}; if(l.d&&(!p.d||l.d<p.d)) p.d=l.d; p.q+=l.q; p.t+=l.t; if(l.cu>0){ p.cu+=l.cu; p.tc+=l.t; } if(!p.nr&&l.nr) p.nr=l.nr; const pr=l.pr||[l.tp,l.mt,l.cr].filter(Boolean).join(' · '); if(pr) p.prod.add(pr); m.set(l.p,p); });
-  const rows=[...m.values()].map(p=>[p.d,p.p,p.c,p.v,rotNR(p.nr),[...p.prod].slice(0,3).join(' / ')+(p.prod.size>3?` +${p.prod.size-3}`:''),p.q,p.t,p.cu&&p.tc?(p.tc-p.cu)/p.tc:null]);
-  abrirDet(titulo,sub||`${pl(rows.length,'pedido','pedidos')} · ${janela().rot}`,[{rot:'Data',t:'data'},{rot:'Pedido'},{rot:'Cliente'},{rot:'Vendedor'},{rot:'Novo/recompra'},{rot:'Produtos',wr:1},{rot:'Peças',t:'int'},{rot:'Valor',t:'brl',total:1},{rot:'Margem',t:'pct'}],rows);
+  const rows=[...m.values()].map(p=>[p.d,p.p,p.c,p.v,rotNR(p.nr),[...p.prod].slice(0,3).join(' / ')+(p.prod.size>3?` +${p.prod.size-3}`:''),p.q,p.t]);
+  abrirDet(titulo,sub||`${pl(rows.length,'pedido','pedidos')} · ${janela().rot}`,[{rot:'Data',t:'data'},{rot:'Pedido'},{rot:'Cliente'},{rot:'Vendedor'},{rot:'Novo/recompra'},{rot:'Produtos',wr:1},{rot:'Peças',t:'int'},{rot:'Valor',t:'brl',total:1}],rows);
 }
 function detItens(titulo,ls,sub){
   abrirDet(titulo,sub||janela().rot,[{rot:'Data',t:'data'},{rot:'Pedido'},{rot:'Cliente'},{rot:'Vendedor'},{rot:'Produto'},{rot:'Tipo'},{rot:'Material'},{rot:'Cor'},{rot:'Peças',t:'int'},{rot:'Valor',t:'brl',total:1}],
@@ -1281,7 +1278,7 @@ const diasAtr=(v)=>Math.round((Date.parse(hojeISO())-Date.parse(v))/864e5);
 // ---------- menu lateral e permissões por perfil ----------
 const MENU=[
   {grupo:'Gestão',ico:'<path d="M3 3h8v8H3zM13 3h8v5h-8zM13 10h8v11h-8zM3 13h8v8H3z"/>',itens:[['painel','Painel executivo','Vendas, resultado, caixa e o que pede decisão'],['indicadores','Quadro de indicadores','Comercial, resultado e caixa com tendência de 6 meses']]},
-  {grupo:'Comercial',ico:'<path d="M3 4h2l2.4 11h11.2L21 7H7" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="9" cy="19" r="1.6"/><circle cx="17" cy="19" r="1.6"/>',itens:[['vendas','Vendas','Pedidos, ticket médio e novas vendas × recompra (R1, R2, R3)'],['produtos','Produtos e mix','Tipo de produto, tecido e cor em peças ou R$ (R4) e curva ABC'],['clientes','Clientes','Curva ABC, faixas de valor, segmento e quem parou de comprar (C3, C5, C6)'],['vendedores','Vendedores e comissão','Faturamento, clientes novos, margem e régua da comissão (C7, C8)'],['pedidos','Pedidos e entregas','Ciclo de pagamento e entregas das próximas semanas (C4)']]},
+  {grupo:'Comercial',ico:'<path d="M3 4h2l2.4 11h11.2L21 7H7" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="9" cy="19" r="1.6"/><circle cx="17" cy="19" r="1.6"/>',itens:[['vendas','Vendas','Pedidos, ticket médio e novas vendas × recompra (R1, R2, R3)'],['produtos','Produtos e mix','Tipo de produto, tecido e cor em peças ou R$ (R4) e curva ABC'],['clientes','Clientes','Curva ABC, faixas de valor, segmento e quem parou de comprar (C3, C5, C6)'],['vendedores','Vendedores e comissão','Faturamento, clientes novos e régua da comissão (C7, C8)'],['pedidos','Pedidos e entregas','Ciclo de pagamento e entregas das próximas semanas (C4)']]},
   {grupo:'Financeiro',ico:'<circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 6v12M15 9c0-1.2-1.3-2-3-2s-3 .8-3 2 1.3 2 3 2 3 .8 3 2-1.3 2-3 2-3-.8-3-2" fill="none" stroke="currentColor" stroke-width="1.8"/>',itens:[['dre','DRE gerencial','Receita, custos, despesas e resultado por competência ou caixa'],['equilibrio','Margem e ponto de equilíbrio','Custos fixos × variáveis, margem de contribuição e ponto de equilíbrio (C1)'],['caixa','Fluxo de caixa','Saldo nos bancos, realizado e projeção de 13 semanas'],['receber','Contas a receber','Inadimplência por idade e por cliente'],['pagar','Contas a pagar','Despesas por categoria, centro de custo e fornecedor']]},
   {grupo:'Controle',ico:'<path d="M6 2h9l4 4v16H6z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 11l2 2 4-4" fill="none" stroke="currentColor" stroke-width="2"/>',itens:[['conciliacao','Planilha × sistema','Por que o total do mês difere entre a planilha do comercial e a Conta Azul'],['dados','Qualidade dos dados','Colunas reconhecidas, campos em branco e grafias diferentes'],['versoes','Versões do painel','O que mudou em cada entrega']]},
   {grupo:'Administração',ico:'<circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.6 2.7-6 6-6s6 2.4 6 6z"/><circle cx="17" cy="9" r="2.4"/><path d="M15.5 14.2c2.9.3 5.5 2.4 5.5 5.8h-4.5"/>',itens:[['usuarios','Usuários e permissões','Perfis, senhas temporárias e o que cada pessoa vê']]},
@@ -1400,7 +1397,7 @@ function quadro(){
     ['Ticket médio',mm=>vs.get(mm).ticket,'brl','R2'],
     ['Vendas para clientes novos',mm=>{const s=vs.get(mm);return s.fat?s.nr.novo.t/s.fat:null},'pct','R3'],
     ['Clientes que compraram',mm=>vs.get(mm).clientes,'int',null,0,0,mm=>detClientes('Clientes de '+nomeMes(mm),linhas([mm]))],
-    ['Margem bruta das vendas',mm=>margem(linhas([mm])).mg,'pct'],
+    ['Peças vendidas',mm=>vs.get(mm).pecas,'int',null,0,0,mm=>detItens('Peças vendidas em '+nomeMes(mm),linhas([mm]))],
     ['Financeiro (competência)'],
     ['Receita',mm=>I(mm)?.receita,'brl',null,0,0,mm=>detLanc('Receitas de '+nomeMes(mm),l=>l[1]==='r'&&l[0]===mm)],
     ['Margem de contribuição',mm=>incompleto(mm)?null:I(mm)?.mc_pct,'pct'],

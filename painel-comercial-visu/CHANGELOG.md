@@ -2,6 +2,12 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v16 — 14/10/2026 · Sem margem bruta por produto
+Arquivo: `painel-visu-v16.zip`
+- Margem bruta retirada de produtos, vendedores, pedidos, painel executivo e quadro de indicadores, porque o custo dos produtos na Conta Azul ainda não tem o refinamento necessário.
+- No lugar: preço médio por peça, peças por pedido e peças vendidas.
+- Margem de contribuição e ponto de equilíbrio continuam no Financeiro, calculados pela DRE.
+
 ## v15 — 14/10/2026 · Produtos gerencial, período personalizado e vendedores ativos
 Arquivo: `painel-visu-v15.zip`
 - Produtos e mix redesenhado: indicadores do mix, participação por tipo com variação, evolução do mix em 6 meses, matriz tecido × cor e curva ABC em gráfico.
