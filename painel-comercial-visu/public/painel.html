@@ -1,6 +1,7 @@
 <title>Painel de Gestão Visu</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Space+Grotesk:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap">
+<script>try{var _v=JSON.parse(localStorage.getItem('visu-visual')||'{}');if(_v.t&&_v.t!=='classico'){document.documentElement.dataset.visual=_v.t;document.documentElement.dataset.theme=_v.t==='noite'?'dark':'light'}if(_v.d)document.documentElement.dataset.densidade=_v.d}catch(e){}</script>
 <style>
 /* Layout: faixa azul-noite com a logo e o fio colorido do catálogo · abas por página · filtros fixos · cartões brancos sobre cinza claro, como as páginas internas do catálogo */
 :root{
@@ -12,6 +13,7 @@
   --green:#17804A; --greenSoft:#E2F3E9; --red:#C23A3A; --redSoft:#FBE7E7; --amber:#9A5F00; --amberSoft:#FFF1D6;
   --fio:linear-gradient(90deg,#5ABAB4 0%,#3A48A8 26%,#8A2E9A 46%,#D7245F 64%,#E4402A 80%,#EA780C 100%);
   --sombra:0 1px 2px rgba(36,30,72,.06);
+  --sbBg:var(--navy); --sbInk:#D9D6EC; --sbMuted:#A9A4C8; --sbHi:#fff; --sbAct:var(--navy2); --sbAcc:#EA780C; --sbLine:rgba(255,255,255,.08); --sbLine2:rgba(255,255,255,.2); --sbHover:rgba(255,255,255,.06); --raio:14px;
   --display:"Outfit","Plus Jakarta Sans",system-ui,"Segoe UI",sans-serif; --body:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
@@ -74,7 +76,7 @@ main{max-width:1320px;margin:0 auto;padding-inline:20px;padding-block:18px 48px;
 .eyebrow{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--orange)}
 .valida{font-size:12px;background:var(--orangeSoft);color:var(--ink);border-radius:8px;padding:7px 11px;max-width:520px}
 
-.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px 20px;box-shadow:var(--sombra);min-width:0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--raio);padding:18px 20px;box-shadow:var(--sombra);min-width:0}
 .card h3{font-family:var(--display);font-weight:600;font-size:15.5px;margin:0}
 .card .sub{font-size:12px;color:var(--ink3);margin-top:2px}
 .hd{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:14px;flex-wrap:wrap}
@@ -87,7 +89,7 @@ main{max-width:1320px;margin:0 auto;padding-inline:20px;padding-block:18px 48px;
 
 .kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
 @media (max-width:900px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
-.kpi{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:15px 16px 14px;box-shadow:var(--sombra);display:flex;flex-direction:column;gap:4px;position:relative;overflow:hidden}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:var(--raio);padding:15px 16px 14px;box-shadow:var(--sombra);display:flex;flex-direction:column;gap:4px;position:relative;overflow:hidden}
 .kpi::before{content:"";position:absolute;inset:0 0 auto 0;height:3px;background:var(--navy2)}
 .kpi.dest::before{background:var(--fio)}
 .kpi .l{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);display:flex;justify-content:space-between;gap:6px}
@@ -264,41 +266,41 @@ td.lk,span.lk{text-decoration:underline dotted var(--line2);text-underline-offse
 @media (max-width:640px){.marca img{height:34px}.marca .div{display:none}.f select{max-width:150px}}
 /* ---------- v10: menu lateral (padrão Sistema de Gestão) ---------- */
 #shell{display:flex;min-height:100vh}
-.sb{width:256px;flex:none;background:var(--navy);color:#D9D6EC;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;z-index:30}
+.sb{width:256px;flex:none;background:var(--sbBg);color:var(--sbInk);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;z-index:30}
 .sb .fio{height:4px;flex:none}
-.sb .logo-box{display:flex;flex-direction:column;align-items:center;gap:6px;padding:18px 16px 14px;text-decoration:none;border-bottom:1px solid rgba(255,255,255,.08)}
+.sb .logo-box{display:flex;flex-direction:column;align-items:center;gap:6px;padding:18px 16px 14px;text-decoration:none;border-bottom:1px solid var(--sbLine)}
 .sb .logo-box img{width:150px;height:auto;display:block}
-.sb .sys{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#A9A4C8;font-weight:700}
-.sb .emp{font-size:11.5px;color:#8C88AE;text-align:center;line-height:1.35}
+.sb .sys{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--sbMuted);font-weight:700}
+.sb .emp{font-size:11.5px;color:var(--sbMuted);text-align:center;line-height:1.35}
 .sb nav{flex:1;overflow-y:auto;padding:8px 0 12px}
-.sb nav::-webkit-scrollbar{width:8px}.sb nav::-webkit-scrollbar-thumb{background:rgba(255,255,255,.2);border-radius:8px}
+.sb nav::-webkit-scrollbar{width:8px}.sb nav::-webkit-scrollbar-thumb{background:var(--sbLine2);border-radius:8px}
 .nm-mod{margin-bottom:2px}
-.nm-tit{display:flex;align-items:center;gap:9px;width:100%;background:none;border:0;cursor:pointer;font:inherit;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#9D98C2;padding:14px 18px 6px;text-align:left}
+.nm-tit{display:flex;align-items:center;gap:9px;width:100%;background:none;border:0;cursor:pointer;font:inherit;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--sbMuted);padding:14px 18px 6px;text-align:left}
 .nm-tit span{flex:1;display:inline-flex;align-items:center;gap:9px}
 .nm-tit i{font-style:normal;font-size:11px;transition:transform .15s}
 .nm-mod:not(.aberto) .nm-tit i{transform:rotate(-90deg)}
 .nm-mod:not(.aberto) .nm-itens{display:none}
-.nm-tit svg{opacity:.9;color:#EA780C}
-.nm-item{display:flex;align-items:center;gap:8px;width:100%;background:none;border:0;border-left:3px solid transparent;cursor:pointer;font:inherit;font-size:14px;color:#D9D6EC;padding:10px 18px 10px 41px;text-align:left;text-decoration:none}
-.nm-item:hover{background:rgba(255,255,255,.06);color:#fff}
-.nm-item.ativo{background:var(--navy2);color:#fff;font-weight:600;border-left-color:#EA780C}
-.nm-item .bd{margin-left:auto;background:#C23A3A;color:#fff;border-radius:20px;font-size:10.5px;padding:1px 7px;font-weight:700}
-.sb .ver-como{padding:10px 16px;border-top:1px solid rgba(255,255,255,.08);display:flex;flex-direction:column;gap:5px}
-.sb .ver-como label{font-size:11.5px;color:#A9A4C8}
-.sb .ver-como select{background:var(--navy2);color:#fff;border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:7px 8px;font:inherit;font-size:13px}
-.sb .rodape{border-top:1px solid rgba(255,255,255,.08);padding:12px 14px;display:flex;align-items:center;gap:10px}
-.sb .av{width:34px;height:34px;border-radius:50%;background:var(--navy2);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex:none;border:2px solid #EA780C}
+.nm-tit svg{opacity:.9;color:var(--sbAcc)}
+.nm-item{display:flex;align-items:center;gap:8px;width:100%;background:none;border:0;border-left:3px solid transparent;cursor:pointer;font:inherit;font-size:14px;color:var(--sbInk);padding:10px 18px 10px 41px;text-align:left;text-decoration:none}
+.nm-item:hover{background:var(--sbHover);color:var(--sbHi)}
+.nm-item.ativo{background:var(--sbAct);color:var(--sbHi);font-weight:600;border-left-color:var(--sbAcc)}
+.nm-item .bd{margin-left:auto;background:#C23A3A;color:var(--sbHi);border-radius:20px;font-size:10.5px;padding:1px 7px;font-weight:700}
+.sb .ver-como{padding:10px 16px;border-top:1px solid var(--sbLine);display:flex;flex-direction:column;gap:5px}
+.sb .ver-como label{font-size:11.5px;color:var(--sbMuted)}
+.sb .ver-como select{background:var(--sbAct);color:var(--sbHi);border:1px solid var(--sbLine2);border-radius:8px;padding:7px 8px;font:inherit;font-size:13px}
+.sb .rodape{border-top:1px solid var(--sbLine);padding:12px 14px;display:flex;align-items:center;gap:10px}
+.sb .av{width:34px;height:34px;border-radius:50%;background:var(--sbAct);color:var(--sbHi);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex:none;border:2px solid var(--sbAcc)}
 .sb .dev{flex:none;display:flex;align-items:center;justify-content:center;gap:6px;padding:7px 12px 9px;text-decoration:none;opacity:.7;transition:opacity .15s;white-space:nowrap}
 .sb .dev:hover{opacity:1}
-.sb .dev-l{font-size:9.5px;color:#A9A4C8}
+.sb .dev-l{font-size:9.5px;color:var(--sbMuted)}
 .sb .se-logo{width:62px;height:auto;display:block}
-.sb .se-logo text{fill:#fff}
-.sb .dev-v{font-size:9.5px;color:#8C88AE;margin-left:4px}
-.sb .quem{flex:1;min-width:0}.sb .rodape{flex:none}.sb .ver-como{flex:none}.sb .quem .n{color:#fff;font-size:13px;font-weight:600;line-height:1.3}
-.sb .quem .p{font-size:11.5px;color:#A9A4C8}.sb .quem .p a{color:inherit}
-.sb .quem .v{font-size:10.5px;color:#7F7AA3;margin-top:2px}
-.sb .ib{border:1px solid rgba(255,255,255,.22);border-radius:8px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;color:#fff;text-decoration:none;font-size:15px;flex:none}
-.sb .ib:hover{border-color:#fff;background:rgba(255,255,255,.08)}
+.sb .se-logo text{fill:var(--sbHi)}
+.sb .dev-v{font-size:9.5px;color:var(--sbMuted);margin-left:4px}
+.sb .quem{flex:1;min-width:0}.sb .rodape{flex:none}.sb .ver-como{flex:none}.sb .quem .n{color:var(--sbHi);font-size:13px;font-weight:600;line-height:1.3}
+.sb .quem .p{font-size:11.5px;color:var(--sbMuted)}.sb .quem .p a{color:inherit}
+.sb .quem .v{font-size:10.5px;color:var(--sbMuted);margin-top:2px}
+.sb .ib{border:1px solid var(--sbLine2);border-radius:8px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;color:var(--sbHi);text-decoration:none;font-size:15px;flex:none}
+.sb .ib:hover{border-color:var(--sbHi);background:var(--sbLine)}
 .main-col{flex:1;min-width:0;display:flex;flex-direction:column}
 .topbar{display:flex;align-items:flex-start;gap:14px;padding:22px 26px 10px;flex-wrap:wrap}
 .topbar h1{font-family:var(--display);font-weight:600;font-size:26px;margin:0;letter-spacing:-.015em;color:var(--ink)}
@@ -350,6 +352,81 @@ table.matriz td,table.matriz th{text-align:center}table.matriz td:first-child,ta
 table.matriz td.hm{cursor:pointer;font-weight:600;border:2px solid var(--panel)}table.matriz td.hm:hover{outline:2px solid var(--orange)}
 table.matriz td.vz{color:var(--line2)}
 .vitrine{min-height:150px}.palco{height:150px}.peca img{height:96px}.peca.foto img{height:84px;width:84px}
+
+/* ===== temas de visual (escolhidos no botão "Visual") ===== */
+:root[data-visual="vibrante"]{
+  --bg:#F6F3FF; --panel:#FFFFFF; --ink:#1E1442; --ink2:#4E4672; --ink3:#857DA8; --line:#E9E3FA; --line2:#D6CDF2;
+  --navy:#2A1670; --navy2:#4A24B0; --orange:#FF5A1F; --orangeSoft:#FFE9DE; --teal:#00B3A4;
+  --s1:#5B3FD9; --s2:#FF6B2C; --s3:#00B3A4; --sNone:#C9C2E3; --bar:#5B3FD9; --barSoft:#E6E0FF;
+  --sombra:0 8px 24px -12px rgba(74,36,176,.25); --raio:20px;
+  --sbBg:linear-gradient(185deg,#2A1670 0%,#5A1E96 55%,#B3166A 100%); --sbInk:#F1EBFF; --sbMuted:#CDBFF2; --sbHi:#fff; --sbAct:rgba(255,255,255,.16); --sbAcc:#FFC233; --sbLine:rgba(255,255,255,.14); --sbLine2:rgba(255,255,255,.3); --sbHover:rgba(255,255,255,.1);
+  --display:"Outfit",system-ui,sans-serif;
+}
+:root[data-visual="vibrante"] .kpi::before{height:5px;background:var(--fio)}
+:root[data-visual="vibrante"] .kpi{border-color:transparent}
+:root[data-visual="vibrante"] .kpi .v,:root[data-visual="vibrante"] .topbar h1{font-weight:800}
+:root[data-visual="vibrante"] .nm-item.ativo{border-radius:0 999px 999px 0;margin-right:12px;width:calc(100% - 12px)}
+:root[data-visual="vibrante"] .card{border-color:transparent}
+
+:root[data-visual="noite"]{
+  --bg:#0B0A16; --panel:#15132A; --ink:#F3F1FF; --ink2:#C3BEE6; --ink3:#8D88B3; --line:#26224A; --line2:#39346A;
+  --navy:#08070F; --navy2:#1F1A3F; --onNavy:#fff; --orange:#FF4FA3; --orangeSoft:#3A1530; --teal:#2FE6D0;
+  --s1:#8B5CFF; --s2:#FF4FA3; --s3:#2FE6D0; --sNone:#4A4570; --bar:#8B5CFF; --barSoft:#2A2550;
+  --green:#3BE58F; --greenSoft:#10331F; --red:#FF6B81; --redSoft:#3A1520; --amber:#FFC857; --amberSoft:#33290F;
+  --fio:linear-gradient(90deg,#2FE6D0,#8B5CFF 50%,#FF4FA3);
+  --sombra:0 0 0 1px rgba(139,92,255,.10),0 10px 30px -18px rgba(139,92,255,.6); --raio:18px;
+  --sbBg:#08070F; --sbInk:#CFCAF0; --sbMuted:#7E79A6; --sbHi:#fff; --sbAct:#1F1A3F; --sbAcc:#2FE6D0; --sbLine:#1C1934; --sbLine2:#332E5C; --sbHover:#14122A;
+  color-scheme:dark;
+}
+:root[data-visual="noite"] .kpi::before{background:var(--fio);height:2px}
+:root[data-visual="noite"] .kpi .v{text-shadow:0 0 18px rgba(139,92,255,.35)}
+
+:root[data-visual="leve"]{
+  --bg:#F6F5F0; --panel:#FFFFFF; --ink:#1D1B26; --ink2:#4D4A5C; --ink3:#8E8AA3; --line:#ECEAF0; --line2:#DCD9E4;
+  --navy:#1D1B26; --navy2:#2E2B3D; --orange:#FF6B2C; --orangeSoft:#FFEDE3; --teal:#2EC4B6;
+  --s1:#6C63FF; --s2:#FF8A4C; --s3:#2EC4B6; --sNone:#D3D0DC; --bar:#6C63FF; --barSoft:#ECEBFF;
+  --sombra:0 10px 30px -18px rgba(29,27,38,.18); --raio:22px;
+  --sbBg:#FFFFFF; --sbInk:#3B3850; --sbMuted:#8E8AA3; --sbHi:#1D1B26; --sbAct:#FFF0E6; --sbAcc:#FF6B2C; --sbLine:#EEEDF2; --sbLine2:#DCD9E4; --sbHover:#F6F5FA;
+  --display:"Space Grotesk","Plus Jakarta Sans",system-ui,sans-serif;
+}
+:root[data-visual="leve"] .sb{border-right:1px solid var(--line)}
+:root[data-visual="leve"] .card,:root[data-visual="leve"] .kpi{border-color:transparent}
+:root[data-visual="leve"] .kpi::before{display:none}
+:root[data-visual="leve"] .kpis>.kpi:nth-child(4n+1){background:#F0EEFF}
+:root[data-visual="leve"] .kpis>.kpi:nth-child(4n+2){background:#FFF1E8}
+:root[data-visual="leve"] .kpis>.kpi:nth-child(4n+3){background:#E5F7F4}
+:root[data-visual="leve"] .kpis>.kpi:nth-child(4n+4){background:#FFF7D9}
+:root[data-visual="leve"] .nm-item.ativo{border-left-color:transparent;border-radius:12px;margin:2px 10px;width:calc(100% - 20px);padding-left:31px;color:#C2410C}
+:root[data-visual="leve"] .sb .fio{height:3px}
+
+/* densidade compacta */
+:root[data-densidade="compacta"] main{gap:10px;padding-block:12px 36px}
+:root[data-densidade="compacta"] .card{padding:12px 14px}
+:root[data-densidade="compacta"] .kpi{padding:10px 12px}
+:root[data-densidade="compacta"] .kpi .v{font-size:clamp(18px,1.8vw,24px)}
+:root[data-densidade="compacta"] .kpis,:root[data-densidade="compacta"] .g2,:root[data-densidade="compacta"] .g2e,:root[data-densidade="compacta"] .g3{gap:10px}
+:root[data-densidade="compacta"] td,:root[data-densidade="compacta"] th{padding-top:5px!important;padding-bottom:5px!important}
+
+/* seletor de visual */
+.vis-pop{position:absolute;right:0;top:calc(100% + 8px);z-index:60;width:min(440px,92vw);background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:16px;box-shadow:0 18px 50px -12px rgba(20,16,50,.35);padding:16px}
+.vis-pop h4{margin:0 0 2px;font-family:var(--display);font-size:15px}
+.vis-pop .sub{font-size:12px;color:var(--ink3);margin-bottom:12px}
+.vis-op{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.vis-op button{all:unset;cursor:pointer;border:2px solid var(--line);border-radius:12px;padding:8px;display:flex;flex-direction:column;gap:6px;transition:border-color .12s}
+.vis-op button:hover{border-color:var(--line2)}
+.vis-op button[aria-pressed="true"]{border-color:var(--orange)}
+.vis-op .mini{display:flex;height:58px;border-radius:8px;overflow:hidden}
+.vis-op .mini .l{width:26%}
+.vis-op .mini .r{flex:1;padding:7px;display:flex;flex-direction:column;gap:5px}
+.vis-op .mini .r i{display:block;height:11px;border-radius:4px}
+.vis-op .mini .r em{display:flex;gap:4px;flex:1;align-items:flex-end}
+.vis-op .mini .r em b{flex:1;border-radius:2px}
+.vis-op .nome{font-weight:700;font-size:13px}
+.vis-op .ds{font-size:11.5px;color:var(--ink3);line-height:1.3}
+.vis-den{display:flex;gap:6px;margin-top:12px;align-items:center;font-size:12.5px;color:var(--ink2);flex-wrap:wrap}
+.vis-den button{border:1px solid var(--line2);background:var(--panel);color:var(--ink);border-radius:999px;padding:4px 12px;cursor:pointer;font:inherit;font-size:12.5px}
+.vis-den button[aria-pressed="true"]{background:var(--ink);color:var(--panel);border-color:var(--ink)}
+.vis-adm{margin-top:12px;padding-top:12px;border-top:1px solid var(--line);display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:12px;color:var(--ink3)}
 </style>
 
 <div id="shell">
@@ -366,7 +443,7 @@ table.matriz td.vz{color:var(--line2)}
   <div class="topbar">
     <button class="hamb" id="hamb" type="button" aria-label="Abrir menu">☰</button>
     <div style="flex:1;min-width:0"><h1 id="pgTit">—</h1><div class="ctx" id="pgCtx">—</div></div>
-    <div class="acoes"><span class="chip" id="chip"><i></i><span id="chipTxt">—</span></span><button class="bt" id="atualizar" type="button">Atualizar</button></div>
+    <div class="acoes" style="position:relative"><span class="chip" id="chip"><i></i><span id="chipTxt">—</span></span><button class="bt" id="btVisual" type="button" aria-expanded="false" aria-controls="visPop">🎨 Visual</button><button class="bt" id="atualizar" type="button">Atualizar</button><div class="vis-pop" id="visPop" hidden></div></div>
   </div>
   <div class="filtros" id="barraFiltros"><div class="in">
     <div class="f per"><label for="fPeriodo">Período</label><select id="fPeriodo"><option value="mes">Mês</option><option value="ano">Ano até o mês</option><option value="12m">Últimos 12 meses</option><option value="faixa">Período personalizado</option></select></div>
@@ -605,8 +682,9 @@ const nomeMes=(m)=>{const[a,b]=m.split('-');return MES_L[+b-1]+' de '+a};
 const somaMes=(m,n)=>{const[a,b]=m.split('-').map(Number);const d=new Date(Date.UTC(a,b-1+n,1));return d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0')};
 function delta(a,b,inv){ if(!b) return '<span class="delta eq">sem base</span>'; const d=(a-b)/b; const c=Math.abs(d)<.005?'eq':(d>0)!==!!inv?'up':'down'; return `<span class="delta ${c}">${d>0?'▲':d<0?'▼':'■'} ${pct(Math.abs(d))}</span>`; }
 
-const VERSAO='v18';
+const VERSAO='v19';
 const VERSOES=[
+ {v:'v19',data:'15/10/2026',tit:'Escolha de visual',arq:'painel-visu-v19.zip',itens:['Botão Visual no topo com quatro estilos: Clássico, Cores da Visu (degradê da marca), Noite (escuro com neon) e Leve (claro com tons pastel), e espaçamento Confortável ou Compacto.','Cada pessoa escolhe o seu no próprio navegador; o ADM pode definir o visual padrão de todos.']},
  {v:'v18',data:'15/10/2026',tit:'Planilha abre na conta Google certa',arq:'painel-visu-v18.zip',itens:['O botão Abrir planilha abre o Google Planilhas já na conta do usuário logado no painel (ou na conta definida em PLANILHA_CONTA), mesmo que o navegador esteja em outra conta Google.']},
  {v:'v17',data:'14/10/2026',tit:'Clientes, contas a pagar e produtos mais gerenciais',arq:'painel-visu-v17.zip',itens:['Clientes redesenhado: indicadores da carteira, 10 maiores com barra e variação, concentração A/B/C, faixas de valor em colunas e clientes parados em tabela compacta.','Contas a pagar em tabelas compactas, com mês atual, mês anterior e variação por categoria.','Produtos e mix: clicar num tipo destaca a evolução dele mês a mês; novo filtro Produto; vendas ainda sem itens carregados ficam fora do mix.','Nomes padronizados (BONÉ → Boné, EGBERTO → Egberto), rótulos de valor no gráfico de vendas, botão Filtrar no período personalizado e link da planilha em Planilha × sistema.']},
  {v:'v16',data:'14/10/2026',tit:'Sem margem bruta por produto',arq:'painel-visu-v16.zip',itens:['Margem bruta retirada de produtos, vendedores, pedidos, painel executivo e quadro de indicadores, porque o custo dos produtos na Conta Azul ainda não tem o refinamento necessário.','No lugar: preço médio por peça, peças por pedido e peças vendidas.','Margem de contribuição e ponto de equilíbrio continuam no Financeiro, calculados pela DRE.']},
@@ -1596,6 +1674,7 @@ async function carregarEu(){
   try{ E.eu=PREVIA?(window.__EU__||{id:'morgana',nome:'Morgana Limeira',perfil:'adm'}):await (await fetch('/api/eu',{headers:{Accept:'application/json'}})).json(); }catch(e){ E.eu=null; }
   if(!E.eu?.perfil) return;
   if(!E.eu.paginas) E.eu.paginas=paginasDe(E.eu);
+  iniciarVisual();
   $('euNome').textContent=E.eu.nome; $('euPerfil').textContent=PERF[E.eu.perfil]||E.eu.perfil;
   $('av').textContent=E.eu.nome.split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join('').toUpperCase();
   $('trocarBox').hidden=PREVIA||E.eu.id==='__admin';
@@ -1634,6 +1713,45 @@ document.querySelectorAll('[data-med]').forEach(b=>b.addEventListener('click',()
 document.querySelectorAll('[data-evol]').forEach(b=>b.addEventListener('click',()=>{E.evol=b.dataset.evol;document.querySelectorAll('[data-evol]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));desenhar()}));
 $('atualizar').addEventListener('click',()=>{ E.fin=null; carregar(true); });
 document.querySelectorAll('[data-reg]').forEach(b=>b.addEventListener('click',()=>{E.reg=b.dataset.reg;desenhar()}));
+
+// ---------- visual (tema) ----------
+const VISUAIS=[
+  {id:'classico',nome:'Clássico',ds:'Marinho da marca, sóbrio',c:['#241E48','#F0F0F2','#FFFFFF','#3A48A8','#D96A05']},
+  {id:'vibrante',nome:'Cores da Visu',ds:'Degradê da marca e cantos redondos',c:['linear-gradient(185deg,#2A1670,#5A1E96 55%,#B3166A)','#F6F3FF','#FFFFFF','#5B3FD9','#FF6B2C']},
+  {id:'noite',nome:'Noite',ds:'Fundo escuro com neon',c:['#08070F','#0B0A16','#15132A','#8B5CFF','#FF4FA3']},
+  {id:'leve',nome:'Leve',ds:'Claro, menu branco, tons pastel',c:['#FFFFFF','#F6F5F0','#F0EEFF','#6C63FF','#FF8A4C']}];
+let VIS={t:'classico',d:'normal'}, VIS_PADRAO=null, VIS_PROPRIO=false;
+try{ const v=JSON.parse(localStorage.getItem('visu-visual')||'null'); if(v&&v.t){ VIS={t:v.t,d:v.d||'normal'}; VIS_PROPRIO=true; } }catch(e){}
+function aplicarVisual(){
+  const r=document.documentElement;
+  if(VIS.t==='classico'){ delete r.dataset.visual; delete r.dataset.theme; } else { r.dataset.visual=VIS.t; r.dataset.theme=VIS.t==='noite'?'dark':'light'; }
+  if(VIS.d==='compacta') r.dataset.densidade='compacta'; else delete r.dataset.densidade;
+  const lg=$('logo'); if(lg){ const claro=VIS.t==='leve'; lg.src=claro?(PREVIA?(window.__LOGO2__||lg.src):'/logo-visu-escuro.png'):(PREVIA?(window.__LOGO__||lg.src):'/logo-visu.png'); }
+}
+function montarVisual(){
+  const adm=E.eu?.perfil==='adm';
+  const nomeDe=(id)=>(VISUAIS.find(v=>v.id===id)||VISUAIS[0]).nome;
+  $('visPop').innerHTML=`<h4>Visual do painel</h4><div class="sub">Muda só as cores e o formato; os números continuam os mesmos.</div>
+  <div class="vis-op">${VISUAIS.map(v=>`<button type="button" data-vis="${v.id}" aria-pressed="${VIS.t===v.id}"><span class="mini" style="background:${v.c[1]}"><span class="l" style="background:${v.c[0]};${v.id==='leve'?'border-right:1px solid #ECEAF0':''}"></span><span class="r"><i style="background:${v.c[2]};width:70%"></i><em><b style="background:${v.c[3]};height:60%"></b><b style="background:${v.c[4]};height:90%"></b><b style="background:${v.c[3]};height:40%"></b><b style="background:${v.c[4]};height:75%"></b></em></span></span><span class="nome">${v.nome}</span><span class="ds">${v.ds}</span></button>`).join('')}</div>
+  <div class="vis-den">Espaçamento: <button type="button" data-den="normal" aria-pressed="${VIS.d!=='compacta'}">Confortável</button><button type="button" data-den="compacta" aria-pressed="${VIS.d==='compacta'}">Compacto</button></div>
+  ${adm?`<div class="vis-adm"><button class="bt2 pri" type="button" id="visPadrao">Usar como padrão para todos</button><span id="visPadraoTxt">${VIS_PADRAO?`Padrão atual: ${nomeDe(VIS_PADRAO.t)}${VIS_PADRAO.d==='compacta'?' · compacto':''}`:'Padrão atual: Clássico'}</span></div>`:''}
+  ${VIS_PROPRIO&&VIS_PADRAO?`<div class="vis-adm"><button class="bt2" type="button" id="visVoltar">Voltar ao padrão do painel</button></div>`:''}`;
+  $('visPop').querySelectorAll('[data-vis]').forEach(b=>b.addEventListener('click',()=>{ VIS.t=b.dataset.vis; salvarVisual(); }));
+  $('visPop').querySelectorAll('[data-den]').forEach(b=>b.addEventListener('click',()=>{ VIS.d=b.dataset.den; salvarVisual(); }));
+  $('visPadrao')?.addEventListener('click',async()=>{ const el=$('visPadraoTxt'); try{ if(!PREVIA){ const r=await fetch('/api/visual',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(VIS)}); if(!r.ok) throw new Error(); } VIS_PADRAO={...VIS}; el.textContent='Salvo: todos passam a abrir com '+nomeDe(VIS.t)+(VIS.d==='compacta'?' · compacto':'')+'.'; }catch(e){ el.textContent='Não consegui salvar. Tente de novo.'; } });
+  $('visVoltar')?.addEventListener('click',()=>{ try{localStorage.removeItem('visu-visual')}catch(e){} VIS_PROPRIO=false; VIS={t:VIS_PADRAO.t,d:VIS_PADRAO.d||'normal'}; aplicarVisual(); montarVisual(); });
+}
+function salvarVisual(){ VIS_PROPRIO=true; try{localStorage.setItem('visu-visual',JSON.stringify(VIS))}catch(e){} aplicarVisual(); montarVisual(); }
+function iniciarVisual(){
+  VIS_PADRAO=E.eu?.visual_padrao||null;
+  if(!VIS_PROPRIO&&VIS_PADRAO) VIS={t:VIS_PADRAO.t||'classico',d:VIS_PADRAO.d||'normal'};
+  aplicarVisual(); montarVisual();
+}
+$('btVisual').addEventListener('click',(e)=>{ e.stopPropagation(); const p=$('visPop'); p.hidden=!p.hidden; $('btVisual').setAttribute('aria-expanded',String(!p.hidden)); });
+$('visPop').addEventListener('click',e=>e.stopPropagation());
+document.addEventListener('click',()=>{ if(!$('visPop').hidden){ $('visPop').hidden=true; $('btVisual').setAttribute('aria-expanded','false'); } });
+aplicarVisual(); montarVisual();
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&!$('visPop').hidden){ $('visPop').hidden=true; $('btVisual').focus(); } });
 if(PREVIA){ $('atualizar').hidden=true; $('sair').hidden=true; if(window.__LOGO__) $('logo').src=window.__LOGO__; }
 else setInterval(()=>{ if(!document.hidden) carregar(); },5*60*1000);
 $('euVersao').textContent='Versão '+VERSAO.slice(1)+'.0';
