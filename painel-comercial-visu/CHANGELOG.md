@@ -2,6 +2,11 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v22 · 15/10/2026
+- Logo do menu recolhe/abre o menu (modo só ícones com submenu ao passar o mouse).
+- Formato do menu no Visual: lateral, só ícones, no topo (data-menu; salvo junto com o tema e no padrão do ADM).
+- Temas Pop, Vidro e Preto & laranja.
+
 ## v21 · 15/10/2026
 - /api/usuarios devolve banco_status; o aviso em Usuários separa "sem DATABASE_URL" de "DATABASE_URL com erro" e mostra o erro.
 - Foco do menu lateral na cor do tema.
