@@ -36,6 +36,7 @@ export const config = {
   intervaloMs: Number(env.INTERVALO_ENTRE_CHAMADAS_MS || 1250), // ~48 chamadas/min (limite da API: 50/min)
 
   // Link da planilha de vendas, mostrado na página Planilha × sistema
+  planilhaConta: env.PLANILHA_CONTA || 'morgana.limeira@sejaexpertgestao.com',
   planilhaLink: env.PLANILHA_LINK || 'https://docs.google.com/spreadsheets/d/1mWgFszLWSMepXLA4FMlOtRJ6jayKgODU/edit?gid=247671240',
 
   demo: env.DEMO === '1',

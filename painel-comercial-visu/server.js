@@ -188,7 +188,7 @@ app.get('/api/status', exigeLogin, async (req, res) => {
 app.get('/api/vendas', exigeLogin, async (req, res) => {
   if (!veVendas(req.usuario)) return res.status(403).json({ erro: 'seu perfil não tem acesso aos dados de vendas' });
   try {
-    res.json({ ...(await dadosDeVendas(req.query.forcar === '1')), planilha_link: config.planilhaLink });
+    res.json({ ...(await dadosDeVendas(req.query.forcar === '1')), planilha_link: config.planilhaLink, planilha_conta: config.planilhaConta });
   } catch (e) {
     console.error('[vendas]', e);
     res.status(502).json({ erro: e.message });
