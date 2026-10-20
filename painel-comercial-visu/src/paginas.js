@@ -10,16 +10,28 @@ export const MENU = [
 export const TODAS = MENU.flatMap((g) => g.itens.map((i) => i[0]));
 const COM = ['vendas', 'produtos', 'clientes', 'vendedores', 'pedidos'];
 const FIN = ['dre', 'equilibrio', 'caixa', 'receber', 'pagar'];
-export const PADRAO = {
+const PADRAO_BASE = {
   adm: TODAS,
   diretor: TODAS.filter((p) => p !== 'usuarios'),
   comercial: [...COM, 'conciliacao', 'versoes'],
   financeiro: ['painel', 'indicadores', ...FIN, 'conciliacao', 'dados', 'versoes'],
 };
+// O ADM pode mudar o que cada perfil vê (vale para todas as pessoas daquele perfil). Guardado na chave perfis_paginas.
+let personalizado = {};
+const LIBERAVEIS = TODAS.filter((p) => p !== 'usuarios');
+export function definirPerfis(o) {
+  personalizado = {};
+  for (const [k, v] of Object.entries(o || {})) if (k !== 'adm' && PADRAO_BASE[k] && Array.isArray(v)) personalizado[k] = v.filter((p) => LIBERAVEIS.includes(p));
+}
+export const perfisPersonalizados = () => ({ ...personalizado });
+export const padraoDe = (perfil) => (perfil === 'adm' ? TODAS : personalizado[perfil]?.length ? personalizado[perfil] : PADRAO_BASE[perfil] || []);
+export const PADRAO = new Proxy({}, { get: (_, k) => padraoDe(k), ownKeys: () => Object.keys(PADRAO_BASE), getOwnPropertyDescriptor: () => ({ enumerable: true, configurable: true }) });
+export const padroesOriginais = () => ({ ...PADRAO_BASE });
+
 // páginas liberadas para o usuário: o padrão do perfil, recortado pela escolha do ADM (se houver)
 export function paginasDe(u) {
   if (!u) return [];
-  const base = PADRAO[u.perfil] || [];
+  const base = padraoDe(u.perfil);
   if (u.perfil === 'adm' || !Array.isArray(u.paginas)) return base;
   const r = base.filter((p) => u.paginas.includes(p));
   return r.length ? r : base.slice(0, 1);

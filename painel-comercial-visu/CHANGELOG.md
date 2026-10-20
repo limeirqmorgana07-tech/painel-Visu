@@ -2,6 +2,10 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v23 · 19/10/2026
+- Permissões por perfil editáveis pelo ADM (POST /api/perfis, chave perfis_paginas); paginasDe usa o padrão personalizado, então menu e bloqueio de dados no servidor seguem a mesma regra.
+- Ver o painel como: recarrega a lista de usuários ao trocar, para refletir permissões recém-salvas.
+
 ## v22 · 15/10/2026
 - Logo do menu recolhe/abre o menu (modo só ícones com submenu ao passar o mouse).
 - Formato do menu no Visual: lateral, só ícones, no topo (data-menu; salvo junto com o tema e no padrão do ADM).

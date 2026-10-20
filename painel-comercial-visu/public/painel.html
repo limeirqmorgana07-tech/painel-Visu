@@ -764,7 +764,7 @@ table.matriz td.vz{color:var(--line2)}
     </div>
     <div class="card" style="margin-top:16px"><div class="hd"><div><h3>Usuários</h3><div class="sub" id="usSub">—</div></div></div><div class="tw" id="usLista"></div><div id="usLink"></div></div>
     <div class="card" style="margin-top:16px" id="usPermCard" hidden><div class="hd"><div><h3 id="usPermTit">Permissões</h3><div class="sub" id="usPermSub">—</div></div><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="bt2" type="button" id="usPermTodos">Marcar todos</button><button class="bt2" type="button" id="usPermPadrao">Padrão do perfil</button><button class="bt2 pri" type="button" id="usPermSalvar">Salvar permissões</button><button class="bt2" type="button" id="usPermFechar">Fechar</button></div></div><div class="perm-grid" id="usPermGrid"></div></div>
-    <div class="card" style="margin-top:16px"><div class="hd"><div><h3>O que cada perfil vê</h3><div class="sub">Padrão de cada perfil. Em "Permissões" dá para tirar páginas de uma pessoa específica.</div></div></div><div class="tw" id="usMatriz"></div></div>
+    <div class="card" style="margin-top:16px"><div class="hd"><div><h3>O que cada perfil vê</h3><div class="sub">Clique nas caixinhas para liberar ou esconder uma página para todo o perfil.</div></div></div><div class="tw" id="usMatriz"></div></div>
   </section>
 
 
@@ -793,8 +793,9 @@ const nomeMes=(m)=>{const[a,b]=m.split('-');return MES_L[+b-1]+' de '+a};
 const somaMes=(m,n)=>{const[a,b]=m.split('-').map(Number);const d=new Date(Date.UTC(a,b-1+n,1));return d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0')};
 function delta(a,b,inv){ if(!b) return '<span class="delta eq">sem base</span>'; const d=(a-b)/b; const c=Math.abs(d)<.005?'eq':(d>0)!==!!inv?'up':'down'; return `<span class="delta ${c}">${d>0?'▲':d<0?'▼':'■'} ${pct(Math.abs(d))}</span>`; }
 
-const VERSAO='v22';
+const VERSAO='v23';
 const VERSOES=[
+ {v:'v23',data:'19/10/2026',tit:'Permissões por perfil',arq:'painel-visu-v23.zip',itens:['Em Usuários e permissões, a tabela "O que cada perfil vê" agora é editável: desmarcar uma página para Diretor esconde para todos os diretores (menu e dados).','"Ver o painel como" passou a usar as permissões mais recentes de cada pessoa (antes podia mostrar a versão antiga até recarregar).']},
  {v:'v22',data:'15/10/2026',tit:'Mais temas e formatos de menu',arq:'painel-visu-v22.zip',itens:['Clique no logo da Visu para recolher o menu lateral (fica só com os ícones; passar o mouse abre os itens).','No botão Visual: formato do menu Lateral, Só ícones ou No topo.','Três temas novos com as cores do logo: Pop (blocos coloridos e contorno forte), Vidro (fundo degradê e cartões translúcidos) e Preto & laranja (editorial e limpo).']},
  {v:'v21',data:'15/10/2026',tit:'Aviso do banco mais claro',arq:'painel-visu-v21.zip',itens:['Em Usuários, o aviso diz se falta a variável DATABASE_URL ou se ela existe mas o banco recusou a conexão (com o erro), e o passo a passo para corrigir.','Contorno de foco do menu lateral mais discreto.']},
  {v:'v20',data:'15/10/2026',tit:'Planilha em tempo real',arq:'painel-visu-v20.zip',itens:['Botão Conectar Google em Planilha × sistema: o ADM entra uma vez com a conta que abre a planilha e o painel passa a lê-la sozinho a cada 5 minutos, sem publicar nem compartilhar o arquivo.','Funciona com planilha do Google e com .xlsx no Drive; a aba de vendas é encontrada automaticamente.']},
@@ -1736,7 +1737,7 @@ async function montarVerComo(){
   let us=[]; try{ us=(await api('/api/usuarios')).usuarios; }catch(e){}
   const ops=[['','Administrador (eu)'],...Object.keys(PERF).filter(k=>k!=='adm').map(k=>['p:'+k,'Perfil '+PERF[k]]),...us.filter(u=>u.perfil!=='adm').map(u=>['u:'+u.id,u.nome+' · '+PERF[u.perfil]])];
   $('verComo').innerHTML=ops.map(([v,r])=>`<option value="${esc(v)}">${esc(r)}</option>`).join('');
-  $('verComo').onchange=()=>{ const v=$('verComo').value; if(!v) E.verComo=null; else if(v.startsWith('p:')) E.verComo={perfil:v.slice(2),nome:'Perfil '+PERF[v.slice(2)]}; else { const u=us.find(x=>x.id===v.slice(2)); E.verComo=u?{...u}:null; } desenhar(); };
+  $('verComo').onchange=async()=>{ const v=$('verComo').value; if(!v) E.verComo=null; else if(v.startsWith('p:')) E.verComo={perfil:v.slice(2),nome:'Perfil '+PERF[v.slice(2)]}; else { try{ us=(await api('/api/usuarios')).usuarios||us; }catch(e){} const u=us.find(x=>x.id===v.slice(2)); E.verComo=u?{...u}:null; } desenhar(); };
 }
 let US={lista:[],banco:true,link:null};
 async function api(url,op={}){ if(PREVIA) return previaApi(url,op); const r=await fetch(url,{...op,headers:{'Content-Type':'application/json',Accept:'application/json'}}); const d=await r.json().catch(()=>({})); if(!r.ok) throw new Error(d.erro||('erro '+r.status)); return d; }
@@ -1770,7 +1771,7 @@ async function pgUsuarios(){
     if((u.senha_criada||u.temporaria)&&!confirm(`Gerar uma nova senha temporária para ${u.nome}? A senha atual deixa de funcionar.`)) return;
     try{ US.link=null; US.temp=await api(`/api/usuarios/${u.id}/senha-temporaria`,{method:'POST'}); mostrarLink(); pgUsuarios(); }catch(e){ alert(e.message); } }));
   $('usLista').querySelectorAll('[data-perm]').forEach(b=>b.addEventListener('click',()=>abrirPerm(US.lista.find(x=>x.id===b.dataset.perm))));
-  $('usMatriz').innerHTML=`<table><thead><tr><th>Página</th>${Object.keys(PERF).map(k=>`<th style="text-align:center">${PERF[k]}</th>`).join('')}</tr></thead><tbody>${MENU.map(g=>`<tr class="grp"><td colspan="5" style="font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--orange);padding-top:12px">${g.grupo}</td></tr>`+g.itens.map(i=>`<tr><td>${i[1]}</td>${Object.keys(PERF).map(k=>`<td style="text-align:center">${PADRAO[k].includes(i[0])?'<span class="status ok">✓</span>':'<span style="color:var(--ink3)">—</span>'}</td>`).join('')}</tr>`).join('')).join('')}</tbody></table>`;
+  desenharMatriz();
   $('usLista').querySelectorAll('[data-ed]').forEach(b=>b.addEventListener('click',()=>{ const u=US.lista.find(x=>x.id===b.dataset.ed); const f=$('usForm'); f.id.value=u.id; f.nome.value=u.nome; f.email.value=u.email; f.perfil.value=u.perfil; $('usFormTit').textContent='Editar '+u.nome; $('usCancelar').hidden=false; f.nome.focus(); }));
   $('usLista').querySelectorAll('[data-del]').forEach(b=>b.addEventListener('click',async()=>{ const u=US.lista.find(x=>x.id===b.dataset.del); if(!confirm(`Remover o acesso de ${u.nome}?`)) return; await api(`/api/usuarios/${u.id}`,{method:'DELETE'}); pgUsuarios(); }));
   mostrarLink();
@@ -1805,6 +1806,8 @@ $('usCancelar').addEventListener('click',()=>{ const f=$('usForm'); f.reset(); f
 async function carregarEu(){
   try{ E.eu=PREVIA?(window.__EU__||{id:'morgana',nome:'Morgana Limeira',perfil:'adm'}):await (await fetch('/api/eu',{headers:{Accept:'application/json'}})).json(); }catch(e){ E.eu=null; }
   if(!E.eu?.perfil) return;
+  if(E.eu.perfis) Object.assign(PADRAO,E.eu.perfis);
+  if(!E.eu.perfis_originais) E.eu.perfis_originais={diretor:[...PADRAO.diretor],comercial:[...PADRAO.comercial],financeiro:[...PADRAO.financeiro]};
   if(!E.eu.paginas) E.eu.paginas=paginasDe(E.eu);
   iniciarVisual();
   $('euNome').textContent=E.eu.nome; $('euPerfil').textContent=PERF[E.eu.perfil]||E.eu.perfil;
@@ -1814,6 +1817,19 @@ async function carregarEu(){
 }
 
 let PERMU=null;
+
+// matriz "O que cada perfil vê": o ADM marca/desmarca e vale para todas as pessoas do perfil
+function desenharMatriz(){
+  const ed=['diretor','comercial','financeiro'], orig=E.eu?.perfis_originais||{};
+  const mudou=(k)=>orig[k]&&(orig[k].length!==PADRAO[k].length||orig[k].some(p=>!PADRAO[k].includes(p)));
+  $('usMatriz').innerHTML=`<table><thead><tr><th>Página</th>${Object.keys(PERF).map(k=>`<th style="text-align:center">${PERF[k]}${mudou(k)?'<div style="font-size:10px;font-weight:600;color:var(--orange);text-transform:none;letter-spacing:0">personalizado</div>':''}</th>`).join('')}</tr></thead><tbody>${MENU.map(g=>`<tr class="grp"><td colspan="5" style="font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--orange);padding-top:12px">${g.grupo}</td></tr>`+g.itens.map(i=>`<tr><td>${i[1]}</td>${Object.keys(PERF).map(k=>{ const on=PADRAO[k].includes(i[0]);
+      if(k==='adm'||i[0]==='usuarios') return `<td style="text-align:center">${on?'<span class="status ok">✓</span>':'<span style="color:var(--ink3)">—</span>'}</td>`;
+      return `<td style="text-align:center"><input type="checkbox" data-pf="${k}" value="${i[0]}" ${on?'checked':''} aria-label="${PERF[k]}: ${esc(i[1])}"></td>`; }).join('')}</tr>`).join('')).join('')}
+    <tr><td></td><td></td>${ed.map(k=>`<td style="text-align:center">${mudou(k)?`<button class="bt2" type="button" data-pfrest="${k}" style="font-size:11.5px;padding:4px 8px">Voltar ao padrão</button>`:''}</td>`).join('')}</tr></tbody></table><div class="nota" id="usMatrizMsg">Marque ou desmarque para mudar o que <b>todas</b> as pessoas daquele perfil veem. Vale na hora, inclusive para quem já está logado (ao recarregar). Para tirar páginas de uma só pessoa, use "Permissões" na lista acima.</div>`;
+  const salvarPf=async(k,paginas)=>{ const msg=$('usMatrizMsg'); try{ const r=PREVIA?{paginas:paginas||orig[k]}:await api('/api/perfis',{method:'POST',body:JSON.stringify({perfil:k,paginas})}); PADRAO[k]=r.paginas; if(E.eu.perfis) E.eu.perfis[k]=r.paginas; desenharMatriz(); $('usMatrizMsg').innerHTML=`<b>Salvo.</b> Perfil ${PERF[k]} agora vê ${r.paginas.length} página${r.paginas.length>1?'s':''}.`; }catch(e){ msg.textContent=e.message; desenharMatriz(); } };
+  $('usMatriz').querySelectorAll('input[data-pf]').forEach(c=>c.addEventListener('change',()=>{ const k=c.dataset.pf; const sel=[...$('usMatriz').querySelectorAll(`input[data-pf="${k}"]:checked`)].map(x=>x.value); if(!sel.length){ c.checked=true; $('usMatrizMsg').textContent='Deixe pelo menos uma página marcada.'; return; } salvarPf(k,sel); }));
+  $('usMatriz').querySelectorAll('[data-pfrest]').forEach(b=>b.addEventListener('click',()=>salvarPf(b.dataset.pfrest,null)));
+}
 function abrirPerm(u){
   PERMU=u; const base=PADRAO[u.perfil]||[], atuais=new Set(paginasDe(u));
   $('usPermCard').hidden=false; $('usPermTit').textContent='Permissões de '+u.nome;

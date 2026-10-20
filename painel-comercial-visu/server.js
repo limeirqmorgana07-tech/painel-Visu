@@ -11,7 +11,7 @@ import { dadosFinanceiros } from './src/financeiro.js';
 import { planilhaConfigurada } from './src/planilha.js';
 import * as google from './src/google.js';
 import * as usuarios from './src/usuarios.js';
-import { paginasDe, veFinanceiro, veVendas } from './src/paginas.js';
+import { paginasDe, veFinanceiro, veVendas, definirPerfis, padraoDe, perfisPersonalizados, padroesOriginais } from './src/paginas.js';
 import { statusBanco, lerKV, salvarKV } from './src/tokenStore.js';
 
 const raiz = path.dirname(fileURLToPath(import.meta.url));
@@ -135,7 +135,21 @@ app.post('/convite/:token', async (req, res) => {
 
 // ---------- usuários (perfil ADM) ----------
 app.use(express.json());
-app.get('/api/eu', exigeLogin, async (req, res) => res.json({ id: req.usuario.id, nome: req.usuario.nome, email: req.usuario.email || '', perfil: req.usuario.perfil, paginas: paginasDe(req.usuario), visual_padrao: (await lerKV('visual_padrao').catch(() => null)) || null }));
+app.get('/api/eu', exigeLogin, async (req, res) => res.json({ id: req.usuario.id, nome: req.usuario.nome, email: req.usuario.email || '', perfil: req.usuario.perfil, paginas: paginasDe(req.usuario), perfis: { diretor: padraoDe('diretor'), comercial: padraoDe('comercial'), financeiro: padraoDe('financeiro') }, perfis_originais: padroesOriginais(), visual_padrao: (await lerKV('visual_padrao').catch(() => null)) || null }));
+// o que cada perfil vê (ADM edita em Usuários e permissões)
+app.post('/api/perfis', exigeAdm, async (req, res) => {
+  const atual = perfisPersonalizados();
+  const { perfil, paginas } = req.body || {};
+  if (!['diretor', 'comercial', 'financeiro'].includes(perfil)) return res.status(400).json({ erro: 'Perfil inválido.' });
+  if (paginas === null) delete atual[perfil];
+  else if (Array.isArray(paginas) && paginas.length) atual[perfil] = paginas.map(String);
+  else return res.status(400).json({ erro: 'Deixe pelo menos uma página marcada.' });
+  definirPerfis(atual);
+  await salvarKV('perfis_paginas', perfisPersonalizados());
+  res.json({ ok: true, perfil, paginas: padraoDe(perfil) });
+});
+lerKV('perfis_paginas').then((o) => definirPerfis(o)).catch(() => {});
+
 // visual (tema) padrão do painel: o ADM escolhe; cada pessoa ainda pode trocar só no navegador dela
 const VISUAIS = ['classico', 'vibrante', 'sol', 'turquesa', 'fio', 'pop', 'vidro', 'preto', 'noite'];
 app.post('/api/visual', exigeAdm, async (req, res) => {
