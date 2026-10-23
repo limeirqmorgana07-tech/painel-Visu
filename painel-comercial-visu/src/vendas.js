@@ -129,22 +129,31 @@ async function vendasContaAzul() {
 
 const EFETIVAS = new Set(['APROVADO', 'FATURADO']);
 
+const MESES_NOME = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+const nomeMesCurto = (m) => { const i = +m.slice(5) - 2; return i >= 0 ? `${MESES_NOME[i]}/${m.slice(0, 4)}` : `dezembro/${+m.slice(0, 4) - 1}`; };
+// Na Conta Azul da Visu, cada mês até julho/2026 entrou como um lançamento único ("Visu"): esses meses só servem
+// para o faturamento. Pedido, ticket, cliente e novo × recompra só são confiáveis a partir de DETALHE_CA_DESDE.
+export const detalheCaDesde = () => process.env.DETALHE_CA_DESDE || '2026-08';
 function linhasDeVendasCA(vendas, cacheItens) {
-  // novo x recompra calculado: "novo" = primeira venda efetiva do cliente no histórico carregado
+  const desde = detalheCaDesde();
   const efetivas = vendas.filter((v) => EFETIVAS.has(v.situacao)).sort((a, b) => a.data.localeCompare(b.data));
-  const primeira = new Map();
-  for (const v of efetivas) { const k = chave(clienteBase(v.cliente)); if (!primeira.has(k)) primeira.set(k, v.id); }
+  // recompra = cliente que já comprou num mês anterior DENTRO do período detalhado; o resto fica sem classificação
+  // (pode ser novo ou cliente antigo que não aparece na Conta Azul). O dado certo vem da planilha (BASE TRATADA).
+  const primeiroMes = new Map();
+  for (const v of efetivas) { if (v.data.slice(0, 7) < desde) continue; const k = chave(clienteBase(v.cliente)); if (!primeiroMes.has(k)) primeiroMes.set(k, v.data.slice(0, 7)); }
   const linhas = [];
   let comItens = 0;
   for (const v of efetivas) {
+    const mes = v.data.slice(0, 7), consolidado = mes < desde;
+    const pm = primeiroMes.get(chave(clienteBase(v.cliente)));
     const base = {
-      data: v.data, mes: v.data.slice(0, 7), cliente: clienteBase(v.cliente), cliente_original: v.cliente,
-      pedido: String(v.numero ?? v.id), pedido_informado: true, vendedor: v.vendedor || 'Sem vendedor', tipo_venda: '—',
-      novo_recompra: primeira.get(chave(clienteBase(v.cliente))) === v.id ? 'novo' : 'recompra',
+      data: v.data, mes, cliente: consolidado ? 'Vendas consolidadas do mês' : clienteBase(v.cliente), cliente_original: v.cliente,
+      pedido: consolidado ? `consolidado-${mes}` : String(v.numero ?? v.id), pedido_informado: !consolidado, vendedor: consolidado ? 'Não vendedores' : v.vendedor || 'Sem vendedor', tipo_venda: '—',
+      novo_recompra: !consolidado && pm && pm < mes ? 'recompra' : '', consolidado,
       pag1: 0, pag2: 0, pago_100: false, forma_pagamento: '', prazo_entrega: '', frete: '', segmento: '',
     };
     const itens = cacheItens[v.id]?.i;
-    if (itens?.length) {
+    if (itens?.length && !consolidado) {
       comItens++;
       const soma = itens.reduce((s, x) => s + x[2], 0) || 1;
       const fator = v.total ? v.total / soma : 1; // distribui desconto/frete proporcionalmente
@@ -155,7 +164,8 @@ function linhasDeVendasCA(vendas, cacheItens) {
       linhas.push({ ...base, tipo_produto: '', material: '', especificacao: '', cor: '', produto: '', quantidade: 0, total: v.total });
     }
   }
-  return { linhas, cobertura_itens: efetivas.length ? comItens / efetivas.length : 1, historico_desde: efetivas[0]?.data || null };
+  const det = efetivas.filter((v) => v.data.slice(0, 7) >= desde);
+  return { linhas, cobertura_itens: det.length ? comItens / det.length : 1, historico_desde: efetivas[0]?.data || null, detalhe_desde: desde };
 }
 
 // ---------- conciliação planilha x Conta Azul ----------
@@ -210,10 +220,11 @@ async function montar(bruto) {
   if (!base && vendasCA) {
     origem = 'conta_azul';
     const cacheItens = await carregarCacheItens();
-    agendarItens(vendasCA.filter((v) => EFETIVAS.has(v.situacao)));
+    agendarItens(vendasCA.filter((v) => EFETIVAS.has(v.situacao) && v.data.slice(0, 7) >= detalheCaDesde()));
     const r = linhasDeVendasCA(vendasCA, cacheItens);
     base = { linhas: r.linhas, mapa: null };
-    extra = { cobertura_itens: r.cobertura_itens, itens_pendentes: itensCache.pendentes, nr_calculado: true, historico_desde: r.historico_desde };
+    extra = { cobertura_itens: r.cobertura_itens, itens_pendentes: itensCache.pendentes, nr_calculado: true, historico_desde: r.historico_desde, detalhe_desde: r.detalhe_desde };
+    avisos.push(`Fonte: Conta Azul. Até ${nomeMesCurto(detalheCaDesde())} cada mês entrou como um lançamento único, então esses meses aparecem só no faturamento (sem pedidos, ticket, clientes ou novo × recompra). Ligue a planilha (BASE TRATADA) para ter o histórico completo.`);
     if (itensCache.pendentes) avisos.push(`Buscando os produtos de ${itensCache.pendentes} vendas na Conta Azul. O mix de produtos se completa nos próximos minutos.`);
   }
 
@@ -224,6 +235,9 @@ async function montar(bruto) {
   return {
     fonte: origem,
     planilha_arquivo: origem === 'planilha' ? base.arquivo || null : null,
+    detalhe_desde: detalheCaDesde(),
+    nr_fonte: origem === 'planilha' && base.mapa?.nr_tratado ? 'tratada' : undefined,
+    de_para: origem === 'planilha' ? base.mapa?.de_para || null : null,
     conta_azul_conectada: !!bruto.conectadoCA,
     credenciais_conta_azul: !!(config.clientId && config.clientSecret),
     atualizado_em: new Date().toISOString(),
@@ -240,6 +254,7 @@ async function montar(bruto) {
       m: l.mes, d: l.data, c: l.cliente, p: l.pedido, v: l.vendedor, tv: l.tipo_venda, nr: l.novo_recompra,
       tp: l.tipo_produto, mt: l.material, es: l.especificacao, cr: l.cor, pr: l.produto || '', q: l.quantidade, t: Math.round(l.total * 100) / 100, cu: Math.round((l.custo || 0) * 100) / 100,
       p1: l.pag1, p2: l.pag2, ok: l.pago_100, fp: l.forma_pagamento, pz: l.prazo_entrega, sg: l.segmento,
+      ...(l.consolidado ? { cs: 1 } : {}),
     })),
     // vendas do sistema, para a conciliação (data da venda, situação, cliente, valor)
     conta_azul: vendasCA

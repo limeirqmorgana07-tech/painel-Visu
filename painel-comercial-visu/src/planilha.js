@@ -17,14 +17,16 @@ const env = process.env;
 const COLUNAS = {
   data: ['data da venda', 'data venda', 'data'],
   mes: ['mes', 'mes da venda', 'competencia'],
-  cliente: ['cliente', 'nome do cliente', 'razao social'],
+  // a BASE TRATADA traz o cliente padronizado (DE-PARA CLIENTES); se existir, tem prioridade sobre o nome digitado
+  cliente: ['cliente padronizado', 'cliente (padronizado)', 'cliente tratado', 'cliente padrao', 'cliente', 'nome do cliente', 'razao social'],
   pedido: ['nome do pedido (trello)', 'nome do pedido', 'pedido', 'nome do pedido trello'],
   codigo: ['cod. interno', 'cod interno', 'codigo interno', 'codigo', 'cod.'],
   vendedor: ['vendedor', 'vendedora', 'consultor'],
   tipoVenda: ['tipo de venda', 'tipo venda', 'b2b/b2c'],
-  novoRecompra: ['cliente novo ou recompra?', 'cliente novo ou recompra', 'novo ou recompra', 'novo/recompra'],
-  tipoProduto: ['tipo de produto', 'produto', 'tipo produto'],
-  material: ['material', 'tecido', 'material/tecido'],
+  // "Novo x Recompra" (BASE TRATADA) vale mais que a marcação dos vendedores
+  novoRecompra: ['novo x recompra', 'novo x recompra (tratado)', 'novo/recompra tratado', 'cliente novo ou recompra?', 'cliente novo ou recompra', 'novo ou recompra', 'novo/recompra'],
+  tipoProduto: ['tipo de produto', 'tipo produto', 'produto'],
+  material: ['tecido', 'material', 'material/tecido', 'tecido tratado'],
   especificacao: ['especificacao', 'especificacoes'],
   cor: ['cor', 'cores'],
   quantidade: ['quantidade', 'qtd', 'qtde', 'quant.'],
@@ -49,8 +51,10 @@ function mapearCabecalho(cabecalho) {
   const normal = cabecalho.map(sem);
   for (const [campo, apelidos] of Object.entries(COLUNAS)) {
     const lista = extras[campo] ? [sem(extras[campo])] : apelidos.map(sem);
-    let i = normal.findIndex((h) => lista.includes(h));
-    if (i < 0) i = normal.findIndex((h) => lista.some((a) => a.length > 3 && h.startsWith(a)));
+    // o primeiro apelido da lista tem prioridade (ex.: "cliente padronizado" antes de "cliente")
+    let i = -1;
+    for (const a of lista) { i = normal.indexOf(a); if (i >= 0) break; }
+    if (i < 0) for (const a of lista) { if (a.length <= 3) continue; i = normal.findIndex((h) => h.startsWith(a)); if (i >= 0) break; }
     if (i >= 0) idx[campo] = i;
   }
   return idx;
@@ -193,6 +197,7 @@ export function normalizarLinhas(matriz) {
       reconhecidas: Object.fromEntries(Object.entries(idx).map(([c, i]) => [c, cabecalho[i]])),
       nao_encontradas: Object.keys(COLUNAS).filter((c) => idx[c] === undefined),
       obrigatorias_faltando: faltando,
+      nr_tratado: idx.novoRecompra !== undefined && sem(cabecalho[idx.novoRecompra]).startsWith('novo x'),
       colunas_da_planilha: cabecalho.filter((c) => String(c).trim()),
     },
   };
@@ -223,7 +228,8 @@ async function tokenContaServico() {
 // escolhe a aba: PLANILHA_ABA, senão a que tiver mais vendas reconhecidas
 export function lerXlsx(bytes, aba = env.PLANILHA_ABA) {
   const wb = XLSX.read(bytes, { type: 'buffer', cellDates: false });
-  const nomes = aba ? wb.SheetNames.filter((n) => sem(n) === sem(aba)) : wb.SheetNames;
+  const tratada = wb.SheetNames.filter((n) => sem(n).includes('base tratada'));
+  const nomes = aba ? wb.SheetNames.filter((n) => sem(n) === sem(aba)) : tratada.length ? tratada : wb.SheetNames;
   if (!nomes.length) throw new Error(`A planilha não tem a aba "${aba}". Abas: ${wb.SheetNames.join(', ')}.`);
   let melhor = null;
   for (const n of nomes) {
@@ -235,6 +241,15 @@ export function lerXlsx(bytes, aba = env.PLANILHA_ABA) {
   }
   if (!melhor) throw new Error('Não encontrei a aba de vendas na planilha.');
   melhor.r.aba = melhor.aba;
+  // DE-PARA CLIENTES: coluna A = nome como foi digitado, coluna B = nome padronizado
+  const dp = wb.SheetNames.find((n) => /de.?para/.test(sem(n)) && sem(n).includes('client'));
+  if (dp) {
+    const mapa = new Map();
+    for (const [de, para] of XLSX.utils.sheet_to_json(wb.Sheets[dp], { header: 1, raw: false, defval: '' })) if (sem(de) && String(para).trim() && sem(de) !== 'de') mapa.set(sem(de), String(para).trim());
+    let trocas = 0;
+    for (const l of melhor.r.linhas) { const p = mapa.get(sem(l.cliente_original)) || mapa.get(sem(l.cliente)); if (p && p !== l.cliente) { l.cliente = p; l.pedido = l.pedido_informado ? l.pedido : `${p}|${l.data || l.mes}`; trocas++; } }
+    melhor.r.mapa.de_para = { aba: dp, nomes: mapa.size, linhas_ajustadas: trocas };
+  }
   return melhor.r;
 }
 

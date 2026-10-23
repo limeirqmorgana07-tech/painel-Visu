@@ -2,6 +2,13 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v24 · 23/10/2026 (revisão do Tiago, bloco Comercial)
+- Planilha: prioriza a aba BASE TRATADA; aplica a aba DE-PARA CLIENTES (col. A → col. B); colunas com prioridade (Cliente padronizado > Cliente; Novo x Recompra > marcação do vendedor; Tecido > Material). nr_fonte e de_para no /api/vendas.
+- Faturamento do mês ≥ DETALHE_CA_DESDE (padrão 2026-08) vem da Conta Azul quando a planilha está ligada; o detalhe continua da planilha.
+- Conta Azul sozinha: meses antes de DETALHE_CA_DESDE viram "vendas consolidadas" (cs:1), fora de pedidos, ticket, clientes, novo × recompra e clientes parados; recompra só quando o cliente já comprou no período detalhado.
+- Matriz tecido × cor e ticket por tecido com linhas/colunas "não identificado"; cor Sublimada no leitor de produtos.
+- Não vendedores padrão (uma vez): Tiago - Financeiro, Escritório BPO, Morgana Limeira, Anderson Alves, Visu. Comparação de nomes sem acento/maiúsculas.
+
 ## v23 · 19/10/2026
 - Permissões por perfil editáveis pelo ADM (POST /api/perfis, chave perfis_paginas); paginasDe usa o padrão personalizado, então menu e bloqueio de dados no servidor seguem a mesma regra.
 - Ver o painel como: recarrega a lista de usuários ao trocar, para refletir permissões recém-salvas.

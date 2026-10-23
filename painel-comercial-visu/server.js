@@ -239,10 +239,20 @@ app.get('/api/vendas', exigeLogin, async (req, res) => {
 
 // Gestão financeira (DRE, caixa, contas a receber/pagar, saldos) pela API da Conta Azul
 // Quem é (ou não é) vendedor: o ADM marca como inativo quem aparece na Conta Azul mas não vende (financeiro, escritório etc.)
-app.get('/api/vendedores', exigeLogin, async (req, res) => res.json((await lerKV('vendedores_config').catch(() => null)) || { inativos: [] }));
+// Não vendedores apontados na revisão de 22/10/2026 (Tiago): entram como inativos uma única vez; o ADM pode reativar.
+const NAO_VENDEDORES_PADRAO = ['Tiago - Financeiro', 'Escritório BPO', 'Morgana Limeira', 'Anderson Alves', 'Visu'];
+app.get('/api/vendedores', exigeLogin, async (req, res) => {
+  let cfg = (await lerKV('vendedores_config').catch(() => null)) || { inativos: [] };
+  if (!cfg.revisao_2210) {
+    const ja = new Set((cfg.inativos || []).map((x) => String(x).toLowerCase()));
+    cfg = { ...cfg, inativos: [...(cfg.inativos || []), ...NAO_VENDEDORES_PADRAO.filter((x) => !ja.has(x.toLowerCase()))], revisao_2210: true };
+    await salvarKV('vendedores_config', cfg).catch(() => {});
+  }
+  res.json(cfg);
+});
 app.post('/api/vendedores', exigeAdm, async (req, res) => {
   const inativos = [...new Set((Array.isArray(req.body?.inativos) ? req.body.inativos : []).map((x) => String(x).trim()).filter(Boolean))];
-  await salvarKV('vendedores_config', { inativos, atualizado_em: new Date().toISOString(), por: req.usuario.nome });
+  await salvarKV('vendedores_config', { inativos, revisao_2210: true, atualizado_em: new Date().toISOString(), por: req.usuario.nome });
   res.json({ inativos });
 });
 

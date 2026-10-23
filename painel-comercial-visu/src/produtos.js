@@ -30,6 +30,8 @@ const PADRAO = {
     'PV / malha mista': [' pv ', 'malha pv', 'piquet', 'pique'],
   },
   cor: {
+    // peça toda sublimada não tem cor de tecido: o Egberto precisa desse grupo para planejar a compra de tecido branco
+    Sublimada: ['sublimad', 'sublimacao', 'sublim', 'full print'],
     'Azul marinho': ['azul marinho', 'marinho'],
     'Azul royal': ['azul royal', 'royal'],
     Azul: ['azul'],
@@ -42,7 +44,7 @@ const PADRAO = {
     Amarelo: ['amarelo', 'amarela'],
     Laranja: ['laranja'],
     Roxo: ['roxo', 'roxa', 'lilas'],
-    Colorida: ['colorid', 'estampad', 'sublimacao total', 'full print'],
+    Colorida: ['colorid', 'estampad'],
   },
 };
 
