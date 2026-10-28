@@ -2,6 +2,10 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v28 · 28/10/2026
+- Logo novo (public/logo-visu.png branco, logo-visu-azul.png azul, logo.png ícone); rota /logo-visu-azul.png; login no azul #00348C.
+- Temas azul, branco (troca para o logo azul), degrade, oceano; marcados como "nova marca" no seletor.
+
 ## v27 · 28/10/2026
 - Perfil consultor (Consultor externo): padrão = páginas comerciais; campos empresa e valido_ate no usuário; acessoVencido() bloqueia login e sessão após a data.
 - Vendedores e comissão: cartões de resumo (comissão a pagar, liberados, mais perto da próxima faixa, maior comissão).

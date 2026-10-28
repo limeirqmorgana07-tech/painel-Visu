@@ -53,14 +53,14 @@ const pagina = (titulo, corpo) => `<!doctype html><html lang="pt-BR"><head><meta
 <meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(titulo)} · Painel de Gestão Visu</title>
 <link rel="icon" href="/logo.png"><style>
 body{margin:0;min-height:100vh;display:grid;place-items:center;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
-background:radial-gradient(120% 140% at 100% 0%,#2F2963 0%,#241E48 60%);color:#241E48}
+background:radial-gradient(120% 140% at 100% 0%,#0A57D6 0%,#00348C 55%,#00225E 100%);color:#0B1F44}
 .cx{background:#fff;padding:32px 28px;border-radius:18px;width:min(360px,90vw);box-shadow:0 20px 50px rgba(60,0,40,.35);text-align:center}
-img{width:170px;height:auto;display:block;margin:0 auto;background:#241E48;padding:14px 18px;border-radius:12px}h1{font-size:18px;margin:14px 0 4px}p{margin:0 0 16px;color:#575272;font-size:13.5px;line-height:1.5}
+img{width:170px;height:auto;display:block;margin:4px auto 6px}h1{font-size:18px;margin:14px 0 4px}p{margin:0 0 16px;color:#575272;font-size:13.5px;line-height:1.5}
 label{display:block;text-align:left;font-size:12px;font-weight:600;color:#575272;margin:10px 0 4px}
 input{width:100%;box-sizing:border-box;padding:11px 12px;border:1px solid #CFCCDD;border-radius:10px;font:inherit}
-button,.b{display:block;margin-top:14px;width:100%;box-sizing:border-box;padding:11px;border:0;border-radius:10px;background:#E8780C;color:#fff;font:600 15px system-ui;cursor:pointer;text-decoration:none}
+button,.b{display:block;margin-top:14px;width:100%;box-sizing:border-box;padding:11px;border:0;border-radius:10px;background:#00348C;color:#fff;font:600 15px system-ui;cursor:pointer;text-decoration:none}
 .e{color:#c0153a;font-size:13px;margin-top:10px}.d{font-size:12px;color:#8A86A0;margin-top:14px}</style></head><body>
-<div class="cx"><img src="/logo-visu.png" alt="Visu Design"><h1>${esc(titulo)}</h1>${corpo}</div></body></html>`;
+<div class="cx"><img src="/logo-visu-azul.png" alt="Visu"><h1>${esc(titulo)}</h1>${corpo}</div></body></html>`;
 
 const paginaLogin = (erro = '', email = '') => pagina('Painel de Gestão', `<p>Acesso restrito</p>
 <form method="post" action="/login"><label for="email">E-mail</label><input id="email" type="email" name="email" value="${esc(email)}" autocomplete="username" autofocus>
@@ -164,7 +164,7 @@ app.post('/api/comissao', exigeAdm, async (req, res) => {
 });
 
 // visual (tema) padrão do painel: o ADM escolhe; cada pessoa ainda pode trocar só no navegador dela
-const VISUAIS = ['classico', 'vibrante', 'sol', 'turquesa', 'fio', 'pop', 'vidro', 'preto', 'noite'];
+const VISUAIS = ['azul', 'branco', 'oceano', 'degrade', 'classico', 'vibrante', 'sol', 'turquesa', 'fio', 'pop', 'vidro', 'preto', 'noite'];
 app.post('/api/visual', exigeAdm, async (req, res) => {
   const t = VISUAIS.includes(req.body?.t) ? req.body.t : 'classico';
   const d = req.body?.d === 'compacta' ? 'compacta' : 'normal';
@@ -189,7 +189,7 @@ app.post('/api/usuarios/:id/convite', exigeAdm, async (req, res) => {
 
 app.get('/saude', (req, res) => res.json({ ok: true }));
 app.get('/saude/banco', async (req, res) => res.json(await statusBanco().catch((e) => ({ erro: e.message }))));
-app.get(['/logo.png', '/logo-visu.png'], (req, res) => res.sendFile(path.join(raiz, 'public', req.path.slice(1))));
+app.get(['/logo.png', '/logo-visu.png', '/logo-visu-azul.png'], (req, res) => res.sendFile(path.join(raiz, 'public', req.path.slice(1))));
 app.use('/vitrine', express.static(path.join(raiz, 'public', 'vitrine'), { maxAge: '7d' }));
 
 // ---------- conexão com a Conta Azul ----------
