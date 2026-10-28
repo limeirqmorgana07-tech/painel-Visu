@@ -2,6 +2,9 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v30 · 28/10/2026
+- Blocos da Gestão por perfil (BLOCOS em src/paginas.js, POST /api/blocos, chave perfis_blocos); veFinanceiro considera blocos financeiros liberados; /api/eu devolve blocos, blocos_def, blocos_perfis (ADM).
+
 ## v29 · 28/10/2026
 - FAIXAS_PADRAO = Política de Premiação por Performance 2026 (17 faixas, 15.000 + 2.187,50·k, 1% + 0,25·k). Faixas salvas antes no painel continuam valendo até o ADM clicar em "Voltar ao padrão".
 - Bônus semanal (R$ 75 por semana seg–sex com ≥ R$ 25 mil), 5º dia útil, modal da política e rota /politica-premiacao.pdf (com login).

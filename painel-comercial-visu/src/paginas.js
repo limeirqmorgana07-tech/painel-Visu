@@ -38,5 +38,26 @@ export function paginasDe(u) {
   const r = base.filter((p) => u.paginas.includes(p));
   return r.length ? r : base.slice(0, 1);
 }
-export const veFinanceiro = (u) => paginasDe(u).some((p) => FIN.includes(p) || p === 'painel' || p === 'indicadores');
+// Blocos das páginas de Gestão (Painel executivo e Quadro de indicadores): o ADM escolhe o que cada perfil enxerga.
+export const BLOCOS = [
+  { id: 'painel.vitrine', pag: 'painel', nome: 'Vitrine: o que mais saiu da fábrica', fin: false },
+  { id: 'painel.vendas', pag: 'painel', nome: 'Indicadores de vendas (vendas, pedidos e ticket, clientes novos, peças)', fin: false },
+  { id: 'painel.financeiro', pag: 'painel', nome: 'Indicadores financeiros (resultado, saldo em caixa, caixa em 4 semanas, inadimplência)', fin: true },
+  { id: 'painel.equilibrio', pag: 'painel', nome: 'Mês em andamento contra o ponto de equilíbrio', fin: true },
+  { id: 'painel.cascata', pag: 'painel', nome: 'Do faturamento ao resultado', fin: true },
+  { id: 'painel.grafico', pag: 'painel', nome: 'Vendas e resultado nos últimos 12 meses', fin: true },
+  { id: 'painel.alertas', pag: 'painel', nome: 'Pontos de atenção', fin: true },
+  { id: 'indicadores.comercial', pag: 'indicadores', nome: 'Quadro: indicadores comerciais', fin: false },
+  { id: 'indicadores.financeiro', pag: 'indicadores', nome: 'Quadro: financeiro (competência)', fin: true },
+  { id: 'indicadores.caixa', pag: 'indicadores', nome: 'Quadro: caixa', fin: true },
+];
+const TODOS_BLOCOS = BLOCOS.map((b) => b.id), SO_COMERCIAL = BLOCOS.filter((b) => !b.fin).map((b) => b.id);
+const BLOCOS_PADRAO = { diretor: TODOS_BLOCOS, financeiro: TODOS_BLOCOS, comercial: SO_COMERCIAL, consultor: SO_COMERCIAL };
+let blocosPers = {};
+export function definirBlocos(o) { blocosPers = {}; for (const [k, v] of Object.entries(o || {})) if (BLOCOS_PADRAO[k] && Array.isArray(v)) blocosPers[k] = v.filter((b) => TODOS_BLOCOS.includes(b)); }
+export const blocosPersonalizados = () => ({ ...blocosPers });
+export const blocosDe = (perfil) => (perfil === 'adm' ? TODOS_BLOCOS : blocosPers[perfil] || BLOCOS_PADRAO[perfil] || []);
+export const blocosPadrao = () => ({ ...BLOCOS_PADRAO });
+// financeiro liberado: tem página financeira, ou tem Painel/Quadro com algum bloco financeiro ligado
+export const veFinanceiro = (u) => { const pg = paginasDe(u); if (pg.some((p) => FIN.includes(p))) return true; const bl = blocosDe(u?.perfil); return BLOCOS.some((b) => b.fin && pg.includes(b.pag) && bl.includes(b.id)); };
 export const veVendas = (u) => paginasDe(u).some((p) => COM.includes(p) || ['painel', 'indicadores', 'conciliacao', 'dados'].includes(p));

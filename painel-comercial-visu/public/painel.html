@@ -849,6 +849,7 @@ table.matriz td.vz{color:var(--line2)}
     </div>
     <div class="card" style="margin-top:16px"><div class="hd"><div><h3>Usuários</h3><div class="sub" id="usSub">—</div></div></div><div class="tw" id="usLista"></div><div id="usLink"></div></div>
     <div class="card" style="margin-top:16px" id="usPermCard" hidden><div class="hd"><div><h3 id="usPermTit">Permissões</h3><div class="sub" id="usPermSub">—</div></div><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="bt2" type="button" id="usPermTodos">Marcar todos</button><button class="bt2" type="button" id="usPermPadrao">Padrão do perfil</button><button class="bt2 pri" type="button" id="usPermSalvar">Salvar permissões</button><button class="bt2" type="button" id="usPermFechar">Fechar</button></div></div><div class="perm-grid" id="usPermGrid"></div></div>
+    <div class="card" style="margin-top:16px"><div class="hd"><div><h3>O que cada perfil vê na Gestão</h3><div class="sub">Quadros do Painel executivo e do Quadro de indicadores. Só valem para quem tem a página liberada na tabela abaixo.</div></div></div><div class="tw" id="usBlocos"></div></div>
     <div class="card" style="margin-top:16px"><div class="hd"><div><h3>O que cada perfil vê</h3><div class="sub">Clique nas caixinhas para liberar ou esconder uma página para todo o perfil.</div></div></div><div class="tw" id="usMatriz"></div></div>
   </section>
 
@@ -878,8 +879,9 @@ const nomeMes=(m)=>{const[a,b]=m.split('-');return MES_L[+b-1]+' de '+a};
 const somaMes=(m,n)=>{const[a,b]=m.split('-').map(Number);const d=new Date(Date.UTC(a,b-1+n,1));return d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0')};
 function delta(a,b,inv){ if(!b) return '<span class="delta eq">sem base</span>'; const d=(a-b)/b; const c=Math.abs(d)<.005?'eq':(d>0)!==!!inv?'up':'down'; return `<span class="delta ${c}">${d>0?'▲':d<0?'▼':'■'} ${pct(Math.abs(d))}</span>`; }
 
-const VERSAO='v29';
+const VERSAO='v30';
 const VERSOES=[
+ {v:'v30',data:'28/10/2026',tit:'Gestão por perfil',arq:'painel-visu-v30.zip',itens:['Em Usuários e permissões, nova tabela "O que cada perfil vê na Gestão": o ADM escolhe, por perfil, quais quadros do Painel executivo e do Quadro de indicadores aparecem (vitrine, indicadores de vendas, indicadores financeiros, ponto de equilíbrio, cascata, gráfico de 12 meses, pontos de atenção; e no Quadro, as partes comercial, financeira e de caixa).','Se nenhum quadro financeiro estiver liberado e o perfil não tiver páginas financeiras, o servidor também bloqueia os dados financeiros.']},
  {v:'v29',data:'28/10/2026',tit:'Premiação pela política da Visu',arq:'painel-visu-v29.zip',itens:['Premiação calculada pela Política de Premiação por Performance 2026: 17 faixas, de 1% a partir de R$ 15 mil até 5% a partir de R$ 50 mil, sobre o total vendido no mês.','Bônus semanal: R$ 75 por semana (segunda a sexta) com R$ 25 mil ou mais em vendas, somado à premiação.','Data de pagamento (5º dia útil do mês seguinte) e botão Ver política de premiação, com o resumo e o PDF.','Página renomeada para Vendedores e premiação. O moderador de margem (item 6) ainda não é aplicado.']},
  {v:'v28',data:'28/10/2026',tit:'Nova marca Visu',arq:'painel-visu-v28.zip',itens:['Logo novo da Visu no menu, na tela de login e no ícone da aba (versão branca nos menus escuros e azul nos claros).','O painel passa a abrir no visual Azul Visu, com as cores da nova marca, para quem ainda não escolheu outro.','Quatro visuais novos com o azul da marca: Azul Visu, Branco & Azul, Degradê azul e Azul profundo. Os anteriores continuam disponíveis.','Tela de login no azul da nova marca.']},
  {v:'v27',data:'28/10/2026',tit:'Consultor externo e comissão em destaque',arq:'painel-visu-v27.zip',itens:['Novo perfil Consultor externo: vê só o módulo de vendas (Vendas, Produtos e mix, Clientes, Vendedores e Pedidos), com empresa e data de fim do acesso (padrão 90 dias). Depois dessa data o login é bloqueado.','Vendedores e comissão abre com o resumo da comissão: total a pagar no mês, quem já liberou comissão (e em qual %), quem está mais perto da próxima faixa e a maior comissão.','Se algum quadro der erro com os dados reais, a página continua e mostra o erro no topo, em vez de sumir.']},
@@ -1467,7 +1469,7 @@ function pgFinanceiro(){
 function pgResumo(j){
   vitrine(linhas(j.atual),j);
   const a=resumo(linhas(j.atual)), b=resumo(linhas(j.ant,j.corte));
-  const f=E.fin; if(!f) carregarFin().then(()=>E.pagina==='painel'&&desenhar()).catch(e=>{['termo','cascata','quadro'].forEach(id=>$(id).innerHTML=`<div class="aviso erro">Não foi possível carregar o financeiro: ${esc(e.message)}</div>`)});
+  const f=E.fin; if(!f&&precisaFinPainel()) carregarFin().then(()=>E.pagina==='painel'&&desenhar()).catch(e=>{['termo','cascata','quadro'].forEach(id=>$(id).innerHTML=`<div class="aviso erro">Não foi possível carregar o financeiro: ${esc(e.message)}</div>`)});
   const m=f?mesFin():E.mes, ma=somaMes(m,-1);
   const res=f&&!incompleto(m)?f.resultado[m]||0:null, rec=f?f.receita[m]||0:0;
   const proj30=f?f.projecao.semanas[3]?.saldo:null;
@@ -1481,7 +1483,7 @@ function pgResumo(j){
     ['Saldo em caixa',f?brl(f.saldo_atual):'…',f?`<span>${f.saldos.length} ${f.saldos.length===1?'conta':'contas'}</span>`:'','',f?()=>abrirDet('Saldos bancários','Saldo atual de cada conta financeira',[{rot:'Conta'},{rot:'Saldo',t:'brl',total:1}],f.saldos.map(c=>[c.nome,c.saldo])):null],
     ['Caixa em 4 semanas',f?`<span class="${proj30<0?'neg':''}">${brl(proj30)}</span>`:'…',f?`<span>projeção pelo a receber e a pagar</span>`:'','',f?()=>detAbertos('Contas a vencer em 4 semanas',x=>x[1]>=hojeISO()&&x[1]<=f.projecao.semanas[3].fim):null],
     ['Inadimplência',f&&f.inadimplencia!=null?pct(f.inadimplencia):'—',f?`<span>${brl(f.receber.atrasado)} em atraso</span>`:'','',f?()=>detAbertos('Recebimentos em atraso',x=>x[0]==='r'&&x[1]<hojeISO()):null],
-  ].map(([l,v,s2,c,fn])=>`<div class="kpi ${c}"${D(fn)}><div class="l"><span>${l}</span></div><div class="v num">${v}</div><div class="s">${s2}</div></div>`).join('');
+  ].filter((x,i)=>i<4?vb('painel.vendas'):vb('painel.financeiro')).map(([l,v,s2,c,fn])=>`<div class="kpi ${c}"${D(fn)}><div class="l"><span>${l}</span></div><div class="v num">${v}</div><div class="s">${s2}</div></div>`).join('');
   // vendas x PE x resultado
   const meses=[]; for(let i=11;i>=0;i--) meses.push(somaMes(E.mes,-i));
   const pe=peRef().valor;
@@ -1783,15 +1785,39 @@ function spark(vals,cor,inv){
 }
 
 // ---------- visão geral ----------
+
+// ---------- blocos da Gestão: o que cada perfil vê no Painel executivo e no Quadro ----------
+const BLOCOS_DEF=[
+  {id:'painel.vitrine',pag:'painel',nome:'Vitrine: o que mais saiu da fábrica',fin:false},
+  {id:'painel.vendas',pag:'painel',nome:'Indicadores de vendas (vendas, pedidos e ticket, clientes novos, peças)',fin:false},
+  {id:'painel.financeiro',pag:'painel',nome:'Indicadores financeiros (resultado, saldo em caixa, caixa em 4 semanas, inadimplência)',fin:true},
+  {id:'painel.equilibrio',pag:'painel',nome:'Mês em andamento contra o ponto de equilíbrio',fin:true},
+  {id:'painel.cascata',pag:'painel',nome:'Do faturamento ao resultado',fin:true},
+  {id:'painel.grafico',pag:'painel',nome:'Vendas e resultado nos últimos 12 meses',fin:true},
+  {id:'painel.alertas',pag:'painel',nome:'Pontos de atenção',fin:true},
+  {id:'indicadores.comercial',pag:'indicadores',nome:'Quadro: indicadores comerciais',fin:false},
+  {id:'indicadores.financeiro',pag:'indicadores',nome:'Quadro: financeiro (competência)',fin:true},
+  {id:'indicadores.caixa',pag:'indicadores',nome:'Quadro: caixa',fin:true}];
+const BL_TODOS=BLOCOS_DEF.map(b=>b.id), BL_COM=BLOCOS_DEF.filter(b=>!b.fin).map(b=>b.id);
+const BL_PADRAO={diretor:BL_TODOS,financeiro:BL_TODOS,comercial:BL_COM,consultor:BL_COM};
+function blocosVis(){ const p=E.verComo?E.verComo.perfil:E.eu?.perfil; if(!p||p==='adm') return BL_TODOS; if(E.verComo) return (E.eu?.blocos_perfis||{})[p]||BL_PADRAO[p]||[]; return E.eu?.blocos||BL_PADRAO[p]||[]; }
+const vb=(id)=>blocosVis().includes(id);
+const precisaFinPainel=()=>['painel.financeiro','painel.equilibrio','painel.cascata','painel.grafico','painel.alertas'].some(vb);
 function pgVisao(j){
+  const card=(id)=>$(id).closest('.card');
+  $('vitrine').hidden=!vb('painel.vitrine'); $('resKpis').hidden=!vb('painel.vendas')&&!vb('painel.financeiro');
+  card('termo').hidden=!vb('painel.equilibrio'); card('cascata').hidden=!vb('painel.cascata'); card('resGraf').hidden=!vb('painel.grafico'); card('alertas').hidden=!vb('painel.alertas');
+  [card('termo').parentElement,card('resGraf').parentElement].forEach(g=>{ g.hidden=[...g.children].every(c=>c.hidden); });
+  const nada=!BLOCOS_DEF.filter(b=>b.pag==='painel').some(b=>vb(b.id));
+  let av=$('semBlocos'); if(!av){ av=document.createElement('div'); av.id='semBlocos'; av.className='vazio'; $('vitrine').parentElement.insertBefore(av,$('vitrine')); } av.hidden=!nada; av.textContent='Nenhum quadro do Painel executivo foi liberado para este perfil. Fale com o administrador.';
   semFiltro(()=>{
     pgResumo(j);
     if(!E.fin) return;
-    termometro(); cascata();
+    if(vb('painel.equilibrio')) termometro(); if(vb('painel.cascata')) cascata();
   });
-  if(!E.fin){ ['termo','cascata'].forEach(id=>$(id).innerHTML='<div class="vazio">Carregando os dados financeiros da Conta Azul…</div>'); }
+  if(!E.fin&&precisaFinPainel()){ ['termo','cascata'].forEach(id=>$(id).innerHTML='<div class="vazio">Carregando os dados financeiros da Conta Azul…</div>'); }
 }
-function pgIndicadores(){ if(comFin('quadro')) semFiltro(()=>quadro()); }
+function pgIndicadores(){ if(!vb('indicadores.financeiro')&&!vb('indicadores.caixa')){ semFiltro(()=>quadro()); return; } if(comFin('quadro')) semFiltro(()=>quadro()); }
 // garante o financeiro carregado antes de desenhar uma página financeira
 function comFin(alvo){
   if(E.fin){ avisoFin(); return true; }
@@ -1844,7 +1870,7 @@ function cascata(){
   $('cascata').innerHTML=`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Cascata do faturamento ao resultado">${g}</svg>`;
 }
 function quadro(){
-  const f=E.fin, m=E.mes, ms=[]; for(let i=5;i>=0;i--) ms.push(somaMes(m,-i));
+  const f=E.fin||{}, m=E.mes, ms=[]; for(let i=5;i>=0;i--) ms.push(somaMes(m,-i));
   const vs=new Map(ms.map(mm=>[mm,resumo(linhas([mm]))])), cu=new Map(ms.map(mm=>[mm,linhas([mm]).reduce((s,l)=>s+(l.cu||0),0)]));
   const I=(mm)=>f.indicadores?.[mm], C=(mm)=>f.caixa?.[mm];
   const fx=(mm,fn)=>{ try{ const r=fn(mm); return r==null||Number.isNaN(r)?null:r; }catch(e){ return null; } };
@@ -1868,6 +1894,8 @@ function quadro(){
     ['Pagamentos',mm=>C(mm)?.saidas,'brl',null,1,0,mm=>detLanc('Pagamentos de '+nomeMes(mm),l=>l[1]==='p'&&l[0]===mm,1)],
     ['Geração de caixa',mm=>C(mm)?C(mm).entradas-C(mm).saidas:null,'brl',null,0,1],
   ];
+  { const GR={'Comercial':'indicadores.comercial','Financeiro (competência)':'indicadores.financeiro','Caixa':'indicadores.caixa'}; let atual=null; const ok=[]; for(const r of linhasQ){ if(r.length===1) atual=GR[r[0]]; if(!atual||vb(atual)) ok.push(r); } linhasQ.splice(0,linhasQ.length,...ok); }
+  if(!linhasQ.length){ $('quadro').innerHTML='<div class="vazio">Nenhum indicador do Quadro foi liberado para este perfil.</div>'; return; }
   const fmt=(v,t)=>v==null?'—':t==='brl'?brl(v):t==='int'?int(v):pct(v);
   const parcial=m===mesHojeBR();
   $('quadroSub').textContent=`${nomeMes(m)} comparado com o mês anterior e com a média dos 3 meses anteriores${parcial?' · mês em andamento (valores parciais)':''}${f.primeiro_mes_despesas&&f.primeiro_mes_despesas>f.meses[0]?` · despesas na Conta Azul a partir de ${nomeMes(f.primeiro_mes_despesas)}`:''}`;
@@ -1947,7 +1975,7 @@ async function pgUsuarios(){
     if((u.senha_criada||u.temporaria)&&!confirm(`Gerar uma nova senha temporária para ${u.nome}? A senha atual deixa de funcionar.`)) return;
     try{ US.link=null; US.temp=await api(`/api/usuarios/${u.id}/senha-temporaria`,{method:'POST'}); mostrarLink(); pgUsuarios(); }catch(e){ alert(e.message); } }));
   $('usLista').querySelectorAll('[data-perm]').forEach(b=>b.addEventListener('click',()=>abrirPerm(US.lista.find(x=>x.id===b.dataset.perm))));
-  desenharMatriz();
+  desenharMatriz(); desenharBlocos();
   $('usLista').querySelectorAll('[data-ed]').forEach(b=>b.addEventListener('click',()=>{ const u=US.lista.find(x=>x.id===b.dataset.ed); const f=$('usForm'); f.id.value=u.id; f.nome.value=u.nome; f.email.value=u.email; f.perfil.value=u.perfil; f.empresa.value=u.empresa||''; f.valido_ate.value=u.valido_ate||''; consCampos(); $('usFormTit').textContent='Editar '+u.nome; $('usCancelar').hidden=false; f.nome.focus(); }));
   $('usLista').querySelectorAll('[data-del]').forEach(b=>b.addEventListener('click',async()=>{ const u=US.lista.find(x=>x.id===b.dataset.del); if(!confirm(`Remover o acesso de ${u.nome}?`)) return; await api(`/api/usuarios/${u.id}`,{method:'DELETE'}); pgUsuarios(); }));
   mostrarLink();
@@ -1996,6 +2024,17 @@ async function carregarEu(){
 
 let PERMU=null;
 
+
+function desenharBlocos(){
+  const ed=['diretor','comercial','financeiro','consultor'], cur=E.eu?.blocos_perfis||{}, pad=E.eu?.blocos_padrao||BL_PADRAO;
+  const de=(k)=>cur[k]||BL_PADRAO[k]||[]; const mudou=(k)=>{ const a=de(k), b=pad[k]||[]; return a.length!==b.length||a.some(x=>!b.includes(x)); };
+  const grupos=[['painel','Painel executivo'],['indicadores','Quadro de indicadores']];
+  $('usBlocos').innerHTML=`<table><thead><tr><th>Quadro</th><th style="text-align:center">ADM</th>${ed.map(k=>`<th style="text-align:center">${PERF[k]}${mudou(k)?'<div style="font-size:10px;font-weight:600;color:var(--orange);text-transform:none;letter-spacing:0">personalizado</div>':''}</th>`).join('')}</tr></thead><tbody>${grupos.map(([pg,rot])=>`<tr class="grp"><td colspan="6" style="font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--orange);padding-top:12px">${rot}</td></tr>`+BLOCOS_DEF.filter(b=>b.pag===pg).map(b=>`<tr><td>${esc(b.nome)}${b.fin?' <span class="req" title="Usa dados financeiros">fin.</span>':''}</td><td style="text-align:center"><span class="status ok">✓</span></td>${ed.map(k=>`<td style="text-align:center"><input type="checkbox" data-bl="${k}" value="${b.id}" ${de(k).includes(b.id)?'checked':''} aria-label="${PERF[k]}: ${esc(b.nome)}"></td>`).join('')}</tr>`).join('')).join('')}
+    <tr><td></td><td></td>${ed.map(k=>`<td style="text-align:center">${mudou(k)?`<button class="bt2" type="button" data-blrest="${k}" style="font-size:11.5px;padding:4px 8px">Voltar ao padrão</button>`:''}</td>`).join('')}</tr></tbody></table><div class="nota" id="usBlocosMsg">Desmarcar um quadro esconde só aquele bloco. Quadros marcados com "fin." usam dados financeiros: se nenhum deles estiver liberado e o perfil não tiver páginas financeiras, o servidor também bloqueia o financeiro para esse perfil.</div>`;
+  const salvar=async(k,blocos)=>{ try{ const r=PREVIA?{blocos:blocos||BL_PADRAO[k]}:await api('/api/blocos',{method:'POST',body:JSON.stringify({perfil:k,blocos})}); E.eu.blocos_perfis={...(E.eu.blocos_perfis||{}),[k]:r.blocos}; desenharBlocos(); $('usBlocosMsg').innerHTML=`<b>Salvo.</b> ${PERF[k]}: ${r.blocos.length} de ${BLOCOS_DEF.length} quadros liberados.`; }catch(e){ $('usBlocosMsg').textContent=e.message; } };
+  $('usBlocos').querySelectorAll('input[data-bl]').forEach(c=>c.addEventListener('change',()=>{ const k=c.dataset.bl; salvar(k,[...$('usBlocos').querySelectorAll(`input[data-bl="${k}"]:checked`)].map(x=>x.value)); }));
+  $('usBlocos').querySelectorAll('[data-blrest]').forEach(b=>b.addEventListener('click',()=>salvar(b.dataset.blrest,null)));
+}
 // matriz "O que cada perfil vê": o ADM marca/desmarca e vale para todas as pessoas do perfil
 function desenharMatriz(){
   const ed=['diretor','comercial','financeiro','consultor'], orig=E.eu?.perfis_originais||{};

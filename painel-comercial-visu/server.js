@@ -11,7 +11,7 @@ import { dadosFinanceiros } from './src/financeiro.js';
 import { planilhaConfigurada } from './src/planilha.js';
 import * as google from './src/google.js';
 import * as usuarios from './src/usuarios.js';
-import { paginasDe, veFinanceiro, veVendas, definirPerfis, padraoDe, perfisPersonalizados, padroesOriginais } from './src/paginas.js';
+import { paginasDe, veFinanceiro, veVendas, definirPerfis, padraoDe, perfisPersonalizados, padroesOriginais, BLOCOS, blocosDe, definirBlocos, blocosPersonalizados, blocosPadrao } from './src/paginas.js';
 import { statusBanco, lerKV, salvarKV } from './src/tokenStore.js';
 
 const raiz = path.dirname(fileURLToPath(import.meta.url));
@@ -135,7 +135,7 @@ app.post('/convite/:token', async (req, res) => {
 
 // ---------- usuários (perfil ADM) ----------
 app.use(express.json());
-app.get('/api/eu', exigeLogin, async (req, res) => res.json({ id: req.usuario.id, nome: req.usuario.nome, email: req.usuario.email || '', perfil: req.usuario.perfil, paginas: paginasDe(req.usuario), perfis: { diretor: padraoDe('diretor'), comercial: padraoDe('comercial'), financeiro: padraoDe('financeiro'), consultor: padraoDe('consultor') }, perfis_originais: padroesOriginais(), visual_padrao: (await lerKV('visual_padrao').catch(() => null)) || null }));
+app.get('/api/eu', exigeLogin, async (req, res) => res.json({ id: req.usuario.id, nome: req.usuario.nome, email: req.usuario.email || '', perfil: req.usuario.perfil, paginas: paginasDe(req.usuario), perfis: { diretor: padraoDe('diretor'), comercial: padraoDe('comercial'), financeiro: padraoDe('financeiro'), consultor: padraoDe('consultor') }, perfis_originais: padroesOriginais(), blocos: blocosDe(req.usuario.perfil), blocos_def: BLOCOS, blocos_perfis: req.usuario.perfil === 'adm' ? Object.fromEntries(['diretor', 'comercial', 'financeiro', 'consultor'].map((k) => [k, blocosDe(k)])) : undefined, blocos_padrao: req.usuario.perfil === 'adm' ? blocosPadrao() : undefined, visual_padrao: (await lerKV('visual_padrao').catch(() => null)) || null }));
 // o que cada perfil vê (ADM edita em Usuários e permissões)
 app.post('/api/perfis', exigeAdm, async (req, res) => {
   const atual = perfisPersonalizados();
@@ -149,6 +149,16 @@ app.post('/api/perfis', exigeAdm, async (req, res) => {
   res.json({ ok: true, perfil, paginas: padraoDe(perfil) });
 });
 lerKV('perfis_paginas').then((o) => definirPerfis(o)).catch(() => {});
+// o que cada perfil vê dentro do Painel executivo e do Quadro de indicadores
+app.post('/api/blocos', exigeAdm, async (req, res) => {
+  const { perfil, blocos } = req.body || {};
+  if (!['diretor', 'comercial', 'financeiro', 'consultor'].includes(perfil)) return res.status(400).json({ erro: 'Perfil inválido.' });
+  const atual = blocosPersonalizados();
+  if (blocos === null) delete atual[perfil]; else if (Array.isArray(blocos)) atual[perfil] = blocos.map(String); else return res.status(400).json({ erro: 'Lista de blocos inválida.' });
+  definirBlocos(atual); await salvarKV('perfis_blocos', blocosPersonalizados());
+  res.json({ ok: true, perfil, blocos: blocosDe(perfil) });
+});
+lerKV('perfis_blocos').then((o) => definirBlocos(o)).catch(() => {});
 
 // faixas de comissão: o ADM define (vale para todos); null volta ao padrão da especificação
 app.get('/api/comissao', exigeLogin, async (req, res) => res.json({ faixas: await faixasComissao(), padrao: FAIXAS_PADRAO() }));
