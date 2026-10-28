@@ -15,7 +15,9 @@ const hojeBR = () => new Date(Date.now() - 3 * 3600e3);
 // ---------- faixas de comissão (seção 3 da especificação) ----------
 // Regra conhecida: 1% a partir de R$ 15 mil no mês e 5% a partir de R$ 50 mil, sem teto. As faixas intermediárias
 // ainda serão confirmadas com a Visu; o ADM cadastra no painel (chave comissao_faixas).
-export const FAIXAS_PADRAO = () => [{ de: config.comissaoInicio, pct: 1 }, { de: config.comissaoTeto, pct: 5 }];
+// Política de Premiação por Performance – Visu 2026 (atualizada em 23/10/2026): piso R$ 15.000 a 1%,
+// +0,25 p.p. a cada R$ 2.187,50, até 5% a partir de R$ 50.000 (sem teto de valor).
+export const FAIXAS_PADRAO = () => Array.from({ length: 17 }, (_, k) => ({ de: Math.round((15000 + 2187.5 * k) * 100) / 100, pct: Math.round((1 + 0.25 * k) * 100) / 100 }));
 export async function faixasComissao() {
   const kv = await lerKV('comissao_faixas').catch(() => null);
   return Array.isArray(kv?.faixas) && kv.faixas.length ? kv.faixas : FAIXAS_PADRAO();

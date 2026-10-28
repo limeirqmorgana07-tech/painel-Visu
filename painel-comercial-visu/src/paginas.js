@@ -2,7 +2,7 @@
 // O ADM pode restringir ainda mais por usuário, na página Usuários e permissões.
 export const MENU = [
   { grupo: 'Gestão', itens: [['painel', 'Painel executivo'], ['indicadores', 'Quadro de indicadores']] },
-  { grupo: 'Comercial', itens: [['vendas', 'Vendas'], ['produtos', 'Produtos e mix'], ['clientes', 'Clientes'], ['vendedores', 'Vendedores e comissão'], ['pedidos', 'Pedidos e entregas']] },
+  { grupo: 'Comercial', itens: [['vendas', 'Vendas'], ['produtos', 'Produtos e mix'], ['clientes', 'Clientes'], ['vendedores', 'Vendedores e premiação'], ['pedidos', 'Pedidos e entregas']] },
   { grupo: 'Financeiro', itens: [['dre', 'DRE gerencial'], ['equilibrio', 'Margem e ponto de equilíbrio'], ['caixa', 'Fluxo de caixa'], ['receber', 'Contas a receber'], ['pagar', 'Contas a pagar']] },
   { grupo: 'Controle', itens: [['conciliacao', 'Planilha × sistema'], ['dados', 'Qualidade dos dados'], ['versoes', 'Versões do painel']] },
   { grupo: 'Administração', itens: [['usuarios', 'Usuários e permissões']] },

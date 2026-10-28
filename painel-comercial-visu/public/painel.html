@@ -570,6 +570,11 @@ table.matriz td.vz{color:var(--line2)}
 :root[data-visual="degrade"] .card,:root[data-visual="degrade"] .kpi{border-color:transparent}
 :root[data-visual="degrade"] .kpi::before{background:var(--fio);height:5px}
 :root[data-visual="degrade"] .kpi .v{font-weight:800;background:linear-gradient(90deg,#00348C,#0A57D6);-webkit-background-clip:text;background-clip:text;color:transparent}
+.pol-fundo{position:fixed;inset:0;background:rgba(10,14,40,.5);z-index:80}
+.pol{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(780px,94vw);max-height:88vh;background:var(--panel);color:var(--ink);border-radius:18px;z-index:81;box-shadow:0 30px 80px -20px rgba(0,0,0,.5);display:flex;flex-direction:column}
+.pol-hd{display:flex;justify-content:space-between;gap:12px;padding:20px 22px 14px;border-bottom:1px solid var(--line)}.pol-hd h3{margin:4px 0 2px;font-family:var(--display);font-size:20px}
+.pol-corpo{overflow:auto;padding:6px 22px 22px;font-size:14px;line-height:1.55}.pol-corpo h4{margin:16px 0 4px;font-size:14px}.pol-corpo p{margin:0;color:var(--ink2)}
+.pol-corpo table{width:100%;border-collapse:collapse;margin-top:8px;font-size:13px}.pol-corpo td,.pol-corpo th{padding:5px 8px;border-bottom:1px solid var(--line);text-align:right}.pol-corpo td:first-child,.pol-corpo th:first-child{text-align:left}
 /* densidade compacta */
 :root[data-densidade="compacta"] main{gap:10px;padding-block:12px 36px}
 :root[data-densidade="compacta"] .card{padding:12px 14px}
@@ -631,6 +636,21 @@ table.matriz td.vz{color:var(--line2)}
     <div class="f com"><label for="fCor">Cor</label><select id="fCor" data-campo="cr"></select></div>
     <button class="limpar" id="limpar" type="button" hidden>Limpar filtros</button>
   </div></div>
+<div id="polFundo" class="pol-fundo" hidden></div>
+<div id="polModal" class="pol" role="dialog" aria-modal="true" aria-labelledby="polTit" hidden>
+  <div class="pol-hd"><div><div class="eyebrow">Visu · Política interna</div><h3 id="polTit">Política de Premiação por Performance (2026)</h3><div class="sub">Atualizada em 23/10/2026 · aprovada por Egberto Sousa, Diretor de Negócios</div></div><div style="display:flex;gap:8px;align-items:flex-start"><a class="bt2" id="polPdf" href="/politica-premiacao.pdf" target="_blank" rel="noopener">Abrir PDF ↗</a><button class="bt2" type="button" id="polFechar" aria-label="Fechar">✕</button></div></div>
+  <div class="pol-corpo">
+    <h4>1. Objetivo</h4><p>Incentivar a alta performance, a constância nas vendas e a sustentabilidade financeira do modelo de negócio dos consultores comerciais.</p>
+    <h4>2. Cronograma e forma de pagamento</h4><p>Fechamento no último dia de cada mês; pagamento no <b>5º dia útil do mês seguinte</b>, via <b>Cartão BIZ</b> (Premiação/Flex) ou outra plataforma definida pela Visu.</p>
+    <h4>3. Natureza jurídica</h4><p>Prêmio por liberalidade (Art. 457 da CLT, §§ 2º e 4º). Não integra o salário e não tem reflexo em 13º, férias + 1/3, FGTS, DSR ou aviso prévio.</p>
+    <h4>4. Premiação mensal (tabela progressiva)</h4><p>Calculada sobre o volume total de vendas do mês, a partir do piso de R$ 15.000,00. Acima de R$ 50.000,00, 5% sobre o total vendido.</p><div id="polTabela"></div>
+    <h4>5. Bônus de produtividade semanal</h4><p>Vendas faturadas ≥ <b>R$ 25.000,00</b> na mesma semana comercial (segunda a sexta) rendem <b>R$ 75,00 por semana</b>, creditados mensalmente.</p>
+    <h4>6. Proteção de margem</h4><p>Margem bruta comercial ≥ 30%: 100% da premiação · entre 25% e 29,9%: redução de 50% na premiação daquela venda · abaixo de 25%: a venda não gera premiação. <i>No painel, esta regra ainda não é aplicada automaticamente.</i></p>
+    <h4>7. Erros de digitação e lançamento</h4><p>Prejuízo direto causado por erro de digitação (frete extra, impostos de nota cancelada, faturamento a menor) é abatido do saldo de premiação do consultor.</p>
+    <h4>8. Cancelamentos e estornos</h4><p>Venda cancelada com premiação já paga tem o valor proporcional estornado ou abatido no pagamento seguinte.</p>
+    <h4>9. Soberania e revisão</h4><p>A Visu pode revisar a política, faixas e percentuais, com comunicado prévio de 30 dias.</p>
+  </div>
+</div>
 <main id="app">
   <div class="aviso erro" id="erroPagina" hidden></div>
   <div class="simula" id="simula" hidden></div>
@@ -714,12 +734,12 @@ table.matriz td.vz{color:var(--line2)}
   <section data-pagina="vendedores" hidden>
     <div class="kpis" id="comKpis" style="margin-bottom:16px"></div>
     <div class="card">
-      <div class="hd"><div><h3>Desempenho por vendedor<span class="req">C7 · C8</span></h3><div class="sub" id="vendSub">Comissão sobre o faturamento do mês, pelas faixas abaixo</div></div></div>
-      <div class="tw"><table><thead><tr><th>Vendedor</th><th class="v">Faturamento</th><th class="v">Part.</th><th class="v">Pedidos</th><th class="v">Ticket médio</th><th class="v">% novos</th><th class="v">Clientes novos</th><th id="thRegua">Régua da comissão</th><th class="v">% liberado</th><th class="v">Comissão</th></tr></thead><tbody id="tbVend"></tbody></table></div>
+      <div class="hd"><div><h3>Desempenho por vendedor<span class="req">C7 · C8</span></h3><div class="sub" id="vendSub">Premiação sobre o faturamento do mês, pela política da Visu</div></div><button class="bt2" type="button" id="btPolitica">📄 Ver política de premiação</button></div>
+      <div class="tw"><table><thead><tr><th>Vendedor</th><th class="v">Faturamento</th><th class="v">Pedidos</th><th class="v">Ticket médio</th><th class="v">% novos</th><th id="thRegua">Régua da premiação</th><th class="v">% liberado</th><th class="v">Premiação</th><th class="v" title="R$ 75 por semana (seg a sex) com R$ 25 mil ou mais">Bônus semanal</th><th class="v">Total</th></tr></thead><tbody id="tbVend"></tbody></table></div>
       <div class="nota" id="vendNota"></div>
     </div>
-    <div class="card" style="margin-top:16px"><div class="hd"><div><h3>Apuração de comissões<span class="req">C8</span></h3><div class="sub" id="apurSub">—</div></div></div><div class="tw" id="apur"></div></div>
-    <div class="card" style="margin-top:16px"><div class="hd"><div><h3>Faixas de comissão</h3><div class="sub">Percentual sobre o faturamento do mês do vendedor</div></div></div><div id="faixasCom" style="max-width:560px"></div></div>
+    <div class="card" style="margin-top:16px"><div class="hd"><div><h3>Apuração da premiação<span class="req">C8</span></h3><div class="sub" id="apurSub">—</div></div></div><div class="tw" id="apur"></div></div>
+    <div class="card" style="margin-top:16px"><div class="hd"><div><h3>Faixas da premiação</h3><div class="sub">Tabela progressiva da Política de Premiação por Performance (Visu 2026)</div></div></div><div id="faixasCom" style="max-width:560px"></div></div>
     <div class="card" style="margin-top:16px" id="vendCfgCard" hidden><div class="hd"><div><h3>Quem é vendedor</h3><div class="sub">Marque como inativo quem aparece na Conta Azul mas não deve ser tratado como vendedor (financeiro, escritório, a própria empresa). As vendas dessas pessoas continuam no faturamento, agrupadas em "Não vendedores", sem régua de comissão.</div></div></div><div id="vendCfg"></div></div>
   </section>
 
@@ -858,8 +878,9 @@ const nomeMes=(m)=>{const[a,b]=m.split('-');return MES_L[+b-1]+' de '+a};
 const somaMes=(m,n)=>{const[a,b]=m.split('-').map(Number);const d=new Date(Date.UTC(a,b-1+n,1));return d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0')};
 function delta(a,b,inv){ if(!b) return '<span class="delta eq">sem base</span>'; const d=(a-b)/b; const c=Math.abs(d)<.005?'eq':(d>0)!==!!inv?'up':'down'; return `<span class="delta ${c}">${d>0?'▲':d<0?'▼':'■'} ${pct(Math.abs(d))}</span>`; }
 
-const VERSAO='v28';
+const VERSAO='v29';
 const VERSOES=[
+ {v:'v29',data:'28/10/2026',tit:'Premiação pela política da Visu',arq:'painel-visu-v29.zip',itens:['Premiação calculada pela Política de Premiação por Performance 2026: 17 faixas, de 1% a partir de R$ 15 mil até 5% a partir de R$ 50 mil, sobre o total vendido no mês.','Bônus semanal: R$ 75 por semana (segunda a sexta) com R$ 25 mil ou mais em vendas, somado à premiação.','Data de pagamento (5º dia útil do mês seguinte) e botão Ver política de premiação, com o resumo e o PDF.','Página renomeada para Vendedores e premiação. O moderador de margem (item 6) ainda não é aplicado.']},
  {v:'v28',data:'28/10/2026',tit:'Nova marca Visu',arq:'painel-visu-v28.zip',itens:['Logo novo da Visu no menu, na tela de login e no ícone da aba (versão branca nos menus escuros e azul nos claros).','O painel passa a abrir no visual Azul Visu, com as cores da nova marca, para quem ainda não escolheu outro.','Quatro visuais novos com o azul da marca: Azul Visu, Branco & Azul, Degradê azul e Azul profundo. Os anteriores continuam disponíveis.','Tela de login no azul da nova marca.']},
  {v:'v27',data:'28/10/2026',tit:'Consultor externo e comissão em destaque',arq:'painel-visu-v27.zip',itens:['Novo perfil Consultor externo: vê só o módulo de vendas (Vendas, Produtos e mix, Clientes, Vendedores e Pedidos), com empresa e data de fim do acesso (padrão 90 dias). Depois dessa data o login é bloqueado.','Vendedores e comissão abre com o resumo da comissão: total a pagar no mês, quem já liberou comissão (e em qual %), quem está mais perto da próxima faixa e a maior comissão.','Se algum quadro der erro com os dados reais, a página continua e mostra o erro no topo, em vez de sumir.']},
  {v:'v26',data:'27/10/2026',tit:'Apuração de comissões',arq:'painel-visu-v26.zip',itens:['Vendedores e comissão: colunas % liberado e Comissão (R$) por vendedor, com total.','Novo quadro Apuração de comissões: comissão de cada vendedor nos últimos 6 meses, cada mês na sua faixa.','Faixas de comissão editáveis pelo ADM (padrão da especificação: 1% a partir de R$ 15 mil e 5% a partir de R$ 50 mil); as intermediárias entram quando a Visu confirmar.']},
@@ -1248,12 +1269,19 @@ function cfgVendedores(){
   $('vendCfg').querySelectorAll('[data-vend]').forEach(c=>c.addEventListener('change',()=>{ const n=c.dataset.vend; let l=(E.vcfg?.inativos||[]).filter(x=>nv(x)!==nv(n)); if(!c.checked) l.push(n); salvarVendedores(l).catch(e=>alert(e.message)); }));
 }
 // ---------- comissão: faixas e apuração ----------
-function faixasCom(){ const R=E.dados.regras||{}; return (R.comissao_faixas&&R.comissao_faixas.length?R.comissao_faixas:[{de:R.comissao_inicio||15000,pct:1},{de:R.comissao_teto||50000,pct:5}]).slice().sort((a,b)=>a.de-b.de); }
+// tabela progressiva da Política de Premiação por Performance (Visu 2026)
+const POLITICA=Array.from({length:17},(_,k)=>({de:Math.round((15000+2187.5*k)*100)/100,pct:Math.round((1+.25*k)*100)/100}));
+const BONUS_SEMANA={min:25000,valor:75};
+function faixasCom(){ const R=E.dados.regras||{}; return (R.comissao_faixas&&R.comissao_faixas.length?R.comissao_faixas:POLITICA).slice().sort((a,b)=>a.de-b.de); }
+// 5º dia útil do mês seguinte (segunda a sexta; feriados não considerados)
+function diaPagamento(m){ const d=new Date(Date.UTC(+m.slice(0,4),+m.slice(5),1)); let n=0; while(true){ const w=d.getUTCDay(); if(w>0&&w<6&&++n===5) break; d.setUTCDate(d.getUTCDate()+1); } return d.toISOString().slice(0,10).split('-').reverse().join('/'); }
+// semanas comerciais (seg a sex) do mês com vendas >= R$ 25 mil
+function semanasBonus(ls){ const sem=new Map(); for(const l of ls){ if(!l.d) continue; const d=new Date(l.d+'T12:00:00Z'), w=d.getUTCDay(); if(w===0||w===6) continue; d.setUTCDate(d.getUTCDate()-(w-1)); const k=d.toISOString().slice(0,10); sem.set(k,(sem.get(k)||0)+l.t); } return [...sem.entries()].filter(([,v])=>v>=BONUS_SEMANA.min).map(([k])=>k); }
 function pctCom(f){ let p=0; for(const x of faixasCom()) if(f>=x.de) p=x.pct; return p; }
 function proxFaixa(f){ return faixasCom().find(x=>x.de>f)||null; }
 const fmtPct=(p)=>(p||0).toLocaleString('pt-BR',{maximumFractionDigits:2})+'%';
 // comissão de um vendedor num conjunto de meses: apurada mês a mês (cada mês na sua faixa) e somada
-function comissaoDe(nome,meses){ let fat=0,com=0; const por=[]; for(const m of meses){ const f=semFiltro(()=>linhas([m])).filter(l=>l.v===nome&&!l.cs).reduce((s2,l)=>s2+l.t,0); const p=pctCom(f); fat+=f; com+=f*p/100; por.push({m,f,p,c:f*p/100}); } return {fat,com,por}; }
+function comissaoDe(nome,meses){ let fat=0,com=0,bon=0; const por=[]; for(const m of meses){ const lv=semFiltro(()=>linhas([m])).filter(l=>l.v===nome&&!l.cs); const f=lv.reduce((s2,l)=>s2+l.t,0); const p=pctCom(f); const sem=semanasBonus(lv), b=sem.length*BONUS_SEMANA.valor; fat+=f; com+=f*p/100; bon+=b; por.push({m,f,p,c:f*p/100,b,sem,tot:f*p/100+b}); } return {fat,com,bon,tot:com+bon,por}; }
 
 function pgVendedores(j){
   const ls=linhas(j.atual), tot=ls.reduce((s,l)=>s+l.t,0)||1, R=E.dados.regras, mesMode=E.periodo==='mes', FX=faixasCom(), topo=FX[FX.length-1];
@@ -1263,53 +1291,53 @@ function pgVendedores(j){
   $('thRegua').hidden=!mesMode;
   const inaS=new Set((E.vcfg?.inativos||[]).map(nv));
   (E.dados.vendedores_cadastrados||[]).forEach(nm=>{ if(!porV.has(nm)&&!inaS.has(nv(nm))&&![...porV.keys()].some(k=>String(k).toLowerCase()===nm.toLowerCase().trim())&&!Object.values(E.filtros).some(Boolean)) lista.push({nome:nm,r:resumo([])}); });
-  $('vendSub').textContent=`Comissão sobre o faturamento do mês: ${FX.map(x=>`${fmtPct(x.pct)} a partir de ${curto(x.de)}`).join(' · ')}, sem teto`;
+  $('vendSub').textContent=`Premiação sobre o faturamento do mês: piso de ${brl(FX[0].de)} (${fmtPct(FX[0].pct)}) até ${fmtPct(topo.pct)} a partir de ${brl(topo.de)}, sobre o total vendido · ${FX.length} faixas`;
   const filtrado=Object.values(E.filtros).some(Boolean);
-  $('vendNota').textContent=(mesMode?'Comissão sobre o faturamento (data e valor da venda), como a Visu pratica. O percentual da faixa vale sobre todo o faturamento do mês do vendedor. Os traços na barra marcam o início de cada faixa.':'Período com mais de um mês: a comissão é apurada mês a mês (cada mês na sua faixa) e somada; o "% liberado" é o efetivo do período.')+(filtrado?' A comissão considera todas as vendas do vendedor no mês, sem os filtros de produto, cliente ou tipo.':'');
+  $('vendNota').innerHTML=(mesMode?'Premiação sobre o faturamento (data e valor da venda), pela Política de Premiação por Performance. O percentual da faixa vale sobre todo o faturamento do mês do vendedor. <b>Ainda não aplicado:</b> o moderador de margem bruta (item 6 da política), porque o custo por venda ainda não é confiável no painel; abatimentos por erro de digitação e estornos (itens 7 e 8) são lançados à parte.':'Período com mais de um mês: a comissão é apurada mês a mês (cada mês na sua faixa) e somada; o "% liberado" é o efetivo do período.')+(filtrado?' A premiação considera todas as vendas do vendedor no mês, sem os filtros de produto, cliente ou tipo.':'');
   const esc2=Math.max(topo.de*1.15,...lista.map(v=>v.r.fat));
-  let totCom=0;
+  let totCom=0, totBon=0;
   $('tbVend').innerHTML=lista.length?lista.map(v=>{ const f=v.r.fat, n=v.r.nr.novo, semC=v.nome===NAO_VEND;
-    const ap=semC?null:comissaoDe(v.nome,j.atual), fC=ap?ap.fat:f, p=mesMode?pctCom(fC):(ap&&ap.fat?ap.com/ap.fat*100:0), com=ap?ap.com:0; totCom+=com;
+    const ap=semC?null:comissaoDe(v.nome,j.atual), fC=ap?ap.fat:f, p=mesMode?pctCom(fC):(ap&&ap.fat?ap.com/ap.fat*100:0), com=ap?ap.com:0; totCom+=com; totBon+=ap?ap.bon:0;
     const px=proxFaixa(fC);
     const st=!px?['p-ok',`${fmtPct(p)} liberado`]:p>0?['p-mid',`+${curto(px.de-fC)} p/ ${fmtPct(px.pct)}`]:['p-no',`+${curto(px.de-fC)} p/ ${fmtPct(px.pct)}`];
     const lsV=ls.filter(l=>l.v===v.nome);
-    return `<tr${D(()=>detPedidos('Vendedor: '+v.nome,lsV))}><td class="el"><b class="lk">${esc(v.nome)}</b></td><td class="v lk">${brl(f)}</td><td class="v">${pct(f/tot)}</td><td class="v">${v.r.pedidos==null?'—':int(v.r.pedidos)}</td><td class="v">${v.r.ticket==null?'—':brl(v.r.ticket)}</td><td class="v" title="${brl(n.t)} de clientes novos">${pct(f?n.t/f:0)}</td><td class="v">${int(n.c.size)}</td>
-      ${mesMode?(semC?'<td><span style="color:var(--ink3);font-size:12px">sem comissão</span></td>':`<td style="min-width:150px"><div style="display:flex;gap:6px;align-items:center"><div class="mini" style="flex:1;min-width:40px"><i style="width:${Math.min(fC/esc2*100,100)}%"></i>${FX.map(x=>`<u style="left:${x.de/esc2*100}%"></u>`).join('')}</div><span class="pill ${st[0]}">${st[1]}</span></div></td>`):''}
-      <td class="v">${semC?'—':`<b>${fmtPct(p)}</b>`}</td><td class="v">${semC?'—':`<b>${brl2(com)}</b>`}</td></tr>`; }).join('')
-      +`<tr class="tot"><td>Total</td><td class="v">${brl(tot)}</td><td></td><td></td><td></td><td></td><td></td>${mesMode?'<td></td>':''}<td class="v">${pct(totCom/tot)}</td><td class="v">${brl2(totCom)}</td></tr>`
+    return `<tr${D(()=>detPedidos('Vendedor: '+v.nome,lsV))}><td class="el"><b class="lk">${esc(v.nome)}</b></td><td class="v lk">${brl(f)}<div style="font-size:10.5px;color:var(--ink3)">${pct(f/tot)} do total</div></td><td class="v">${v.r.pedidos==null?'—':int(v.r.pedidos)}</td><td class="v">${v.r.ticket==null?'—':brl(v.r.ticket)}</td><td class="v" title="${brl(n.t)} de clientes novos">${pct(f?n.t/f:0)}<div style="font-size:10.5px;color:var(--ink3)">${pl(n.c.size,'cliente','clientes')}</div></td>
+      ${mesMode?(semC?'<td><span style="color:var(--ink3);font-size:12px">sem premiação</span></td>':`<td style="min-width:140px"><div style="display:flex;gap:6px;align-items:center"><div class="mini" style="flex:1;min-width:34px"><i style="width:${Math.min(fC/esc2*100,100)}%"></i>${FX.map(x=>`<u style="left:${x.de/esc2*100}%"></u>`).join('')}</div><span class="pill ${st[0]}">${st[1]}</span></div></td>`):''}
+      <td class="v">${semC?'—':`<b>${fmtPct(p)}</b>`}</td><td class="v">${semC?'—':brl2(com)}</td><td class="v" title="${ap&&ap.bon?ap.por.flatMap(x=>x.sem).map(k=>'semana de '+k.split('-').reverse().join('/')).join(', '):''}">${semC?'—':ap.bon?`${brl2(ap.bon)}<div style="font-size:10.5px;color:var(--ink3)">${ap.bon/BONUS_SEMANA.valor} sem.</div>`:'—'}</td><td class="v">${semC?'—':`<b>${brl2(com+(ap?ap.bon:0))}</b>`}</td></tr>`; }).join('')
+      +`<tr class="tot"><td>Total</td><td class="v">${brl(tot)}</td><td></td><td></td><td></td>${mesMode?'<td></td>':''}<td class="v">${pct(totCom/tot)}</td><td class="v">${brl2(totCom)}</td><td class="v">${brl2(totBon)}</td><td class="v"><b>${brl2(totCom+totBon)}</b></td></tr>`
     :'<tr><td colspan="10" class="vazio">Sem vendas com esses filtros.</td></tr>';
   // resumo da comissão no topo
-  const comV=lista.filter(v=>v.nome!==NAO_VEND).map(v=>{ const ap=comissaoDe(v.nome,j.atual); const pp=mesMode?pctCom(ap.fat):(ap.fat?ap.com/ap.fat*100:0); return {nome:v.nome,fat:ap.fat,com:ap.com,p:pp,px:mesMode?proxFaixa(ap.fat):null}; });
-  const lib=comV.filter(v=>v.com>0), perto=mesMode?comV.filter(v=>v.px).sort((a,b)=>(a.px.de-a.fat)-(b.px.de-b.fat))[0]:null, maior=comV.slice().sort((a,b)=>b.com-a.com)[0];
+  const comV=lista.filter(v=>v.nome!==NAO_VEND).map(v=>{ const ap=comissaoDe(v.nome,j.atual); const pp=mesMode?pctCom(ap.fat):(ap.fat?ap.com/ap.fat*100:0); return {nome:v.nome,fat:ap.fat,com:ap.com,bon:ap.bon,tot:ap.tot,p:pp,px:mesMode?proxFaixa(ap.fat):null}; });
+  const lib=comV.filter(v=>v.com>0), perto=mesMode?comV.filter(v=>v.px).sort((a,b)=>(a.px.de-a.fat)-(b.px.de-b.fat))[0]:null, maior=comV.slice().sort((a,b)=>b.tot-a.tot)[0];
   $('comKpis').innerHTML=kpiHtml([
-    ['Comissão a pagar',brl2(comV.reduce((s2,v)=>s2+v.com,0)),`<span>${mesMode?nomeMes(E.mes):'período selecionado'} · ${FX.map(x=>`${fmtPct(x.pct)} a partir de ${curto(x.de)}`).join(' · ')}</span>`,'dest','C8'],
-    ['Vendedores com comissão liberada',`${int(lib.length)} de ${int(comV.length)}`,`<span>${lib.length?lib.map(v=>`${esc(v.nome)} ${fmtPct(v.p)}`).join(' · '):'ninguém atingiu a primeira faixa'}</span>`,'',''],
+    ['Premiação a pagar',brl2(comV.reduce((s2,v)=>s2+v.tot,0)),`<span>${brl2(comV.reduce((s2,v)=>s2+v.com,0))} da tabela + ${brl2(comV.reduce((s2,v)=>s2+v.bon,0))} de bônus semanal${mesMode?` · pagamento em ${diaPagamento(E.mes)} (5º dia útil)`:''}</span>`,'dest','C8'],
+    ['Premiação liberada',`${int(lib.length)} de ${int(comV.length)}`,`<span>${lib.length?lib.map(v=>`${esc(v.nome)} ${fmtPct(v.p)}`).join(' · '):'ninguém atingiu o piso de R$ 15 mil'}</span>`,'',''],
     ['Mais perto da próxima faixa',perto?esc(perto.nome):'—',`<span>${perto?`faltam ${brl(perto.px.de-perto.fat)} para ${fmtPct(perto.px.pct)}`:mesMode?'todos já estão na faixa máxima':'escolha um mês para ver a régua'}</span>`,'',''],
-    ['Maior comissão',maior&&maior.com?brl2(maior.com):'—',`<span>${maior&&maior.com?`${esc(maior.nome)} · ${fmtPct(maior.p)} sobre ${brl(maior.fat)}`:'—'}</span>`,'',''],
+    ['Maior premiação',maior&&maior.tot?brl2(maior.tot):'—',`<span>${maior&&maior.tot?`${esc(maior.nome)} · ${fmtPct(maior.p)} sobre ${brl(maior.fat)}${maior.bon?` + ${brl2(maior.bon)} de bônus`:''}`:'—'}</span>`,'',''],
   ]);
   // apuração dos últimos 6 meses
   const ms=[]; for(let i=5;i>=0;i--) ms.push(somaMes(E.mes,-i));
   const nomes=new Set(); ms.forEach(m=>semFiltro(()=>linhas([m])).forEach(l=>{ if(l.v&&l.v!==NAO_VEND&&!l.cs) nomes.add(l.v); }));
-  const ap=[...nomes].map(nome=>({nome,...comissaoDe(nome,ms)})).sort((a,b)=>b.com-a.com);
-  const totM=ms.map((m,i)=>ap.reduce((s2,a)=>s2+a.por[i].c,0));
-  $('apurSub').textContent=`Comissão a pagar por mês (${nomeMes(ms[0]).split(' ')[0]} a ${nomeMes(ms[5])}) · clique num valor para ver as vendas`;
-  $('apur').innerHTML=ap.length?`<table class="compacta"><thead><tr><th>Vendedor</th>${ms.map(m=>`<th class="v">${MES_C[+m.slice(5)-1]}</th>`).join('')}<th class="v">Total</th></tr></thead><tbody>${ap.map(a=>`<tr><td class="el"><b>${esc(a.nome)}</b></td>${a.por.map(x=>`<td class="v"${x.f?D(()=>detPedidos(`${a.nome} · ${nomeMes(x.m)} · comissão ${fmtPct(x.p)}`,semFiltro(()=>linhas([x.m])).filter(l=>l.v===a.nome&&!l.cs))):''}>${x.f?`<span class="${x.c?'lk':''}">${brl(x.c)}</span><div style="font-size:10.5px;color:var(--ink3)">${x.p?fmtPct(x.p):'abaixo de '+curto(FX[0].de)}</div>`:'<span style="color:var(--ink3)">—</span>'}</td>`).join('')}<td class="v"><b>${brl(a.com)}</b></td></tr>`).join('')}
-    <tr class="tot"><td>Total</td>${totM.map(v=>`<td class="v">${brl(v)}</td>`).join('')}<td class="v">${brl(totM.reduce((a2,b2)=>a2+b2,0))}</td></tr></tbody></table><div class="nota">Cada mês é apurado na faixa que o vendedor atingiu naquele mês. "Não vendedores" e meses sem detalhe da Conta Azul ficam de fora.</div>`:vazio('Sem vendas de vendedores nos últimos 6 meses.');
+  const ap=[...nomes].map(nome=>({nome,...comissaoDe(nome,ms)})).sort((a,b)=>b.tot-a.tot);
+  const totM=ms.map((m,i)=>ap.reduce((s2,a)=>s2+a.por[i].tot,0));
+  $('apurSub').textContent=`Premiação + bônus semanal por mês (${nomeMes(ms[0]).split(' ')[0]} a ${nomeMes(ms[5])}) · clique num valor para ver as vendas`;
+  $('apur').innerHTML=ap.length?`<table class="compacta"><thead><tr><th>Vendedor</th>${ms.map(m=>`<th class="v">${MES_C[+m.slice(5)-1]}</th>`).join('')}<th class="v">Total</th></tr></thead><tbody>${ap.map(a=>`<tr><td class="el"><b>${esc(a.nome)}</b></td>${a.por.map(x=>`<td class="v"${x.f?D(()=>detPedidos(`${a.nome} · ${nomeMes(x.m)} · comissão ${fmtPct(x.p)}`,semFiltro(()=>linhas([x.m])).filter(l=>l.v===a.nome&&!l.cs))):''}>${x.f?`<span class="${x.tot?'lk':''}">${brl(x.tot)}</span><div style="font-size:10.5px;color:var(--ink3)">${x.p?fmtPct(x.p):'abaixo de '+curto(FX[0].de)}${x.b?` · +${brl(x.b)} bônus`:''}</div>`:'<span style="color:var(--ink3)">—</span>'}</td>`).join('')}<td class="v"><b>${brl(a.com)}</b></td></tr>`).join('')}
+    <tr class="tot"><td>Total</td>${totM.map(v=>`<td class="v">${brl(v)}</td>`).join('')}<td class="v">${brl(totM.reduce((a2,b2)=>a2+b2,0))}</td></tr></tbody></table><div class="nota">Cada mês é apurado na faixa que o vendedor atingiu naquele mês, mais R$ 75 por semana (seg a sex) com R$ 25 mil ou mais em vendas. Pagamento no 5º dia útil do mês seguinte, via Cartão BIZ. "Não vendedores" e meses sem detalhe da Conta Azul ficam de fora.</div>`:vazio('Sem vendas de vendedores nos últimos 6 meses.');
   desenharFaixas();
 }
 function desenharFaixas(){
   const FX=faixasCom(), adm=(E.verComo?E.verComo.perfil:E.eu?.perfil)==='adm', padrao=!(E.dados.regras?.comissao_faixas_personalizadas);
   const linhasF=FX.map((x,i)=>`<tr><td>${adm?`a partir de <input class="fxDe" type="number" min="0" step="500" value="${x.de}" style="width:110px" aria-label="Faturamento mínimo da faixa ${i+1}">`:'a partir de <b>'+brl(x.de)+'</b>'}</td><td class="v">${adm?`<input class="fxPct" type="number" min="0.1" max="100" step="0.5" value="${x.pct}" style="width:70px" aria-label="Percentual da faixa ${i+1}"> %`:'<b>'+fmtPct(x.pct)+'</b>'}</td>${adm?`<td class="v"><button class="bt2 del fxDel" type="button" data-i="${i}" title="Remover faixa">✕</button></td>`:''}</tr>`).join('');
-  $('faixasCom').innerHTML=`<table class="compacta"><thead><tr><th>Faturamento do mês</th><th class="v">Comissão</th>${adm?'<th></th>':''}</tr></thead><tbody>${linhasF}</tbody></table>
+  $('faixasCom').innerHTML=`<details${padrao?'':' open'}><summary style="cursor:pointer;font-weight:600;font-size:13.5px;padding:4px 0">${FX.length} faixas · de ${fmtPct(FX[0].pct)} (a partir de ${brl(FX[0].de)}) a ${fmtPct(FX[FX.length-1].pct)} (a partir de ${brl(FX[FX.length-1].de)}) · ${adm?'ver e editar':'ver todas'}</summary><table class="compacta"><thead><tr><th>Faturamento do mês</th><th class="v">Premiação</th>${adm?'<th></th>':''}</tr></thead><tbody>${linhasF}</tbody></table></details>
     ${adm?`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button class="bt2" type="button" id="fxAdd">+ Faixa</button><button class="bt2 pri" type="button" id="fxSalvar">Salvar faixas</button><button class="bt2" type="button" id="fxPadrao">Voltar ao padrão</button><span id="fxMsg" class="nota" style="margin:0;align-self:center"></span></div>`:''}
-    <div class="nota">Pela especificação: começa em 1% a partir de R$ 15 mil e chega a 5% a partir de R$ 50 mil, sem teto. <b>As faixas intermediárias (entre 1% e 5%) ainda precisam ser confirmadas com a Visu</b>${adm?'; inclua-as aqui quando vierem':''}.</div>`;
+    <div class="nota">Pela Política de Premiação por Performance (Visu 2026, atualizada em 23/10/2026): piso de R$ 15.000 a 1%, mais 0,25 ponto a cada R$ 2.187,50, até 5% a partir de R$ 50.000, sempre sobre o total vendido no mês.${adm?' Se a Visu mudar a política, edite as faixas aqui; "Voltar ao padrão" retoma a tabela da política.':''}</div>`;
   if(!adm) return;
   const ler=()=>[...$('faixasCom').querySelectorAll('tbody tr')].map(tr=>({de:+tr.querySelector('.fxDe').value,pct:+tr.querySelector('.fxPct').value}));
   const aplicar=(fx)=>{ E.dados.regras.comissao_faixas=fx; desenhar(); };
   $('fxAdd').onclick=()=>{ const fx=ler(); const u=fx[fx.length-1]||{de:0,pct:0}; fx.push({de:u.de+10000,pct:Math.min(u.pct+1,100)}); E.dados.regras.comissao_faixas=fx; desenharFaixas(); };
   $('faixasCom').querySelectorAll('.fxDel').forEach(b=>b.onclick=()=>{ const fx=ler(); fx.splice(+b.dataset.i,1); if(!fx.length) return; E.dados.regras.comissao_faixas=fx; desenharFaixas(); });
   $('fxSalvar').onclick=async()=>{ const fx=ler().filter(x=>x.pct>0).sort((a,b)=>a.de-b.de); try{ const r=PREVIA?{faixas:fx}:await api('/api/comissao',{method:'POST',body:JSON.stringify({faixas:fx})}); aplicar(r.faixas); $('fxMsg').textContent='Faixas salvas.'; }catch(e){ $('fxMsg').textContent=e.message; } };
-  $('fxPadrao').onclick=async()=>{ try{ const r=PREVIA?{faixas:[{de:15000,pct:1},{de:50000,pct:5}]}:await api('/api/comissao',{method:'POST',body:JSON.stringify({faixas:null})}); aplicar(r.faixas); }catch(e){ $('fxMsg').textContent=e.message; } };
+  $('fxPadrao').onclick=async()=>{ try{ const r=PREVIA?{faixas:POLITICA}:await api('/api/comissao',{method:'POST',body:JSON.stringify({faixas:null})}); aplicar(r.faixas); }catch(e){ $('fxMsg').textContent=e.message; } };
 }
 
 // ---------- 5. qualidade ----------
@@ -1708,7 +1736,7 @@ const diasAtr=(v)=>Math.round((Date.parse(hojeISO())-Date.parse(v))/864e5);
 // ---------- menu lateral e permissões por perfil ----------
 const MENU=[
   {grupo:'Gestão',ico:'<path d="M3 3h8v8H3zM13 3h8v5h-8zM13 10h8v11h-8zM3 13h8v8H3z"/>',itens:[['painel','Painel executivo','Vendas, resultado, caixa e o que pede decisão'],['indicadores','Quadro de indicadores','Comercial, resultado e caixa com tendência de 6 meses']]},
-  {grupo:'Comercial',ico:'<path d="M3 4h2l2.4 11h11.2L21 7H7" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="9" cy="19" r="1.6"/><circle cx="17" cy="19" r="1.6"/>',itens:[['vendas','Vendas','Pedidos, ticket médio e novas vendas × recompra (R1, R2, R3)'],['produtos','Produtos e mix','Tipo de produto, tecido e cor em peças ou R$ (R4) e curva ABC'],['clientes','Clientes','Curva ABC, faixas de valor, segmento e quem parou de comprar (C3, C5, C6)'],['vendedores','Vendedores e comissão','Faturamento, clientes novos, régua e apuração da comissão (C7, C8)'],['pedidos','Pedidos e entregas','Ciclo de pagamento e entregas das próximas semanas (C4)']]},
+  {grupo:'Comercial',ico:'<path d="M3 4h2l2.4 11h11.2L21 7H7" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="9" cy="19" r="1.6"/><circle cx="17" cy="19" r="1.6"/>',itens:[['vendas','Vendas','Pedidos, ticket médio e novas vendas × recompra (R1, R2, R3)'],['produtos','Produtos e mix','Tipo de produto, tecido e cor em peças ou R$ (R4) e curva ABC'],['clientes','Clientes','Curva ABC, faixas de valor, segmento e quem parou de comprar (C3, C5, C6)'],['vendedores','Vendedores e premiação','Faturamento, clientes novos, régua e apuração da premiação (C7, C8)'],['pedidos','Pedidos e entregas','Ciclo de pagamento e entregas das próximas semanas (C4)']]},
   {grupo:'Financeiro',ico:'<circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 6v12M15 9c0-1.2-1.3-2-3-2s-3 .8-3 2 1.3 2 3 2 3 .8 3 2-1.3 2-3 2-3-.8-3-2" fill="none" stroke="currentColor" stroke-width="1.8"/>',itens:[['dre','DRE gerencial','Receita, custos, despesas e resultado por competência ou caixa'],['equilibrio','Margem e ponto de equilíbrio','Custos fixos × variáveis, margem de contribuição e ponto de equilíbrio (C1)'],['caixa','Fluxo de caixa','Saldo nos bancos, realizado e projeção de 13 semanas'],['receber','Contas a receber','Inadimplência por idade e por cliente'],['pagar','Contas a pagar','Despesas por categoria, centro de custo e fornecedor']]},
   {grupo:'Controle',ico:'<path d="M6 2h9l4 4v16H6z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 11l2 2 4-4" fill="none" stroke="currentColor" stroke-width="2"/>',itens:[['conciliacao','Planilha × sistema','Por que o total do mês difere entre a planilha do comercial e a Conta Azul'],['dados','Qualidade dos dados','Colunas reconhecidas, campos em branco e grafias diferentes'],['versoes','Versões do painel','O que mudou em cada entrega']]},
   {grupo:'Administração',ico:'<circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.6 2.7-6 6-6s6 2.4 6 6z"/><circle cx="17" cy="9" r="2.4"/><path d="M15.5 14.2c2.9.3 5.5 2.4 5.5 5.8h-4.5"/>',itens:[['usuarios','Usuários e permissões','Perfis, senhas temporárias e o que cada pessoa vê']]},
@@ -1994,6 +2022,13 @@ $('usPermSalvar').addEventListener('click',async()=>{ if(!PERMU) return; const s
   if(!sel.length){ alert('Deixe pelo menos uma página marcada.'); return; }
   try{ await api('/api/usuarios',{method:'POST',body:JSON.stringify({id:PERMU.id,nome:PERMU.nome,email:PERMU.email,perfil:PERMU.perfil,paginas:sel})}); $('usPermCard').hidden=true; pgUsuarios(); }catch(e){ alert(e.message); } });
 
+
+// política de premiação (modal)
+function abrirPolitica(){ const F=POLITICA; $('polTabela').innerHTML=`<table><thead><tr><th>Faixa</th><th>Vendas no mês</th><th>%</th><th>Premiação no piso</th></tr></thead><tbody><tr><td>0</td><td>até R$ 14.999,99</td><td>0%</td><td>R$ 0,00</td></tr>${F.map((x,i)=>`<tr><td>${i+1}</td><td>${brl2(x.de)}</td><td>${fmtPct(x.pct)}</td><td>${brl2(x.de*x.pct/100)}</td></tr>`).join('')}<tr><td>18+</td><td>acima de R$ 50 mil</td><td>5% (teto)</td><td>venda total × 0,05</td></tr></tbody></table>`;
+  if(PREVIA) $('polPdf').hidden=true; $('polModal').hidden=false; $('polFundo').hidden=false; $('polFechar').focus(); }
+function fecharPolitica(){ $('polModal').hidden=true; $('polFundo').hidden=true; }
+$('btPolitica').addEventListener('click',abrirPolitica); $('polFechar').addEventListener('click',fecharPolitica); $('polFundo').addEventListener('click',fecharPolitica);
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&!$('polModal').hidden) fecharPolitica(); });
 // ---------- eventos ----------
 $('hamb').addEventListener('click',()=>{ $('sb').classList.toggle('aberto'); $('scrim').classList.toggle('on'); });
 $('scrim').addEventListener('click',fecharMenu);

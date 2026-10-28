@@ -189,6 +189,7 @@ app.post('/api/usuarios/:id/convite', exigeAdm, async (req, res) => {
 
 app.get('/saude', (req, res) => res.json({ ok: true }));
 app.get('/saude/banco', async (req, res) => res.json(await statusBanco().catch((e) => ({ erro: e.message }))));
+app.get('/politica-premiacao.pdf', exigeLogin, (req, res) => res.sendFile(path.join(raiz, 'public', 'politica-premiacao.pdf')));
 app.get(['/logo.png', '/logo-visu.png', '/logo-visu-azul.png'], (req, res) => res.sendFile(path.join(raiz, 'public', req.path.slice(1))));
 app.use('/vitrine', express.static(path.join(raiz, 'public', 'vitrine'), { maxAge: '7d' }));
 

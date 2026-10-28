@@ -2,6 +2,10 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v29 · 28/10/2026
+- FAIXAS_PADRAO = Política de Premiação por Performance 2026 (17 faixas, 15.000 + 2.187,50·k, 1% + 0,25·k). Faixas salvas antes no painel continuam valendo até o ADM clicar em "Voltar ao padrão".
+- Bônus semanal (R$ 75 por semana seg–sex com ≥ R$ 25 mil), 5º dia útil, modal da política e rota /politica-premiacao.pdf (com login).
+
 ## v28 · 28/10/2026
 - Logo novo (public/logo-visu.png branco, logo-visu-azul.png azul, logo.png ícone); rota /logo-visu-azul.png; login no azul #00348C.
 - Temas azul, branco (troca para o logo azul), degrade, oceano; marcados como "nova marca" no seletor.
