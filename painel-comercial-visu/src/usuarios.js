@@ -5,7 +5,7 @@ import crypto from 'node:crypto';
 import { config } from './config.js';
 import { lerKV, salvarKV, statusBanco } from './tokenStore.js';
 
-export const PERFIS = { adm: 'ADM', diretor: 'Diretor', comercial: 'Comercial', financeiro: 'Financeiro' };
+export const PERFIS = { adm: 'ADM', diretor: 'Diretor', comercial: 'Comercial', financeiro: 'Financeiro', consultor: 'Consultor externo' };
 const CHAVE = 'usuarios';
 const VALIDADE_CONVITE_DIAS = 7;
 
@@ -18,11 +18,13 @@ const INICIAIS = [
   { id: 'tiago-sobral', nome: 'Tiago Sobral', email: 'tiago.sobral@sejaexpertgestao.com', perfil: 'adm' },
 ];
 
+// fim do dia (horário de Brasília) da data de validade
+export const acessoVencido = (u) => !!(u?.valido_ate && Date.now() > Date.parse(`${u.valido_ate}T23:59:59-03:00`));
 const b64 = (s) => Buffer.from(s).toString('base64url');
 const de64 = (s) => Buffer.from(s, 'base64url').toString();
 const hmac = (s) => crypto.createHmac('sha256', config.segredoSessao).update(s).digest('base64url');
 const igual = (a, b) => a.length === b.length && crypto.timingSafeEqual(Buffer.from(a), Buffer.from(b));
-const limpo = (u) => ({ id: u.id, nome: u.nome, email: u.email || '', perfil: u.perfil, paginas: Array.isArray(u.paginas) ? u.paginas : null, senha_criada: !!u.hash && !u.temporaria, temporaria: !!(u.hash && u.temporaria), temp_expira_em: u.temporaria && u.temp_exp ? new Date(u.temp_exp).toISOString() : null, ultimo_acesso: u.ultimo_acesso || null, criado_em: u.criado_em || null });
+const limpo = (u) => ({ id: u.id, nome: u.nome, email: u.email || '', perfil: u.perfil, paginas: Array.isArray(u.paginas) ? u.paginas : null, senha_criada: !!u.hash && !u.temporaria, temporaria: !!(u.hash && u.temporaria), temp_expira_em: u.temporaria && u.temp_exp ? new Date(u.temp_exp).toISOString() : null, ultimo_acesso: u.ultimo_acesso || null, criado_em: u.criado_em || null, valido_ate: u.valido_ate || null, empresa: u.empresa || '' });
 
 let cache = null;
 async function carregar() {
@@ -50,19 +52,22 @@ async function gravar(lista) { cache = lista; await salvarKV(CHAVE, lista); }
 export async function listar() { return (await carregar()).map(limpo); }
 export async function porId(id) { return (await carregar()).find((u) => u.id === id) || null; }
 
-export async function salvar({ id, nome, email, perfil, paginas }) {
+export async function salvar({ id, nome, email, perfil, paginas, valido_ate, empresa }) {
   const lista = await carregar();
   nome = String(nome || '').trim(); email = String(email || '').trim().toLowerCase();
   if (!nome) throw new Error('Informe o nome.');
   if (!PERFIS[perfil]) throw new Error('Perfil inválido.');
   if (email && lista.some((u) => u.email === email && u.id !== id)) throw new Error('Já existe um usuário com esse e-mail.');
+  // acesso com prazo (usado para consultor externo): AAAA-MM-DD ou vazio
+  const validade = /^\d{4}-\d{2}-\d{2}$/.test(String(valido_ate || '')) ? String(valido_ate) : null;
+  empresa = String(empresa || '').trim().slice(0, 80);
   let u = id && lista.find((x) => x.id === id);
   const pag = Array.isArray(paginas) ? paginas.map(String) : paginas === null ? null : undefined;
-  if (u) { Object.assign(u, { nome, email, perfil }); if (pag !== undefined) u.paginas = pag; }
+  if (u) { Object.assign(u, { nome, email, perfil, valido_ate: validade, empresa }); if (pag !== undefined) u.paginas = pag; }
   else {
     const base = nome.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'usuario';
     let novo = base, n = 2; while (lista.some((x) => x.id === novo)) novo = `${base}-${n++}`;
-    u = { id: novo, nome, email, perfil, paginas: pag ?? null, ver: 0, criado_em: new Date().toISOString() };
+    u = { id: novo, nome, email, perfil, paginas: pag ?? null, valido_ate: validade, empresa, ver: 0, criado_em: new Date().toISOString() };
     lista.push(u);
   }
   await gravar(lista);
@@ -124,6 +129,7 @@ export async function autenticar(email, senha) {
   if (!u) { hashSenha(senha, 'x'); return { erro: 'E-mail ou senha incorretos.' }; }
   if (!igual(hashSenha(senha, u.salt), u.hash)) return { erro: 'E-mail ou senha incorretos.' };
   if (u.temporaria && u.temp_exp && u.temp_exp < Date.now()) return { erro: 'Sua senha temporária expirou. Peça uma nova ao administrador do painel.' };
+  if (acessoVencido(u)) return { erro: 'Seu acesso ao painel terminou. Fale com a diretoria da Visu ou com a Seja Expert para renovar.' };
   return { u };
 }
 
@@ -179,7 +185,7 @@ export async function lerSessao(valor) {
   if (d.exp < Date.now()) return null;
   if (d.id === '__admin') return { id: '__admin', nome: 'Administrador', perfil: 'adm', email: '' };
   const u = await porId(d.id);
-  if (!u || (u.ver || 0) !== d.v || !u.hash) return null;
+  if (!u || (u.ver || 0) !== d.v || !u.hash || acessoVencido(u)) return null;
   return u;
 }
 export const ADMIN_MESTRE = { id: '__admin', ver: 0 };

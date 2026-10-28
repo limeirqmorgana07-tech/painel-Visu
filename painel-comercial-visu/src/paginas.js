@@ -15,6 +15,8 @@ const PADRAO_BASE = {
   diretor: TODAS.filter((p) => p !== 'usuarios'),
   comercial: [...COM, 'conciliacao', 'versoes'],
   financeiro: ['painel', 'indicadores', ...FIN, 'conciliacao', 'dados', 'versoes'],
+  // consultor externo liberado pela diretoria: só o módulo de vendas (em homologação); o ADM pode ampliar
+  consultor: [...COM],
 };
 // O ADM pode mudar o que cada perfil vê (vale para todas as pessoas daquele perfil). Guardado na chave perfis_paginas.
 let personalizado = {};

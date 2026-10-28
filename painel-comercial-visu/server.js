@@ -6,7 +6,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { config, redirectUri } from './src/config.js';
 import * as ca from './src/contaAzul.js';
-import { dadosDeVendas } from './src/vendas.js';
+import { dadosDeVendas, faixasComissao, FAIXAS_PADRAO } from './src/vendas.js';
 import { dadosFinanceiros } from './src/financeiro.js';
 import { planilhaConfigurada } from './src/planilha.js';
 import * as google from './src/google.js';
@@ -135,12 +135,12 @@ app.post('/convite/:token', async (req, res) => {
 
 // ---------- usuários (perfil ADM) ----------
 app.use(express.json());
-app.get('/api/eu', exigeLogin, async (req, res) => res.json({ id: req.usuario.id, nome: req.usuario.nome, email: req.usuario.email || '', perfil: req.usuario.perfil, paginas: paginasDe(req.usuario), perfis: { diretor: padraoDe('diretor'), comercial: padraoDe('comercial'), financeiro: padraoDe('financeiro') }, perfis_originais: padroesOriginais(), visual_padrao: (await lerKV('visual_padrao').catch(() => null)) || null }));
+app.get('/api/eu', exigeLogin, async (req, res) => res.json({ id: req.usuario.id, nome: req.usuario.nome, email: req.usuario.email || '', perfil: req.usuario.perfil, paginas: paginasDe(req.usuario), perfis: { diretor: padraoDe('diretor'), comercial: padraoDe('comercial'), financeiro: padraoDe('financeiro'), consultor: padraoDe('consultor') }, perfis_originais: padroesOriginais(), visual_padrao: (await lerKV('visual_padrao').catch(() => null)) || null }));
 // o que cada perfil vê (ADM edita em Usuários e permissões)
 app.post('/api/perfis', exigeAdm, async (req, res) => {
   const atual = perfisPersonalizados();
   const { perfil, paginas } = req.body || {};
-  if (!['diretor', 'comercial', 'financeiro'].includes(perfil)) return res.status(400).json({ erro: 'Perfil inválido.' });
+  if (!['diretor', 'comercial', 'financeiro', 'consultor'].includes(perfil)) return res.status(400).json({ erro: 'Perfil inválido.' });
   if (paginas === null) delete atual[perfil];
   else if (Array.isArray(paginas) && paginas.length) atual[perfil] = paginas.map(String);
   else return res.status(400).json({ erro: 'Deixe pelo menos uma página marcada.' });
@@ -149,6 +149,19 @@ app.post('/api/perfis', exigeAdm, async (req, res) => {
   res.json({ ok: true, perfil, paginas: padraoDe(perfil) });
 });
 lerKV('perfis_paginas').then((o) => definirPerfis(o)).catch(() => {});
+
+// faixas de comissão: o ADM define (vale para todos); null volta ao padrão da especificação
+app.get('/api/comissao', exigeLogin, async (req, res) => res.json({ faixas: await faixasComissao(), padrao: FAIXAS_PADRAO() }));
+app.post('/api/comissao', exigeAdm, async (req, res) => {
+  if (req.body?.faixas === null) { await salvarKV('comissao_faixas', null); dadosDeVendas(true).catch(() => {}); return res.json({ faixas: FAIXAS_PADRAO() }); }
+  const faixas = (Array.isArray(req.body?.faixas) ? req.body.faixas : [])
+    .map((f) => ({ de: Math.round(Number(f.de) * 100) / 100, pct: Math.round(Number(f.pct) * 100) / 100 }))
+    .filter((f) => f.de >= 0 && f.pct > 0 && f.pct <= 100).sort((a, b) => a.de - b.de);
+  if (!faixas.length) return res.status(400).json({ erro: 'Informe pelo menos uma faixa (a partir de R$ X, Y%).' });
+  await salvarKV('comissao_faixas', { faixas, atualizado_em: new Date().toISOString(), por: req.usuario.nome });
+  dadosDeVendas(true).catch(() => {});
+  res.json({ faixas });
+});
 
 // visual (tema) padrão do painel: o ADM escolhe; cada pessoa ainda pode trocar só no navegador dela
 const VISUAIS = ['classico', 'vibrante', 'sol', 'turquesa', 'fio', 'pop', 'vidro', 'preto', 'noite'];

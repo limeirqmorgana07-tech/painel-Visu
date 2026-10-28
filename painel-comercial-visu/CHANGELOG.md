@@ -2,6 +2,21 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v27 · 28/10/2026
+- Perfil consultor (Consultor externo): padrão = páginas comerciais; campos empresa e valido_ate no usuário; acessoVencido() bloqueia login e sessão após a data.
+- Vendedores e comissão: cartões de resumo (comissão a pagar, liberados, mais perto da próxima faixa, maior comissão).
+- desenhar(): erro de um quadro vira aviso no topo (#erroPagina) com a mensagem e a versão.
+- POST /api/comissao renova o cache de vendas.
+
+## v26 · 27/10/2026
+- Comissão: % liberado e valor por vendedor, apuração mensal (6 meses) e faixas configuráveis (GET/POST /api/comissao, chave comissao_faixas; regras.comissao_faixas no /api/vendas).
+
+## v25 · 23/10/2026 (planilha tratada, cópia de 13/10)
+- lerXlsx: BASE TRATADA como fonte (Cliente padronizado, Cliente (como lançado), Novo x Recompra, Pedido (cliente + data), Mapeamento, Possível lançamento duplicado?), unida linha a linha à BASE DE DADOS para pagamento, prazo, especificação e frete.
+- tratarClientes: sem BASE TRATADA, aplica DE-PARA CLIENTES + CLIENTES ("Cliente anterior a 2026?") na base crua; novo = 1ª data do cliente na base. Conferido com a planilha: set/2026 = 31,2% novos, 39 clientes novos, 104 pedidos, 407 clientes.
+- Abas RESULTADO, DE-PARA e CLIENTES nunca são escolhidas como base de vendas.
+- Qualidade dos dados: resumo do tratamento, nomes fora do DE-PARA e linhas de possível duplicidade.
+
 ## v24 · 23/10/2026 (revisão do Tiago, bloco Comercial)
 - Planilha: prioriza a aba BASE TRATADA; aplica a aba DE-PARA CLIENTES (col. A → col. B); colunas com prioridade (Cliente padronizado > Cliente; Novo x Recompra > marcação do vendedor; Tecido > Material). nr_fonte e de_para no /api/vendas.
 - Faturamento do mês ≥ DETALHE_CA_DESDE (padrão 2026-08) vem da Conta Azul quando a planilha está ligada; o detalhe continua da planilha.

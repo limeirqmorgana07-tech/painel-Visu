@@ -12,6 +12,15 @@ const chave = (s) => sem(s).replace(/[^a-z0-9]+/g, ' ').trim();
 const iso = (d) => d.toISOString().slice(0, 10);
 const hojeBR = () => new Date(Date.now() - 3 * 3600e3);
 
+// ---------- faixas de comissão (seção 3 da especificação) ----------
+// Regra conhecida: 1% a partir de R$ 15 mil no mês e 5% a partir de R$ 50 mil, sem teto. As faixas intermediárias
+// ainda serão confirmadas com a Visu; o ADM cadastra no painel (chave comissao_faixas).
+export const FAIXAS_PADRAO = () => [{ de: config.comissaoInicio, pct: 1 }, { de: config.comissaoTeto, pct: 5 }];
+export async function faixasComissao() {
+  const kv = await lerKV('comissao_faixas').catch(() => null);
+  return Array.isArray(kv?.faixas) && kv.faixas.length ? kv.faixas : FAIXAS_PADRAO();
+}
+
 // ---------- padronização de grafias ----------
 function padronizar(linhas, campo) {
   const grupos = new Map();
@@ -236,7 +245,7 @@ async function montar(bruto) {
     fonte: origem,
     planilha_arquivo: origem === 'planilha' ? base.arquivo || null : null,
     detalhe_desde: detalheCaDesde(),
-    nr_fonte: origem === 'planilha' && base.mapa?.nr_tratado ? 'tratada' : undefined,
+    nr_fonte: origem === 'planilha' && base.mapa?.nr_tratado ? (base.mapa?.tratamento === 'painel' ? 'painel' : 'tratada') : undefined,
     de_para: origem === 'planilha' ? base.mapa?.de_para || null : null,
     conta_azul_conectada: !!bruto.conectadoCA,
     credenciais_conta_azul: !!(config.clientId && config.clientSecret),
@@ -248,6 +257,7 @@ async function montar(bruto) {
       meta: config.metaMensal || null,
       comissao_inicio: config.comissaoInicio,
       comissao_teto: config.comissaoTeto,
+      comissao_faixas: await faixasComissao(),
     },
     vendedores_cadastrados: vendedoresCA.map((v) => v.nome),
     linhas: linhas.map((l) => ({

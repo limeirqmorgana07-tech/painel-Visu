@@ -315,7 +315,8 @@ td.lk,span.lk{text-decoration:underline dotted var(--line2);text-underline-offse
 .hamb{display:none;border:1px solid var(--line2);background:var(--panel);border-radius:8px;width:38px;height:38px;cursor:pointer;font-size:18px;color:var(--ink)}
 .filtros{position:sticky;top:0;z-index:6;background:var(--bg);border-bottom:1px solid var(--line)}
 .filtros .in{max-width:none;padding:10px 26px}
-main{max-width:none;padding:18px 26px 48px}
+main{max-width:none;padding:18px 26px 48px;min-width:0;margin:0;align-self:stretch}
+main>section{min-width:0}
 .pg-tools{display:flex;justify-content:flex-end;gap:8px;margin-bottom:12px}
 .simula{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:var(--amberSoft);border-left:4px solid var(--orange);border-radius:10px;padding:10px 14px;font-size:13px}
 .scrim{display:none}
@@ -572,6 +573,7 @@ table.matriz td.vz{color:var(--line2)}
     <button class="limpar" id="limpar" type="button" hidden>Limpar filtros</button>
   </div></div>
 <main id="app">
+  <div class="aviso erro" id="erroPagina" hidden></div>
   <div class="simula" id="simula" hidden></div>
   <div class="aviso" id="avisoFonte" hidden></div>
   <div class="aviso erro" id="avisoErro" hidden></div>
@@ -651,12 +653,14 @@ table.matriz td.vz{color:var(--line2)}
   </section>
 
   <section data-pagina="vendedores" hidden>
-    
+    <div class="kpis" id="comKpis" style="margin-bottom:16px"></div>
     <div class="card">
-      <div class="hd"><div><h3>Desempenho por vendedor<span class="req">C7 · C8</span></h3><div class="sub">Comissão sobre o faturamento: começa em 1% a partir de R$ 15 mil e chega a 5% a partir de R$ 50 mil, sem teto</div></div></div>
-      <div class="tw"><table><thead><tr><th>Vendedor</th><th class="v">Faturamento</th><th class="v">Part.</th><th class="v">Pedidos</th><th class="v">Ticket médio</th><th class="v">Novos (R$)</th><th class="v">% novos</th><th class="v">Clientes novos</th><th id="thRegua">Régua da comissão</th></tr></thead><tbody id="tbVend"></tbody></table></div>
+      <div class="hd"><div><h3>Desempenho por vendedor<span class="req">C7 · C8</span></h3><div class="sub" id="vendSub">Comissão sobre o faturamento do mês, pelas faixas abaixo</div></div></div>
+      <div class="tw"><table><thead><tr><th>Vendedor</th><th class="v">Faturamento</th><th class="v">Part.</th><th class="v">Pedidos</th><th class="v">Ticket médio</th><th class="v">% novos</th><th class="v">Clientes novos</th><th id="thRegua">Régua da comissão</th><th class="v">% liberado</th><th class="v">Comissão</th></tr></thead><tbody id="tbVend"></tbody></table></div>
       <div class="nota" id="vendNota"></div>
     </div>
+    <div class="card" style="margin-top:16px"><div class="hd"><div><h3>Apuração de comissões<span class="req">C8</span></h3><div class="sub" id="apurSub">—</div></div></div><div class="tw" id="apur"></div></div>
+    <div class="card" style="margin-top:16px"><div class="hd"><div><h3>Faixas de comissão</h3><div class="sub">Percentual sobre o faturamento do mês do vendedor</div></div></div><div id="faixasCom" style="max-width:560px"></div></div>
     <div class="card" style="margin-top:16px" id="vendCfgCard" hidden><div class="hd"><div><h3>Quem é vendedor</h3><div class="sub">Marque como inativo quem aparece na Conta Azul mas não deve ser tratado como vendedor (financeiro, escritório, a própria empresa). As vendas dessas pessoas continuam no faturamento, agrupadas em "Não vendedores", sem régua de comissão.</div></div></div><div id="vendCfg"></div></div>
   </section>
 
@@ -757,7 +761,9 @@ table.matriz td.vz{color:var(--line2)}
       <form class="us-form" id="usForm"><input type="hidden" name="id">
         <div class="f"><label for="usNome">Nome</label><input id="usNome" name="nome" required></div>
         <div class="f"><label for="usEmail">E-mail (será o login)</label><input id="usEmail" name="email" type="email"></div>
-        <div class="f"><label for="usPerfil">Perfil</label><select id="usPerfil" name="perfil"><option value="diretor">Diretor</option><option value="comercial">Comercial</option><option value="financeiro">Financeiro</option><option value="adm">ADM</option></select></div>
+        <div class="f"><label for="usPerfil">Perfil</label><select id="usPerfil" name="perfil"><option value="diretor">Diretor</option><option value="comercial">Comercial</option><option value="financeiro">Financeiro</option><option value="consultor">Consultor externo</option><option value="adm">ADM</option></select></div>
+        <div class="f us-cons" hidden><label for="usEmpresa">Empresa do consultor</label><input id="usEmpresa" name="empresa" placeholder="opcional"></div>
+        <div class="f us-cons" hidden><label for="usValidade">Acesso até</label><input id="usValidade" name="valido_ate" type="date"></div>
         <button class="bt2 pri" type="submit">Salvar</button><button class="bt2" type="button" id="usCancelar" hidden>Cancelar</button>
       </form>
       <div class="e" id="usErro" style="color:var(--red);font-size:12.5px;margin-top:8px"></div>
@@ -793,8 +799,11 @@ const nomeMes=(m)=>{const[a,b]=m.split('-');return MES_L[+b-1]+' de '+a};
 const somaMes=(m,n)=>{const[a,b]=m.split('-').map(Number);const d=new Date(Date.UTC(a,b-1+n,1));return d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0')};
 function delta(a,b,inv){ if(!b) return '<span class="delta eq">sem base</span>'; const d=(a-b)/b; const c=Math.abs(d)<.005?'eq':(d>0)!==!!inv?'up':'down'; return `<span class="delta ${c}">${d>0?'▲':d<0?'▼':'■'} ${pct(Math.abs(d))}</span>`; }
 
-const VERSAO='v24';
+const VERSAO='v27';
 const VERSOES=[
+ {v:'v27',data:'28/10/2026',tit:'Consultor externo e comissão em destaque',arq:'painel-visu-v27.zip',itens:['Novo perfil Consultor externo: vê só o módulo de vendas (Vendas, Produtos e mix, Clientes, Vendedores e Pedidos), com empresa e data de fim do acesso (padrão 90 dias). Depois dessa data o login é bloqueado.','Vendedores e comissão abre com o resumo da comissão: total a pagar no mês, quem já liberou comissão (e em qual %), quem está mais perto da próxima faixa e a maior comissão.','Se algum quadro der erro com os dados reais, a página continua e mostra o erro no topo, em vez de sumir.']},
+ {v:'v26',data:'27/10/2026',tit:'Apuração de comissões',arq:'painel-visu-v26.zip',itens:['Vendedores e comissão: colunas % liberado e Comissão (R$) por vendedor, com total.','Novo quadro Apuração de comissões: comissão de cada vendedor nos últimos 6 meses, cada mês na sua faixa.','Faixas de comissão editáveis pelo ADM (padrão da especificação: 1% a partir de R$ 15 mil e 5% a partir de R$ 50 mil); as intermediárias entram quando a Visu confirmar.']},
+ {v:'v25',data:'23/10/2026',tit:'Planilha tratada do Tiago',arq:'painel-visu-v25.zip',itens:['Leitura ajustada à planilha tratada real: aba BASE TRATADA (cliente padronizado, Novo x Recompra, pedido = cliente + data), completada pela BASE DE DADOS com pagamento, prazo e especificação.','Se a planilha do dia a dia tiver só a base crua com as abas DE-PARA CLIENTES e CLIENTES, o painel faz o mesmo tratamento sozinho (conferido: setembro dá 31,2% de novos, 39 clientes novos, 104 pedidos e 407 clientes).','Qualidade dos dados mostra o tratamento usado, nomes fora do DE-PARA e as 10 linhas marcadas como possível duplicidade.']},
  {v:'v24',data:'23/10/2026',tit:'Ajustes do bloco Comercial (revisão do Tiago)',arq:'painel-visu-v24.zip',itens:['Planilha: lê a aba BASE TRATADA, aplica o DE-PARA CLIENTES e usa a coluna "Novo x Recompra" tratada no lugar da marcação dos vendedores; tecido e cor saem das colunas da planilha.','Com a planilha ligada, o faturamento do mês (a partir de agosto) vem da Conta Azul e o detalhe da planilha, com a diferença mostrada.','Só Conta Azul: janeiro a julho entram só no faturamento (sem pedidos, ticket, clientes ou novo × recompra); recompra só é marcada com certeza, o resto fica sem classificação.','Matriz tecido × cor e ticket por tecido com "não identificado", fechando com o total; nova cor Sublimada.','Tiago - Financeiro, Escritório BPO, Morgana Limeira, Anderson Alves e Visu marcados como não vendedores.','Nota do ponto de equilíbrio mostra o valor da DRE e o da especificação.']},
  {v:'v23',data:'19/10/2026',tit:'Permissões por perfil',arq:'painel-visu-v23.zip',itens:['Em Usuários e permissões, a tabela "O que cada perfil vê" agora é editável: desmarcar uma página para Diretor esconde para todos os diretores (menu e dados).','"Ver o painel como" passou a usar as permissões mais recentes de cada pessoa (antes podia mostrar a versão antiga até recarregar).']},
  {v:'v22',data:'15/10/2026',tit:'Mais temas e formatos de menu',arq:'painel-visu-v22.zip',itens:['Clique no logo da Visu para recolher o menu lateral (fica só com os ícones; passar o mouse abre os itens).','No botão Visual: formato do menu Lateral, Só ícones ou No topo.','Três temas novos com as cores do logo: Pop (blocos coloridos e contorno forte), Vidro (fundo degradê e cartões translúcidos) e Preto & laranja (editorial e limpo).']},
@@ -961,7 +970,10 @@ function desenhar(){
   $('limpar').hidden=!comercial||!Object.values(E.filtros).some(Boolean);
   avisoFin();
   const S=$('simula'); if(E.verComo){ S.hidden=false; S.innerHTML=`<span>Visualizando o painel como <b>${esc(E.verComo.nome||PERF[E.verComo.perfil])}</b>. O menu mostra exatamente o que esse perfil vê.</span><button class="bt2" type="button" id="simSair">Voltar para ADM</button>`; $('simSair').onclick=()=>{ E.verComo=null; $('verComo').value=''; desenhar(); }; } else S.hidden=true;
-  ({painel:pgVisao,indicadores:pgIndicadores,vendas:pgGeral,produtos:pgProdutos,clientes:pgClientes,vendedores:pgVendedores,pedidos:pgPedidos,dre:pgDRE,equilibrio:pgEquilibrio,caixa:pgCx,receber:pgRc,pagar:pgPg,conciliacao:pgConciliacao,dados:pgDados,versoes:pgVersoes,usuarios:pgUsuarios})[E.pagina](j);
+  // se um quadro der erro com os dados reais, a página continua e o erro aparece no topo (em vez de sumir em silêncio)
+  const errBox=$('erroPagina'); if(errBox) errBox.hidden=true;
+  try{ ({painel:pgVisao,indicadores:pgIndicadores,vendas:pgGeral,produtos:pgProdutos,clientes:pgClientes,vendedores:pgVendedores,pedidos:pgPedidos,dre:pgDRE,equilibrio:pgEquilibrio,caixa:pgCx,receber:pgRc,pagar:pgPg,conciliacao:pgConciliacao,dados:pgDados,versoes:pgVersoes,usuarios:pgUsuarios})[E.pagina](j); }
+  catch(e){ console.error(e); if(errBox){ errBox.hidden=false; errBox.innerHTML=`<span><b>Parte desta página não pôde ser montada.</b> Mande um print desta mensagem para a Seja Expert: <code>${esc(String(e&&e.message||e))}</code> (${esc(VERSAO)})</span>`; } }
 }
 
 // ---------- 1. visão geral ----------
@@ -996,7 +1008,7 @@ function pgGeral(j){
       <div><h4>Em clientes</h4><div class="leg" style="margin:0"><span>Clientes novos <b>${int(n.c.size)}</b></span><span>Clientes de recompra <b>${int(r.c.size)}</b></span></div></div>
     </div>
     ${x.p?`<div class="nota alerta">${int(x.p)} ${x.p===1?'pedido está':'pedidos estão'} sem a marcação "Cliente novo ou recompra?" na planilha (${brl(x.t)}). Eles aparecem em cinza.</div>`:''}
-    <div class="nota">${E.dados.nr_calculado?`<b>Pela Conta Azul não dá para separar novo de recompra com segurança:</b> até ${E.dados.detalhe_desde?nomeMes(somaMes(E.dados.detalhe_desde,-1)):'julho'} as vendas entraram como um lançamento único por mês. Aqui, "recompra" é só quem já comprou de ${E.dados.detalhe_desde?nomeMes(E.dados.detalhe_desde):'agosto'} em diante; o resto fica em cinza (sem classificação). Com a planilha ligada, vale a coluna "Novo x Recompra" da BASE TRATADA.`:E.dados.nr_fonte==='tratada'?'A divisão segue a coluna "Novo x Recompra" da BASE TRATADA (cliente padronizado).':'A divisão segue a coluna "Cliente novo ou recompra?", preenchida pelos vendedores.'} Canal de origem (Instagram, indicação etc.) não é registrado hoje.</div>`;
+    <div class="nota">${E.dados.nr_calculado?`<b>Pela Conta Azul não dá para separar novo de recompra com segurança:</b> até ${E.dados.detalhe_desde?nomeMes(somaMes(E.dados.detalhe_desde,-1)):'julho'} as vendas entraram como um lançamento único por mês. Aqui, "recompra" é só quem já comprou de ${E.dados.detalhe_desde?nomeMes(E.dados.detalhe_desde):'agosto'} em diante; o resto fica em cinza (sem classificação). Com a planilha ligada, vale a coluna "Novo x Recompra" da BASE TRATADA.`:E.dados.nr_fonte==='tratada'?'A divisão segue a coluna "Novo x Recompra" da BASE TRATADA: cliente padronizado pelo DE-PARA, novo = primeira compra do cliente na base, e quem já comprava antes de 2026 conta como recompra.':E.dados.nr_fonte==='painel'?'Calculado pelo painel com as regras da BASE TRATADA: cliente padronizado pelo DE-PARA CLIENTES, novo = primeira compra do cliente na base, e quem está marcado como "anterior a 2026" na aba CLIENTES conta como recompra.':'A divisão segue a coluna "Cliente novo ou recompra?", preenchida pelos vendedores.'} Canal de origem (Instagram, indicação etc.) não é registrado hoje.</div>`;
 
   const meses=[]; for(let i=11;i>=0;i--) meses.push(somaMes(E.mes,-i));
   graficoEvolucao(meses.map(m=>({m,s:resumo(linhas([m]))})),peRef().valor);
@@ -1175,26 +1187,88 @@ function cfgVendedores(){
   $('vendCfg').innerHTML=`<div class="tw"><table><thead><tr><th>Nome na Conta Azul</th><th class="v">Vendas (24 meses)</th><th class="v">Última venda</th><th>Situação</th></tr></thead><tbody>${lista.map(v=>{ const off=ina.has(nv(v.nome)); return `<tr><td><b>${esc(v.nome)}</b></td><td class="v">${brl(v.t)}</td><td class="v">${v.ult?v.ult.split('-').reverse().join('/'):'—'}</td><td><label class="sw"><input type="checkbox" data-vend="${esc(v.nome)}" ${off?'':'checked'}><span></span>${off?'<em class="off">Inativo · não é vendedor</em>':'<em>Ativo · vendedor</em>'}</label></td></tr>`; }).join('')}</tbody></table></div>`;
   $('vendCfg').querySelectorAll('[data-vend]').forEach(c=>c.addEventListener('change',()=>{ const n=c.dataset.vend; let l=(E.vcfg?.inativos||[]).filter(x=>nv(x)!==nv(n)); if(!c.checked) l.push(n); salvarVendedores(l).catch(e=>alert(e.message)); }));
 }
+// ---------- comissão: faixas e apuração ----------
+function faixasCom(){ const R=E.dados.regras||{}; return (R.comissao_faixas&&R.comissao_faixas.length?R.comissao_faixas:[{de:R.comissao_inicio||15000,pct:1},{de:R.comissao_teto||50000,pct:5}]).slice().sort((a,b)=>a.de-b.de); }
+function pctCom(f){ let p=0; for(const x of faixasCom()) if(f>=x.de) p=x.pct; return p; }
+function proxFaixa(f){ return faixasCom().find(x=>x.de>f)||null; }
+const fmtPct=(p)=>(p||0).toLocaleString('pt-BR',{maximumFractionDigits:2})+'%';
+// comissão de um vendedor num conjunto de meses: apurada mês a mês (cada mês na sua faixa) e somada
+function comissaoDe(nome,meses){ let fat=0,com=0; const por=[]; for(const m of meses){ const f=semFiltro(()=>linhas([m])).filter(l=>l.v===nome&&!l.cs).reduce((s2,l)=>s2+l.t,0); const p=pctCom(f); fat+=f; com+=f*p/100; por.push({m,f,p,c:f*p/100}); } return {fat,com,por}; }
+
 function pgVendedores(j){
-  const ls=linhas(j.atual), tot=ls.reduce((s,l)=>s+l.t,0)||1, R=E.dados.regras, mesMode=E.periodo==='mes';
+  const ls=linhas(j.atual), tot=ls.reduce((s,l)=>s+l.t,0)||1, R=E.dados.regras, mesMode=E.periodo==='mes', FX=faixasCom(), topo=FX[FX.length-1];
   const porV=new Map(); ls.forEach(l=>{ const g=porV.get(l.v)||[]; g.push(l); porV.set(l.v,g); });
   const lista=[...porV.entries()].map(([nome,g])=>({nome,r:resumo(g)})).sort((a,b)=>(a.nome===NAO_VEND)-(b.nome===NAO_VEND)||b.r.fat-a.r.fat);
   cfgVendedores();
   $('thRegua').hidden=!mesMode;
   const inaS=new Set((E.vcfg?.inativos||[]).map(nv));
   (E.dados.vendedores_cadastrados||[]).forEach(nm=>{ if(!porV.has(nm)&&!inaS.has(nv(nm))&&![...porV.keys()].some(k=>String(k).toLowerCase()===nm.toLowerCase().trim())&&!Object.values(E.filtros).some(Boolean)) lista.push({nome:nm,r:resumo([])}); });
-  $('vendNota').textContent=mesMode?'Comissão sobre o faturamento (data e valor da venda), como a Visu pratica. A régua compara o faturamento do mês com R$ 15 mil (começa em 1%) e R$ 50 mil (libera 5%, sem teto). Os traços na barra marcam esses dois pontos.':'A régua da comissão aparece quando o período é um mês só, porque a comissão é apurada mês a mês.';
-  const esc2=Math.max(R.comissao_teto*1.15,...lista.map(v=>v.r.fat));
-  $('tbVend').innerHTML=lista.length?lista.map(v=>{ const f=v.r.fat, n=v.r.nr.novo;
-    const st=f>=R.comissao_teto?['p-ok','5% liberado']:f>=R.comissao_inicio?['p-mid',`faltam ${brl(R.comissao_teto-f)} p/ 5%`]:['p-no',`faltam ${brl(R.comissao_inicio-f)} p/ 1%`];
+  $('vendSub').textContent=`Comissão sobre o faturamento do mês: ${FX.map(x=>`${fmtPct(x.pct)} a partir de ${curto(x.de)}`).join(' · ')}, sem teto`;
+  const filtrado=Object.values(E.filtros).some(Boolean);
+  $('vendNota').textContent=(mesMode?'Comissão sobre o faturamento (data e valor da venda), como a Visu pratica. O percentual da faixa vale sobre todo o faturamento do mês do vendedor. Os traços na barra marcam o início de cada faixa.':'Período com mais de um mês: a comissão é apurada mês a mês (cada mês na sua faixa) e somada; o "% liberado" é o efetivo do período.')+(filtrado?' A comissão considera todas as vendas do vendedor no mês, sem os filtros de produto, cliente ou tipo.':'');
+  const esc2=Math.max(topo.de*1.15,...lista.map(v=>v.r.fat));
+  let totCom=0;
+  $('tbVend').innerHTML=lista.length?lista.map(v=>{ const f=v.r.fat, n=v.r.nr.novo, semC=v.nome===NAO_VEND;
+    const ap=semC?null:comissaoDe(v.nome,j.atual), fC=ap?ap.fat:f, p=mesMode?pctCom(fC):(ap&&ap.fat?ap.com/ap.fat*100:0), com=ap?ap.com:0; totCom+=com;
+    const px=proxFaixa(fC);
+    const st=!px?['p-ok',`${fmtPct(p)} liberado`]:p>0?['p-mid',`+${curto(px.de-fC)} p/ ${fmtPct(px.pct)}`]:['p-no',`+${curto(px.de-fC)} p/ ${fmtPct(px.pct)}`];
     const lsV=ls.filter(l=>l.v===v.nome);
-    return `<tr${D(()=>detPedidos('Vendedor: '+v.nome,lsV))}><td class="el"><b class="lk">${esc(v.nome)}</b></td><td class="v lk">${brl(f)}</td><td class="v">${pct(f/tot)}</td><td class="v">${int(v.r.pedidos)}</td><td class="v">${brl(v.r.ticket)}</td><td class="v">${brl(n.t)}</td><td class="v">${pct(f?n.t/f:0)}</td><td class="v">${int(n.c.size)}</td>
-      ${mesMode&&v.nome===NAO_VEND?'<td><span style="color:var(--ink3);font-size:12px">sem comissão</span></td>':mesMode?`<td style="min-width:230px"><div style="display:flex;gap:8px;align-items:center"><div class="mini" style="flex:1"><i style="width:${Math.min(f/esc2*100,100)}%"></i><u style="left:${R.comissao_inicio/esc2*100}%"></u><u style="left:${R.comissao_teto/esc2*100}%"></u></div><span class="pill ${st[0]}">${st[1]}</span></div></td>`:''}</tr>`; }).join('')
-    :'<tr><td colspan="9" class="vazio">Sem vendas com esses filtros.</td></tr>';
+    return `<tr${D(()=>detPedidos('Vendedor: '+v.nome,lsV))}><td class="el"><b class="lk">${esc(v.nome)}</b></td><td class="v lk">${brl(f)}</td><td class="v">${pct(f/tot)}</td><td class="v">${v.r.pedidos==null?'—':int(v.r.pedidos)}</td><td class="v">${v.r.ticket==null?'—':brl(v.r.ticket)}</td><td class="v" title="${brl(n.t)} de clientes novos">${pct(f?n.t/f:0)}</td><td class="v">${int(n.c.size)}</td>
+      ${mesMode?(semC?'<td><span style="color:var(--ink3);font-size:12px">sem comissão</span></td>':`<td style="min-width:150px"><div style="display:flex;gap:6px;align-items:center"><div class="mini" style="flex:1;min-width:40px"><i style="width:${Math.min(fC/esc2*100,100)}%"></i>${FX.map(x=>`<u style="left:${x.de/esc2*100}%"></u>`).join('')}</div><span class="pill ${st[0]}">${st[1]}</span></div></td>`):''}
+      <td class="v">${semC?'—':`<b>${fmtPct(p)}</b>`}</td><td class="v">${semC?'—':`<b>${brl2(com)}</b>`}</td></tr>`; }).join('')
+      +`<tr class="tot"><td>Total</td><td class="v">${brl(tot)}</td><td></td><td></td><td></td><td></td><td></td>${mesMode?'<td></td>':''}<td class="v">${pct(totCom/tot)}</td><td class="v">${brl2(totCom)}</td></tr>`
+    :'<tr><td colspan="10" class="vazio">Sem vendas com esses filtros.</td></tr>';
+  // resumo da comissão no topo
+  const comV=lista.filter(v=>v.nome!==NAO_VEND).map(v=>{ const ap=comissaoDe(v.nome,j.atual); const pp=mesMode?pctCom(ap.fat):(ap.fat?ap.com/ap.fat*100:0); return {nome:v.nome,fat:ap.fat,com:ap.com,p:pp,px:mesMode?proxFaixa(ap.fat):null}; });
+  const lib=comV.filter(v=>v.com>0), perto=mesMode?comV.filter(v=>v.px).sort((a,b)=>(a.px.de-a.fat)-(b.px.de-b.fat))[0]:null, maior=comV.slice().sort((a,b)=>b.com-a.com)[0];
+  $('comKpis').innerHTML=kpiHtml([
+    ['Comissão a pagar',brl2(comV.reduce((s2,v)=>s2+v.com,0)),`<span>${mesMode?nomeMes(E.mes):'período selecionado'} · ${FX.map(x=>`${fmtPct(x.pct)} a partir de ${curto(x.de)}`).join(' · ')}</span>`,'dest','C8'],
+    ['Vendedores com comissão liberada',`${int(lib.length)} de ${int(comV.length)}`,`<span>${lib.length?lib.map(v=>`${esc(v.nome)} ${fmtPct(v.p)}`).join(' · '):'ninguém atingiu a primeira faixa'}</span>`,'',''],
+    ['Mais perto da próxima faixa',perto?esc(perto.nome):'—',`<span>${perto?`faltam ${brl(perto.px.de-perto.fat)} para ${fmtPct(perto.px.pct)}`:mesMode?'todos já estão na faixa máxima':'escolha um mês para ver a régua'}</span>`,'',''],
+    ['Maior comissão',maior&&maior.com?brl2(maior.com):'—',`<span>${maior&&maior.com?`${esc(maior.nome)} · ${fmtPct(maior.p)} sobre ${brl(maior.fat)}`:'—'}</span>`,'',''],
+  ]);
+  // apuração dos últimos 6 meses
+  const ms=[]; for(let i=5;i>=0;i--) ms.push(somaMes(E.mes,-i));
+  const nomes=new Set(); ms.forEach(m=>semFiltro(()=>linhas([m])).forEach(l=>{ if(l.v&&l.v!==NAO_VEND&&!l.cs) nomes.add(l.v); }));
+  const ap=[...nomes].map(nome=>({nome,...comissaoDe(nome,ms)})).sort((a,b)=>b.com-a.com);
+  const totM=ms.map((m,i)=>ap.reduce((s2,a)=>s2+a.por[i].c,0));
+  $('apurSub').textContent=`Comissão a pagar por mês (${nomeMes(ms[0]).split(' ')[0]} a ${nomeMes(ms[5])}) · clique num valor para ver as vendas`;
+  $('apur').innerHTML=ap.length?`<table class="compacta"><thead><tr><th>Vendedor</th>${ms.map(m=>`<th class="v">${MES_C[+m.slice(5)-1]}</th>`).join('')}<th class="v">Total</th></tr></thead><tbody>${ap.map(a=>`<tr><td class="el"><b>${esc(a.nome)}</b></td>${a.por.map(x=>`<td class="v"${x.f?D(()=>detPedidos(`${a.nome} · ${nomeMes(x.m)} · comissão ${fmtPct(x.p)}`,semFiltro(()=>linhas([x.m])).filter(l=>l.v===a.nome&&!l.cs))):''}>${x.f?`<span class="${x.c?'lk':''}">${brl(x.c)}</span><div style="font-size:10.5px;color:var(--ink3)">${x.p?fmtPct(x.p):'abaixo de '+curto(FX[0].de)}</div>`:'<span style="color:var(--ink3)">—</span>'}</td>`).join('')}<td class="v"><b>${brl(a.com)}</b></td></tr>`).join('')}
+    <tr class="tot"><td>Total</td>${totM.map(v=>`<td class="v">${brl(v)}</td>`).join('')}<td class="v">${brl(totM.reduce((a2,b2)=>a2+b2,0))}</td></tr></tbody></table><div class="nota">Cada mês é apurado na faixa que o vendedor atingiu naquele mês. "Não vendedores" e meses sem detalhe da Conta Azul ficam de fora.</div>`:vazio('Sem vendas de vendedores nos últimos 6 meses.');
+  desenharFaixas();
+}
+function desenharFaixas(){
+  const FX=faixasCom(), adm=(E.verComo?E.verComo.perfil:E.eu?.perfil)==='adm', padrao=!(E.dados.regras?.comissao_faixas_personalizadas);
+  const linhasF=FX.map((x,i)=>`<tr><td>${adm?`a partir de <input class="fxDe" type="number" min="0" step="500" value="${x.de}" style="width:110px" aria-label="Faturamento mínimo da faixa ${i+1}">`:'a partir de <b>'+brl(x.de)+'</b>'}</td><td class="v">${adm?`<input class="fxPct" type="number" min="0.1" max="100" step="0.5" value="${x.pct}" style="width:70px" aria-label="Percentual da faixa ${i+1}"> %`:'<b>'+fmtPct(x.pct)+'</b>'}</td>${adm?`<td class="v"><button class="bt2 del fxDel" type="button" data-i="${i}" title="Remover faixa">✕</button></td>`:''}</tr>`).join('');
+  $('faixasCom').innerHTML=`<table class="compacta"><thead><tr><th>Faturamento do mês</th><th class="v">Comissão</th>${adm?'<th></th>':''}</tr></thead><tbody>${linhasF}</tbody></table>
+    ${adm?`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px"><button class="bt2" type="button" id="fxAdd">+ Faixa</button><button class="bt2 pri" type="button" id="fxSalvar">Salvar faixas</button><button class="bt2" type="button" id="fxPadrao">Voltar ao padrão</button><span id="fxMsg" class="nota" style="margin:0;align-self:center"></span></div>`:''}
+    <div class="nota">Pela especificação: começa em 1% a partir de R$ 15 mil e chega a 5% a partir de R$ 50 mil, sem teto. <b>As faixas intermediárias (entre 1% e 5%) ainda precisam ser confirmadas com a Visu</b>${adm?'; inclua-as aqui quando vierem':''}.</div>`;
+  if(!adm) return;
+  const ler=()=>[...$('faixasCom').querySelectorAll('tbody tr')].map(tr=>({de:+tr.querySelector('.fxDe').value,pct:+tr.querySelector('.fxPct').value}));
+  const aplicar=(fx)=>{ E.dados.regras.comissao_faixas=fx; desenhar(); };
+  $('fxAdd').onclick=()=>{ const fx=ler(); const u=fx[fx.length-1]||{de:0,pct:0}; fx.push({de:u.de+10000,pct:Math.min(u.pct+1,100)}); E.dados.regras.comissao_faixas=fx; desenharFaixas(); };
+  $('faixasCom').querySelectorAll('.fxDel').forEach(b=>b.onclick=()=>{ const fx=ler(); fx.splice(+b.dataset.i,1); if(!fx.length) return; E.dados.regras.comissao_faixas=fx; desenharFaixas(); });
+  $('fxSalvar').onclick=async()=>{ const fx=ler().filter(x=>x.pct>0).sort((a,b)=>a.de-b.de); try{ const r=PREVIA?{faixas:fx}:await api('/api/comissao',{method:'POST',body:JSON.stringify({faixas:fx})}); aplicar(r.faixas); $('fxMsg').textContent='Faixas salvas.'; }catch(e){ $('fxMsg').textContent=e.message; } };
+  $('fxPadrao').onclick=async()=>{ try{ const r=PREVIA?{faixas:[{de:15000,pct:1},{de:50000,pct:5}]}:await api('/api/comissao',{method:'POST',body:JSON.stringify({faixas:null})}); aplicar(r.faixas); }catch(e){ $('fxMsg').textContent=e.message; } };
 }
 
 // ---------- 5. qualidade ----------
-const ROT_COL={data:'Data da venda',mes:'Mês',cliente:'Cliente',pedido:'Nome do pedido (Trello)',codigo:'Cód. interno',vendedor:'Vendedor',tipoVenda:'Tipo de venda',novoRecompra:'Cliente novo ou recompra?',tipoProduto:'Tipo de produto',material:'Material',especificacao:'Especificação',cor:'Cor',quantidade:'Quantidade',valorUnit:'Valor/und',total:'Total',pag1:'1º pagamento',pag2:'2º pagamento',pago100:'Pedido 100% pago',formaPagamento:'Forma de pagamento',prazoEntrega:'Prazo de entrega',frete:'Frete',segmento:'Segmento',observacao:'Observação'};
+const ROT_COL={data:'Data da venda',mes:'Mês',cliente:'Cliente (padronizado)',pedido:'Nome do pedido (Trello)',codigo:'Cód. interno',vendedor:'Vendedor',tipoVenda:'Tipo de venda',novoRecompra:'Novo x Recompra',tipoProduto:'Tipo de produto',material:'Material',especificacao:'Especificação',cor:'Cor',quantidade:'Quantidade',valorUnit:'Valor/und',total:'Total',pag1:'1º pagamento',pag2:'2º pagamento',pago100:'Pedido 100% pago',formaPagamento:'Forma de pagamento',prazoEntrega:'Prazo de entrega',frete:'Frete',segmento:'Segmento',observacao:'Observação'};
+
+// resumo do tratamento de clientes (BASE TRATADA / DE-PARA) e das linhas a conferir
+function tratamentoHtml(m){
+  if(!m) return '';
+  const dp=m.de_para, dup=m.duplicados||[], tr=m.tratamento;
+  const linhas=[];
+  linhas.push(tr==='base_tratada'?`Lendo a aba <b>${esc(m.aba||'BASE TRATADA')}</b>: cliente padronizado e "Novo x Recompra" vêm prontos da planilha.${m.base_dados?` Pagamento, prazo e especificação completados pela aba ${esc(m.base_dados.aba)} (${int(m.base_dados.linhas_unidas)} de ${int(m.base_dados.linhas)} linhas).`:''}`
+    :tr==='painel'?`A planilha não tem a aba BASE TRATADA: o painel aplicou o mesmo tratamento sozinho a partir da aba ${esc(m.aba||'')}.`
+    :'Sem DE-PARA CLIENTES: clientes e novo × recompra seguem como foram digitados (marcação dos vendedores).');
+  if(dp) linhas.push(`DE-PARA CLIENTES: ${int(dp.nomes)} nomes mapeados${dp.anteriores_2026!=null?` · ${int(dp.anteriores_2026)} clientes marcados como anteriores a 2026 (aba CLIENTES)`:''}.`);
+  if(m.nomes_novos) linhas.push(`<b>${int(m.nomes_novos)} linhas com nome de cliente fora do DE-PARA.</b> Inclua esses nomes no fim da aba DE-PARA CLIENTES.`);
+  let h=`<div class="nota" style="margin-top:12px">${linhas.join('<br>')}</div>`;
+  if(dup.length) h+=`<div class="nota alerta" style="margin-top:10px"><b>${int(dup.length)} linhas marcadas como possível lançamento duplicado</b> (coluna "Possível lançamento duplicado?"). Enquanto a Visu não confirmar, elas continuam somando no faturamento.<div class="tw" style="margin-top:6px"><table><thead><tr><th>Linha</th><th>Data</th><th>Cliente</th><th>Produto</th><th class="v">Total</th></tr></thead><tbody>${dup.map(d=>`<tr><td>${d.linha}</td><td class="num">${(d.data||'').split('-').reverse().join('/')}</td><td>${esc(nomeBonito(d.cliente||''))}</td><td>${esc(nomeBonito(d.produto||''))}</td><td class="v">${brl2(d.total)}</td></tr>`).join('')}</tbody></table></div></div>`;
+  return h;
+}
 function pgDados(){
   const q=E.dados.qualidade, mapa=q.colunas||{}, fonte=E.dados.fonte;
   if(fonte!=='planilha'){
@@ -1204,7 +1278,7 @@ function pgDados(){
     const rec=mapa.reconhecidas||{};
     $('colSub').textContent=`${Object.keys(rec).length} de ${Object.keys(ROT_COL).length} reconhecidas · cabeçalho na linha ${mapa.linha_cabecalho}`;
     $('colunas').innerHTML=`<div class="tw"><table><thead><tr><th>Campo do painel</th><th>Coluna na planilha</th></tr></thead><tbody>
-      ${Object.keys(ROT_COL).map(k=>`<tr><td>${ROT_COL[k]}</td><td>${rec[k]?`<span class="status ok">✓ ${esc(rec[k])}</span>`:`<span class="status at">não encontrada</span>`}</td></tr>`).join('')}</tbody></table></div>`;
+      ${Object.keys(ROT_COL).map(k=>`<tr><td>${ROT_COL[k]}</td><td>${rec[k]?`<span class="status ok">✓ ${esc(rec[k])}</span>`:`<span class="status at">não encontrada</span>`}</td></tr>`).join('')}</tbody></table></div>`+tratamentoHtml(mapa);
   }
   const f=q.faltando, ROTV={data:'Data ou mês',pedido:'Código do pedido',novo_recompra:'Novo ou recompra',tipo_produto:'Tipo de produto',material:'Material',cor:'Cor',quantidade:'Quantidade',total:'Total'};
   $('vazSub').textContent=`${int(q.total_linhas)} linhas lidas`;
@@ -1574,7 +1648,7 @@ const diasAtr=(v)=>Math.round((Date.parse(hojeISO())-Date.parse(v))/864e5);
 // ---------- menu lateral e permissões por perfil ----------
 const MENU=[
   {grupo:'Gestão',ico:'<path d="M3 3h8v8H3zM13 3h8v5h-8zM13 10h8v11h-8zM3 13h8v8H3z"/>',itens:[['painel','Painel executivo','Vendas, resultado, caixa e o que pede decisão'],['indicadores','Quadro de indicadores','Comercial, resultado e caixa com tendência de 6 meses']]},
-  {grupo:'Comercial',ico:'<path d="M3 4h2l2.4 11h11.2L21 7H7" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="9" cy="19" r="1.6"/><circle cx="17" cy="19" r="1.6"/>',itens:[['vendas','Vendas','Pedidos, ticket médio e novas vendas × recompra (R1, R2, R3)'],['produtos','Produtos e mix','Tipo de produto, tecido e cor em peças ou R$ (R4) e curva ABC'],['clientes','Clientes','Curva ABC, faixas de valor, segmento e quem parou de comprar (C3, C5, C6)'],['vendedores','Vendedores e comissão','Faturamento, clientes novos e régua da comissão (C7, C8)'],['pedidos','Pedidos e entregas','Ciclo de pagamento e entregas das próximas semanas (C4)']]},
+  {grupo:'Comercial',ico:'<path d="M3 4h2l2.4 11h11.2L21 7H7" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="9" cy="19" r="1.6"/><circle cx="17" cy="19" r="1.6"/>',itens:[['vendas','Vendas','Pedidos, ticket médio e novas vendas × recompra (R1, R2, R3)'],['produtos','Produtos e mix','Tipo de produto, tecido e cor em peças ou R$ (R4) e curva ABC'],['clientes','Clientes','Curva ABC, faixas de valor, segmento e quem parou de comprar (C3, C5, C6)'],['vendedores','Vendedores e comissão','Faturamento, clientes novos, régua e apuração da comissão (C7, C8)'],['pedidos','Pedidos e entregas','Ciclo de pagamento e entregas das próximas semanas (C4)']]},
   {grupo:'Financeiro',ico:'<circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 6v12M15 9c0-1.2-1.3-2-3-2s-3 .8-3 2 1.3 2 3 2 3 .8 3 2-1.3 2-3 2-3-.8-3-2" fill="none" stroke="currentColor" stroke-width="1.8"/>',itens:[['dre','DRE gerencial','Receita, custos, despesas e resultado por competência ou caixa'],['equilibrio','Margem e ponto de equilíbrio','Custos fixos × variáveis, margem de contribuição e ponto de equilíbrio (C1)'],['caixa','Fluxo de caixa','Saldo nos bancos, realizado e projeção de 13 semanas'],['receber','Contas a receber','Inadimplência por idade e por cliente'],['pagar','Contas a pagar','Despesas por categoria, centro de custo e fornecedor']]},
   {grupo:'Controle',ico:'<path d="M6 2h9l4 4v16H6z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 11l2 2 4-4" fill="none" stroke="currentColor" stroke-width="2"/>',itens:[['conciliacao','Planilha × sistema','Por que o total do mês difere entre a planilha do comercial e a Conta Azul'],['dados','Qualidade dos dados','Colunas reconhecidas, campos em branco e grafias diferentes'],['versoes','Versões do painel','O que mudou em cada entrega']]},
   {grupo:'Administração',ico:'<circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.6 2.7-6 6-6s6 2.4 6 6z"/><circle cx="17" cy="9" r="2.4"/><path d="M15.5 14.2c2.9.3 5.5 2.4 5.5 5.8h-4.5"/>',itens:[['usuarios','Usuários e permissões','Perfis, senhas temporárias e o que cada pessoa vê']]},
@@ -1584,7 +1658,7 @@ const MESES_PAG=Object.fromEntries(TODAS.map(p=>[p,1]));
 const ITEM=Object.fromEntries(MENU.flatMap(g=>g.itens.map(i=>[i[0],{rot:i[1],ctx:i[2],grupo:g.grupo}])));
 const GRUPO_DE=Object.fromEntries(TODAS.map(p=>[p,ITEM[p].grupo]));
 const COMP=['vendas','produtos','clientes','vendedores','pedidos'], FINP=['dre','equilibrio','caixa','receber','pagar'];
-const PADRAO={adm:TODAS,diretor:TODAS.filter(p=>p!=='usuarios'),comercial:[...COMP,'conciliacao','versoes'],financeiro:['painel','indicadores',...FINP,'conciliacao','dados','versoes']};
+const PADRAO={adm:TODAS,diretor:TODAS.filter(p=>p!=='usuarios'),comercial:[...COMP,'conciliacao','versoes'],financeiro:['painel','indicadores',...FINP,'conciliacao','dados','versoes'],consultor:[...COMP]};
 function paginasDe(u){ if(!u) return []; const base=PADRAO[u.perfil]||[]; if(u.perfil==='adm'||!Array.isArray(u.paginas)) return base; const r=base.filter(p=>u.paginas.includes(p)); return r.length?r:base.slice(0,1); }
 // páginas que aparecem agora (com o "Ver o painel como" do ADM)
 function paginasAtivas(){ if(E.verComo) return paginasDe(E.verComo); return E.eu?.paginas||paginasDe(E.eu)||TODAS; }
@@ -1746,7 +1820,7 @@ function mcTab(){
 function pgControle(){ pgConciliacao(); pgDados(); pgVersoes(); }
 
 // ---------- usuários (ADM) ----------
-const PERF={adm:'ADM',diretor:'Diretor',comercial:'Comercial',financeiro:'Financeiro'};
+const PERF={adm:'ADM',diretor:'Diretor',comercial:'Comercial',financeiro:'Financeiro',consultor:'Consultor externo'};
 async function montarVerComo(){
   let us=[]; try{ us=(await api('/api/usuarios')).usuarios; }catch(e){}
   const ops=[['','Administrador (eu)'],...Object.keys(PERF).filter(k=>k!=='adm').map(k=>['p:'+k,'Perfil '+PERF[k]]),...us.filter(u=>u.perfil!=='adm').map(u=>['u:'+u.id,u.nome+' · '+PERF[u.perfil]])];
@@ -1771,11 +1845,11 @@ async function pgUsuarios(){
     ?`<span><b>A variável DATABASE_URL está no Render, mas o painel não conseguiu entrar no banco.</b> Enquanto isso, usuários, senhas e a conexão com a Conta Azul se apagam a cada reinício. ${BS.erro?`Erro do banco: <code>${esc(BS.erro)}</code>. `:''}Confira no Neon se copiou o link inteiro (começa com <code>postgresql://</code> e termina com <code>?sslmode=require</code>), cole de novo no Render e salve.</span>`
     :'<span><b>Sem banco de dados: usuários, senhas e a conexão com a Conta Azul se apagam toda vez que o Render reinicia.</b> Por isso cadastros somem e o painel volta para os dados de demonstração. No Render, abra o serviço → <b>Environment</b> → <b>Add Environment Variable</b>, nome <code>DATABASE_URL</code> e, como valor, o link do banco gratuito do Neon (neon.tech → seu projeto → <b>Connect</b>). Salve e espere o painel reiniciar.</span>';
   const n=(p)=>US.lista.filter(u=>u.perfil===p).length;
-  $('usSub').textContent=`${pl(n('diretor'),'diretor','diretores')} · ${pl(n('adm'),'ADM','ADMs')} · senha temporária vale 7 dias e precisa ser trocada no primeiro acesso`;
+  $('usSub').textContent=`${pl(n('diretor'),'diretor','diretores')} · ${pl(n('consultor'),'consultor externo','consultores externos')} · ${pl(n('adm'),'ADM','ADMs')} · senha temporária vale 7 dias e precisa ser trocada no primeiro acesso`;
   const dt=(x)=>x?new Date(x).toLocaleDateString('pt-BR')+' '+new Date(x).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):'—';
   $('usLista').innerHTML=`<table><thead><tr><th>Nome</th><th>E-mail (login)</th><th>Perfil</th><th>Situação</th><th>Último acesso</th><th></th></tr></thead><tbody>${US.lista.map(u=>`<tr>
     <td><b>${esc(u.nome)}</b></td><td class="el">${u.email?esc(u.email):'<span style="color:var(--red)">cadastre o e-mail (Editar)</span>'}</td>
-    <td><span class="pill" style="${u.perfil==='adm'?'background:var(--orange);color:#fff':u.perfil==='diretor'?'background:var(--teal);color:#241E48':'background:var(--barSoft);color:var(--ink)'}">${PERF[u.perfil]||u.perfil}</span>${Array.isArray(u.paginas)&&u.perfil!=='adm'?`<div style="font-size:11px;color:var(--ink3);margin-top:3px">${paginasDe(u).length} de ${PADRAO[u.perfil].length} páginas</div>`:''}</td>
+    <td><span class="pill" style="${u.perfil==='adm'?'background:var(--orange);color:#fff':u.perfil==='diretor'?'background:var(--teal);color:#241E48':u.perfil==='consultor'?'background:#8A2E9A;color:#fff':'background:var(--barSoft);color:var(--ink)'}">${PERF[u.perfil]||u.perfil}</span>${u.empresa?`<div style="font-size:11px;color:var(--ink3);margin-top:3px">${esc(u.empresa)}</div>`:''}${u.valido_ate?`<div style="font-size:11px;margin-top:3px;color:${Date.parse(u.valido_ate+'T23:59:59-03:00')<Date.now()?'var(--red)':'var(--ink3)'}">acesso até ${u.valido_ate.split('-').reverse().join('/')}</div>`:''}${Array.isArray(u.paginas)&&u.perfil!=='adm'?`<div style="font-size:11px;color:var(--ink3);margin-top:3px">${paginasDe(u).length} de ${PADRAO[u.perfil].length} páginas</div>`:''}</td>
     <td>${u.senha_criada?'<span class="status ok">✓ ativo</span>':u.temporaria?`<span class="status at">senha temporária · até ${new Date(u.temp_expira_em).toLocaleDateString('pt-BR')}</span>`:'<span class="status at">sem acesso ainda</span>'}</td><td class="num">${dt(u.ultimo_acesso)}</td>
     <td style="white-space:nowrap;text-align:right"><button class="bt2 ${u.senha_criada?'':'pri'}" data-temp="${u.id}">${u.senha_criada?'Redefinir senha':'Senha temporária'}</button> <button class="bt2" data-conv="${u.id}" title="Alternativa: link pessoal para a pessoa criar a senha">Link</button> <button class="bt2" data-ed="${u.id}">Editar</button> ${u.perfil!=='adm'?`<button class="bt2" data-perm="${u.id}">Permissões</button>`:''} ${u.id!==E.eu?.id?`<button class="bt2 del" data-del="${u.id}">Remover</button>`:''}</td></tr>`).join('')}</tbody></table>`;
   $('usLista').querySelectorAll('[data-conv]').forEach(b=>b.addEventListener('click',async()=>{ const u=US.lista.find(x=>x.id===b.dataset.conv);
@@ -1786,7 +1860,7 @@ async function pgUsuarios(){
     try{ US.link=null; US.temp=await api(`/api/usuarios/${u.id}/senha-temporaria`,{method:'POST'}); mostrarLink(); pgUsuarios(); }catch(e){ alert(e.message); } }));
   $('usLista').querySelectorAll('[data-perm]').forEach(b=>b.addEventListener('click',()=>abrirPerm(US.lista.find(x=>x.id===b.dataset.perm))));
   desenharMatriz();
-  $('usLista').querySelectorAll('[data-ed]').forEach(b=>b.addEventListener('click',()=>{ const u=US.lista.find(x=>x.id===b.dataset.ed); const f=$('usForm'); f.id.value=u.id; f.nome.value=u.nome; f.email.value=u.email; f.perfil.value=u.perfil; $('usFormTit').textContent='Editar '+u.nome; $('usCancelar').hidden=false; f.nome.focus(); }));
+  $('usLista').querySelectorAll('[data-ed]').forEach(b=>b.addEventListener('click',()=>{ const u=US.lista.find(x=>x.id===b.dataset.ed); const f=$('usForm'); f.id.value=u.id; f.nome.value=u.nome; f.email.value=u.email; f.perfil.value=u.perfil; f.empresa.value=u.empresa||''; f.valido_ate.value=u.valido_ate||''; consCampos(); $('usFormTit').textContent='Editar '+u.nome; $('usCancelar').hidden=false; f.nome.focus(); }));
   $('usLista').querySelectorAll('[data-del]').forEach(b=>b.addEventListener('click',async()=>{ const u=US.lista.find(x=>x.id===b.dataset.del); if(!confirm(`Remover o acesso de ${u.nome}?`)) return; await api(`/api/usuarios/${u.id}`,{method:'DELETE'}); pgUsuarios(); }));
   mostrarLink();
 }
@@ -1814,14 +1888,16 @@ function mostrarLink(){
   $('usCopiar').addEventListener('click',e=>cp(L.link,e.target)); $('usCopiarMsg').addEventListener('click',e=>cp(msg,e.target));
 }
 $('usForm').addEventListener('submit',async e=>{ e.preventDefault(); const f=e.target; $('usErro').textContent='';
-  try{ await api('/api/usuarios',{method:'POST',body:JSON.stringify({id:f.id.value||undefined,nome:f.nome.value,email:f.email.value,perfil:f.perfil.value})}); f.reset(); f.id.value=''; $('usFormTit').textContent='Novo usuário'; $('usCancelar').hidden=true; pgUsuarios(); }
+  try{ await api('/api/usuarios',{method:'POST',body:JSON.stringify({id:f.id.value||undefined,nome:f.nome.value,email:f.email.value,perfil:f.perfil.value,empresa:f.empresa.value,valido_ate:f.perfil.value==='consultor'?f.valido_ate.value:''})}); f.reset(); f.id.value=''; $('usFormTit').textContent='Novo usuário'; $('usCancelar').hidden=true; pgUsuarios(); }
   catch(err){ $('usErro').textContent=err.message; } });
+const consCampos=()=>{ const on=$('usPerfil').value==='consultor'; document.querySelectorAll('.us-cons').forEach(x=>x.hidden=!on); if(on&&!$('usValidade').value){ const d=new Date(Date.now()+90*864e5); $('usValidade').value=d.toISOString().slice(0,10); } };
+$('usPerfil').addEventListener('change',consCampos);
 $('usCancelar').addEventListener('click',()=>{ const f=$('usForm'); f.reset(); f.id.value=''; $('usFormTit').textContent='Novo usuário'; $('usCancelar').hidden=true; });
 async function carregarEu(){
   try{ E.eu=PREVIA?(window.__EU__||{id:'morgana',nome:'Morgana Limeira',perfil:'adm'}):await (await fetch('/api/eu',{headers:{Accept:'application/json'}})).json(); }catch(e){ E.eu=null; }
   if(!E.eu?.perfil) return;
   if(E.eu.perfis) Object.assign(PADRAO,E.eu.perfis);
-  if(!E.eu.perfis_originais) E.eu.perfis_originais={diretor:[...PADRAO.diretor],comercial:[...PADRAO.comercial],financeiro:[...PADRAO.financeiro]};
+  if(!E.eu.perfis_originais) E.eu.perfis_originais={diretor:[...PADRAO.diretor],comercial:[...PADRAO.comercial],financeiro:[...PADRAO.financeiro],consultor:[...PADRAO.consultor]};
   if(!E.eu.paginas) E.eu.paginas=paginasDe(E.eu);
   iniciarVisual();
   $('euNome').textContent=E.eu.nome; $('euPerfil').textContent=PERF[E.eu.perfil]||E.eu.perfil;
@@ -1834,9 +1910,9 @@ let PERMU=null;
 
 // matriz "O que cada perfil vê": o ADM marca/desmarca e vale para todas as pessoas do perfil
 function desenharMatriz(){
-  const ed=['diretor','comercial','financeiro'], orig=E.eu?.perfis_originais||{};
+  const ed=['diretor','comercial','financeiro','consultor'], orig=E.eu?.perfis_originais||{};
   const mudou=(k)=>orig[k]&&(orig[k].length!==PADRAO[k].length||orig[k].some(p=>!PADRAO[k].includes(p)));
-  $('usMatriz').innerHTML=`<table><thead><tr><th>Página</th>${Object.keys(PERF).map(k=>`<th style="text-align:center">${PERF[k]}${mudou(k)?'<div style="font-size:10px;font-weight:600;color:var(--orange);text-transform:none;letter-spacing:0">personalizado</div>':''}</th>`).join('')}</tr></thead><tbody>${MENU.map(g=>`<tr class="grp"><td colspan="5" style="font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--orange);padding-top:12px">${g.grupo}</td></tr>`+g.itens.map(i=>`<tr><td>${i[1]}</td>${Object.keys(PERF).map(k=>{ const on=PADRAO[k].includes(i[0]);
+  $('usMatriz').innerHTML=`<table><thead><tr><th>Página</th>${Object.keys(PERF).map(k=>`<th style="text-align:center">${PERF[k]}${mudou(k)?'<div style="font-size:10px;font-weight:600;color:var(--orange);text-transform:none;letter-spacing:0">personalizado</div>':''}</th>`).join('')}</tr></thead><tbody>${MENU.map(g=>`<tr class="grp"><td colspan="6" style="font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--orange);padding-top:12px">${g.grupo}</td></tr>`+g.itens.map(i=>`<tr><td>${i[1]}</td>${Object.keys(PERF).map(k=>{ const on=PADRAO[k].includes(i[0]);
       if(k==='adm'||i[0]==='usuarios') return `<td style="text-align:center">${on?'<span class="status ok">✓</span>':'<span style="color:var(--ink3)">—</span>'}</td>`;
       return `<td style="text-align:center"><input type="checkbox" data-pf="${k}" value="${i[0]}" ${on?'checked':''} aria-label="${PERF[k]}: ${esc(i[1])}"></td>`; }).join('')}</tr>`).join('')).join('')}
     <tr><td></td><td></td>${ed.map(k=>`<td style="text-align:center">${mudou(k)?`<button class="bt2" type="button" data-pfrest="${k}" style="font-size:11.5px;padding:4px 8px">Voltar ao padrão</button>`:''}</td>`).join('')}</tr></tbody></table><div class="nota" id="usMatrizMsg">Marque ou desmarque para mudar o que <b>todas</b> as pessoas daquele perfil veem. Vale na hora, inclusive para quem já está logado (ao recarregar). Para tirar páginas de uma só pessoa, use "Permissões" na lista acima.</div>`;

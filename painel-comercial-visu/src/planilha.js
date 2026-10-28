@@ -40,6 +40,11 @@ const COLUNAS = {
   frete: ['frete', 'frete da visu ou do cliente', 'frete (visu/cliente)'],
   segmento: ['segmento', 'segmento do cliente'],
   observacao: ['observacao', 'observacoes', 'obs', 'obs.'],
+  // colunas da BASE TRATADA (Tiago, out/2026)
+  clienteLancado: ['cliente (como lancado)', 'nome como lancado'],
+  duplicado: ['possivel lancamento duplicado?', 'possivel lancamento duplicado'],
+  mapeamento: ['mapeamento'],
+  anterior2026: ['cliente anterior a 2026?', 'cliente anterior a 2026? (sim)'],
 };
 
 export const sem = (s) => String(s ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[º°]/g, 'o').replace(/\s+/g, ' ').trim();
@@ -162,7 +167,8 @@ export function normalizarLinhas(matriz) {
     if (!total && quantidade && unit) total = quantidade * unit;
     const data = dataISO(val(lin, 'data'));
     const mes = data ? data.slice(0, 7) : mesDe(val(lin, 'mes'), env.PLANILHA_ANO_PADRAO);
-    const clienteOriginal = String(val(lin, 'cliente')).trim();
+    const clienteOriginal = String(val(lin, 'clienteLancado') || val(lin, 'cliente')).trim();
+    const clientePadrao = String(val(lin, 'cliente')).trim();
     const pedidoTxt = String(val(lin, 'codigo') || val(lin, 'pedido')).trim();
     if (!clienteOriginal && !total) continue; // linhas vazias
     if (!clienteOriginal && !data) continue; // linha de TOTAL ou subtotal no fim da planilha
@@ -170,7 +176,7 @@ export function normalizarLinhas(matriz) {
     linhas.push({
       linha: i + 1,
       data, mes,
-      cliente: clienteBase(clienteOriginal) || 'Sem cliente',
+      cliente: (idx.clienteLancado !== undefined ? clientePadrao : clienteBase(clienteOriginal)) || 'Sem cliente',
       cliente_original: clienteOriginal,
       pedido: pedidoTxt || `${clienteBase(clienteOriginal)}|${data || mes}`,
       pedido_informado: !!pedidoTxt,
@@ -188,6 +194,8 @@ export function normalizarLinhas(matriz) {
       prazo_entrega: dataISO(val(lin, 'prazoEntrega')),
       frete: String(val(lin, 'frete')).trim(),
       segmento: String(val(lin, 'segmento')).trim(),
+      duplicado: sem(val(lin, 'duplicado')) === 'verificar',
+      nome_novo: sem(val(lin, 'mapeamento')).includes('novo'),
     });
   }
   return {
@@ -226,31 +234,88 @@ async function tokenContaServico() {
 }
 
 // escolhe a aba: PLANILHA_ABA, senão a que tiver mais vendas reconhecidas
+const matrizDe = (wb, n) => XLSX.utils.sheet_to_json(wb.Sheets[n], { header: 1, raw: true, defval: '' });
+const acharAba = (wb, teste) => wb.SheetNames.find((n) => teste(sem(n)));
+
+// DE-PARA CLIENTES (col. A = nome como lançado, col. B = cliente padronizado) e CLIENTES (col. "Cliente anterior a 2026?")
+function lerTratamento(wb) {
+  const t = { depara: null, anteriores: null };
+  const dp = acharAba(wb, (n) => /de.?para/.test(n) && n.includes('client'));
+  if (dp) {
+    t.depara = new Map();
+    for (const [de, para] of XLSX.utils.sheet_to_json(wb.Sheets[dp], { header: 1, raw: false, defval: '' }).slice(1)) if (sem(de) && String(para).trim()) t.depara.set(sem(de), String(para).trim());
+    t.aba_depara = dp;
+  }
+  const cl = acharAba(wb, (n) => n === 'clientes');
+  if (cl) {
+    const m = matrizDe(wb, cl), h = (m[0] || []).map(sem);
+    const iC = h.findIndex((x) => x.startsWith('cliente padronizado')), iA = h.findIndex((x) => x.startsWith('cliente anterior a 2026'));
+    if (iC >= 0 && iA >= 0) { t.anteriores = new Set(m.slice(1).filter((r) => sem(r[iA]).startsWith('s')).map((r) => sem(r[iC]))); t.aba_clientes = cl; }
+  }
+  return t;
+}
+
+// Aplica o mesmo tratamento da BASE TRATADA quando a planilha só tem a base crua:
+// cliente padronizado pelo DE-PARA; novo = 1ª data de compra do cliente na base (e não marcado como anterior a 2026).
+export function tratarClientes(linhas, t) {
+  let nomesNovos = 0;
+  if (t.depara) for (const l of linhas) { const p = t.depara.get(sem(l.cliente_original)); if (p) l.cliente = p; else { l.nome_novo = true; nomesNovos++; } if (!l.pedido_informado || t.pedidoPorData) l.pedido = `${l.cliente}|${l.data || l.mes}`; }
+  const primeira = new Map();
+  for (const l of linhas) { const k = sem(l.cliente), d = l.data || `${l.mes}-01`; if (!primeira.has(k) || d < primeira.get(k)) primeira.set(k, d); }
+  for (const l of linhas) {
+    const k = sem(l.cliente);
+    l.novo_recompra = t.anteriores?.has(k) ? 'recompra' : (l.data || `${l.mes}-01`) === primeira.get(k) ? 'novo' : 'recompra';
+  }
+  return { nomes_novos: nomesNovos };
+}
+
+// Lê o arquivo da planilha de vendas.
+//  - com a aba BASE TRATADA: usa ela (cliente padronizado, Novo x Recompra) e completa pagamento, prazo e especificação pela BASE DE DADOS (mesma linha);
+//  - sem ela, mas com DE-PARA CLIENTES: o painel faz o tratamento sozinho a partir da base crua;
+//  - sem nada disso: usa a base como está (marcação dos vendedores).
 export function lerXlsx(bytes, aba = env.PLANILHA_ABA) {
   const wb = XLSX.read(bytes, { type: 'buffer', cellDates: false });
-  const tratada = wb.SheetNames.filter((n) => sem(n).includes('base tratada'));
-  const nomes = aba ? wb.SheetNames.filter((n) => sem(n) === sem(aba)) : tratada.length ? tratada : wb.SheetNames;
+  const tratada = aba ? null : acharAba(wb, (n) => n.includes('base tratada'));
+  const nomes = aba ? wb.SheetNames.filter((n) => sem(n) === sem(aba)) : tratada ? [tratada] : wb.SheetNames.filter((n) => !/resultado|de.?para|^clientes$/.test(sem(n)));
   if (!nomes.length) throw new Error(`A planilha não tem a aba "${aba}". Abas: ${wb.SheetNames.join(', ')}.`);
   let melhor = null;
   for (const n of nomes) {
-    const matriz = XLSX.utils.sheet_to_json(wb.Sheets[n], { header: 1, raw: true, defval: '' });
-    let r; try { r = normalizarLinhas(matriz); } catch { continue; }
+    let r; try { r = normalizarLinhas(matrizDe(wb, n)); } catch { continue; }
     const ok = !(r.mapa?.obrigatorias_faltando?.length);
     const nota = (ok ? 1e9 : 0) + (r.linhas?.length || 0);
     if (!melhor || nota > melhor.nota) melhor = { nota, r, aba: n };
   }
   if (!melhor) throw new Error('Não encontrei a aba de vendas na planilha.');
-  melhor.r.aba = melhor.aba;
-  // DE-PARA CLIENTES: coluna A = nome como foi digitado, coluna B = nome padronizado
-  const dp = wb.SheetNames.find((n) => /de.?para/.test(sem(n)) && sem(n).includes('client'));
-  if (dp) {
-    const mapa = new Map();
-    for (const [de, para] of XLSX.utils.sheet_to_json(wb.Sheets[dp], { header: 1, raw: false, defval: '' })) if (sem(de) && String(para).trim() && sem(de) !== 'de') mapa.set(sem(de), String(para).trim());
-    let trocas = 0;
-    for (const l of melhor.r.linhas) { const p = mapa.get(sem(l.cliente_original)) || mapa.get(sem(l.cliente)); if (p && p !== l.cliente) { l.cliente = p; l.pedido = l.pedido_informado ? l.pedido : `${p}|${l.data || l.mes}`; trocas++; } }
-    melhor.r.mapa.de_para = { aba: dp, nomes: mapa.size, linhas_ajustadas: trocas };
+  const r = melhor.r; r.aba = melhor.aba;
+  const t = lerTratamento(wb);
+  if (tratada && melhor.aba === tratada) {
+    r.mapa.tratamento = 'base_tratada';
+    // completa com a BASE DE DADOS (as duas abas andam linha a linha)
+    const bruta = acharAba(wb, (n) => n.includes('base de dados'));
+    if (bruta) {
+      const rb = normalizarLinhas(matrizDe(wb, bruta)), porLinha = new Map(rb.linhas.map((l) => [l.linha, l]));
+      let unidas = 0;
+      for (const l of r.linhas) {
+        const b = porLinha.get(l.linha);
+        if (!b || sem(b.cliente_original) !== sem(l.cliente_original)) continue;
+        unidas++;
+        for (const c of ['pag1', 'pag2', 'pago_100', 'forma_pagamento', 'prazo_entrega', 'especificacao', 'frete', 'segmento']) if (!l[c] && b[c]) l[c] = b[c];
+        if (b.pedido_informado) l.codigo_pedido = b.pedido;
+      }
+      r.mapa.base_dados = { aba: bruta, linhas_unidas: unidas, linhas: r.linhas.length };
+      for (const [c, col] of Object.entries(rb.mapa.reconhecidas)) if (!r.mapa.reconhecidas[c] && ['pag1', 'pag2', 'pago100', 'formaPagamento', 'prazoEntrega', 'especificacao', 'frete', 'segmento', 'codigo'].includes(c)) r.mapa.reconhecidas[c] = `${col} (aba ${bruta})`;
+      r.mapa.nao_encontradas = Object.keys(COLUNAS).filter((c) => !r.mapa.reconhecidas[c]);
+    }
+    r.mapa.nomes_novos = r.linhas.filter((l) => l.nome_novo).length;
+  } else if (t.depara) {
+    const x = tratarClientes(r.linhas, { ...t, pedidoPorData: true });
+    r.mapa.tratamento = 'painel';
+    r.mapa.nr_tratado = true;
+    r.mapa.nomes_novos = x.nomes_novos;
   }
-  return melhor.r;
+  if (t.depara) r.mapa.de_para = { aba: t.aba_depara, nomes: t.depara.size, anteriores_2026: t.anteriores ? t.anteriores.size : null };
+  r.mapa.duplicados = r.linhas.filter((l) => l.duplicado).map((l) => ({ linha: l.linha, data: l.data, cliente: l.cliente, total: l.total, produto: l.tipo_produto }));
+  return r;
 }
 
 export async function lerPlanilha() {
