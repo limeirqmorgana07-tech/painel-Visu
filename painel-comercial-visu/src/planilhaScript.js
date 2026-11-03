@@ -35,6 +35,13 @@ function doGet(e) {
   return saida({ nome: arquivo.getName(), alterado_em: arquivo.getLastUpdated().toISOString(), base64: Utilities.base64Encode(blob.getBytes()) });
 }
 
+// Rode esta função uma vez no editor (▶ Executar) para o Google pedir a autorização de leitura do Drive.
+function autorizar() {
+  const arquivo = DriveApp.getFileById(ARQUIVO_ID);
+  UrlFetchApp.fetch('https://www.google.com', { muteHttpExceptions: true });
+  Logger.log('Autorizado. Planilha: ' + arquivo.getName());
+}
+
 function saida(o) {
   return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON);
 }
@@ -45,7 +52,13 @@ export async function baixarPorScript(url = memo?.url, chave = memo?.chave) {
   if (!url || !chave) throw new Error('A planilha ainda não foi ligada pelo e-mail.');
   const r = await fetch(`${url}${url.includes('?') ? '&' : '?'}chave=${encodeURIComponent(chave)}`, { redirect: 'follow' });
   const txt = await r.text();
-  let j; try { j = JSON.parse(txt); } catch { throw new Error(/<html/i.test(txt) ? 'O endereço devolveu uma página do Google em vez da planilha. Na implantação, "Quem pode acessar" precisa ser "Qualquer pessoa".' : `Resposta inesperada do script (${r.status}).`); }
+  let j; try { j = JSON.parse(txt); } catch {
+    if (!/<html/i.test(txt)) throw new Error(`Resposta inesperada do script (${r.status}).`);
+    const t = txt.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
+    if (/autoriza|authoriz|permiss/i.test(t) && !/sign in|fazer login|entrar/i.test(t)) throw new Error('O script ainda não foi autorizado a ler o Drive. No editor do Apps Script, escolha a função "autorizar" (ou doGet) ao lado de ▶ Executar, clique em Executar e permita o acesso. Depois: Implantar → Gerenciar implantações → lápis → Versão: Nova versão → Implantar, e teste de novo.');
+    if (/sign in|fazer login|entrar|login/i.test(t)) throw new Error('O Google pediu login: na implantação, "Quem pode acessar" precisa ser "Qualquer pessoa" (não "Qualquer pessoa com Conta do Google"). Ajuste em Implantar → Gerenciar implantações → lápis.');
+    throw new Error('O Google devolveu uma página de erro em vez da planilha. Quase sempre falta autorizar o script: no editor, rode ▶ Executar uma vez (função "autorizar" ou doGet) e permita o acesso; depois Implantar → Gerenciar implantações → lápis → Nova versão → Implantar. Confira também se "Quem pode acessar" está como "Qualquer pessoa".');
+  }
   if (j.erro) throw new Error(j.erro === 'chave inválida' ? 'A chave do script não confere com a do painel. Copie o script de novo pelo painel e reimplante.' : `Script: ${j.erro}`);
   if (!j.base64) throw new Error('O script não devolveu a planilha.');
   return { nome: j.nome, alterado_em: j.alterado_em, bytes: Buffer.from(j.base64, 'base64') };

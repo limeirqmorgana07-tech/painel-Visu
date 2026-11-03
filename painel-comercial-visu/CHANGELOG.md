@@ -2,6 +2,10 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v33 — 03/11/2026 — Ligação da planilha pelo e-mail mais fácil
+- Script do Google com a função `autorizar` e passo de autorização na janela "Ligar pelo meu e-mail".
+- Mensagem de erro específica quando o Google devolve uma página (script não autorizado ou acesso diferente de "Qualquer pessoa").
+
 ## v32 — 03/11/2026 — Planilha de vendas, inconsistências num lugar só e perfil Vendedor
 - **Planilha de vendas** (Comercial, antes "Pedidos de venda"): mesma grade com as colunas da planilha, visível mesmo vazia.
 - **Inconsistências** unificadas numa lista só (sistema × planilha, colunas vazias, pagamento/entrega, código, duplicidade, cadastro), com filtros e exportação. A página separada "Sistema × planilha: pedidos" saiu.
