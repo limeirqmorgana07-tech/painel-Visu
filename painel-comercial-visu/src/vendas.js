@@ -7,6 +7,7 @@ import { planilhaConfigurada, lerPlanilha, sem, clienteBase } from './planilha.j
 import { gerarDemoPlanilha, gerarDemoContaAzul } from './demo.js';
 import { lerAtributos } from './produtos.js';
 import { lerKV, salvarKV } from './tokenStore.js';
+import { fontePainel, linhasDoPainel, prepararFonte } from './pedidos.js';
 
 const chave = (s) => sem(s).replace(/[^a-z0-9]+/g, ' ').trim();
 const iso = (d) => d.toISOString().slice(0, 10);
@@ -219,6 +220,7 @@ async function buscarFontes() {
       avisos.push(`Planilha indisponível (${e.message}). Mostrando as vendas da Conta Azul.`);
     }
   }
+  await prepararFonte().catch(() => {});
   return { origem, base, vendasCA, vendedoresCA, avisos, conectadoCA };
 }
 
@@ -228,6 +230,8 @@ async function montar(bruto) {
   const avisos = [...bruto.avisos];
   let extra = {};
   if (origem !== 'planilha' && origem !== 'demo') base = null;
+  // fonte "Pedidos do painel" (ADM escolhe em Pedidos de venda): os indicadores leem os pedidos registrados no painel
+  if (fontePainel()) { origem = 'painel'; base = { linhas: linhasDoPainel(), mapa: null }; }
   if (!base && vendasCA) {
     origem = 'conta_azul';
     const cacheItens = await carregarCacheItens();
@@ -265,6 +269,7 @@ async function montar(bruto) {
     linhas: linhas.map((l) => ({
       m: l.mes, d: l.data, c: l.cliente, p: l.pedido, v: l.vendedor, tv: l.tipo_venda, nr: l.novo_recompra,
       tp: l.tipo_produto, mt: l.material, es: l.especificacao, cr: l.cor, pr: l.produto || '', q: l.quantidade, t: Math.round(l.total * 100) / 100, cu: Math.round((l.custo || 0) * 100) / 100,
+      ...(l.codigo_pedido || (l.pedido_informado && !String(l.pedido).includes('|')) ? { cd: l.codigo_pedido || l.pedido } : {}),
       p1: l.pag1, p2: l.pag2, ok: l.pago_100, fp: l.forma_pagamento, pz: l.prazo_entrega, sg: l.segmento,
       ...(l.consolidado ? { cs: 1 } : {}),
     })),
@@ -295,4 +300,6 @@ export async function dadosDeVendas(forcar = false) {
   return cache.carregando;
 }
 
+// pedidos do painel mudaram: a próxima leitura remonta a base sem chamar a Conta Azul de novo
+export const remontarVendas = () => { cache.versaoItens = -1; };
 export const vendasContaAzulEmCache = () => cache.bruto?.vendasCA || null;

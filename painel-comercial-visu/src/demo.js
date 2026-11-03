@@ -28,7 +28,7 @@ export function gerarDemoPlanilha() {
   const agora = new Date(Date.now() - 3 * 3600e3);
   const linhas = [];
   const jaComprou = new Set();
-  let cod = 4100;
+  const seqMes = {};
   let novos = 0;
   for (let m = 13; m >= 0; m--) {
     const ini = new Date(Date.UTC(agora.getUTCFullYear(), agora.getUTCMonth() - m, 1));
@@ -52,7 +52,8 @@ export function gerarDemoPlanilha() {
       const vendedor = escolher(r, VENDEDORES);
       const tipoVenda = r() < 0.82 ? 'B2B' : 'B2C';
       const itens = 1 + Math.floor(r() * r() * 3);
-      cod++;
+      const mm = iso.slice(5, 7), aa = iso.slice(0, 4); seqMes[mm + aa] = (seqMes[mm + aa] || 0) + 1;
+      const cod = `${String(seqMes[mm + aa]).padStart(4, '0')}${mm}${aa}`; // padrão da Visu: sequência do mês + mês + ano
       const prazo = new Date(data.getTime() + (10 + Math.floor(r() * 12)) * 864e5).toISOString().slice(0, 10);
       const entregue = prazo < agora.toISOString().slice(0, 10);
       const xp = r();
@@ -72,7 +73,7 @@ export function gerarDemoPlanilha() {
         linhas.push({
           linha: linhas.length + 2, data: iso, mes: iso.slice(0, 7),
           cliente: nomeLancado.replace(/\s*lote\s*\d+$/i, ''), cliente_original: nomeLancado,
-          pedido: `VS-${cod}`, pedido_informado: true, vendedor, tipo_venda: tipoVenda,
+          pedido: cod, codigo: cod, nome_pedido: `${cliente.split(' ')[0]} ${tipoVenda}`, valor_unit: unit, pedido_informado: true, vendedor, tipo_venda: tipoVenda,
           novo_recompra: r() < 0.03 ? '' : marcadoNovo ? 'novo' : 'recompra',
           tipo_produto: prod[0], material, especificacao, cor,
           quantidade: qtd, total: Math.round(qtd * unit * 100) / 100, custo: Math.round(qtd * unit * (0.5 + r() * 0.16) * 100) / 100,
@@ -106,7 +107,27 @@ export function gerarDemoContaAzul(linhasPlanilha) {
     if (r() < 0.02) situacao = 'CANCELADO';
     if (data > new Date(Date.now() - 3 * 3600e3).toISOString().slice(0, 10)) continue;
     const criado = x >= 0.14 && x < 0.17 ? new Date(new Date(data).getTime() + 35 * 864e5).toISOString().slice(0, 10) : data;
-    vendas.push({ id: `ca-${cod}`, numero: n++, data, criado_em: criado, cliente: p.cliente, vendedor: p.vendedor, situacao, total, versao: 1 });
+    n++; vendas.push({ id: `ca-${cod}`, numero: Number(cod) || n, data, criado_em: criado, cliente: p.cliente, vendedor: p.vendedor, situacao, total, versao: 1 });
   }
   return vendas;
+}
+
+// Parcelas FICTÍCIAS a receber das vendas de exemplo, com baixas (data, banco e forma), para o card de pagamentos.
+export function gerarDemoParcelas(vendas) {
+  const r = prng(4242), hoje = new Date(Date.now() - 3 * 3600e3).toISOString().slice(0, 10);
+  const CONTAS = ['Banco do Brasil', 'Sicredi', 'Banco Inter', 'Caixa'], FORMAS = ['Pix', 'Pix', 'Boleto', 'Cartão de crédito'];
+  const mais = (d, n) => new Date(Date.parse(d) + n * 864e5).toISOString().slice(0, 10);
+  const out = [];
+  for (const v of vendas) {
+    if (v.situacao !== 'APROVADO' && v.situacao !== 'FATURADO') continue;
+    const duas = r() < 0.65, partes = duas ? [Math.round(v.total * 50) / 100, v.total - Math.round(v.total * 50) / 100] : [v.total];
+    partes.forEach((valor, i) => {
+      const venc = mais(v.data, i ? 21 + Math.floor(r() * 10) : Math.floor(r() * 3));
+      const pago = venc <= hoje && r() < 0.93;
+      const dp = pago ? mais(venc, Math.floor(r() * 4) - 1) : '';
+      out.push({ id: `pc-${v.numero}-${i + 1}`, descricao: `Venda ${v.numero} - parcela ${i + 1}/${partes.length}`, vencimento: venc, status: pago ? 'RECEBIDO' : venc < hoje ? 'ATRASADO' : 'EM_ABERTO', total: Math.round(valor * 100) / 100, pago: pago ? Math.round(valor * 100) / 100 : 0, aberto: pago ? 0 : Math.round(valor * 100) / 100, data_pagamento: dp,
+        baixas: pago ? [{ data: dp, conta: CONTAS[Math.floor(r() * CONTAS.length)], forma: FORMAS[Math.floor(r() * FORMAS.length)], valor: Math.round(valor * 100) / 100 }] : [] });
+    });
+  }
+  return out;
 }

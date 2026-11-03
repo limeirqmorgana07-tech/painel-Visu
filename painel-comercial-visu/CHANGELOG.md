@@ -2,6 +2,19 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v31 — 03/11/2026 — Pedidos de venda no painel
+Pedido da reunião interna Visu e Vieira Diniz (03/11/2026):
+- **Pedidos de venda** (Comercial): registro de vendas com as mesmas colunas da planilha, edição na célula, novo pedido com vários itens e código automático `NNNNMMAAAA`.
+- **Pedido complementar**: depois de 24 h (variável `HORAS_EDICAO_PEDIDO`) o vendedor não altera quantidade e valores; o acréscimo vira `código-1`, `código-2`.
+- **Importar base** (gestão): planilha conectada ou arquivo .xlsx, por período, mantendo ou substituindo os meses já importados. Linhas a revisar em amarelo; "lote" sai do nome do cliente.
+- Colunas **Planilha, Sistema e Divergência**; **1º e 2º pagamento** da Conta Azul pelo código do pedido, com card (data da baixa, banco, forma).
+- **Conciliação de pedidos**: painel (ou planilha) × Conta Azul pedido a pedido.
+- **Histórico de alterações** (gestão): usuário, horário, antes → depois. Tabelas `pedidos_venda` e `pedidos_log` no Postgres (criadas sozinhas).
+- **Revisão de cadastro de clientes** com unificação de grafias.
+- **Premiação oculta** para Comercial e Consultor (bloco `vendedores.premiacao`).
+- **Fonte dos indicadores** escolhida pelo ADM: planilha conectada ou pedidos do painel.
+- **Exportar em Excel, PDF e CSV** em todas as listas (detalhamentos, pedidos, conciliação, histórico). As bibliotecas (`xlsx`, `jspdf`, `jspdf-autotable`) são servidas pelo próprio painel em `/vendor/`.
+
 ## v30 · 28/10/2026
 - Blocos da Gestão por perfil (BLOCOS em src/paginas.js, POST /api/blocos, chave perfis_blocos); veFinanceiro considera blocos financeiros liberados; /api/eu devolve blocos, blocos_def, blocos_perfis (ADM).
 

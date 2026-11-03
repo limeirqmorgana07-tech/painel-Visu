@@ -6,12 +6,13 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { config, redirectUri } from './src/config.js';
 import * as ca from './src/contaAzul.js';
-import { dadosDeVendas, faixasComissao, FAIXAS_PADRAO } from './src/vendas.js';
+import { dadosDeVendas, faixasComissao, FAIXAS_PADRAO, remontarVendas, vendasContaAzulEmCache } from './src/vendas.js';
+import * as pedidos from './src/pedidos.js';
 import { dadosFinanceiros } from './src/financeiro.js';
 import { planilhaConfigurada } from './src/planilha.js';
 import * as google from './src/google.js';
 import * as usuarios from './src/usuarios.js';
-import { paginasDe, veFinanceiro, veVendas, definirPerfis, padraoDe, perfisPersonalizados, padroesOriginais, BLOCOS, blocosDe, definirBlocos, blocosPersonalizados, blocosPadrao } from './src/paginas.js';
+import { paginasDe, veFinanceiro, veVendas, definirPerfis, padraoDe, perfisPersonalizados, padroesOriginais, BLOCOS, blocosDe, definirBlocos, blocosPersonalizados, blocosPadrao, vePedidos, veHistorico } from './src/paginas.js';
 import { statusBanco, lerKV, salvarKV } from './src/tokenStore.js';
 
 const raiz = path.dirname(fileURLToPath(import.meta.url));
@@ -201,6 +202,9 @@ app.get('/saude', (req, res) => res.json({ ok: true }));
 app.get('/saude/banco', async (req, res) => res.json(await statusBanco().catch((e) => ({ erro: e.message }))));
 app.get('/politica-premiacao.pdf', exigeLogin, (req, res) => res.sendFile(path.join(raiz, 'public', 'politica-premiacao.pdf')));
 app.get(['/logo.png', '/logo-visu.png', '/logo-visu-azul.png'], (req, res) => res.sendFile(path.join(raiz, 'public', req.path.slice(1))));
+// bibliotecas de exportação (Excel e PDF), servidas pelo próprio painel para não depender de CDN
+const VENDOR = { 'xlsx.full.min.js': 'xlsx/dist/xlsx.full.min.js', 'jspdf.umd.min.js': 'jspdf/dist/jspdf.umd.min.js', 'jspdf.plugin.autotable.min.js': 'jspdf-autotable/dist/jspdf.plugin.autotable.min.js' };
+app.get('/vendor/:arq', exigeLogin, (req, res) => (VENDOR[req.params.arq] ? res.sendFile(path.join(raiz, 'node_modules', VENDOR[req.params.arq]), { maxAge: '30d' }) : res.sendStatus(404)));
 app.use('/vitrine', express.static(path.join(raiz, 'public', 'vitrine'), { maxAge: '7d' }));
 
 // ---------- conexão com a Conta Azul ----------
@@ -285,6 +289,34 @@ app.get('/api/financeiro', exigeLogin, async (req, res) => {
   try { res.json(await dadosFinanceiros(req.query.forcar === '1')); }
   catch (e) { console.error('[financeiro]', e); res.status(502).json({ erro: e.message }); }
 });
+
+// ---------- Pedidos de venda no painel (reunião de 03/11/2026) ----------
+const exigePedidos = (req, res, next) => (vePedidos(req.usuario) ? next() : res.status(403).json({ erro: 'seu perfil não tem acesso aos pedidos de venda' }));
+const depoisDeMudar = () => remontarVendas();
+const resp = (fn) => async (req, res) => { try { res.json(await fn(req)); } catch (e) { res.status(400).json({ erro: e.message }); } };
+app.get('/api/pedidos', exigeLogin, exigePedidos, resp(async (req) => {
+  const [registros, cfg] = await Promise.all([pedidos.listar(), pedidos.configPedidos()]);
+  let pagamentos = null;
+  try { const vendas = vendasContaAzulEmCache() || (await dadosDeVendas().catch(() => null), vendasContaAzulEmCache()); pagamentos = await pedidos.pagamentosPorPedido(vendas, req.query.forcar === '1'); } catch (e) { pagamentos = { erro: e.message }; }
+  return { registros, config: cfg, pagamentos, campos_valor: pedidos.CAMPOS_VALOR, horas_edicao: Number(process.env.HORAS_EDICAO_PEDIDO || 24),
+    pode: { lancar: pedidos.podeLancar(req.usuario), gestao: pedidos.podeEditarTudo(req.usuario), importar: pedidos.podeEditarTudo(req.usuario), fonte: req.usuario.perfil === 'adm' },
+    planilha_conectada: planilhaConfigurada() || config.demo, eu: { id: req.usuario.id, nome: req.usuario.nome } };
+}));
+app.get('/api/pedidos/proximo-codigo', exigeLogin, exigePedidos, resp(async (req) => { await pedidos.listar(); return { codigo: req.query.de ? pedidos.proximoComplemento(req.query.de) : pedidos.proximoCodigo(req.query.data) }; }));
+app.post('/api/pedidos', exigeLogin, exigePedidos, resp(async (req) => { const r = await pedidos.criarPedido(req.body, req.usuario); depoisDeMudar(); return { registros: r }; }));
+app.patch('/api/pedidos/:id', exigeLogin, exigePedidos, resp(async (req) => { const r = await pedidos.alterar(req.params.id, req.body?.mudancas || req.body, req.usuario); depoisDeMudar(); return { registro: r }; }));
+app.delete('/api/pedidos/:id', exigeLogin, exigePedidos, resp(async (req) => { await pedidos.excluir(req.params.id, req.usuario); depoisDeMudar(); return { ok: true }; }));
+app.post('/api/pedidos/unificar-cliente', exigeLogin, exigePedidos, resp(async (req) => { const r = await pedidos.unificarCliente(req.body?.de, req.body?.para, req.usuario); depoisDeMudar(); return r; }));
+// importação: JSON {de, ate, modo, simular} lê a planilha conectada; com ?arquivo=nome.xlsx o corpo é o próprio .xlsx
+app.post('/api/pedidos/importar', exigeLogin, exigePedidos, express.raw({ type: ['application/octet-stream', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'], limit: '25mb' }), resp(async (req) => {
+  const arquivo = Buffer.isBuffer(req.body) && req.body.length ? req.body : null;
+  const o = arquivo ? req.query : req.body || {};
+  const r = await pedidos.importar({ de: String(o.de || '2026-01'), ate: String(o.ate || '2026-10'), modo: o.modo === 'substituir' ? 'substituir' : 'faltam', simular: String(o.simular) !== 'false' && o.simular !== false, bytes: arquivo, nomeArquivo: String(req.query.arquivo || '') }, req.usuario);
+  if (!r.simular && r.importadas !== undefined) depoisDeMudar();
+  return r;
+}));
+app.post('/api/pedidos/config', exigeAdm, resp(async (req) => { const r = await pedidos.salvarConfigPedidos({ fonte: req.body?.fonte === 'painel' ? 'painel' : 'planilha' }, req.usuario); depoisDeMudar(); return r; }));
+app.get('/api/pedidos/historico', exigeLogin, (req, res, next) => (veHistorico(req.usuario) ? next() : res.status(403).json({ erro: 'o histórico de alterações é só para a gestão' })), resp(async (req) => ({ itens: await pedidos.historico({ codigo: req.query.codigo, usuario: req.query.usuario, acao: req.query.acao, dias: req.query.dias || 90 }) })));
 
 // Mapeamento de colunas e inconsistências da planilha, sem as linhas
 app.get('/api/planilha', exigeLogin, async (req, res) => {

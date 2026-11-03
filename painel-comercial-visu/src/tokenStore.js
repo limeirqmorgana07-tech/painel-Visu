@@ -33,6 +33,8 @@ async function db() {
     return null;
   }
 }
+// acesso direto ao Postgres (null sem DATABASE_URL), para tabelas próprias como a de pedidos
+export const banco = () => db();
 export async function statusBanco() { const p = await db(); return { configurado: !!limparUrl(config.databaseUrl), conectado: !!p, erro: erroBanco || null }; }
 
 export async function lerToken() {

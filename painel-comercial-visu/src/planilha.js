@@ -40,6 +40,7 @@ const COLUNAS = {
   frete: ['frete', 'frete da visu ou do cliente', 'frete (visu/cliente)'],
   segmento: ['segmento', 'segmento do cliente'],
   observacao: ['observacao', 'observacoes', 'obs', 'obs.'],
+  pagador: ['nome pagador - comprovante', 'nome pagador -  comprovante', 'nome pagador', 'pagador'],
   // colunas da BASE TRATADA (Tiago, out/2026)
   clienteLancado: ['cliente (como lancado)', 'nome como lancado'],
   duplicado: ['possivel lancamento duplicado?', 'possivel lancamento duplicado'],
@@ -194,6 +195,9 @@ export function normalizarLinhas(matriz) {
       prazo_entrega: dataISO(val(lin, 'prazoEntrega')),
       frete: String(val(lin, 'frete')).trim(),
       segmento: String(val(lin, 'segmento')).trim(),
+      // campos guardados só para a importação da base no painel (menu Pedidos de venda)
+      codigo: String(val(lin, 'codigo')).trim(), nome_pedido: String(val(lin, 'pedido')).trim(), valor_unit: unit,
+      observacao: String(val(lin, 'observacao')).trim(), pagador: String(val(lin, 'pagador')).trim(),
       duplicado: sem(val(lin, 'duplicado')) === 'verificar',
       nome_novo: sem(val(lin, 'mapeamento')).includes('novo'),
     });
@@ -299,7 +303,7 @@ export function lerXlsx(bytes, aba = env.PLANILHA_ABA) {
         const b = porLinha.get(l.linha);
         if (!b || sem(b.cliente_original) !== sem(l.cliente_original)) continue;
         unidas++;
-        for (const c of ['pag1', 'pag2', 'pago_100', 'forma_pagamento', 'prazo_entrega', 'especificacao', 'frete', 'segmento']) if (!l[c] && b[c]) l[c] = b[c];
+        for (const c of ['pag1', 'pag2', 'pago_100', 'forma_pagamento', 'prazo_entrega', 'especificacao', 'frete', 'segmento', 'nome_pedido', 'valor_unit', 'observacao', 'pagador']) if (!l[c] && b[c]) l[c] = b[c];
         if (b.pedido_informado) l.codigo_pedido = b.pedido;
       }
       r.mapa.base_dados = { aba: bruta, linhas_unidas: unidas, linhas: r.linhas.length };

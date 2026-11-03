@@ -273,6 +273,8 @@ export function normalizarParcela(p, tipo) {
     categorias: (p.categorias || []).map((c) => ({ id: c.id, nome: c.nome })),
     centros: (p.centros_custo || []).map((c) => c.nome),
     pessoa: nomeDe(p.cliente ?? p.fornecedor ?? p.contato) || '',
+    data_pagamento: String(p.data_pagamento ?? p.data_ultimo_pagamento ?? p.data_quitacao ?? '').slice(0, 10),
+    conta: nomeDe(p.conta_financeira ?? p.conta) || '',
   };
 }
 
@@ -287,6 +289,19 @@ export async function buscarParcelas(tipo, filtros = {}) {
     data_pagamento_ate: filtros.pagamento_ate,
   });
   return brutas.map((p) => normalizarParcela(p, tipo));
+}
+
+// Detalhe de uma parcela, com as baixas (data do pagamento, conta/banco, forma). Os nomes dos campos variam,
+// por isso a leitura é tolerante; se a API não trouxer, o painel mostra só vencimento e valor pago.
+export async function buscarBaixasParcela(id) {
+  const r = await get(`/v1/financeiro/eventos-financeiros/parcelas/${id}`);
+  const lista = r?.baixas || r?.pagamentos || r?.recebimentos || [];
+  return (Array.isArray(lista) ? lista : []).map((b) => ({
+    data: String(b.data_pagamento ?? b.data ?? b.data_baixa ?? '').slice(0, 10),
+    conta: nomeDe(b.conta_financeira ?? b.conta ?? b.banco) || '',
+    forma: nomeDe(b.metodo_pagamento ?? b.forma_pagamento) || (typeof b.metodo_pagamento === 'string' ? b.metodo_pagamento : ''),
+    valor: num(b.valor_composicao?.valor_liquido ?? b.valor_composicao?.valor_bruto ?? b.valor ?? b.valor_pago ?? b.total),
+  })).filter((b) => b.data || b.valor);
 }
 
 export async function buscarEstruturaDRE() {
