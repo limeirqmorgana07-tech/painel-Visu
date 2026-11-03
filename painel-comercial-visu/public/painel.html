@@ -605,6 +605,7 @@ table.matriz td.vz{color:var(--line2)}
 .ped-modal{width:min(980px,96vw)}
 .dica-c{font-size:10.5px;font-weight:500;color:var(--ink3)}
 .ped-tot{font-weight:700;font-family:var(--display);font-size:15px}
+.ps-grava{border-top:1px solid var(--line);margin-top:14px;padding-top:12px}.ps-grava h4{margin:0 0 6px;font-size:14px}.ps-grava p{margin:0 0 6px;font-size:13px;color:var(--ink2)}#psArq{background:var(--panel);border:1px solid var(--line2);border-radius:8px;padding:7px 9px;font:inherit;font-size:13px;color:var(--ink)}
 .ps-passos{padding-left:20px;margin:10px 0}.ps-passos li{margin:0 0 12px;color:var(--ink2)}.ps-passos li b{color:var(--ink)}.ps-passos textarea{width:100%;box-sizing:border-box;margin:8px 0 6px;font:12px/1.45 ui-monospace,Menlo,Consolas,monospace;background:var(--bg);color:var(--ink);border:1px solid var(--line2);border-radius:8px;padding:8px}#psUrl{background:var(--panel);border:1px solid var(--line2);border-radius:8px;padding:7px 9px;font:inherit;font-size:13px;color:var(--ink)}#psModal{width:min(760px,94vw)}
 .pol .e,.ped-modal .e{color:var(--red);font-size:12.5px;margin-top:8px}
 #imModal{width:min(720px,94vw)}
@@ -745,6 +746,14 @@ table.matriz td.vz{color:var(--line2)}
         <div style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap"><input id="psUrl" placeholder="https://script.google.com/macros/s/…/exec" style="flex:1;min-width:240px"><button class="bt2 pri" type="button" id="psLigar">Testar e ligar</button></div></li>
     </ol>
     <div class="e" id="psErro"></div><div class="nota" id="psOk"></div>
+    <div class="ps-grava" id="psGrava" hidden>
+      <h4>Gravar os recebimentos na planilha do Google</h4>
+      <p>Para cada pedido com o pagamento em branco que já foi baixado na Conta Azul, o painel escreve o valor em <b>1º/2º PAGAMENTO</b>, coloca uma <b>nota na célula</b> com data, banco e forma (no Google Planilhas aparece como balão ao passar o mouse) e marca <b>SIM</b> em <b>PEDIDO 100% PAGO</b> quando quitado. Só escreve em célula vazia.</p>
+      <p><b>Precisa:</b> (1) que a planilha seja <b>Planilha Google</b>; se for .xlsx, abra-a → Arquivo → <b>Salvar como Planilhas Google</b>, passe a usar a nova e cole o link dela abaixo; (2) colar o <b>script novo</b> (acima) no Apps Script, rodar <b>autorizar</b> e fazer <b>Implantar → Gerenciar implantações → lápis → Nova versão</b>.</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0"><input id="psArq" placeholder="Link da planilha Google (se mudou)" style="flex:1;min-width:240px"><button class="bt2" type="button" id="psArqSalvar">Usar esta planilha</button></div>
+      <label style="display:flex;gap:8px;align-items:center;font-size:13px"><input type="checkbox" id="psGravar"> Gravar sozinho a cada 10 minutos</label>
+      <div style="display:flex;gap:8px;margin-top:8px;align-items:center;flex-wrap:wrap"><button class="bt2 pri" type="button" id="psGravarAgora">Gravar agora</button><span class="nota" id="psGravaMsg" style="margin:0"></span></div>
+    </div>
   </div>
 </div>
 <div id="imModal" class="pol" role="dialog" aria-modal="true" aria-labelledby="imTit" hidden>
@@ -1057,8 +1066,9 @@ const nomeMes=(m)=>{const[a,b]=m.split('-');return MES_L[+b-1]+' de '+a};
 const somaMes=(m,n)=>{const[a,b]=m.split('-').map(Number);const d=new Date(Date.UTC(a,b-1+n,1));return d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0')};
 function delta(a,b,inv){ if(!b) return '<span class="delta eq">sem base</span>'; const d=(a-b)/b; const c=Math.abs(d)<.005?'eq':(d>0)!==!!inv?'up':'down'; return `<span class="delta ${c}">${d>0?'▲':d<0?'▼':'■'} ${pct(Math.abs(d))}</span>`; }
 
-const VERSAO='v35';
+const VERSAO='v36';
 const VERSOES=[
+ {v:'v36',data:'03/11/2026',tit:'Recebimentos gravados na planilha do Google',arq:'painel-visu-v36.zip',itens:['O painel grava na planilha do Google os recebimentos já baixados na Conta Azul: valor em 1º/2º PAGAMENTO com nota na célula (data, banco e forma, que aparece como balão no Google Planilhas) e SIM em PEDIDO 100% PAGO quando quitado. Só escreve em célula vazia, a cada 10 minutos ou no botão Gravar agora / Preencher pagamentos. Cada gravação fica no Histórico.','Precisa ser Planilha Google (o .xlsx não aceita gravação) e do script novo: a janela Ligar pelo meu e-mail explica e aceita o link da planilha convertida.','Inconsistências separa "Pagamento em branco, já baixado na Conta Azul" (com valor, data e banco) de "Pagamento ou entrega em branco" ainda não recebido.']},
  {v:'v35',data:'03/11/2026',tit:'Detalhe do pagamento no balão',arq:'painel-visu-v35.zip',itens:['A Planilha de vendas volta a ter só as colunas da planilha: o valor do 1º e do 2º pagamento fica na célula (com o selo CA quando veio da Conta Azul) e o detalhe aparece no balão ao passar o mouse: data do pagamento, banco, forma, vencimento e situação.','Novo balão em Pedido 100% pago: todas as parcelas do pedido na Conta Azul, com o que foi recebido, quando, em qual banco, o que está em aberto e a diferença para o total do pedido.','Data e banco dos pagamentos continuam guardados e saem na exportação em Excel, PDF e CSV.']},
  {v:'v34',data:'03/11/2026',tit:'Clientes cadastrados, sequência da planilha e pagamentos da Conta Azul',arq:'painel-visu-v34.zip',itens:['+ Novo pedido traz os clientes já cadastrados (cadastro da Conta Azul, planilha e vendas no sistema), com a última compra; avisa quando o cliente é novo e sugere novo × recompra por essa data.','O código do pedido continua a última sequência do mês usada na planilha ligada e na Conta Azul (não só no painel).','Pagamentos em branco que já foram baixados na Conta Azul são preenchidos sozinhos: 1º e 2º pagamento (valor), data de cada pagamento, banco, forma de pagamento e Pedido 100% pago quando quitado. Botão Preencher pagamentos para rodar na hora. Tudo registrado no Histórico como "Conta Azul (automático)"; nada que foi digitado é trocado.','Novas colunas na Planilha de vendas: Data 1º pag., Data 2º pag. e Banco.','As parcelas da Conta Azul são ligadas ao pedido pelo número da venda e, quando a descrição não traz o número, pelo cliente e pelo valor.']},
  {v:'v33',data:'03/11/2026',tit:'Ligação da planilha pelo e-mail mais fácil',arq:'painel-visu-v33.zip',itens:['O script do Google ganhou a função "autorizar" e a janela Ligar pelo meu e-mail tem o passo de autorização (▶ Executar no editor), que o Google não pede sozinho ao implantar.','Quando o Google devolve uma página em vez da planilha, o painel diz o motivo: script não autorizado ou acesso diferente de "Qualquer pessoa", e como corrigir.']},
@@ -1780,7 +1790,7 @@ function pgPagar(){
 // ---------- ligar a planilha pelo e-mail (script do Google, v32) ----------
 async function abrirLigarPlanilha(){
   $('psErro').textContent=''; $('psOk').textContent=''; $('psScript').value='Carregando…'; $('pdFundo').hidden=false; $('psModal').hidden=false;
-  try{ const r=await api('/api/planilha-script'); $('psScript').value=r.script; $('psUrl').value=r.url||''; $('psLinkScript').href='https://script.google.com/home/start?authuser='+encodeURIComponent(r.conta||E.eu?.email||''); if(r.configurado) $('psOk').innerHTML=`Ligada${r.nome?' ao arquivo <b>'+esc(r.nome)+'</b>':''}${r.ligado_em?' em '+new Date(r.ligado_em).toLocaleString('pt-BR'):''}.`; }
+  try{ const r=await api('/api/planilha-script'); $('psScript').value=r.script; $('psUrl').value=r.url||''; $('psGrava').hidden=!r.configurado; $('psGravar').checked=!!r.gravar; $('psArq').value=r.arquivo_id&&r.planilha_link?r.planilha_link:''; $('psGravaMsg').textContent=r.ultima_gravacao?`Última gravação: ${new Date(r.ultima_gravacao.em).toLocaleString('pt-BR')} · ${r.ultima_gravacao.celulas||0} células em ${r.ultima_gravacao.pedidos||0} pedidos`:''; $('psLinkScript').href='https://script.google.com/home/start?authuser='+encodeURIComponent(r.conta||E.eu?.email||''); if(r.configurado) $('psOk').innerHTML=`Ligada${r.nome?' ao arquivo <b>'+esc(r.nome)+'</b>':''}${r.ligado_em?' em '+new Date(r.ligado_em).toLocaleString('pt-BR'):''}.`; }
   catch(e){ $('psErro').textContent=e.message; }
 }
 async function desligarPlanilha(){ if(!confirmar('Desligar a leitura da planilha pelo e-mail?')) return; try{ await api('/api/planilha-script',{method:'DELETE'}); toast('Planilha desligada.'); await carregar(true); }catch(e){ toast(e.message,true); } }
@@ -2009,7 +2019,7 @@ function pgRegistro(){
   $('pdVend').innerHTML='<option value="">Todos</option>'+[...new Set(regs.map(r=>r.vendedor).filter(Boolean))].sort().map(v=>`<option>${esc(v)}</option>`).join(''); $('pdVend').value=PED.vend;
   $('pdBusca').value=PED.busca;
   document.querySelectorAll('[data-pdf]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.pdf===PED.fil)));
-  $('pdNovo').hidden=!P.lancar; $('pdImportar').hidden=!P.importar; $('pdPagar').hidden=!P.lancar||!regs.length||!E.dados?.conta_azul;
+  $('pdNovo').hidden=!P.lancar; $('pdImportar').hidden=!P.importar; $('pdPagar').hidden=!P.lancar||!(regs.length||(E.eu?.perfil==='adm'&&E.dados?.planilha_script?.configurado))||!E.dados?.conta_azul;
   // aviso
   const av=$('pdAviso'); av.hidden=false; av.className='aviso';
   if(!regs.length) av.innerHTML=P.importar?`<span><b>Ainda não há pedidos no painel.</b> Clique em <b>Importar base</b> para trazer as vendas de janeiro a outubro da planilha conectada (ou de um arquivo .xlsx). Depois disso os vendedores revisam os campos marcados em amarelo e, a partir de novembro, lançam os pedidos aqui.</span>`:'<span><b>Ainda não há pedidos no painel.</b> A gestão vai importar a base de janeiro a outubro da planilha; a partir de novembro os pedidos são lançados aqui, em <b>+ Novo pedido</b>.</span>';
@@ -2265,7 +2275,8 @@ const TIPOS_INC=[
   ['pag','Pagamento diferente da Conta Azul',0,'Conferir o comprovante e corrigir a planilha ou a baixa.'],
   ['vaz','Coluna obrigatória em branco',1,'Preencher as colunas indicadas.'],
   ['nr','Novo × recompra em branco',0,'Marcar se o cliente é novo ou recompra.'],
-  ['pge','Pagamento ou entrega em branco',0,'Preencher forma de pagamento, prazo de entrega e 1º pagamento.'],
+  ['pgeCA','Pagamento em branco, já baixado na Conta Azul',1,'O painel grava sozinho o valor (e a data, o banco e a forma no balão); se quiser na hora, clique em Preencher pagamentos.'],
+  ['pge','Pagamento ou entrega em branco',0,'Preencher forma de pagamento, prazo de entrega e 1º pagamento (ainda não recebido na Conta Azul).'],
   ['semCod','Sem código do pedido',1,'Preencher o cód. interno (o mesmo número da venda na Conta Azul).'],
   ['fmt','Código fora do padrão',0,'Corrigir o código (sequência + mês + ano) ou a data da venda.'],
   ['multi','Mesmo código em pedidos diferentes',1,'Dar um código novo ou usar o complementar (código-1).'],
@@ -2291,7 +2302,11 @@ function linhasInconsistencias(ls,b,ca,desde,noMes,vendSel){
   for(const r of ls){
     const f=OBR.filter(([c])=>!r[c]).map(x=>x[1]); if(f.length) push('vaz',r,{falta:f.join(', ')});
     if(!r.novo_recompra) push('nr',r,{falta:'novo ou recompra'});
-    const pe=[!r.forma_pagamento&&'forma de pagamento',!r.prazo_entrega&&'prazo de entrega',!(+r.pag1)&&!r.pago_100&&'1º pagamento'].filter(Boolean); if(pe.length&&(r.mes||'')>='2026-09') push('pge',r,{falta:pe.join(', ')});
+    // pagamento em branco: confere na Conta Azul se a parcela já foi baixada
+    const grpR=r.codigo?g.get(ckey(r.codigo)):null, prim=!grpR||grpR.regs[0]===r, psR=r.codigo&&temCA?parcelasDe(r.codigo):[], pagoCA=psR.filter(p=>p.pago>0);
+    const semPag=prim&&!(grpR?grpR.regs.some(x=>+x.pag1>0):+r.pag1>0);
+    if(semPag&&pagoCA.length&&(r.mes||'')>=desde){ const tx=pagoCA.map((p,i)=>`${i+1}º ${brl2(p.pago)}${p.baixas?.[0]?.data?' em '+dataBR(p.baixas[0].data):''}${p.baixas?.[0]?.conta?' · '+p.baixas[0].conta:''}`).join(' | '); push('pgeCA',r,{plan:grpR?grpR.t:+r.total||0,sis:pagoCA.reduce((a,p)=>a+p.pago,0),dif:'',falta:'baixado na Conta Azul: '+tx}); }
+    const pe=[!r.forma_pagamento&&'forma de pagamento',!r.prazo_entrega&&'prazo de entrega',semPag&&!pagoCA.length&&!r.pago_100&&'1º pagamento (ainda não recebido no sistema)'].filter(Boolean); if(pe.length&&(r.mes||'')>='2026-09') push('pge',r,{falta:pe.join(', ')});
     if(!r.codigo&&(r.mes||'')>='2026-09') push('semCod',r,{falta:'cód. interno'});
     if(r.codigo){ const m=cbase(r.codigo).match(/^(\d{4})(\d{2})(\d{4})$/); if(!m) push('fmt',r,{falta:'formato do código'}); else if(r.data&&`${m[3]}-${m[2]}`!==r.data.slice(0,7)) push('fmt',r,{falta:`código de ${m[2]}/${m[3]}, venda em ${dataBR(r.data)}`});
       const k=semA(r.cliente)+'|'+r.data, mm=cd.get(k)||new Map(); mm.set(cbase(r.codigo),1); cd.set(k,mm); }
@@ -2374,7 +2389,7 @@ $('pdVend').onchange=()=>{ PED.vend=$('pdVend').value; PED.vendEscolhido=true; p
 let tBusca=null; $('pdBusca').oninput=()=>{ clearTimeout(tBusca); tBusca=setTimeout(()=>{ PED.busca=$('pdBusca').value; pgRegistro(); },250); };
 document.querySelectorAll('[data-pdf]').forEach(b=>b.onclick=()=>{ PED.fil=b.dataset.pdf; pgRegistro(); });
 $('pdNovo').onclick=()=>abrirPedido('novo');
-$('pdPagar').onclick=async()=>{ $('pdPagar').disabled=true; toast('Conferindo as baixas na Conta Azul…'); try{ const r=await api('/api/pedidos/preencher-pagamentos',{method:'POST',body:'{}'}); await carregarPedidos(true); depoisPedido(); toast(r.linhas?`Pagamentos preenchidos em ${pl(r.pedidos,'pedido','pedidos')} (${pl(r.linhas,'linha','linhas')}).${r.buscando_baixas?' Ainda buscando data e banco de algumas parcelas; clique de novo em alguns minutos.':''}`:r.buscando_baixas?'Buscando data e banco das parcelas na Conta Azul; clique de novo em alguns minutos.':'Nada a preencher: os pagamentos em branco ainda não foram baixados na Conta Azul.'); pgRegistro(); }catch(e){ toast(e.message,true); } finally{ $('pdPagar').disabled=false; } }; $('pdImportar').onclick=abrirImport;
+$('pdPagar').onclick=async()=>{ $('pdPagar').disabled=true; toast('Conferindo as baixas na Conta Azul…'); try{ const r=await api('/api/pedidos/preencher-pagamentos',{method:'POST',body:'{}'}); await carregarPedidos(true); depoisPedido(); let t=r.linhas?`Planilha de vendas do painel: pagamentos preenchidos em ${pl(r.pedidos,'pedido','pedidos')}.${r.buscando_baixas?' Ainda buscando data e banco de algumas parcelas.':''}`:r.buscando_baixas?'Buscando data e banco das parcelas na Conta Azul; clique de novo em alguns minutos.':'Painel: nada a preencher (os pagamentos em branco ainda não foram baixados).'; if(E.eu?.perfil==='adm'&&E.dados?.planilha_script?.configurado) t+=' '+await gravarPlanilhaAgora(true); toast(t); pgRegistro(); }catch(e){ toast(e.message,true); } finally{ $('pdPagar').disabled=false; } }; $('pdImportar').onclick=abrirImport;
 $('pdGrade').addEventListener('click',e=>{
   const b=e.target.closest('[data-ac]'); if(b){ const r=regsPed().find(x=>x.id===b.closest('tr').dataset.id); if(!r) return;
     if(b.dataset.ac==='item') abrirPedido('item',r); else if(b.dataset.ac==='comp') abrirPedido('comp',r); else if(b.dataset.ac==='del') excluirLinha(r); else if(b.dataset.ac==='hist'){ $('hsBusca').value=r.codigo; irPara('historico'); } return; }
@@ -2396,6 +2411,10 @@ $('pmCliente').addEventListener('change',()=>{ sugerirNR(); infoCliente(); }); $
 $('pmCliente').addEventListener('blur',()=>{ const c=$('pmCliente').value, m=c.match(/\s*[-–(]?\s*\b(lote\s*\d+)\)?\s*$/i); if(m){ $('pmCliente').value=c.slice(0,m.index).trim(); if(!$('pmLote').value) $('pmLote').value=m[1].replace(/^l/,'L'); toast('O lote foi para a coluna "Lote / obs. do cliente": o nome do cliente fica só com o cliente.'); sugerirNR(); } });
 $('imFechar').onclick=()=>{ $('imModal').hidden=true; $('pdFundo').hidden=true; };
 $('psFechar').onclick=()=>{ $('psModal').hidden=true; $('pdFundo').hidden=true; };
+async function gravarPlanilhaAgora(silencioso){ try{ const r=await api('/api/planilha-script/gravar',{method:'POST',body:JSON.stringify({agora:true})}); const t=r.celulas?`Planilha do Google: ${pl(r.celulas,'célula preenchida','células preenchidas')} em ${pl(r.pedidos,'pedido','pedidos')}${r.aba?' (aba '+r.aba+')':''}.`:'Planilha do Google: nada a preencher (os pagamentos em branco ainda não foram baixados'+(r.buscando_baixas?', ou a data e o banco ainda estão chegando':'')+').'; if(!silencioso) toast(t); $('psGravaMsg').textContent=t; return t; }catch(e){ $('psGravaMsg').textContent=e.message; if(!silencioso) toast(e.message,true); return e.message; } }
+$('psGravarAgora').onclick=async()=>{ $('psGravarAgora').disabled=true; $('psGravaMsg').textContent='Gravando na planilha…'; await gravarPlanilhaAgora(); $('psGravarAgora').disabled=false; };
+$('psGravar').onchange=async()=>{ try{ await api('/api/planilha-script/gravar',{method:'POST',body:JSON.stringify({ativo:$('psGravar').checked})}); toast($('psGravar').checked?'O painel vai gravar os recebimentos na planilha a cada 10 minutos.':'Gravação automática desligada.'); }catch(e){ toast(e.message,true); } };
+$('psArqSalvar').onclick=async()=>{ try{ await api('/api/planilha-script/arquivo',{method:'POST',body:JSON.stringify({link:$('psArq').value})}); await abrirLigarPlanilha(); $('psOk').innerHTML='<b>Planilha trocada.</b> O script acima já tem o ID novo: copie, cole no Apps Script, salve, rode <b>autorizar</b> e faça <b>Implantar → Gerenciar implantações → lápis → Nova versão</b>. Depois clique em Testar e ligar.'; }catch(e){ $('psErro').textContent=e.message; } };
 $('psCopiar').onclick=()=>{ const t=$('psScript'); (navigator.clipboard?.writeText(t.value)||Promise.reject()).then(()=>{ $('psCopiar').textContent='Copiado ✓'; }).catch(()=>{ t.select(); }); };
 $('psLigar').onclick=async()=>{ $('psErro').textContent=''; $('psOk').textContent='Testando a leitura da planilha…'; $('psLigar').disabled=true; try{ const r=await api('/api/planilha-script',{method:'POST',body:JSON.stringify({url:$('psUrl').value})}); $('psOk').innerHTML=`<b>Pronto!</b> O painel leu o arquivo <b>${esc(r.nome||'')}</b>${r.alterado_em?' (última edição '+new Date(r.alterado_em).toLocaleString('pt-BR')+')':''}. A partir de agora as vendas vêm da planilha a cada 5 minutos.`; toast('Planilha ligada pelo seu e-mail.'); setTimeout(()=>carregar(true),800); }catch(e){ $('psOk').textContent=''; $('psErro').textContent=e.message; } finally{ $('psLigar').disabled=false; } };
 document.querySelectorAll('[data-imo]').forEach(b=>b.onclick=()=>{ IM.orig=b.dataset.imo; IM.ok=null; $('imOk').disabled=true; $('imRes').innerHTML=''; marcarOrig(); });

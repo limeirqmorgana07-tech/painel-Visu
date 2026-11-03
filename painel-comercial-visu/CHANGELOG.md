@@ -2,6 +2,11 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v36 — 03/11/2026 — Recebimentos gravados na planilha do Google
+- Script do Google com `doPost`: grava valor em 1º/2º PAGAMENTO (com nota: data, banco, forma) e SIM em PEDIDO 100% PAGO, só em células vazias e só em Planilha Google.
+- `/api/planilha-script/gravar` (ativar a cada 10 min e gravar agora) e `/api/planilha-script/arquivo` (trocar o ID quando o .xlsx for convertido).
+- Inconsistências: novo tipo "Pagamento em branco, já baixado na Conta Azul".
+
 ## v35 — 03/11/2026 — Detalhe do pagamento no balão
 - Colunas Data 1º/2º pag. e Banco saem da grade; o detalhe (data, banco, forma, situação) fica no balão do 1º/2º pagamento.
 - Balão em Pedido 100% pago com todas as parcelas do pedido.

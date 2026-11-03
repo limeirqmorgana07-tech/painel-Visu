@@ -394,3 +394,28 @@ export async function preencherPagamentos(pagamentos, u, { auto = false } = {}) 
   await registrarLog(log.map((e) => ({ usuario: auto ? 'Conta Azul (automático)' : u?.nome || 'Sistema', usuario_id: auto ? '' : u?.id || '', acao: 'alterou', ...e, detalhe: 'Pagamento preenchido pela Conta Azul' })));
   return { linhas: mudou.length, pedidos: new Set(log.map((e) => e.codigo)).size };
 }
+
+// ---------- recebimentos para gravar na planilha do Google (só onde a planilha está em branco) ----------
+const dataBR = (d) => (d ? String(d).slice(0, 10).split('-').reverse().join('/') : '');
+export function itensParaPlanilha(pagamentos, linhasPlanilha) {
+  const por = pagamentos?.por_codigo || {}, grupos = new Map();
+  for (const l of linhasPlanilha || []) { const c = l.codigo_pedido || l.codigo || (l.pedido_informado && !String(l.pedido).includes('|') ? l.pedido : ''); if (!c) continue; const k = chaveCodigo(c); (grupos.get(k) || grupos.set(k, { codigo: c, ls: [] }).get(k)).ls.push(l); }
+  const itens = [];
+  for (const [k, g] of grupos) {
+    const ps = por[k]; if (!ps?.length) continue;
+    const nota = (p, i) => { const b = p.baixas?.[0]; return `Conta Azul: ${i + 1}ª parcela de ${ps.length}, recebido ${b?.data ? 'em ' + dataBR(b.data) : ''}${b?.conta ? ' · ' + b.conta : ''}${b?.forma ? ' · ' + b.forma : ''} (valor R$ ${Number(p.pago).toFixed(2).replace('.', ',')}). Preenchido pelo Painel de Gestão.`; };
+    const temP1 = g.ls.some((l) => +l.pag1 > 1), temP2 = g.ls.some((l) => +l.pag2 > 1);
+    const it = { codigo: g.codigo };
+    if (!temP1 && ps[0]?.pago > 0) { it.pag1 = r2(ps[0].pago); it.nota1 = nota(ps[0], 0); }
+    if (!temP2 && ps[1]?.pago > 0) { it.pag2 = r2(ps[1].pago); it.nota2 = nota(ps[1], 1); }
+    const total = g.ls.reduce((s2, l) => s2 + (+l.total || 0), 0), rec = ps.reduce((s2, p) => s2 + (+p.pago || 0), 0);
+    if (!g.ls.every((l) => l.pago_100) && ps.every((p) => !(p.aberto > 0.01)) && Math.abs(rec - total) <= 1) it.pago100 = true;
+    if (it.pag1 || it.pag2 || it.pago100) itens.push(it);
+  }
+  return itens;
+}
+export async function logPlanilha(u, itens, resp) {
+  const feitos = new Set(resp?.codigos || []);
+  await registrarLog(itens.filter((i) => feitos.has(i.codigo)).map((i) => ({ usuario: u ? u.nome : 'Conta Azul (automático)', usuario_id: u?.id || '', acao: 'alterou', codigo: i.codigo, cliente: '',
+    mudancas: [i.pag1 && { campo: 'pag1', antes: '', depois: i.pag1 }, i.pag2 && { campo: 'pag2', antes: '', depois: i.pag2 }, i.pago100 && { campo: 'pago_100', antes: false, depois: true }].filter(Boolean), detalhe: 'Gravado na planilha do Google' })));
+}
