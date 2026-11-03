@@ -2,6 +2,11 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v35 — 03/11/2026 — Detalhe do pagamento no balão
+- Colunas Data 1º/2º pag. e Banco saem da grade; o detalhe (data, banco, forma, situação) fica no balão do 1º/2º pagamento.
+- Balão em Pedido 100% pago com todas as parcelas do pedido.
+- Data e banco seguem gravados (`data_pag1`, `data_pag2`, `banco_pag`, `pag_ca`) e vão na exportação.
+
 ## v34 — 03/11/2026 — Clientes cadastrados, sequência da planilha e pagamentos da Conta Azul
 - `/api/pedidos/clientes`: cadastro da Conta Azul + planilha + vendas + painel, com última compra.
 - Código automático continua a sequência do mês da planilha ligada e dos números de venda da Conta Azul.

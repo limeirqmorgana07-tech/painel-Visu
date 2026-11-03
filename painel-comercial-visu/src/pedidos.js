@@ -383,7 +383,7 @@ export async function preencherPagamentos(pagamentos, u, { auto = false } = {}) 
     regs.sort((a, b) => (a.ordem || 0) - (b.ordem || 0) || String(a.id).localeCompare(String(b.id)));
     const r0 = { ...regs[0] }, ch = [];
     const set = (c, v) => { if (v === '' || v == null || v === 0) return; if (r0[c] && !(CAMPOS[c] === 'num' && !+r0[c])) return; ch.push({ campo: c, antes: r0[c] ?? '', depois: v }); r0[c] = v; };
-    [0, 1].forEach((i) => { const p = ps[i]; if (!p || !(p.pago > 0)) return; const b = p.baixas?.[0]; set(i ? 'pag2' : 'pag1', r2(p.pago)); if (b?.data) set(i ? 'data_pag2' : 'data_pag1', b.data); if (b?.conta) set('banco_pag', b.conta); if (b?.forma) set('forma_pagamento', b.forma); });
+    [0, 1].forEach((i) => { const p = ps[i]; if (!p || !(p.pago > 0)) return; const b = p.baixas?.[0]; const antes = ch.length; set(i ? 'pag2' : 'pag1', r2(p.pago)); if (ch.length > antes) r0.pag_ca = [...new Set([...(r0.pag_ca || []), i + 1])]; if (b?.data) set(i ? 'data_pag2' : 'data_pag1', b.data); if (b?.conta) set('banco_pag', b.conta); if (b?.forma) set('forma_pagamento', b.forma); });
     const total = regs.reduce((s2, r) => s2 + (+r.total || 0), 0), recebido = ps.reduce((s2, p) => s2 + (+p.pago || 0), 0), quitado = ps.every((p) => !(p.aberto > 0.01)) && Math.abs(recebido - total) <= 1;
     const marcar = quitado ? regs.filter((r) => !r.pago_100) : [];
     if (ch.length) { Object.assign(r0, { alterado_em: agoraISO(), alterado_por: auto ? 'Conta Azul (automático)' : u?.nome || '' }); mem.set(r0.id, r0); mudou.push(r0); log.push({ registro: r0.id, codigo: r0.codigo, cliente: r0.cliente, mudancas: ch }); }
