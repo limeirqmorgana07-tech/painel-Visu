@@ -2,6 +2,14 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v32 — 03/11/2026 — Planilha de vendas, inconsistências num lugar só e perfil Vendedor
+- **Planilha de vendas** (Comercial, antes "Pedidos de venda"): mesma grade com as colunas da planilha, visível mesmo vazia.
+- **Inconsistências** unificadas numa lista só (sistema × planilha, colunas vazias, pagamento/entrega, código, duplicidade, cadastro), com filtros e exportação. A página separada "Sistema × planilha: pedidos" saiu.
+- Sem planilha ligada nem base importada, a conferência avisa em vez de listar tudo como "só no sistema".
+- **Perfil Vendedor** (campo "nome na planilha"): vê as próprias linhas primeiro, lança no próprio nome e só altera o que é dele.
+- **Ligar pelo meu e-mail**: Google Apps Script na conta de quem tem acesso à planilha, com chave gerada pelo painel (`src/planilhaScript.js`, chave `planilha_script` no banco). Não precisa de GOOGLE_CLIENT_ID/SECRET.
+- Planilha × sistema (mês) volta ao Controle.
+
 ## v31 — 03/11/2026 — Pedidos de venda no painel
 Pedido da reunião interna Visu e Vieira Diniz (03/11/2026):
 - **Pedidos de venda** (Comercial): registro de vendas com as mesmas colunas da planilha, edição na célula, novo pedido com vários itens e código automático `NNNNMMAAAA`.

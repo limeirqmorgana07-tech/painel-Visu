@@ -11,6 +11,7 @@ import * as pedidos from './src/pedidos.js';
 import { dadosFinanceiros } from './src/financeiro.js';
 import { planilhaConfigurada } from './src/planilha.js';
 import * as google from './src/google.js';
+import * as pscript from './src/planilhaScript.js';
 import * as usuarios from './src/usuarios.js';
 import { paginasDe, veFinanceiro, veVendas, definirPerfis, padraoDe, perfisPersonalizados, padroesOriginais, BLOCOS, blocosDe, definirBlocos, blocosPersonalizados, blocosPadrao, vePedidos, veHistorico } from './src/paginas.js';
 import { statusBanco, lerKV, salvarKV } from './src/tokenStore.js';
@@ -136,12 +137,12 @@ app.post('/convite/:token', async (req, res) => {
 
 // ---------- usuários (perfil ADM) ----------
 app.use(express.json());
-app.get('/api/eu', exigeLogin, async (req, res) => res.json({ id: req.usuario.id, nome: req.usuario.nome, email: req.usuario.email || '', perfil: req.usuario.perfil, paginas: paginasDe(req.usuario), perfis: { diretor: padraoDe('diretor'), comercial: padraoDe('comercial'), financeiro: padraoDe('financeiro'), consultor: padraoDe('consultor') }, perfis_originais: padroesOriginais(), blocos: blocosDe(req.usuario.perfil), blocos_def: BLOCOS, blocos_perfis: req.usuario.perfil === 'adm' ? Object.fromEntries(['diretor', 'comercial', 'financeiro', 'consultor'].map((k) => [k, blocosDe(k)])) : undefined, blocos_padrao: req.usuario.perfil === 'adm' ? blocosPadrao() : undefined, visual_padrao: (await lerKV('visual_padrao').catch(() => null)) || null }));
+app.get('/api/eu', exigeLogin, async (req, res) => res.json({ id: req.usuario.id, nome: req.usuario.nome, email: req.usuario.email || '', perfil: req.usuario.perfil, paginas: paginasDe(req.usuario), perfis: { diretor: padraoDe('diretor'), comercial: padraoDe('comercial'), financeiro: padraoDe('financeiro'), consultor: padraoDe('consultor'), vendedor: padraoDe('vendedor') }, vendedor: req.usuario.vendedor || '', perfis_originais: padroesOriginais(), blocos: blocosDe(req.usuario.perfil), blocos_def: BLOCOS, blocos_perfis: req.usuario.perfil === 'adm' ? Object.fromEntries(['diretor', 'comercial', 'financeiro', 'consultor', 'vendedor'].map((k) => [k, blocosDe(k)])) : undefined, blocos_padrao: req.usuario.perfil === 'adm' ? blocosPadrao() : undefined, visual_padrao: (await lerKV('visual_padrao').catch(() => null)) || null }));
 // o que cada perfil vê (ADM edita em Usuários e permissões)
 app.post('/api/perfis', exigeAdm, async (req, res) => {
   const atual = perfisPersonalizados();
   const { perfil, paginas } = req.body || {};
-  if (!['diretor', 'comercial', 'financeiro', 'consultor'].includes(perfil)) return res.status(400).json({ erro: 'Perfil inválido.' });
+  if (!['diretor', 'comercial', 'financeiro', 'consultor', 'vendedor'].includes(perfil)) return res.status(400).json({ erro: 'Perfil inválido.' });
   if (paginas === null) delete atual[perfil];
   else if (Array.isArray(paginas) && paginas.length) atual[perfil] = paginas.map(String);
   else return res.status(400).json({ erro: 'Deixe pelo menos uma página marcada.' });
@@ -153,7 +154,7 @@ lerKV('perfis_paginas').then((o) => definirPerfis(o)).catch(() => {});
 // o que cada perfil vê dentro do Painel executivo e do Quadro de indicadores
 app.post('/api/blocos', exigeAdm, async (req, res) => {
   const { perfil, blocos } = req.body || {};
-  if (!['diretor', 'comercial', 'financeiro', 'consultor'].includes(perfil)) return res.status(400).json({ erro: 'Perfil inválido.' });
+  if (!['diretor', 'comercial', 'financeiro', 'consultor', 'vendedor'].includes(perfil)) return res.status(400).json({ erro: 'Perfil inválido.' });
   const atual = blocosPersonalizados();
   if (blocos === null) delete atual[perfil]; else if (Array.isArray(blocos)) atual[perfil] = blocos.map(String); else return res.status(400).json({ erro: 'Lista de blocos inválida.' });
   definirBlocos(atual); await salvarKV('perfis_blocos', blocosPersonalizados());
@@ -241,6 +242,13 @@ app.get('/google/callback', exigeAdm, async (req, res) => {
   }
 });
 app.post('/google/desconectar', exigeAdm, async (req, res) => { await google.desconectarGoogle(); dadosDeVendas(true).catch(() => {}); res.redirect('/#conciliacao'); });
+// planilha ligada pelo e-mail do ADM (Apps Script): sem GOOGLE_CLIENT_ID/SECRET no Render
+app.get('/api/planilha-script', exigeAdm, async (req, res) => { const chave = await pscript.chaveScript(); res.json({ ...pscript.statusScript(), script: pscript.modeloScript(chave, google.idPlanilha() || 'COLE_AQUI_O_ID_DA_PLANILHA'), planilha_link: config.planilhaLink, conta: config.planilhaConta }); });
+app.post('/api/planilha-script', exigeAdm, async (req, res) => {
+  try { const arq = await pscript.ligarScript(req.body?.url, req.usuario); dadosDeVendas(true).catch(() => {}); res.json({ ok: true, nome: arq.nome, alterado_em: arq.alterado_em, ...pscript.statusScript() }); }
+  catch (e) { res.status(400).json({ erro: e.message }); }
+});
+app.delete('/api/planilha-script', exigeAdm, async (req, res) => { await pscript.desligarScript(); dadosDeVendas(true).catch(() => {}); res.json({ ok: true }); });
 app.get('/api/google', exigeLogin, async (req, res) => res.json({ ...(await google.statusGoogle()), redirect_uri: google.redirectGoogle() }));
 
 app.post('/desconectar', exigeAdm, async (req, res) => {
@@ -258,7 +266,7 @@ app.get('/api/status', exigeLogin, async (req, res) => {
 app.get('/api/vendas', exigeLogin, async (req, res) => {
   if (!veVendas(req.usuario)) return res.status(403).json({ erro: 'seu perfil não tem acesso aos dados de vendas' });
   try {
-    res.json({ ...(await dadosDeVendas(req.query.forcar === '1')), planilha_link: config.planilhaLink, planilha_conta: config.planilhaConta, google: await google.statusGoogle().catch(() => null) });
+    res.json({ ...(await dadosDeVendas(req.query.forcar === '1')), planilha_link: config.planilhaLink, planilha_conta: config.planilhaConta, google: await google.statusGoogle().catch(() => null), planilha_script: pscript.statusScript() });
   } catch (e) {
     console.error('[vendas]', e);
     res.status(502).json({ erro: e.message });
@@ -299,8 +307,8 @@ app.get('/api/pedidos', exigeLogin, exigePedidos, resp(async (req) => {
   let pagamentos = null;
   try { const vendas = vendasContaAzulEmCache() || (await dadosDeVendas().catch(() => null), vendasContaAzulEmCache()); pagamentos = await pedidos.pagamentosPorPedido(vendas, req.query.forcar === '1'); } catch (e) { pagamentos = { erro: e.message }; }
   return { registros, config: cfg, pagamentos, campos_valor: pedidos.CAMPOS_VALOR, horas_edicao: Number(process.env.HORAS_EDICAO_PEDIDO || 24),
-    pode: { lancar: pedidos.podeLancar(req.usuario), gestao: pedidos.podeEditarTudo(req.usuario), importar: pedidos.podeEditarTudo(req.usuario), fonte: req.usuario.perfil === 'adm' },
-    planilha_conectada: planilhaConfigurada() || config.demo, eu: { id: req.usuario.id, nome: req.usuario.nome } };
+    vendedor: req.usuario.perfil === 'vendedor' ? req.usuario.vendedor || '' : '', pode: { lancar: pedidos.podeLancar(req.usuario), gestao: pedidos.podeEditarTudo(req.usuario), importar: pedidos.podeEditarTudo(req.usuario), fonte: req.usuario.perfil === 'adm' },
+    planilha_conectada: planilhaConfigurada() || config.demo, eu: { id: req.usuario.id, nome: req.usuario.nome, perfil: req.usuario.perfil, vendedor: req.usuario.vendedor || '' } };
 }));
 app.get('/api/pedidos/proximo-codigo', exigeLogin, exigePedidos, resp(async (req) => { await pedidos.listar(); return { codigo: req.query.de ? pedidos.proximoComplemento(req.query.de) : pedidos.proximoCodigo(req.query.data) }; }));
 app.post('/api/pedidos', exigeLogin, exigePedidos, resp(async (req) => { const r = await pedidos.criarPedido(req.body, req.usuario); depoisDeMudar(); return { registros: r }; }));
@@ -339,6 +347,7 @@ app.get(['/', '/index.html'], exigeLogin, async (req, res) => {
 });
 
 google.carregarGoogle().catch(() => {});
+pscript.carregarScript().catch(() => {});
 app.listen(config.porta, () => {
   console.log(`Painel Comercial Visu em ${config.urlPublica} (porta ${config.porta})`);
   if (!config.senhaPainel) console.warn('ATENÇÃO: PAINEL_SENHA não definida — sem senha mestra de ADM; só entram usuários com convite aceito.');

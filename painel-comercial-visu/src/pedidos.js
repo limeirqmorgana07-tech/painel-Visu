@@ -155,11 +155,14 @@ const dentroDoPrazo = (r) => Date.now() - Date.parse(r.criado_em || 0) < HORAS_E
 function bloqueio(u, r, campo) {
   if (podeEditarTudo(u)) return null;
   if (!podeLancar(u)) return 'Seu perfil só consulta os pedidos.';
+  if (!ehDoVendedor(u, r)) return 'Esta linha é de outro vendedor: só ele ou a gestão altera.';
   if (CAMPOS_VALOR.includes(campo) && !dentroDoPrazo(r)) return r.origem === 'planilha'
     ? 'Linha importada da planilha: quantidade e valores só a gestão altera. Para acrescentar peças, lance um acréscimo (pedido complementar).'
     : `Passaram ${HORAS_EDICAO} h do lançamento: para acrescentar peças, lance um acréscimo (pedido complementar). Só a gestão altera este campo agora.`;
   return null;
 }
+// perfil Vendedor: só mexe nas linhas dele (pelo nome na coluna VENDEDOR) ou nas que ele mesmo lançou
+export const ehDoVendedor = (u, r) => u?.perfil !== 'vendedor' || r.criado_por_id === u.id || (!!u.vendedor && sem(r.vendedor) === sem(u.vendedor));
 const quem = (u) => ({ usuario: u?.nome || 'Sistema', usuario_id: u?.id || '' });
 
 // ---------- leitura ----------
@@ -195,7 +198,8 @@ function novoRegistro(dados, u, extra = {}) {
 export async function criarPedido(corpo, u) {
   if (!podeLancar(u)) throw new Error('Seu perfil só consulta os pedidos.');
   await carregar();
-  const cab = corpo?.pedido || {}, itens = Array.isArray(corpo?.itens) && corpo.itens.length ? corpo.itens : [{}];
+  const cab = { ...(corpo?.pedido || {}) }; if (u?.perfil === 'vendedor' && u.vendedor) cab.vendedor = u.vendedor;
+  const itens = Array.isArray(corpo?.itens) && corpo.itens.length ? corpo.itens : [{}];
   if (!limpar('cliente', cab.cliente)) throw new Error('Informe o cliente.');
   if (!limpar('data', cab.data)) throw new Error('Informe a data da venda.');
   let codigo = limpar('codigo', cab.codigo);
@@ -240,7 +244,7 @@ export async function excluir(id, u) {
   await carregar();
   const r = mem.get(id);
   if (!r || r.excluido) throw new Error('Linha não encontrada.');
-  if (!podeEditarTudo(u) && !(podeLancar(u) && dentroDoPrazo(r) && r.criado_por_id === u?.id)) throw new Error(`Só a gestão exclui pedidos depois de ${HORAS_EDICAO} h (ou lançados por outra pessoa).`);
+  if (!podeEditarTudo(u) && !(podeLancar(u) && dentroDoPrazo(r) && r.criado_por_id === u?.id && ehDoVendedor(u, r))) throw new Error(`Só a gestão exclui pedidos depois de ${HORAS_EDICAO} h (ou lançados por outra pessoa).`);
   const novo = { ...r, excluido: true, excluido_em: agoraISO(), excluido_por: u?.nome || '' };
   mem.set(id, novo); await gravar([novo]);
   await registrarLog([{ ...quem(u), acao: 'excluiu', registro: id, codigo: r.codigo, cliente: r.cliente, mudancas: [{ campo: 'item', antes: `${r.quantidade} × ${r.tipo_produto || 'item'} = R$ ${Number(r.total || 0).toFixed(2)}`, depois: '' }] }]);
@@ -253,7 +257,7 @@ export async function unificarCliente(de, para, u) {
   if (!para || !nomes.size) throw new Error('Informe os nomes a unificar e o nome certo.');
   await carregar();
   const mudados = [];
-  for (const r of mem.values()) if (!r.excluido && nomes.has(sem(r.cliente)) && r.cliente !== para) { const n = { ...r, cliente: para, cliente_lancado: r.cliente_lancado || r.cliente, alterado_em: agoraISO(), alterado_por: u?.nome || '' }; mem.set(r.id, n); mudados.push([r, n]); }
+  for (const r of mem.values()) if (!r.excluido && nomes.has(sem(r.cliente)) && r.cliente !== para && ehDoVendedor(u, r)) { const n = { ...r, cliente: para, cliente_lancado: r.cliente_lancado || r.cliente, alterado_em: agoraISO(), alterado_por: u?.nome || '' }; mem.set(r.id, n); mudados.push([r, n]); }
   await gravar(mudados.map((x) => x[1]));
   await registrarLog([{ ...quem(u), acao: 'unificou', codigo: null, cliente: para, mudancas: [{ campo: 'cliente', antes: [...new Set(mudados.map((x) => x[0].cliente))].join(' · '), depois: para }], detalhe: `${mudados.length} linhas` }]);
   return { linhas: mudados.length };
@@ -263,7 +267,7 @@ export async function unificarCliente(de, para, u) {
 async function linhasDaFonte(bytes) {
   if (bytes) return { linhas: lerXlsx(bytes).linhas, origem: 'arquivo' };
   if (config.demo) return { linhas: gerarDemoPlanilha().linhas, origem: 'demonstração' };
-  if (!planilhaConfigurada()) throw new Error('A planilha não está conectada. Conecte o Google em Conferência → Sistema × planilha: mês, ou envie o arquivo .xlsx.');
+  if (!planilhaConfigurada()) throw new Error('A planilha não está conectada. Ligue a planilha em Controle → Planilha × sistema (mês) → Ligar pelo meu e-mail, ou envie o arquivo .xlsx.');
   return { linhas: (await lerPlanilha()).linhas, origem: 'planilha conectada' };
 }
 export async function importar({ de = '2026-01', ate = '2026-10', modo = 'faltam', simular = true, bytes = null, nomeArquivo = '' }, u) {

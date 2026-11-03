@@ -2,11 +2,11 @@
 // O ADM pode restringir ainda mais por usuário, na página Usuários e permissões.
 export const MENU = [
   { grupo: 'Gestão', itens: [['painel', 'Painel executivo'], ['indicadores', 'Quadro de indicadores']] },
-  { grupo: 'Comercial', itens: [['registro', 'Pedidos de venda'], ['vendas', 'Vendas'], ['produtos', 'Produtos e mix'], ['clientes', 'Clientes'], ['vendedores', 'Vendedores e premiação'], ['pedidos', 'Pedidos e entregas']] },
+  { grupo: 'Comercial', itens: [['registro', 'Planilha de vendas'], ['vendas', 'Vendas'], ['produtos', 'Produtos e mix'], ['clientes', 'Clientes'], ['vendedores', 'Vendedores e premiação'], ['pedidos', 'Pedidos e entregas']] },
   // reunião de 03/11/2026: conferência sistema × planilha num grupo próprio (a planilha é a referência das vendas)
-  { grupo: 'Conferência', itens: [['conferencia', 'Sistema × planilha: pedidos'], ['conciliacao', 'Sistema × planilha: mês'], ['inconsistencias', 'Inconsistências'], ['historico', 'Histórico de alterações']] },
+  { grupo: 'Conferência', itens: [['inconsistencias', 'Inconsistências'], ['historico', 'Histórico de alterações']] },
   { grupo: 'Financeiro', itens: [['dre', 'DRE gerencial'], ['equilibrio', 'Margem e ponto de equilíbrio'], ['caixa', 'Fluxo de caixa'], ['receber', 'Contas a receber'], ['pagar', 'Contas a pagar']] },
-  { grupo: 'Controle', itens: [['dados', 'Qualidade dos dados'], ['versoes', 'Versões do painel']] },
+  { grupo: 'Controle', itens: [['conciliacao', 'Planilha × sistema (mês)'], ['dados', 'Qualidade dos dados'], ['versoes', 'Versões do painel']] },
   { grupo: 'Administração', itens: [['usuarios', 'Usuários e permissões']] },
 ];
 export const TODAS = MENU.flatMap((g) => g.itens.map((i) => i[0]));
@@ -16,15 +16,17 @@ const PADRAO_BASE = {
   adm: TODAS,
   diretor: TODAS.filter((p) => p !== 'usuarios'),
   // reunião de 03/11/2026: vendedores lançam os pedidos no painel e veem a conciliação; o histórico fica com a gestão
-  comercial: ['registro', ...COM, 'conferencia', 'conciliacao', 'inconsistencias', 'versoes'],
-  financeiro: ['painel', 'indicadores', 'registro', ...FIN, 'conferencia', 'conciliacao', 'inconsistencias', 'historico', 'dados', 'versoes'],
+  comercial: ['registro', ...COM, 'inconsistencias', 'conciliacao', 'versoes'],
+  financeiro: ['painel', 'indicadores', 'registro', ...FIN, 'inconsistencias', 'historico', 'conciliacao', 'dados', 'versoes'],
   // consultor externo liberado pela diretoria: só o módulo de vendas (em homologação); o ADM pode ampliar
   consultor: [...COM],
+  // perfil Vendedor (v32): lança e revisa as próprias vendas na Planilha de vendas e vê as inconsistências dele
+  vendedor: ['registro', ...COM, 'inconsistencias', 'versoes'],
 };
 // O ADM pode mudar o que cada perfil vê (vale para todas as pessoas daquele perfil). Guardado na chave perfis_paginas.
 let personalizado = {};
 const LIBERAVEIS = TODAS.filter((p) => p !== 'usuarios');
-const NOVAS_V31 = ['registro', 'conferencia', 'inconsistencias', 'historico'];
+const NOVAS_V31 = ['registro', 'inconsistencias', 'historico'];
 export function definirPerfis(o) {
   personalizado = {};
   // listas salvas antes da v31 não conheciam os 3 menus novos: entram conforme o padrão do perfil
@@ -60,7 +62,7 @@ export const BLOCOS = [
   { id: 'vendedores.premiacao', pag: 'vendedores', nome: 'Vendedores: premiação, bônus e apuração (valores de cada vendedor)', fin: false },
 ];
 const TODOS_BLOCOS = BLOCOS.map((b) => b.id), SO_COMERCIAL = BLOCOS.filter((b) => !b.fin && b.id !== 'vendedores.premiacao').map((b) => b.id);
-const BLOCOS_PADRAO = { diretor: TODOS_BLOCOS, financeiro: TODOS_BLOCOS, comercial: SO_COMERCIAL, consultor: SO_COMERCIAL };
+const BLOCOS_PADRAO = { diretor: TODOS_BLOCOS, financeiro: TODOS_BLOCOS, comercial: SO_COMERCIAL, consultor: SO_COMERCIAL, vendedor: SO_COMERCIAL };
 let blocosPers = {};
 export function definirBlocos(o) {
   blocosPers = {};

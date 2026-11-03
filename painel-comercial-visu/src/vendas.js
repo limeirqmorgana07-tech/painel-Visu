@@ -256,6 +256,7 @@ async function montar(bruto) {
     nr_fonte: origem === 'planilha' && base.mapa?.nr_tratado ? (base.mapa?.tratamento === 'painel' ? 'painel' : 'tratada') : undefined,
     de_para: origem === 'planilha' ? base.mapa?.de_para || null : null,
     conta_azul_conectada: !!bruto.conectadoCA,
+    modo_demo: !!config.demo,
     credenciais_conta_azul: !!(config.clientId && config.clientSecret),
     atualizado_em: new Date().toISOString(),
     avisos,

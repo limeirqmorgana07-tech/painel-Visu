@@ -605,6 +605,7 @@ table.matriz td.vz{color:var(--line2)}
 .ped-modal{width:min(980px,96vw)}
 .dica-c{font-size:10.5px;font-weight:500;color:var(--ink3)}
 .ped-tot{font-weight:700;font-family:var(--display);font-size:15px}
+.ps-passos{padding-left:20px;margin:10px 0}.ps-passos li{margin:0 0 12px;color:var(--ink2)}.ps-passos li b{color:var(--ink)}.ps-passos textarea{width:100%;box-sizing:border-box;margin:8px 0 6px;font:12px/1.45 ui-monospace,Menlo,Consolas,monospace;background:var(--bg);color:var(--ink);border:1px solid var(--line2);border-radius:8px;padding:8px}#psUrl{background:var(--panel);border:1px solid var(--line2);border-radius:8px;padding:7px 9px;font:inherit;font-size:13px;color:var(--ink)}#psModal{width:min(760px,94vw)}
 .pol .e,.ped-modal .e{color:var(--red);font-size:12.5px;margin-top:8px}
 #imModal{width:min(720px,94vw)}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--panel);padding:10px 16px;border-radius:10px;font-size:13px;z-index:90;max-width:min(560px,92vw);box-shadow:0 10px 30px -10px rgba(0,0,0,.4)}
@@ -621,6 +622,7 @@ table.matriz td.vz{color:var(--line2)}
 .balao .pgcard{min-width:0}.balao .pgcard hr{border-top:1px solid var(--line)}.balao .pgcard .ln span:first-child{color:var(--ink3);opacity:1}
 .balao .bh{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}.balao .bh b{font-family:var(--display);font-size:13.5px}
 .balao .av{margin-top:8px;padding:6px 8px;border-radius:8px;background:var(--redSoft);color:var(--red);font-weight:600}
+.inc-tipos{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}.inc-t{border:1px solid var(--line2);background:var(--panel);color:var(--ink);border-radius:999px;padding:5px 11px;font:inherit;font-size:12px;cursor:pointer}.inc-t b{margin-left:4px}.inc-t.grave b{color:var(--red)}.inc-t.media b{color:var(--amber)}.inc-t.zero{opacity:.55;cursor:default}.inc-t.zero b{color:var(--green)}.inc-t.on{background:var(--ink);color:var(--panel);border-color:var(--ink)}.inc-t.on b{color:inherit}
 .inc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
 .inc{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:6px;cursor:pointer;text-align:left;font:inherit;color:var(--ink)}
 .inc:hover{border-color:var(--orange)}.inc.zero{cursor:default;opacity:.72}.inc.zero:hover{border-color:var(--line)}
@@ -729,6 +731,21 @@ table.matriz td.vz{color:var(--line2)}
     <div class="e" id="pmErro"></div>
     <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px"><button class="bt2" type="button" id="pmCancelar">Cancelar</button><button class="bt2 pri" type="submit" id="pmSalvar">Salvar pedido</button></div>
   </form></div>
+</div>
+<div id="psModal" class="pol" role="dialog" aria-modal="true" aria-labelledby="psTit" hidden>
+  <div class="pol-hd"><div><div class="eyebrow">Controle · Planilha de vendas</div><h3 id="psTit">Ligar a planilha pelo seu e-mail</h3><div class="sub">O painel passa a ler a planilha sozinho, com o acesso que o seu e-mail já tem. Não precisa de nada no Render.</div></div><button class="bt2" type="button" id="psFechar" aria-label="Fechar">✕</button></div>
+  <div class="pol-corpo">
+    <ol class="ps-passos">
+      <li><b>Abra o Google Apps Script com o seu e-mail</b> (o que abre a planilha): <a id="psLinkScript" href="https://script.google.com/home/start" target="_blank" rel="noopener">script.google.com ↗</a> → <b>Novo projeto</b>.</li>
+      <li><b>Apague</b> o que estiver no editor e <b>cole o script abaixo</b> (já vem com o código da planilha e a chave do painel). Clique em 💾 Salvar.
+        <textarea id="psScript" readonly rows="9" spellcheck="false"></textarea><button class="bt2" type="button" id="psCopiar">Copiar script</button></li>
+      <li>Clique em <b>Implantar → Nova implantação</b> → engrenagem ⚙ → <b>App da Web</b>. Em <b>Executar como</b> deixe <b>Eu</b> (o seu e-mail) e em <b>Quem pode acessar</b> escolha <b>Qualquer pessoa</b>. Clique em <b>Implantar</b>.</li>
+      <li>O Google pede autorização: escolha a sua conta → <b>Avançado</b> → <b>Acessar projeto (não seguro)</b> → <b>Permitir</b>. O aviso aparece porque o script é seu e não foi publicado; ele só lê a planilha e só responde a quem tem a chave do painel.</li>
+      <li>Copie o <b>URL do app da Web</b> (termina com <code>/exec</code>), cole aqui e clique em <b>Testar e ligar</b>:
+        <div style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap"><input id="psUrl" placeholder="https://script.google.com/macros/s/…/exec" style="flex:1;min-width:240px"><button class="bt2 pri" type="button" id="psLigar">Testar e ligar</button></div></li>
+    </ol>
+    <div class="e" id="psErro"></div><div class="nota" id="psOk"></div>
+  </div>
 </div>
 <div id="imModal" class="pol" role="dialog" aria-modal="true" aria-labelledby="imTit" hidden>
   <div class="pol-hd"><div><div class="eyebrow">Gestão · Pedidos de venda</div><h3 id="imTit">Importar a base de vendas</h3><div class="sub">Traz as vendas da planilha para o painel, para os vendedores revisarem (novo × recompra, nome do cliente, campos vazios)</div></div><button class="bt2" type="button" id="imFechar" aria-label="Fechar">✕</button></div>
@@ -888,12 +905,15 @@ table.matriz td.vz{color:var(--line2)}
     <div class="ped-bar">
       <div class="f"><label for="inMes">Mês</label><select id="inMes"></select></div>
       <div class="f"><label for="inVend">Vendedor</label><select id="inVend"></select></div>
-      <div class="seg" role="group" aria-label="Base" id="inBase"><button type="button" data-inb="planilha" aria-pressed="true">Planilha</button><button type="button" data-inb="painel" aria-pressed="false">Pedidos do painel</button></div>
+      <div class="seg" role="group" aria-label="Base" id="inBase"><button type="button" data-inb="planilha" aria-pressed="true">Planilha</button><button type="button" data-inb="painel" aria-pressed="false">Planilha de vendas do painel</button></div>
+      <span style="flex:1"></span>
+      <div class="exp" data-exp="in"><button class="bt2" type="button" aria-haspopup="true" aria-expanded="false">Exportar ▾</button><div class="exp-m" hidden><button type="button" data-fmt="xlsx">Excel (.xlsx)</button><button type="button" data-fmt="pdf">PDF</button><button type="button" data-fmt="csv">CSV</button></div></div>
     </div>
     <div class="aviso" id="inAviso"></div>
     <div class="kpis" id="inKpis" style="margin-bottom:14px"></div>
-    <div class="inc-grid" id="inCards"></div>
-    <div class="card" style="margin-top:16px"><div class="hd"><div><h3>Inconsistências por vendedor</h3><div class="sub">O "dever de casa" de cada vendedor no período · clique num número para ver as linhas</div></div></div><div class="tw" id="inVendT"></div></div>
+    <div class="card"><div class="hd"><div><h3>Todas as inconsistências</h3><div class="sub">Sistema × planilha, colunas vazias, código do pedido e cadastro de clientes, numa lista só · clique num tipo para filtrar</div></div></div>
+      <div class="inc-tipos" id="inResumo"></div><div class="tw" id="inTabela"></div></div>
+    <div class="card" style="margin-top:16px"><div class="hd"><div><h3>Por vendedor</h3><div class="sub">O "dever de casa" de cada vendedor no período · clique num número para ver as linhas</div></div></div><div class="tw" id="inVendT"></div></div>
   </section>
   <section data-pagina="historico" hidden>
     <div class="ped-bar">
@@ -996,7 +1016,8 @@ table.matriz td.vz{color:var(--line2)}
       <form class="us-form" id="usForm"><input type="hidden" name="id">
         <div class="f"><label for="usNome">Nome</label><input id="usNome" name="nome" required></div>
         <div class="f"><label for="usEmail">E-mail (será o login)</label><input id="usEmail" name="email" type="email"></div>
-        <div class="f"><label for="usPerfil">Perfil</label><select id="usPerfil" name="perfil"><option value="diretor">Diretor</option><option value="comercial">Comercial</option><option value="financeiro">Financeiro</option><option value="consultor">Consultor externo</option><option value="adm">ADM</option></select></div>
+        <div class="f"><label for="usPerfil">Perfil</label><select id="usPerfil" name="perfil"><option value="diretor">Diretor</option><option value="comercial">Comercial</option><option value="financeiro">Financeiro</option><option value="consultor">Consultor externo</option><option value="vendedor">Vendedor</option><option value="adm">ADM</option></select></div>
+        <div class="f us-vend" hidden><label for="usVendedor">Nome dele na planilha (coluna Vendedor)</label><input id="usVendedor" name="vendedor" list="dlVendedor" placeholder="ex.: EGBERTO"></div>
         <div class="f us-cons" hidden><label for="usEmpresa">Empresa do consultor</label><input id="usEmpresa" name="empresa" placeholder="opcional"></div>
         <div class="f us-cons" hidden><label for="usValidade">Acesso até</label><input id="usValidade" name="valido_ate" type="date"></div>
         <button class="bt2 pri" type="submit">Salvar</button><button class="bt2" type="button" id="usCancelar" hidden>Cancelar</button>
@@ -1035,8 +1056,9 @@ const nomeMes=(m)=>{const[a,b]=m.split('-');return MES_L[+b-1]+' de '+a};
 const somaMes=(m,n)=>{const[a,b]=m.split('-').map(Number);const d=new Date(Date.UTC(a,b-1+n,1));return d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0')};
 function delta(a,b,inv){ if(!b) return '<span class="delta eq">sem base</span>'; const d=(a-b)/b; const c=Math.abs(d)<.005?'eq':(d>0)!==!!inv?'up':'down'; return `<span class="delta ${c}">${d>0?'▲':d<0?'▼':'■'} ${pct(Math.abs(d))}</span>`; }
 
-const VERSAO='v31';
+const VERSAO='v32';
 const VERSOES=[
+ {v:'v32',data:'03/11/2026',tit:'Planilha de vendas, inconsistências num lugar só e perfil Vendedor',arq:'painel-visu-v32.zip',itens:['Menu Comercial → Planilha de vendas (antes "Pedidos de venda"): as mesmas colunas da planilha, onde o vendedor lança e corrige. Mesmo vazia, mostra as colunas e o que fazer (Importar base ou + Novo pedido).','Inconsistências num item só (Conferência → Inconsistências): uma lista única com sistema × planilha pedido a pedido, colunas obrigatórias vazias, novo × recompra, pagamento e entrega em branco, código do pedido, duplicidade e cadastro de clientes, com filtro por tipo e por vendedor e exportação em Excel, PDF e CSV.','Sem planilha ligada nem base importada, a conferência não lista mais tudo como "só no sistema": avisa o que falta fazer.','Novo perfil Vendedor: ligado ao nome dele na coluna Vendedor; abre a planilha e as inconsistências já filtradas nele, lança pedidos no próprio nome e só altera as próprias linhas. Premiação oculta por padrão.','Ligar a planilha pelo seu e-mail (Controle → Planilha × sistema (mês) → Ligar pelo meu e-mail): um script do Google na sua conta entrega a planilha ao painel, sem GOOGLE_CLIENT_ID/SECRET no Render. A leitura passa a ser automática a cada 5 minutos.','Planilha × sistema (mês) volta para o Controle; Conferência fica com Inconsistências e Histórico de alterações.']},
  {v:'v31',data:'03/11/2026',tit:'Pedidos de venda no painel (reunião Visu e Vieira Diniz)',arq:'painel-visu-v31.zip',itens:['Novo menu Pedidos de venda no Comercial: tela com as mesmas colunas da planilha, edição direto na célula, + Novo pedido com vários itens e código automático no padrão da Visu (sequência do mês + mês + ano, ex.: 0005112026).','Regra do acréscimo: quantidade e valores ficam travados para o vendedor 24 h depois do lançamento; acréscimo vira pedido complementar com o mesmo código + "-1", "-2", que gera título complementar na Conta Azul.','Importar base: traz as vendas de janeiro a outubro da planilha conectada (ou de um arquivo .xlsx) e permite subir outubro de novo depois. Campos em branco, novo × recompra vazio e cliente com "lote" no nome ficam em amarelo para os vendedores revisarem; o lote vai para a coluna própria.','Colunas Planilha, Sistema (Conta Azul) e Divergência em cada pedido, e 1º e 2º pagamento preenchidos pela Conta Azul pelo código do pedido, com card de data da baixa, banco e forma ao passar o mouse.','Novo menu Conciliação de pedidos: pedido a pedido, painel × Conta Azul, com batendo, valor diferente, só no painel, só no sistema e sem código.','Novo menu Histórico de alterações (gestão): quem lançou, alterou, excluiu ou importou, quando e o que mudou (antes → depois).','Revisão de cadastro de clientes: junta grafias do mesmo cliente (ex.: Checkpoint, Checkpoint 5 anos, Checkpoint CT) com um clique.','Premiação oculta para vendedores: novo item "Vendedores: premiação" em O que cada perfil vê na Gestão, desligado para Comercial e Consultor.','O ADM escolhe se os indicadores leem a planilha conectada ou os pedidos do painel (para extinguir o controle paralelo a partir de novembro).','Novo grupo Conferência no menu: Sistema × planilha por pedido e por mês, Inconsistências (valor diferente na Conta Azul, pedido sem venda, venda sem pedido, pagamento diferente, sem código, código fora do padrão, código repetido, mesmo cliente e dia com códigos diferentes, lote no nome, grafias, novo × recompra, campos em branco, duplicidade, total × qtd) com o dever de casa por vendedor, e Histórico de alterações.','As vendas seguem a planilha (a Conta Azul aparece só como conferência); pedidos importados contam como na base tratada (cliente + data). Testado com a planilha tratada real: setembro com 104 pedidos, R$ 241.835, 31,2% para clientes novos e 39 clientes novos.','Cód. interno que vinha como número (4092026) volta para 10 dígitos (0004092026). Sem Conta Azul conectada, a conferência não usa mais vendas de demonstração.','1º e 2º pagamento: balão flutuante ao passar o mouse, com situação (recebido, a receber, em atraso), parcela, vencimento, data da baixa, banco e forma.','Exportar em Excel (.xlsx, com valores numéricos, datas e filtro), PDF (com cabeçalho, totais e páginas numeradas) e CSV em todas as listas: detalhamentos ao clicar nos valores, Pedidos de venda, Conciliação de pedidos e Histórico.']},
  {v:'v30',data:'28/10/2026',tit:'Gestão por perfil',arq:'painel-visu-v30.zip',itens:['Em Usuários e permissões, nova tabela "O que cada perfil vê na Gestão": o ADM escolhe, por perfil, quais quadros do Painel executivo e do Quadro de indicadores aparecem (vitrine, indicadores de vendas, indicadores financeiros, ponto de equilíbrio, cascata, gráfico de 12 meses, pontos de atenção; e no Quadro, as partes comercial, financeira e de caixa).','Se nenhum quadro financeiro estiver liberado e o perfil não tiver páginas financeiras, o servidor também bloqueia os dados financeiros.']},
  {v:'v29',data:'28/10/2026',tit:'Premiação pela política da Visu',arq:'painel-visu-v29.zip',itens:['Premiação calculada pela Política de Premiação por Performance 2026: 17 faixas, de 1% a partir de R$ 15 mil até 5% a partir de R$ 50 mil, sobre o total vendido no mês.','Bônus semanal: R$ 75 por semana (segunda a sexta) com R$ 25 mil ou mais em vendas, somado à premiação.','Data de pagamento (5º dia útil do mês seguinte) e botão Ver política de premiação, com o resumo e o PDF.','Página renomeada para Vendedores e premiação. O moderador de margem (item 6) ainda não é aplicado.']},
@@ -1751,26 +1773,38 @@ function pgPagar(){
   $('pgProx').innerHTML=pg.proximos.length?`<table><thead><tr><th>Vencimento</th><th>Fornecedor · categoria</th><th class="v">Valor</th></tr></thead><tbody>${pg.proximos.map(x=>`<tr${D(()=>detAbertos('A pagar: '+(x.pessoa||x.descricao),y=>y[0]==='p'&&y[2]===x.pessoa))}><td class="num">${x.vencimento.split('-').reverse().join('/')}</td><td class="el">${esc(x.pessoa||x.descricao)}<div style="font-size:11.5px;color:var(--ink3)">${esc(x.categoria)}</div></td><td class="v">${brl2(x.aberto)}</td></tr>`).join('')}</tbody></table>`:'<div class="vazio">Nada a vencer.</div>';
 }
 
+// ---------- ligar a planilha pelo e-mail (script do Google, v32) ----------
+async function abrirLigarPlanilha(){
+  $('psErro').textContent=''; $('psOk').textContent=''; $('psScript').value='Carregando…'; $('pdFundo').hidden=false; $('psModal').hidden=false;
+  try{ const r=await api('/api/planilha-script'); $('psScript').value=r.script; $('psUrl').value=r.url||''; $('psLinkScript').href='https://script.google.com/home/start?authuser='+encodeURIComponent(r.conta||E.eu?.email||''); if(r.configurado) $('psOk').innerHTML=`Ligada${r.nome?' ao arquivo <b>'+esc(r.nome)+'</b>':''}${r.ligado_em?' em '+new Date(r.ligado_em).toLocaleString('pt-BR'):''}.`; }
+  catch(e){ $('psErro').textContent=e.message; }
+}
+async function desligarPlanilha(){ if(!confirmar('Desligar a leitura da planilha pelo e-mail?')) return; try{ await api('/api/planilha-script',{method:'DELETE'}); toast('Planilha desligada.'); await carregar(true); }catch(e){ toast(e.message,true); } }
 // ---------- conciliação planilha x sistema ----------
 const kc=(s)=>String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/\s*[-–(]?\s*\blote\s*\d+\)?\s*$/,'').replace(/[^a-z0-9]+/g,' ').trim();
 let totalInformado={}; try{ totalInformado=JSON.parse(localStorage.getItem('visu-total-planilha')||'{}'); }catch(e){}
 function pgConciliacao(){
   const conta=E.eu?.email||E.dados.planilha_conta||'morgana.limeira@sejaexpertgestao.com', base=E.dados.planilha_link||'https://docs.google.com/spreadsheets/d/1mWgFszLWSMepXLA4FMlOtRJ6jayKgODU/edit?gid=247671240', link=base+(base.includes('?')?'&':'?')+'authuser='+encodeURIComponent(conta), ligada=E.dados.fonte==='planilha';
-  const G=E.dados.google||{}, arq=E.dados.planilha_arquivo, admG=E.eu?.perfil==='adm';
+  const G=E.dados.google||{}, arq=E.dados.planilha_arquivo, admG=E.eu?.perfil==='adm', PS=E.dados.planilha_script||{};
   const quando=(iso)=>iso?new Date(iso).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'';
-  const txt=ligada&&G.conectado
+  const txt=ligada&&PS.configurado
+    ?`<b>ligada em tempo real pelo seu e-mail</b>${PS.por?` (por ${esc(PS.por)})`:''}${arq?.aba?` · aba "${esc(arq.aba)}"`:''}${arq?.alterado_em?` · última edição na planilha: ${quando(arq.alterado_em)}`:''} · o painel relê a cada 5 minutos.`
+    :PS.configurado?'ligada pelo e-mail, mas a leitura falhou. Veja o aviso no topo da página.'
+    :ligada&&G.conectado
     ?`<b>ligada em tempo real</b> pela conta ${esc(G.email||'Google')}${arq?.aba?` · aba "${esc(arq.aba)}"`:''}${arq?.alterado_em?` · última edição na planilha: ${quando(arq.alterado_em)}`:''} · o painel relê a cada 5 minutos.`
     :ligada?'ligada ao painel e lida automaticamente a cada atualização (5 min).'
     :G.conectado?`Google conectado (${esc(G.email)}), mas a leitura falhou. Veja o aviso no topo da página.`
-    :`ainda não está ligada: a comparação usa o total que você informar abaixo.${admG?' Clique em <b>Conectar Google</b> e entre com a conta que abre a planilha; a partir daí os números entram sozinhos.':' Peça ao administrador para conectar o Google.'}`;
+    :`ainda não está ligada: a comparação usa o total que você informar abaixo.${admG?' Clique em <b>Ligar pelo meu e-mail</b>: em 5 minutos o painel passa a ler a planilha sozinho com o acesso do seu e-mail.':' Peça ao administrador para conectar o Google.'}`;
   const botoes=[];
   if(admG&&!PREVIA){
-    if(!G.conectado) botoes.push(G.credenciais===false?`<span class="nota" style="margin:0">Falta configurar GOOGLE_CLIENT_ID e GOOGLE_CLIENT_SECRET no Render.</span>`:`<a class="bt2 pri" style="text-decoration:none" href="/google/conectar">Conectar Google</a>`);
+    if(PS.configurado) botoes.push(`<button class="bt2" type="button" data-ps="abrir">Refazer ligação</button><button class="bt2" type="button" data-ps="desligar">Desligar</button>`);
+    else if(!G.conectado) botoes.push(`<button class="bt2 pri" type="button" data-ps="abrir">Ligar pelo meu e-mail</button>`+(G.credenciais?`<a class="bt2" style="text-decoration:none" href="/google/conectar">Conectar Google</a>`:''));
     else botoes.push(`<form method="post" action="/google/desconectar" style="display:inline"><button class="bt2" type="submit">Desconectar Google</button></form>`);
   } else if(admG&&PREVIA&&!G.conectado) botoes.push(`<button class="bt2 pri" type="button" disabled title="Na prévia não conecta">Conectar Google</button>`);
   botoes.push(`<a class="bt2" style="text-decoration:none" href="${esc(link)}" target="_blank" rel="noopener">Abrir planilha ↗</a>`);
   $('concPlan').innerHTML=`<span style="flex:1;min-width:260px"><b>Planilha "Rotina de vendas_Gestão faturamento CLOUD"</b> · ${txt}</span><span style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">${botoes.join('')}</span>`;
-  $('concPlan').classList.toggle('ok',!!(ligada&&G.conectado));
+  $('concPlan').classList.toggle('ok',!!(ligada&&(G.conectado||PS.configurado)));
+  $('concPlan').querySelectorAll('[data-ps]').forEach(b=>b.onclick=()=>b.dataset.ps==='abrir'?abrirLigarPlanilha():desligarPlanilha());
   const d=E.dados, m=E.mes, caD=d.conta_azul;
   if(!caD){ $('ponte').innerHTML='<div class="vazio">A Conta Azul ainda não está conectada. A conciliação compara a planilha com as vendas do sistema.</div>'; $('motivos').innerHTML=''; $('concMeses').innerHTML=''; $('concClientes').innerHTML=''; return; }
   const temPlanilha=d.fonte==='planilha'||d.fonte==='demo';
@@ -1897,7 +1931,7 @@ const ckey=(c)=>String(c||'').replace(/\D/g,'').replace(/^0+/,'');
 const cbase=(c)=>String(c||'').trim().split(/[-/ ]/)[0];
 const semA=(s)=>String(s??'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/\s+/g,' ').trim();
 const dataBR=(d)=>d?String(d).slice(0,10).split('-').reverse().join('/'):'';
-const PED={d:null,carr:null,mes:null,vend:'',busca:'',fil:'',cfMes:null,cfVend:'',cfBase:null,cfSit:'',hs:null,hsDias:null,editando:null};
+const PED={d:null,carr:null,mes:null,vend:'',inVend:null,inTipo:'',busca:'',fil:'',cfMes:null,cfVend:'',cfBase:null,cfSit:'',hs:null,hsDias:null,editando:null};
 const COLS_PED=[['data','Data da venda','data'],['mes','Mês','ro'],['codigo','Cód. interno','texto'],['cliente','Cliente','texto','dlCliente'],['lote','Lote / obs. do cliente','texto'],['nome_pedido','Nome do pedido (Trello)','texto'],['vendedor','Vendedor','texto','dlVendedor'],['tipo_venda','Tipo de venda','sel:|B2B|B2C'],['novo_recompra','Cliente novo ou recompra?','sel:|novo|recompra'],['segmento','Segmento','texto','dlSegmento'],['tipo_produto','Tipo de produto','texto','dlProduto'],['material','Material','texto','dlMaterial'],['especificacao','Especificação','texto','dlEspec'],['quantidade','Quantidade','num'],['cor','Cor','texto','dlCor'],['valor_unit','Valor/und','brl'],['total','Total','brl'],['pag1','1º pagamento','pag'],['pag2','2º pagamento','pag'],['pago_100','Pedido 100% pago','bool'],['prazo_entrega','Prazo de entrega','data'],['forma_pagamento','Forma de pagamento','texto','dlForma'],['pagador','Nome pagador (comprovante)','texto'],['observacao','Observação','texto']];
 const ROT_PED=Object.fromEntries(COLS_PED.map(c=>[c[0],c[1]]));
 const REQ_PED=['cliente','vendedor','tipo_venda','novo_recompra','tipo_produto','material','cor','quantidade','total'];
@@ -1923,10 +1957,12 @@ function statusCod(cod,tot,mes,ca){
 }
 const ST_CL={ok:'st-ok',dif:'st-dif',so_painel:'st-so',so_sistema:'st-so',cancelado:'st-dif',nao_aprov:'st-so',sem:'st-na',antes:'st-na',semca:'st-na'};
 function pendPed(r){ const p=REQ_PED.filter(c=>!r[c]); if((r.mes||'')>='2026-09'&&!r.codigo) p.push('codigo'); if(/\blote\s*\d/i.test(r.cliente||'')) p.push('cliente'); if(r.possivel_duplicado) p.push('duplicado'); return p; }
-function travaPed(r,c){ const d=PED.d, P=d.pode; if(!P.lancar) return 'Seu perfil só consulta os pedidos.'; if(P.gestao||!d.campos_valor.includes(c)) return '';
+const meuVend=()=>PED.d?.vendedor||'';
+const ehMinha=(r)=>!meuVend()||r.criado_por_id===PED.d.eu?.id||semA(r.vendedor)===semA(meuVend());
+function travaPed(r,c){ const d=PED.d, P=d.pode; if(!P.lancar) return 'Seu perfil só consulta os pedidos.'; if(!P.gestao&&!ehMinha(r)) return 'Esta linha é de outro vendedor: só ele ou a gestão altera.'; if(P.gestao||!d.campos_valor.includes(c)) return '';
   if(r.origem==='planilha') return 'Linha importada da planilha: quantidade e valores só a gestão altera. Para acrescentar peças, use Acréscimo (pedido complementar).';
   if(Date.now()-Date.parse(r.criado_em||0)>d.horas_edicao*3600e3) return `Passaram ${d.horas_edicao} h do lançamento: para acrescentar peças, use Acréscimo (pedido complementar). Só a gestão altera este campo agora.`; return ''; }
-const podeExcluir=(r)=>{ const P=PED.d.pode; return P.gestao||(P.lancar&&r.origem!=='planilha'&&r.criado_por_id===PED.d.eu?.id&&Date.now()-Date.parse(r.criado_em||0)<PED.d.horas_edicao*3600e3); };
+const podeExcluir=(r)=>{ const P=PED.d.pode; return P.gestao||(P.lancar&&ehMinha(r)&&r.origem!=='planilha'&&r.criado_por_id===PED.d.eu?.id&&Date.now()-Date.parse(r.criado_em||0)<PED.d.horas_edicao*3600e3); };
 // próximo código do mês (0001 + mês + ano) e do complementar (-1, -2…), igual ao servidor
 function proxCod(data){ const d=data||hojeISO(), mm=d.slice(5,7), aa=d.slice(0,4); let mx=0; regsPed().forEach(r=>{ const m=cbase(r.codigo).match(/^(\d{4})(\d{2})(\d{4})$/); if(m&&m[2]===mm&&m[3]===aa) mx=Math.max(mx,+m[1]); }); return String(mx+1).padStart(4,'0')+mm+aa; }
 function proxComp(cod){ const b=cbase(cod); let k=0; regsPed().forEach(r=>{ const c=String(r.codigo||''); if(cbase(c)===b&&c!==b){ const n=+c.slice(b.length).replace(/\D/g,''); if(n>k) k=n; } }); return b+'-'+(k+1); }
@@ -1964,6 +2000,7 @@ function pgRegistro(){
   const hoje=hojeISO().slice(0,7), meses=[...new Set(regs.map(r=>r.mes).filter(Boolean).concat([hoje]))].sort().reverse();
   if(!PED.mes||(PED.mes!=='todos'&&!meses.includes(PED.mes))) PED.mes=meses.includes(hoje)&&regs.some(r=>r.mes===hoje)?hoje:(meses.find(m=>regs.some(r=>r.mes===m))||hoje);
   $('pdMes').innerHTML=meses.map(m=>`<option value="${m}">${nomeMes(m)} (${int(regs.filter(r=>r.mes===m).length)})</option>`).join('')+`<option value="todos">Todos os meses (${int(regs.length)})</option>`; $('pdMes').value=PED.mes;
+  if(PED.vend==null||(PED.vend===''&&meuVend()&&!PED.vendEscolhido)) PED.vend=meuVend()?[...new Set(regs.map(r=>r.vendedor))].find(v=>semA(v)===semA(meuVend()))||'':'';
   $('pdVend').innerHTML='<option value="">Todos</option>'+[...new Set(regs.map(r=>r.vendedor).filter(Boolean))].sort().map(v=>`<option>${esc(v)}</option>`).join(''); $('pdVend').value=PED.vend;
   $('pdBusca').value=PED.busca;
   document.querySelectorAll('[data-pdf]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.pdf===PED.fil)));
@@ -2021,7 +2058,7 @@ function pgRegistro(){
   }
   const g0=$('pdGrade'), st={t:g0.scrollTop,l:g0.scrollLeft};
   g0.innerHTML=vis.length?`<table><thead><tr><th class="ac"></th>${COLS_PED.map(([c,rot,t])=>`<th class="${t==='brl'||t==='num'||t==='pag'?'v':''}">${rot}</th>`).join('')}<th class="v">Planilha (pedido)</th><th class="v">Sistema (Conta Azul)</th><th>Divergência</th></tr></thead><tbody>${html}</tbody></table>`
-    :`<div class="vazio" style="padding:20px">${regs.length?'Nenhuma linha com esses filtros.':'Sem pedidos ainda.'}</div>`;
+    :`<table><thead><tr><th class="ac"></th>${COLS_PED.map(([c,rot,t])=>`<th class="${t==='brl'||t==='num'||t==='pag'?'v':''}">${rot}</th>`).join('')}<th class="v">Planilha (pedido)</th><th class="v">Sistema (Conta Azul)</th><th>Divergência</th></tr></thead><tbody><tr><td class="ac"></td><td colspan="${COLS_PED.length+3}" style="padding:22px 12px;white-space:normal">${regs.length?'Nenhuma linha com esses filtros.':`<b>A planilha de vendas ainda está vazia.</b> ${P.importar?'Clique em <b>Importar base</b> para trazer janeiro a outubro da planilha do comercial'+(d.planilha_conectada?'':' (arquivo .xlsx, ou ligue a planilha em Controle → Planilha × sistema)')+'. ':''}${P.lancar?'Para lançar uma venda nova, use <b>+ Novo pedido</b>.':''}`}</td></tr></tbody></table>`;
   g0.scrollTop=st.t; g0.scrollLeft=st.l; PED.flash=null;
   $('pdNota').innerHTML=(vis.length>LIM?`Mostrando as primeiras ${int(LIM)} de ${int(vis.length)} linhas; escolha um mês ou busque. `:'')+`<b>Sistema</b> = valor da venda na Conta Azul com o mesmo código (cód. interno = número da venda). <b>CA</b> = pagamento preenchido pela Conta Azul; passe o mouse em 1º/2º pagamento para ver data da baixa e banco${d.pagamentos?.erro?` (pagamentos indisponíveis: ${esc(d.pagamentos.erro)})`:''}.`;
   revisaoClientes(conhecidos);
@@ -2090,7 +2127,8 @@ function abrirPedido(modo,base){
   const cab=base?{...base}:{}; const set=(n,v)=>{ if(f.elements[n]) f.elements[n].value=v??''; };
   ['cliente','lote','nome_pedido','vendedor','tipo_venda','novo_recompra','segmento','forma_pagamento','prazo_entrega','pagador','observacao'].forEach(k=>set(k,modo==='novo'?'':cab[k]));
   set('data',modo==='item'?cab.data:hojeISO());
-  if(modo==='novo'){ const eu=semA(E.eu?.nome||'').split(' ')[0]; const v=eu&&conh.vendedor.find(x=>semA(x).split(' ')[0]===eu); if(v) set('vendedor',v); }
+  $('pmVend').readOnly=!!meuVend(); if(meuVend()) set('vendedor',conh.vendedor.find(x=>semA(x)===semA(meuVend()))||meuVend());
+  else if(modo==='novo'){ const eu=semA(E.eu?.nome||'').split(' ')[0]; const v=eu&&conh.vendedor.find(x=>semA(x).split(' ')[0]===eu); if(v) set('vendedor',v); }
   $('pmCodigo').readOnly=modo!=='novo';
   $('pmCodigo').value=modo==='item'?cab.codigo:modo==='comp'?proxComp(cab.codigo):''; $('pmCodigo').placeholder=modo==='novo'?'automático: '+proxCod($('pmData').value):'';
   $('pdmTit').textContent=modo==='novo'?'Novo pedido':modo==='item'?`Novo item no pedido ${cab.codigo}`:`Acréscimo ao pedido ${cab.codigo}`;
@@ -2120,7 +2158,7 @@ const IM={orig:'planilha',ok:null};
 function abrirImport(){ IM.ok=null; $('imRes').innerHTML=''; $('imErro').textContent=''; $('imOk').disabled=true; $('imOk').textContent='Importar';
   if(!PED.d.planilha_conectada&&IM.orig==='planilha') IM.orig='arquivo'; marcarOrig(); $('pdFundo').hidden=false; $('imModal').hidden=false; }
 function marcarOrig(){ document.querySelectorAll('[data-imo]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.imo===IM.orig))); $('imArqF').hidden=IM.orig!=='arquivo';
-  if(IM.orig==='planilha'&&!PED.d?.planilha_conectada) $('imErro').textContent='A planilha não está conectada (Conferência → Sistema × planilha: mês → Conectar Google). Use o arquivo .xlsx.'; else $('imErro').textContent=''; }
+  if(IM.orig==='planilha'&&!PED.d?.planilha_conectada) $('imErro').textContent='A planilha ainda não está ligada (Controle → Planilha × sistema (mês) → Ligar pelo meu e-mail). Por enquanto, use o arquivo .xlsx.'; else $('imErro').textContent=''; }
 async function rodarImport(simular){
   const o={de:$('imDe').value,ate:$('imAte').value,modo:$('imModo').value,simular};
   $('imErro').textContent=''; $('imConferir').disabled=$('imOk').disabled=true;
@@ -2199,89 +2237,100 @@ function pgHistorico(){
 
 // ---------- base da conferência: a planilha é a referência das vendas (reunião de 03/11/2026) ----------
 function baseConf(chave){
-  const regs=regsPed(), temPainel=regs.length>0, temPlan=(E.dados?.linhas||[]).some(l=>!l.cs)&&E.dados?.fonte!=='painel'&&E.dados?.fonte!=='conta_azul';
+  const regs=regsPed(), temPainel=regs.length>0, f=E.dados?.fonte, temPlan=(E.dados?.linhas||[]).some(l=>!l.cs)&&(f==='planilha'||(f==='demo'&&(PREVIA||E.dados?.modo_demo)));
   let b=PED[chave];
   if(!b||(b==='painel'&&!temPainel)||(b==='planilha'&&!temPlan)) b=E.dados?.fonte==='painel'&&temPainel?'painel':temPlan?'planilha':'painel';
   PED[chave]=b;
-  const base=b==='painel'?regs:(E.dados?.linhas||[]).filter(l=>!l.cs).map(l=>({codigo:l.cd||'',data:l.d,mes:l.m,cliente:l.c,cliente_lancado:l.co||'',vendedor:l.vo&&l.vo!==l.v?l.vo:l.v,tipo_venda:l.tv==='—'?'':l.tv,novo_recompra:l.nr||'',tipo_produto:l.tp,material:l.mt,cor:l.cr,quantidade:l.q,total:l.t,pag1:l.p1>1?l.p1:0,pag2:l.p2>1?l.p2:0,possivel_duplicado:!!l.du,_pl:1}));
+  const base=b==='painel'?regs:(E.dados?.linhas||[]).filter(l=>!l.cs).map(l=>({codigo:l.cd||'',data:l.d,mes:l.m,cliente:l.c,cliente_lancado:l.co||'',vendedor:l.vo&&l.vo!==l.v?l.vo:l.v,tipo_venda:l.tv==='—'?'':l.tv,novo_recompra:l.nr||'',tipo_produto:l.tp,material:l.mt,cor:l.cr,quantidade:l.q,total:l.t,pag1:l.p1>1?l.p1:0,pag2:l.p2>1?l.p2:0,pago_100:!!l.ok,forma_pagamento:l.fp||'',prazo_entrega:l.pz||'',possivel_duplicado:!!l.du,_pl:1}));
   return {b,base,temPainel,temPlan,rot:b==='painel'?'pedidos do painel':'planilha'};
 }
 
-// ---------- menu "Inconsistências" ----------
+// ---------- menu "Inconsistências" (v32: tudo num lugar só, uma lista única) ----------
+const TIPOS_INC=[
+  ['dif','Valor diferente na Conta Azul',1,'Conferir acréscimos: peças extras viram pedido complementar (código-1).'],
+  ['soP','Pedido sem venda aprovada no sistema',1,'Lançar a venda na Conta Azul com o mesmo número ou corrigir o código.'],
+  ['soS','Venda no sistema sem pedido na planilha',1,'Lançar o pedido na planilha com o mesmo código da Conta Azul.'],
+  ['pag','Pagamento diferente da Conta Azul',0,'Conferir o comprovante e corrigir a planilha ou a baixa.'],
+  ['vaz','Coluna obrigatória em branco',1,'Preencher as colunas indicadas.'],
+  ['nr','Novo × recompra em branco',0,'Marcar se o cliente é novo ou recompra.'],
+  ['pge','Pagamento ou entrega em branco',0,'Preencher forma de pagamento, prazo de entrega e 1º pagamento.'],
+  ['semCod','Sem código do pedido',1,'Preencher o cód. interno (o mesmo número da venda na Conta Azul).'],
+  ['fmt','Código fora do padrão',0,'Corrigir o código (sequência + mês + ano) ou a data da venda.'],
+  ['multi','Mesmo código em pedidos diferentes',1,'Dar um código novo ou usar o complementar (código-1).'],
+  ['dois','Mesmo cliente e dia com códigos diferentes',0,'Se for acréscimo, usar o código original com "-1".'],
+  ['dup','Possível lançamento duplicado',1,'Confirmar se são dois itens; se não, excluir a linha repetida.'],
+  ['conta','Total diferente de qtd × valor/und',0,'Corrigir quantidade, valor/und ou total.'],
+  ['lote','Cliente com "lote" no nome',0,'Deixar só o nome do cliente; o lote vai na coluna Lote / obs.'],
+  ['graf','Mesmo cliente com nomes diferentes',0,'Padronizar o nome (botão Unificar na Planilha de vendas).'],
+];
+function linhasInconsistencias(ls,b,ca,desde,noMes,vendSel){
+  const out=[], push=(tipo,r,extra={})=>out.push({tipo,data:r.data||'',codigo:r.codigo||'',cliente:r.cliente||'',vendedor:r.vendedor||'',plan:+r.total||0,sis:'',dif:'',falta:'',...extra});
+  const g=gruposCod(ls), temCA=!!E.dados?.conta_azul;
+  if(temCA){
+    for(const [k,x] of g){ const st=statusCod(x.codigo,x.t,x.mes,ca), v=ca.get(k), base={data:x.data,codigo:x.codigo,cliente:x.cliente,vendedor:x.vendedor||'',total:x.t};
+      if(st[0]==='dif') push('dif',base,{sis:v.t,dif:v.t-x.t,falta:'Conta Azul '+brl2(v.t)});
+      else if(['so_painel','cancelado','nao_aprov'].includes(st[0])) push('soP',base,{sis:v?v.t:'',dif:v?v.t-x.t:'',falta:v?SIT_CA[v.s]||v.s:'não existe na Conta Azul'});
+      if(x.mes>=desde){ const ps=parcelasDe(x.codigo); if(ps.length){ const p1=x.regs.reduce((a,r)=>a+(+r.pag1||0),0), p2=x.regs.reduce((a,r)=>a+(+r.pag2||0),0); [[p1,ps[0]],[p2,ps[1]]].forEach(([vp,pc],i)=>{ if(vp>0&&pc&&Math.abs(vp-(pc.pago||pc.valor))>1) push('pag',base,{plan:vp,sis:pc.pago||pc.valor,dif:(pc.pago||pc.valor)-vp,falta:(i?'2º':'1º')+' pagamento'}); }); } } }
+    const usados=new Set(g.keys());
+    if(ls.length) for(const v of E.dados.conta_azul.vendas||[]){ const m=(v.d||'').slice(0,7); if(m<desde||!noMes(m)||v.n==null||usados.has(ckey(v.n))||!['APROVADO','FATURADO'].includes(v.s)) continue; if(vendSel&&nv(v.v)!==nv(vendSel)) continue; out.push({tipo:'soS',data:v.d,codigo:String(v.n),cliente:v.c,vendedor:v.v||'',plan:'',sis:v.t,dif:v.t,falta:SIT_CA[v.s]||v.s}); }
+  }
+  const OBR=[['cliente','cliente'],['vendedor','vendedor'],['tipo_venda','tipo de venda'],['tipo_produto','tipo de produto'],['material','material'],['cor','cor'],['quantidade','quantidade'],['total','total']].concat(b==='painel'?[['valor_unit','valor/und']]:[]);
+  const visto=new Map(), cd=new Map();
+  for(const r of ls){
+    const f=OBR.filter(([c])=>!r[c]).map(x=>x[1]); if(f.length) push('vaz',r,{falta:f.join(', ')});
+    if(!r.novo_recompra) push('nr',r,{falta:'novo ou recompra'});
+    const pe=[!r.forma_pagamento&&'forma de pagamento',!r.prazo_entrega&&'prazo de entrega',!(+r.pag1)&&!r.pago_100&&'1º pagamento'].filter(Boolean); if(pe.length&&(r.mes||'')>='2026-09') push('pge',r,{falta:pe.join(', ')});
+    if(!r.codigo&&(r.mes||'')>='2026-09') push('semCod',r,{falta:'cód. interno'});
+    if(r.codigo){ const m=cbase(r.codigo).match(/^(\d{4})(\d{2})(\d{4})$/); if(!m) push('fmt',r,{falta:'formato do código'}); else if(r.data&&`${m[3]}-${m[2]}`!==r.data.slice(0,7)) push('fmt',r,{falta:`código de ${m[2]}/${m[3]}, venda em ${dataBR(r.data)}`});
+      const k=semA(r.cliente)+'|'+r.data, mm=cd.get(k)||new Map(); mm.set(cbase(r.codigo),1); cd.set(k,mm); }
+    if(b==='painel'&&r.quantidade&&r.valor_unit&&Math.abs(r.quantidade*r.valor_unit-r.total)>1) push('conta',r,{falta:`${int(r.quantidade)} × ${brl2(r.valor_unit)} = ${brl2(r.quantidade*r.valor_unit)}`});
+    if(/\blote\s*\d/i.test(r.cliente||'')||/\blote\s*\d/i.test(r.cliente_lancado||'')) push('lote',r,{falta:'lançado como "'+(r.cliente_lancado||r.cliente)+'"'});
+    const kd=[semA(r.cliente),r.data,semA(r.tipo_produto),semA(r.cor),r.quantidade,Math.round((+r.total||0)*100)].join('|'); visto.set(kd,(visto.get(kd)||[]).concat([r]));
+  }
+  for(const x of g.values()) if(new Set(x.regs.map(r=>semA(r.cliente))).size>1||new Set(x.regs.map(r=>r.data)).size>1) x.regs.forEach(r=>push('multi',r,{falta:'mesmo código com '+(new Set(x.regs.map(r=>semA(r.cliente))).size>1?'clientes':'datas')+' diferentes'}));
+  for(const r of ls){ const mm=cd.get(semA(r.cliente)+'|'+r.data); if(r.codigo&&mm&&mm.size>1) push('dois',r,{falta:'códigos '+[...mm.keys()].join(', ')}); }
+  const dupS=new Set([...ls.filter(r=>r.possivel_duplicado),...[...visto.values()].filter(x=>x.length>1).flat()]); dupS.forEach(r=>push('dup',r,{falta:r.possivel_duplicado?'marcado na base tratada':'linha igual repetida'}));
+  const cont=new Map(); ls.forEach(r=>{ const n=r._pl?(r.cliente_lancado||r.cliente):r.cliente; if(n) cont.set(n,(cont.get(n)||0)+1); });
+  const nomes=[...cont.keys()].map(n=>({n,k:semA(n).replace(/\blote\s*\d+/g,'').replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim()})).filter(x=>x.k.length>=3).sort((a,c)=>a.k.length-c.k.length);
+  const usN=new Set(); for(const a of nomes){ if(usN.has(a.n)) continue; const gg=nomes.filter(c=>c.n!==a.n&&!usN.has(c.n)&&(c.k===a.k||c.k.startsWith(a.k+' '))); if(!gg.length) continue; [a,...gg].forEach(x=>usN.add(x.n)); const todos=[a.n,...gg.map(x=>x.n)];
+    ls.filter(r=>todos.includes(r._pl?(r.cliente_lancado||r.cliente):r.cliente)).forEach(r=>push('graf',r,{falta:'grafias: '+todos.join(' · ')})); }
+  return out;
+}
 function pgInconsistencias(){
-  if(!precisaPedidos('inCards')){ $('inKpis').innerHTML=''; return; }
-  const {b,base,temPainel,temPlan,rot}=baseConf('inBase'), rotA=b==='painel'?'o painel':'a planilha', rotNa=b==='painel'?'no painel':'na planilha', rotDa=b==='painel'?'do painel':'da planilha';
+  if(!precisaPedidos('inTabela')){ $('inKpis').innerHTML=''; return; }
+  const {b,base,temPainel,temPlan,rot}=baseConf('inBase');
   document.querySelectorAll('[data-inb]').forEach(x=>{ x.setAttribute('aria-pressed',String(x.dataset.inb===b)); x.disabled=x.dataset.inb==='painel'?!temPainel:!temPlan; });
+  const av=$('inAviso');
+  if(!base.length){ av.className='aviso erro'; av.innerHTML=`<span><b>Ainda não há planilha para conferir.</b> A planilha do comercial não está ligada ao painel e a base não foi importada, por isso não dá para comparar com a Conta Azul (se comparasse, tudo apareceria como "só no sistema"). ${E.eu?.perfil==='adm'?'Ligue a planilha em <b>Controle → Planilha × sistema (mês)</b> (botão <b>Ligar pelo meu e-mail</b>) ou importe o arquivo em <b>Planilha de vendas → Importar base</b>.':'Peça ao administrador para ligar a planilha.'}</span>`;
+    ['inKpis','inResumo','inTabela','inVendT'].forEach(id=>$(id).innerHTML=''); $('inMes').innerHTML=''; $('inVend').innerHTML=''; PED.inRows=[]; return; }
   const hoje=hojeISO().slice(0,7), meses=[...new Set(base.map(r=>r.mes).filter(m=>m&&m<=hoje))].sort().reverse();
   if(!PED.inMes||(PED.inMes!=='todos'&&!meses.includes(PED.inMes))) PED.inMes=meses[0]||'todos';
   $('inMes').innerHTML=meses.map(m=>`<option value="${m}">${nomeMes(m)}</option>`).join('')+'<option value="todos">Todos os meses</option>'; $('inMes').value=PED.inMes;
   const noMes=(m)=>PED.inMes==='todos'||m===PED.inMes;
   const vends=[...new Set(base.filter(r=>noMes(r.mes)).map(r=>r.vendedor).filter(Boolean))].sort();
+  if(PED.inVend==null&&meuVend()) PED.inVend=vends.find(v=>semA(v)===semA(meuVend()))||'';
   if(!vends.includes(PED.inVend)) PED.inVend=''; $('inVend').innerHTML='<option value="">Todos</option>'+vends.map(v=>`<option>${esc(v)}</option>`).join(''); $('inVend').value=PED.inVend||'';
-  const ls=base.filter(r=>noMes(r.mes)&&(!PED.inVend||r.vendedor===PED.inVend)), ca=mapaCA(), desde=DESDE(), temCA=!!E.dados?.conta_azul;
-  $('inAviso').innerHTML=`<span>Base: <b>${rot}</b>${b==='planilha'?' (a referência das vendas, como combinado na reunião de 03/11)':''}. Cada cartão é um tipo de problema; clique para ver as linhas e exportar em Excel ou PDF. A conferência com a Conta Azul vale a partir de ${nomeMes(desde)}${temCA?'':' e precisa da Conta Azul conectada'}.</span>`;
-  // agrupamento por código
-  const g=gruposCod(ls), stG=new Map(); for(const [k,x] of g) stG.set(k,statusCod(x.codigo,x.t,x.mes,ca));
-  const cod=(r)=>r.codigo?ckey(r.codigo):'';
-  const C=[]; // {id,grupo,tit,desc,como,grave,itens:[linhas], cols, linha(r)->array, valor(r)}
-  const colsLinha=[{rot:'Data',t:'data'},{rot:'Código'},{rot:'Cliente'},{rot:'Vendedor'},{rot:'Produto'},{rot:'Qtd',t:'int'},{rot:'Total',t:'brl',total:1}];
-  const linhaL=(r)=>[r.data,r.codigo||'',r.cliente,r.vendedor||'',[r.tipo_produto,r.material,r.cor].filter(Boolean).join(' · '),r.quantidade,r.total];
-  const add=(o)=>C.push(o);
-  // 1. Conta Azul
-  const pedRows=[...g.entries()].map(([k,x])=>({k,x,st:stG.get(k),v:ca.get(k)}));
-  const colsPed=[{rot:'Código'},{rot:'Data',t:'data'},{rot:'Cliente'},{rot:'Vendedor'},{rot:b==='painel'?'Painel':'Planilha',t:'brl',total:1},{rot:'Conta Azul',t:'brl',total:1},{rot:'Diferença',t:'brl',total:1},{rot:'Situação na Conta Azul'}];
-  const linhaP=(p)=>[p.x.codigo,p.x.data,p.x.cliente,p.x.vendedor||'',p.x.t,p.v?p.v.t:'',p.v?p.v.t-p.x.t:'',p.v?SIT_CA[p.v.s]||p.v.s:'não encontrada'];
-  if(temCA){
-    const dif=pedRows.filter(p=>p.st[0]==='dif');
-    add({id:'dif',grupo:'Conta Azul',tit:'Valor diferente na Conta Azul',desc:'Mesmo código, valor diferente entre '+rotA+' e a Conta Azul.',como:'Conferir acréscimos: se houve peças extras, lançar o pedido complementar (código-1).',grave:1,n:dif.length,val:dif.reduce((s2,p)=>s2+Math.abs(p.v.t-p.x.t),0),abrir:()=>abrirDet('Valor diferente na Conta Azul',`${rot} × Conta Azul · ${PED.inMes==='todos'?'todos os meses':nomeMes(PED.inMes)}`,colsPed,dif.map(linhaP)),vend:(v)=>dif.filter(p=>p.x.vendedor===v).length});
-    const soP=pedRows.filter(p=>['so_painel','cancelado','nao_aprov'].includes(p.st[0]));
-    add({id:'soP',grupo:'Conta Azul',tit:'Pedido sem venda aprovada no sistema',desc:'Código '+rotDa+' que não existe, está cancelado ou não aprovado na Conta Azul.',como:'Lançar a venda na Conta Azul com o mesmo número ou corrigir o código.',grave:1,n:soP.length,val:soP.reduce((s2,p)=>s2+p.x.t,0),abrir:()=>abrirDet('Pedido sem venda aprovada no sistema',rot+' × Conta Azul',colsPed,soP.map(linhaP)),vend:(v)=>soP.filter(p=>p.x.vendedor===v).length});
-    const usados=new Set(g.keys()), soS=(E.dados.conta_azul.vendas||[]).filter(v=>{ const m=(v.d||'').slice(0,7); return m>=desde&&noMes(m)&&v.n!=null&&!usados.has(ckey(v.n))&&['APROVADO','FATURADO'].includes(v.s)&&(!PED.inVend||nv(v.v)===nv(PED.inVend)); });
-    add({id:'soS',grupo:'Conta Azul',tit:'Venda no sistema sem pedido '+rotNa,desc:'Venda aprovada na Conta Azul cujo número não aparece como código.',como:'Lançar o pedido '+rotNa+' com o mesmo código da Conta Azul.',grave:1,n:soS.length,val:soS.reduce((s2,v)=>s2+v.t,0),abrir:()=>abrirDet('Venda no sistema sem pedido '+rotNa,'Conta Azul',[{rot:'Número'},{rot:'Data',t:'data'},{rot:'Cliente'},{rot:'Vendedor'},{rot:'Valor',t:'brl',total:1},{rot:'Situação'}],soS.map(v=>[String(v.n),v.d,v.c,v.v||'',v.t,SIT_CA[v.s]||v.s])),vend:(v)=>soS.filter(x=>nv(x.v)===nv(v)).length});
-    const pag=[]; for(const p of pedRows){ if(p.x.mes<desde) continue; const ps=parcelasDe(p.x.codigo); if(!ps.length) continue; const pl1=p.x.regs.reduce((s2,r)=>s2+(+r.pag1||0),0), pl2=p.x.regs.reduce((s2,r)=>s2+(+r.pag2||0),0);
-      [[pl1,ps[0]],[pl2,ps[1]]].forEach(([vp,pc],i)=>{ if(vp>0&&pc&&Math.abs(vp-(pc.pago||pc.valor))>1) pag.push([p.x.codigo,p.x.cliente,p.x.vendedor||'',i?'2º':'1º',vp,pc.pago||pc.valor,(pc.pago||pc.valor)-vp,pc.baixas?.[0]?.data||'',pc.baixas?.[0]?.conta||'']); }); }
-    add({id:'pag',grupo:'Conta Azul',tit:'Pagamento diferente da Conta Azul',desc:'1º ou 2º pagamento '+rotDa+' diferente da parcela recebida na Conta Azul.',como:'Conferir o comprovante e corrigir a planilha ou a baixa na Conta Azul.',grave:0,n:pag.length,val:pag.reduce((s2,x)=>s2+Math.abs(x[6]),0),abrir:()=>abrirDet('Pagamento diferente da Conta Azul',rot+' × parcelas da Conta Azul',[{rot:'Código'},{rot:'Cliente'},{rot:'Vendedor'},{rot:'Parcela'},{rot:b==='painel'?'Painel':'Planilha',t:'brl'},{rot:'Conta Azul',t:'brl'},{rot:'Diferença',t:'brl',total:1},{rot:'Baixa em',t:'data'},{rot:'Banco'}],pag),vend:(v)=>pag.filter(x=>x[2]===v).length});
-  }
-  // 2. código do pedido
-  const semCod=ls.filter(r=>!r.codigo&&(r.mes||'')>='2026-09');
-  add({id:'semCod',grupo:'Código do pedido',tit:'Sem código do pedido',desc:'Linhas a partir de setembro/2026 sem cód. interno: não dá para conferir com o sistema.',como:'Preencher o cód. interno (o mesmo número da venda na Conta Azul).',grave:1,n:semCod.length,val:semCod.reduce((s2,r)=>s2+(+r.total||0),0),abrir:()=>abrirDet('Sem código do pedido',rot,colsLinha,semCod.map(linhaL)),vend:(v)=>semCod.filter(r=>r.vendedor===v).length});
-  const fora=ls.filter(r=>{ if(!r.codigo) return false; const m=cbase(r.codigo).match(/^(\d{4})(\d{2})(\d{4})$/); return !m||(r.data&&`${m[3]}-${m[2]}`!==r.data.slice(0,7)); });
-  add({id:'fmt',grupo:'Código do pedido',tit:'Código fora do padrão',desc:'Código que não segue sequência + mês + ano (ex.: 0030102026) ou com mês diferente da data da venda.',como:'Corrigir o código ou a data da venda.',grave:0,n:fora.length,val:fora.reduce((s2,r)=>s2+(+r.total||0),0),abrir:()=>abrirDet('Código fora do padrão',rot,colsLinha,fora.map(linhaL)),vend:(v)=>fora.filter(r=>r.vendedor===v).length});
-  const multi=[...g.values()].filter(x=>new Set(x.regs.map(r=>semA(r.cliente))).size>1||new Set(x.regs.map(r=>r.data)).size>1);
-  add({id:'multi',grupo:'Código do pedido',tit:'Mesmo código em pedidos diferentes',desc:'Um código com clientes ou datas diferentes: provavelmente um pedido novo lançado com código repetido.',como:'Dar um código novo ao pedido ou usar o complementar (código-1).',grave:1,n:multi.length,val:multi.reduce((s2,x)=>s2+x.t,0),abrir:()=>abrirDet('Mesmo código em pedidos diferentes',rot,colsLinha,multi.flatMap(x=>x.regs.map(linhaL))),vend:(v)=>multi.filter(x=>x.regs.some(r=>r.vendedor===v)).length});
-  const cd=new Map(); ls.forEach(r=>{ if(!r.codigo) return; const k=semA(r.cliente)+'|'+r.data; const m2=cd.get(k)||new Map(); m2.set(cbase(r.codigo),(m2.get(cbase(r.codigo))||[]).concat([r])); cd.set(k,m2); });
-  const dois=[...cd.values()].filter(m2=>m2.size>1);
-  add({id:'dois',grupo:'Código do pedido',tit:'Mesmo cliente e dia com códigos diferentes',desc:'Dois ou mais códigos para o mesmo cliente no mesmo dia: pode ser acréscimo lançado como pedido novo.',como:'Se for acréscimo, usar o código original com "-1" (pedido complementar); se forem pedidos diferentes, está certo.',grave:0,n:dois.length,val:dois.reduce((s2,m2)=>s2+[...m2.values()].flat().reduce((a3,r)=>a3+(+r.total||0),0),0),abrir:()=>abrirDet('Mesmo cliente e dia com códigos diferentes',rot,colsLinha,dois.flatMap(m2=>[...m2.values()].flat().map(linhaL))),vend:(v)=>dois.filter(m2=>[...m2.values()].flat().some(r=>r.vendedor===v)).length});
-  // 3. cadastro de clientes
-  const lote=ls.filter(r=>/\blote\s*\d/i.test(r.cliente||'')||/\blote\s*\d/i.test(r.cliente_lancado||''));
-  add({id:'lote',grupo:'Cadastro de clientes',tit:'Cliente com "lote" no nome',desc:'"Lote 1, lote 2" no nome do cliente separa o mesmo cliente em vários e distorce curva ABC e ticket.',como:'Deixar só o nome do cliente; o lote vai na coluna Lote / obs.',grave:0,n:lote.length,val:lote.reduce((s2,r)=>s2+(+r.total||0),0),abrir:()=>abrirDet('Cliente com "lote" no nome',rot,[{rot:'Data',t:'data'},{rot:'Código'},{rot:'Como foi lançado'},{rot:'Cliente padronizado'},{rot:'Vendedor'},{rot:'Total',t:'brl',total:1}],lote.map(r=>[r.data,r.codigo||'',r.cliente_lancado||r.cliente,r.cliente,r.vendedor||'',r.total])),vend:(v)=>lote.filter(r=>r.vendedor===v).length});
-  const cont=new Map(); ls.forEach(r=>{ const n=r._pl?(r.cliente_lancado||r.cliente):r.cliente; if(n) cont.set(n,(cont.get(n)||0)+1); });
-  const nomes=[...cont.keys()].map(n=>({n,k:semA(n).replace(/\blote\s*\d+/g,'').replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim()})).filter(x=>x.k.length>=3).sort((a2,b2)=>a2.k.length-b2.k.length);
-  const usadosN=new Set(), grupos=[]; for(const a2 of nomes){ if(usadosN.has(a2.n)) continue; const gg=nomes.filter(b2=>b2.n!==a2.n&&!usadosN.has(b2.n)&&(b2.k===a2.k||b2.k.startsWith(a2.k+' '))); if(!gg.length) continue; [a2,...gg].forEach(x=>usadosN.add(x.n)); grupos.push([a2.n,...gg.map(x=>x.n)]); }
-  add({id:'graf',grupo:'Cadastro de clientes',tit:'Mesmo cliente com nomes diferentes',desc:'Grafias diferentes do mesmo cliente (ex.: Checkpoint, Checkpoint 5 anos, Checkpoint CT).',como:'Padronizar o nome (em Pedidos de venda há o botão Unificar).',grave:0,n:grupos.length,val:null,abrir:()=>abrirDet('Mesmo cliente com nomes diferentes',rot+' · nomes como foram lançados',[{rot:'Nome sugerido'},{rot:'Grafias encontradas'},{rot:'Linhas',t:'int',total:1}],grupos.map(gr=>[gr[0],gr.map(n=>`${n} (${cont.get(n)})`).join(' · '),gr.reduce((s2,n)=>s2+cont.get(n),0)])),vend:()=>null});
-  // 4. campos
-  const nr=ls.filter(r=>!r.novo_recompra);
-  add({id:'nr',grupo:'Campos da venda',tit:'Sem novo × recompra',desc:'Sem essa marcação o painel não calcula vendas a clientes novos (R3) nem a recompra.',como:'Marcar se o cliente é novo ou recompra.',grave:0,n:nr.length,val:nr.reduce((s2,r)=>s2+(+r.total||0),0),abrir:()=>abrirDet('Sem novo × recompra',rot,colsLinha,nr.map(linhaL)),vend:(v)=>nr.filter(r=>r.vendedor===v).length});
-  const OBR=['cliente','vendedor','tipo_venda','tipo_produto','material','cor','quantidade','total'];
-  const vaz=ls.map(r=>({r,f:OBR.filter(c=>!r[c])})).filter(x=>x.f.length);
-  add({id:'vaz',grupo:'Campos da venda',tit:'Campos obrigatórios em branco',desc:'Vendedor, tipo de venda, produto, tecido, cor, quantidade ou total vazios.',como:'Completar os campos indicados em cada linha.',grave:0,n:vaz.length,val:vaz.reduce((s2,x)=>s2+(+x.r.total||0),0),abrir:()=>abrirDet('Campos obrigatórios em branco',rot,[...colsLinha,{rot:'Em branco',wr:1}],vaz.map(x=>[...linhaL(x.r),x.f.map(c=>ROT_PED[c]).join(', ')])),vend:(v)=>vaz.filter(x=>x.r.vendedor===v).length});
-  const vistos=new Map(); ls.forEach(r=>{ const k=[semA(r.cliente),r.data,semA(r.tipo_produto),semA(r.cor),r.quantidade,Math.round((+r.total||0)*100)].join('|'); vistos.set(k,(vistos.get(k)||[]).concat([r])); });
-  const dup=[...new Set([...ls.filter(r=>r.possivel_duplicado),...[...vistos.values()].filter(x=>x.length>1).flat()])];
-  add({id:'dup',grupo:'Campos da venda',tit:'Possível lançamento duplicado',desc:'Mesmo cliente, data, produto, cor, quantidade e total em mais de uma linha (ou marcado na base tratada).',como:'Confirmar se são dois itens de verdade; se não, excluir a linha repetida.',grave:1,n:dup.length,val:dup.reduce((s2,r)=>s2+(+r.total||0),0),abrir:()=>abrirDet('Possível lançamento duplicado',rot,colsLinha,dup.map(linhaL)),vend:(v)=>dup.filter(r=>r.vendedor===v).length});
-  if(b==='painel'){ const conta=ls.filter(r=>r.quantidade&&r.valor_unit&&Math.abs(r.quantidade*r.valor_unit-r.total)>1);
-    add({id:'conta',grupo:'Campos da venda',tit:'Total diferente de qtd × valor/und',desc:'O total da linha não bate com quantidade × valor por unidade.',como:'Corrigir quantidade, valor/und ou total.',grave:0,n:conta.length,val:conta.reduce((s2,r)=>s2+Math.abs(r.quantidade*r.valor_unit-r.total),0),abrir:()=>abrirDet('Total diferente de qtd × valor/und',rot,[...colsLinha,{rot:'Valor/und',t:'brl'},{rot:'Qtd × valor',t:'brl'}],conta.map(r=>[...linhaL(r),r.valor_unit,r.quantidade*r.valor_unit])),vend:(v)=>conta.filter(r=>r.vendedor===v).length}); }
-  PED.inC=C;
-  const graves=C.filter(c=>c.grave&&c.n), tot=C.reduce((s2,c)=>s2+c.n,0);
+  const ls=base.filter(r=>noMes(r.mes)&&(!PED.inVend||r.vendedor===PED.inVend)), desde=DESDE(), temCA=!!E.dados?.conta_azul;
+  av.className='aviso'; av.innerHTML=`<span>Base: <b>${rot}</b>${b==='planilha'?' (a referência das vendas, como combinado na reunião de 03/11)':''}. Uma lista só com tudo que precisa de correção: sistema × planilha pedido a pedido${temCA?` (a partir de ${nomeMes(desde)})`:' (<b>Conta Azul não conectada</b>)'}, colunas vazias, código do pedido e cadastro de clientes. Clique num tipo para filtrar.</span>`;
+  const todas=linhasInconsistencias(ls,b,mapaCA(),desde,noMes,PED.inVend);
+  const rotT=(t)=>t==='soS'?'Venda no sistema sem pedido '+(b==='painel'?'no painel':'na planilha'):TIPOS_INC.find(x=>x[0]===t)[1];
+  const porT=new Map(TIPOS_INC.map(t=>[t[0],[]])); todas.forEach(x=>porT.get(x.tipo).push(x));
+  if(PED.inTipo&&!porT.get(PED.inTipo)?.length) PED.inTipo='';
+  const vis=todas.filter(x=>!PED.inTipo||x.tipo===PED.inTipo).sort((a,c)=>TIPOS_INC.findIndex(t=>t[0]===a.tipo)-TIPOS_INC.findIndex(t=>t[0]===c.tipo)||(a.data||'').localeCompare(c.data||''));
+  PED.inRows=vis;
+  const linhasProb=new Set(todas.filter(x=>!['soS'].includes(x.tipo)).map(x=>x.codigo+'|'+x.cliente+'|'+x.data+'|'+x.plan));
+  const graves=todas.filter(x=>TIPOS_INC.find(t=>t[0]===x.tipo)[2]);
   $('inKpis').innerHTML=kpiHtml([
-    ['Inconsistências',int(tot),`<span>${pl(C.filter(c=>c.n).length,'tipo de problema','tipos de problema')} · ${PED.inMes==='todos'?'todos os meses':nomeMes(PED.inMes)}</span>`,tot?'alerta':'dest',''],
-    ['Afetam o valor',int(graves.reduce((s2,c)=>s2+c.n,0)),`<span>${graves.map(c=>c.tit.toLowerCase()).slice(0,2).join(', ')||'nenhuma'}</span>`,graves.length?'alerta':'',''],
-    ['Linhas conferidas',int(ls.length),`<span>${pl(new Set(ls.map(r=>r.codigo?cbase(r.codigo):r.cliente+'|'+r.data)).size,'pedido','pedidos')} · ${brl(ls.reduce((s2,r)=>s2+(+r.total||0),0))}</span>`,'',''],
-    ['Linhas sem problema',pct(ls.length?1-new Set([...semCod,...fora,...lote,...nr,...vaz.map(x=>x.r),...dup]).size/ls.length:1),'<span>de campos, código e cadastro</span>','',''],
+    ['Inconsistências',int(todas.length),`<span>${pl([...porT.values()].filter(v=>v.length).length,'tipo','tipos')} · ${PED.inMes==='todos'?'todos os meses':nomeMes(PED.inMes)}${PED.inVend?' · '+esc(PED.inVend):''}</span>`,todas.length?'alerta':'dest',''],
+    ['Graves',int(graves.length),'<span>afetam valor, código ou a conferência com o sistema</span>',graves.length?'alerta':'',''],
+    ['Linhas conferidas',int(ls.length),`<span>${brl(ls.reduce((a,r)=>a+(+r.total||0),0))} na ${b==='painel'?'base do painel':'planilha'}</span>`,'',''],
+    ['Sistema × planilha',temCA?int([...porT.get('dif'),...porT.get('soP'),...porT.get('soS')].length):'—',temCA?`<span>${int(porT.get('dif').length)} valor diferente · ${int(porT.get('soP').length)} só ${b==='painel'?'no painel':'na planilha'} · ${int(porT.get('soS').length)} só no sistema</span>`:'<span>conecte a Conta Azul</span>','',''],
   ]);
-  let gAnt='';
-  $('inCards').innerHTML=C.map((c,i)=>{ const cab=c.grupo!==gAnt?(gAnt=c.grupo,`<div class="g" style="grid-column:1/-1;margin-top:${i?8:0}px">${esc(c.grupo)}</div>`):''; return cab+`<button type="button" class="inc ${c.n?(c.grave?'grave':'media'):'zero'}" data-inc="${i}"${c.n?'':' disabled'}><span class="n">${c.n?int(c.n):'✓'}</span><span class="t">${esc(c.tit)}</span><span class="d">${esc(c.desc)}${c.n&&c.val?` <b>${brl(c.val)}</b>`:''}</span><span class="c">Como corrigir: ${esc(c.como)}</span></button>`; }).join('');
-  const porV=vends.filter(v=>!PED.inVend||v===PED.inVend), cv=C.filter(c=>c.vend(porV[0]||'')!==null);
-  $('inVendT').innerHTML=porV.length?`<table class="compacta"><thead><tr><th>Vendedor</th>${cv.map(c=>`<th class="v" title="${esc(c.tit)}">${esc(c.tit.replace(/ (na planilha|no painel)$/,''))}</th>`).join('')}<th class="v">Total</th></tr></thead><tbody>${porV.map(v=>{ const ns=cv.map(c=>c.vend(v)||0); return `<tr><td class="el"><b>${esc(v)}</b></td>${ns.map((n,i)=>`<td class="v">${n?`<a href="#" class="lk" data-incv="${C.indexOf(cv[i])}" data-v="${esc(v)}">${int(n)}</a>`:'<span style="color:var(--ink3)">—</span>'}</td>`).join('')}<td class="v"><b>${int(ns.reduce((a2,b2)=>a2+b2,0))}</b></td></tr>`; }).join('')}</tbody></table>`:vazio('Sem vendedores no período.');
+  $('inResumo').innerHTML=`<button type="button" class="inc-t ${PED.inTipo?'':'on'}" data-int="">Todas <b>${int(todas.length)}</b></button>`+TIPOS_INC.map(([t,,gr,como])=>{ const n=porT.get(t).length; return `<button type="button" class="inc-t ${PED.inTipo===t?'on':''} ${n?(gr?'grave':'media'):'zero'}" data-int="${t}" ${n?'':'disabled'} title="Como corrigir: ${esc(como)}">${esc(rotT(t))} <b>${n?int(n):'✓'}</b></button>`; }).join('');
+  const como=PED.inTipo?TIPOS_INC.find(t=>t[0]===PED.inTipo)[3]:'';
+  $('inTabela').innerHTML=(como?`<div class="nota" style="margin:0 0 8px"><b>Como corrigir:</b> ${esc(como)}</div>`:'')+(vis.length?`<table class="compacta"><thead><tr><th>Inconsistência</th><th>Data</th><th>Código</th><th>Cliente</th><th>Vendedor</th><th>O que falta / detalhe</th><th class="v">Planilha</th><th class="v">Sistema</th><th class="v">Diferença</th></tr></thead><tbody>${vis.slice(0,1500).map(x=>{ const gr=TIPOS_INC.find(t=>t[0]===x.tipo)[2]; return `<tr${x.codigo&&b==='painel'&&x.tipo!=='soS'?` data-incod="${esc(x.codigo)}" style="cursor:pointer" title="Abrir na Planilha de vendas"`:''}><td><span class="pill ${gr?'st-dif':'st-so'}">${esc(rotT(x.tipo))}</span></td><td style="white-space:nowrap">${dataBR(x.data)}</td><td><b>${esc(x.codigo)}</b></td><td class="el">${esc(x.cliente)}</td><td class="el">${esc(x.vendedor)}</td><td class="hs-m" style="white-space:normal;min-width:180px">${esc(x.falta)}</td><td class="v">${x.plan===''?'—':brl2(x.plan)}</td><td class="v">${x.sis===''?'—':brl2(x.sis)}</td><td class="v">${x.dif===''||Math.abs(x.dif)<=1?'—':`<b style="color:var(--red)">${x.dif>0?'+':''}${brl2(x.dif)}</b>`}</td></tr>`; }).join('')}</tbody></table>${vis.length>1500?'<div class="nota">Mostrando 1.500; exporte para ver todas.</div>':''}`:vazio('Nenhuma inconsistência com esses filtros. ✓'));
+  const porV=vends.filter(v=>!PED.inVend||v===PED.inVend), tv=TIPOS_INC.filter(t=>t[0]!=='soS'&&porT.get(t[0]).length);
+  $('inVendT').innerHTML=porV.length&&tv.length?`<table class="compacta"><thead><tr><th>Vendedor</th>${tv.map(t=>`<th class="v" title="${esc(t[1])}">${esc(rotT(t[0]))}</th>`).join('')}<th class="v">Total</th></tr></thead><tbody>${porV.map(v=>{ const ns=tv.map(t=>porT.get(t[0]).filter(x=>x.vendedor===v).length); return `<tr><td class="el"><b>${esc(v)}</b></td>${ns.map((n,i)=>`<td class="v">${n?`<a href="#" class="lk" data-incv="${tv[i][0]}" data-v="${esc(v)}">${int(n)}</a>`:'<span style="color:var(--ink3)">—</span>'}</td>`).join('')}<td class="v"><b>${int(ns.reduce((a,c)=>a+c,0))}</b></td></tr>`; }).join('')}</tbody></table>`:vazio('Nada a corrigir por vendedor.');
 }
 
 // ---------- balão flutuante dos pagamentos ----------
@@ -2298,7 +2347,7 @@ function esconderBalao(ja){ clearTimeout(BAL.t); const f=()=>{ const b=$('balao'
 
 // ---------- eventos ----------
 $('pdMes').onchange=()=>{ PED.mes=$('pdMes').value; pgRegistro(); };
-$('pdVend').onchange=()=>{ PED.vend=$('pdVend').value; pgRegistro(); };
+$('pdVend').onchange=()=>{ PED.vend=$('pdVend').value; PED.vendEscolhido=true; pgRegistro(); };
 let tBusca=null; $('pdBusca').oninput=()=>{ clearTimeout(tBusca); tBusca=setTimeout(()=>{ PED.busca=$('pdBusca').value; pgRegistro(); },250); };
 document.querySelectorAll('[data-pdf]').forEach(b=>b.onclick=()=>{ PED.fil=b.dataset.pdf; pgRegistro(); });
 $('pdNovo').onclick=()=>abrirPedido('novo'); $('pdImportar').onclick=abrirImport;
@@ -2313,18 +2362,22 @@ $('pdGrade').addEventListener('scroll',()=>esconderBalao(true),{passive:true}); 
 $('balao').addEventListener('mouseenter',()=>clearTimeout(BAL.t)); $('balao').addEventListener('mouseleave',()=>esconderBalao());
 $('inMes').onchange=()=>{ PED.inMes=$('inMes').value; pgInconsistencias(); }; $('inVend').onchange=()=>{ PED.inVend=$('inVend').value; pgInconsistencias(); };
 document.querySelectorAll('[data-inb]').forEach(x=>x.onclick=()=>{ PED.inBase=x.dataset.inb; pgInconsistencias(); });
-$('inCards').addEventListener('click',e=>{ const b2=e.target.closest('[data-inc]'); if(b2&&PED.inC[+b2.dataset.inc]?.n) PED.inC[+b2.dataset.inc].abrir(); });
-$('inVendT').addEventListener('click',e=>{ const a2=e.target.closest('[data-incv]'); if(!a2) return; e.preventDefault(); PED.inVend=a2.dataset.v; const k=+a2.dataset.incv; pgInconsistencias(); PED.inC[k]?.abrir(); });
+$('inResumo').addEventListener('click',e=>{ const b2=e.target.closest('[data-int]'); if(!b2||b2.disabled) return; PED.inTipo=b2.dataset.int; pgInconsistencias(); });
+$('inVendT').addEventListener('click',e=>{ const a2=e.target.closest('[data-incv]'); if(!a2) return; e.preventDefault(); PED.inVend=a2.dataset.v; PED.inTipo=a2.dataset.incv; pgInconsistencias(); $('inTabela').scrollIntoView({behavior:'smooth',block:'start'}); });
+$('inTabela').addEventListener('click',e=>{ const tr=e.target.closest('[data-incod]'); if(!tr) return; const cod=tr.dataset.incod, r=regsPed().find(x=>x.codigo===cod); PED.busca=cod; PED.fil=''; PED.vend=''; PED.vendEscolhido=true; if(r) PED.mes=r.mes; irPara('registro'); });
 $('pdmForm').addEventListener('submit',salvarPedido); $('pmCancelar').onclick=fecharPedido; $('pdmFechar').onclick=fecharPedido;
 $('pmMais').onclick=()=>{ $('pmItens').insertAdjacentHTML('beforeend',linhaItem()); $('pmItens').lastElementChild.querySelector('input').focus(); };
 $('pmItens').addEventListener('input',totaisItens); $('pmItens').addEventListener('click',e=>{ if(e.target.closest('.itDel')&&$('pmItens').children.length>1){ e.target.closest('tr').remove(); totaisItens(); } });
 $('pmCliente').addEventListener('change',sugerirNR); $('pmNR').addEventListener('change',()=>{ $('pmNR').dataset.auto=''; }); $('pmData').addEventListener('change',()=>{ sugerirNR(); if(PM.modo==='novo') $('pmCodigo').placeholder='automático: '+proxCod($('pmData').value); });
 $('pmCliente').addEventListener('blur',()=>{ const c=$('pmCliente').value, m=c.match(/\s*[-–(]?\s*\b(lote\s*\d+)\)?\s*$/i); if(m){ $('pmCliente').value=c.slice(0,m.index).trim(); if(!$('pmLote').value) $('pmLote').value=m[1].replace(/^l/,'L'); toast('O lote foi para a coluna "Lote / obs. do cliente": o nome do cliente fica só com o cliente.'); sugerirNR(); } });
 $('imFechar').onclick=()=>{ $('imModal').hidden=true; $('pdFundo').hidden=true; };
+$('psFechar').onclick=()=>{ $('psModal').hidden=true; $('pdFundo').hidden=true; };
+$('psCopiar').onclick=()=>{ const t=$('psScript'); (navigator.clipboard?.writeText(t.value)||Promise.reject()).then(()=>{ $('psCopiar').textContent='Copiado ✓'; }).catch(()=>{ t.select(); }); };
+$('psLigar').onclick=async()=>{ $('psErro').textContent=''; $('psOk').textContent='Testando a leitura da planilha…'; $('psLigar').disabled=true; try{ const r=await api('/api/planilha-script',{method:'POST',body:JSON.stringify({url:$('psUrl').value})}); $('psOk').innerHTML=`<b>Pronto!</b> O painel leu o arquivo <b>${esc(r.nome||'')}</b>${r.alterado_em?' (última edição '+new Date(r.alterado_em).toLocaleString('pt-BR')+')':''}. A partir de agora as vendas vêm da planilha a cada 5 minutos.`; toast('Planilha ligada pelo seu e-mail.'); setTimeout(()=>carregar(true),800); }catch(e){ $('psOk').textContent=''; $('psErro').textContent=e.message; } finally{ $('psLigar').disabled=false; } };
 document.querySelectorAll('[data-imo]').forEach(b=>b.onclick=()=>{ IM.orig=b.dataset.imo; IM.ok=null; $('imOk').disabled=true; $('imRes').innerHTML=''; marcarOrig(); });
 ['imDe','imAte','imModo','imArq'].forEach(id=>$(id).addEventListener('change',()=>{ IM.ok=null; $('imOk').disabled=true; $('imOk').textContent='Importar'; $('imRes').innerHTML=''; }));
 $('imConferir').onclick=()=>rodarImport(true); $('imOk').onclick=()=>rodarImport(false);
-$('pdFundo').onclick=()=>{ fecharPedido(); $('imModal').hidden=true; };
+$('pdFundo').onclick=()=>{ fecharPedido(); $('imModal').hidden=true; $('psModal').hidden=true; };
 document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&(!$('pdModal').hidden||!$('imModal').hidden)){ fecharPedido(); $('imModal').hidden=true; } });
 $('cfMes').onchange=()=>{ PED.cfMes=$('cfMes').value; pgConferencia(); }; $('cfVend').onchange=()=>{ PED.cfVend=$('cfVend').value; pgConferencia(); };
 document.querySelectorAll('[data-cfb]').forEach(b=>b.onclick=()=>{ PED.cfBase=b.dataset.cfb; pgConferencia(); });
@@ -2383,6 +2436,9 @@ const FONTES_EXP={
   cf:()=>({nome:'conciliacao-pedidos-'+PED.cfMes,titulo:'Conciliação de pedidos · '+(PED.cfMes==='todos'?'todos os meses':nomeMes(PED.cfMes)),sub:`${PED.cfBase==='painel'?'Pedidos do painel':'Planilha conectada'} × Conta Azul, pelo código do pedido${PED.cfVend?' · '+PED.cfVend:''}`,
     cols:[{rot:'Situação'},{rot:'Código'},{rot:'Data',t:'data'},{rot:'Cliente'},{rot:'Vendedor'},{rot:PED.cfBase==='painel'?'Painel':'Planilha',t:'brl',total:1},{rot:'Sistema',t:'brl',total:1},{rot:'Divergência',t:'brl',total:1},{rot:'Situação na Conta Azul'}],
     rows:(PED.cfRows||[]).map(r=>[r.st[1],r.cod,r.data,r.cliente||r.sisCli||'',r.vend||'',r.painel??'',r.sis??'',r.dif==null||Math.abs(r.dif)<=1?'':r.dif,SIT_CA[r.sit]||r.sit||''])}),
+  in:()=>({nome:'inconsistencias-'+(PED.inMes||''),titulo:'Inconsistências · '+(PED.inMes==='todos'?'todos os meses':nomeMes(PED.inMes||hojeISO().slice(0,7))),sub:(PED.inVend?'Vendedor: '+PED.inVend+' · ':'')+(PED.inTipo?TIPOS_INC.find(t=>t[0]===PED.inTipo)[1]:'todos os tipos'),
+    cols:[{rot:'Inconsistência'},{rot:'Data',t:'data'},{rot:'Código'},{rot:'Cliente'},{rot:'Vendedor'},{rot:'Planilha',t:'brl'},{rot:'Sistema',t:'brl'},{rot:'Diferença',t:'brl',total:1},{rot:'O que falta / detalhe'}],
+    rows:(PED.inRows||[]).map(x=>[TIPOS_INC.find(t=>t[0]===x.tipo)[1],x.data,x.codigo,x.cliente,x.vendedor,x.plan,x.sis,x.dif===''||Math.abs(x.dif)<=1?'':x.dif,x.falta])}),
   hs:()=>({nome:'historico-pedidos',titulo:'Histórico de alterações dos pedidos',sub:$('hsDias').selectedOptions[0].textContent,
     cols:[{rot:'Quando'},{rot:'Quem'},{rot:'Ação'},{rot:'Código'},{rot:'Cliente'},{rot:'O que mudou'}],
     rows:(PED.hsVis||[]).map(x=>[new Date(x.quando).toLocaleString('pt-BR'),x.usuario,ACAO[x.acao]||x.acao,x.codigo||'',x.cliente||'',(x.mudancas||[]).map(m=>m.campo==='item'?[m.antes,m.depois].filter(Boolean).join(' → '):`${ROT_PED[m.campo]||m.campo}: ${m.antes??''} → ${m.depois??''}`).join(' | ')+(x.detalhe?' · '+x.detalhe:'')])}),
@@ -2426,10 +2482,10 @@ function previaPedidos(url,op){
 // ---------- menu lateral e permissões por perfil ----------
 const MENU=[
   {grupo:'Gestão',ico:'<path d="M3 3h8v8H3zM13 3h8v5h-8zM13 10h8v11h-8zM3 13h8v8H3z"/>',itens:[['painel','Painel executivo','Vendas, resultado, caixa e o que pede decisão'],['indicadores','Quadro de indicadores','Comercial, resultado e caixa com tendência de 6 meses']]},
-  {grupo:'Comercial',ico:'<path d="M3 4h2l2.4 11h11.2L21 7H7" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="9" cy="19" r="1.6"/><circle cx="17" cy="19" r="1.6"/>',itens:[['registro','Pedidos de venda','Registro de vendas com as mesmas colunas da planilha: os vendedores lançam e revisam aqui'],['vendas','Vendas','Pedidos, ticket médio e novas vendas × recompra (R1, R2, R3)'],['produtos','Produtos e mix','Tipo de produto, tecido e cor em peças ou R$ (R4) e curva ABC'],['clientes','Clientes','Curva ABC, faixas de valor, segmento e quem parou de comprar (C3, C5, C6)'],['vendedores','Vendedores e premiação','Faturamento, clientes novos, régua e apuração da premiação (C7, C8)'],['pedidos','Pedidos e entregas','Ciclo de pagamento e entregas das próximas semanas (C4)']]},
-  {grupo:'Conferência',ico:'<path d="M4 5h7v14H4zM13 5h7v14h-7z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M6.5 9h2M6.5 12h2M15.5 9h2M15.5 12h2" stroke="currentColor" stroke-width="1.8"/>',itens:[['conferencia','Sistema × planilha: pedidos','Pedido a pedido: Conta Azul conferida contra a planilha pelo código do pedido'],['conciliacao','Sistema × planilha: mês','Por que o total do mês difere entre a planilha do comercial e a Conta Azul'],['inconsistencias','Inconsistências','Tudo o que precisa de correção: valores, códigos, cadastro de clientes e campos em branco'],['historico','Histórico de alterações','Quem lançou, alterou ou excluiu pedidos, e quando']]},
+  {grupo:'Comercial',ico:'<path d="M3 4h2l2.4 11h11.2L21 7H7" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="9" cy="19" r="1.6"/><circle cx="17" cy="19" r="1.6"/>',itens:[['registro','Planilha de vendas','As mesmas colunas da planilha do comercial: os vendedores lançam e revisam as vendas aqui'],['vendas','Vendas','Pedidos, ticket médio e novas vendas × recompra (R1, R2, R3)'],['produtos','Produtos e mix','Tipo de produto, tecido e cor em peças ou R$ (R4) e curva ABC'],['clientes','Clientes','Curva ABC, faixas de valor, segmento e quem parou de comprar (C3, C5, C6)'],['vendedores','Vendedores e premiação','Faturamento, clientes novos, régua e apuração da premiação (C7, C8)'],['pedidos','Pedidos e entregas','Ciclo de pagamento e entregas das próximas semanas (C4)']]},
+  {grupo:'Conferência',ico:'<path d="M4 5h7v14H4zM13 5h7v14h-7z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M6.5 9h2M6.5 12h2M15.5 9h2M15.5 12h2" stroke="currentColor" stroke-width="1.8"/>',itens:[['inconsistencias','Inconsistências','Num lugar só: sistema × planilha pedido a pedido, colunas vazias, códigos e cadastro de clientes'],['historico','Histórico de alterações','Quem lançou, alterou ou excluiu pedidos, e quando']]},
   {grupo:'Financeiro',ico:'<circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 6v12M15 9c0-1.2-1.3-2-3-2s-3 .8-3 2 1.3 2 3 2 3 .8 3 2-1.3 2-3 2-3-.8-3-2" fill="none" stroke="currentColor" stroke-width="1.8"/>',itens:[['dre','DRE gerencial','Receita, custos, despesas e resultado por competência ou caixa'],['equilibrio','Margem e ponto de equilíbrio','Custos fixos × variáveis, margem de contribuição e ponto de equilíbrio (C1)'],['caixa','Fluxo de caixa','Saldo nos bancos, realizado e projeção de 13 semanas'],['receber','Contas a receber','Inadimplência por idade e por cliente'],['pagar','Contas a pagar','Despesas por categoria, centro de custo e fornecedor']]},
-  {grupo:'Controle',ico:'<path d="M6 2h9l4 4v16H6z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 11l2 2 4-4" fill="none" stroke="currentColor" stroke-width="2"/>',itens:[['dados','Qualidade dos dados','Colunas reconhecidas, campos em branco e grafias diferentes'],['versoes','Versões do painel','O que mudou em cada entrega']]},
+  {grupo:'Controle',ico:'<path d="M6 2h9l4 4v16H6z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 11l2 2 4-4" fill="none" stroke="currentColor" stroke-width="2"/>',itens:[['conciliacao','Planilha × sistema (mês)','Total do mês planilha × Conta Azul e ligação da planilha'],['dados','Qualidade dos dados','Colunas reconhecidas, campos em branco e grafias diferentes'],['versoes','Versões do painel','O que mudou em cada entrega']]},
   {grupo:'Administração',ico:'<circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.6 2.7-6 6-6s6 2.4 6 6z"/><circle cx="17" cy="9" r="2.4"/><path d="M15.5 14.2c2.9.3 5.5 2.4 5.5 5.8h-4.5"/>',itens:[['usuarios','Usuários e permissões','Perfis, senhas temporárias e o que cada pessoa vê']]},
 ];
 const TODAS=MENU.flatMap(g=>g.itens.map(i=>i[0]));
@@ -2437,7 +2493,7 @@ const MESES_PAG=Object.fromEntries(TODAS.map(p=>[p,1]));
 const ITEM=Object.fromEntries(MENU.flatMap(g=>g.itens.map(i=>[i[0],{rot:i[1],ctx:i[2],grupo:g.grupo}])));
 const GRUPO_DE=Object.fromEntries(TODAS.map(p=>[p,ITEM[p].grupo]));
 const COMP=['vendas','produtos','clientes','vendedores','pedidos'], FINP=['dre','equilibrio','caixa','receber','pagar'];
-const PADRAO={adm:TODAS,diretor:TODAS.filter(p=>p!=='usuarios'),comercial:['registro',...COMP,'conferencia','conciliacao','inconsistencias','versoes'],financeiro:['painel','indicadores','registro',...FINP,'conferencia','conciliacao','inconsistencias','historico','dados','versoes'],consultor:[...COMP]};
+const PADRAO={adm:TODAS,diretor:TODAS.filter(p=>p!=='usuarios'),comercial:['registro',...COMP,'inconsistencias','conciliacao','versoes'],financeiro:['painel','indicadores','registro',...FINP,'inconsistencias','historico','conciliacao','dados','versoes'],consultor:[...COMP],vendedor:['registro',...COMP,'inconsistencias','versoes']};
 function paginasDe(u){ if(!u) return []; const base=PADRAO[u.perfil]||[]; if(u.perfil==='adm'||!Array.isArray(u.paginas)) return base; const r=base.filter(p=>u.paginas.includes(p)); return r.length?r:base.slice(0,1); }
 // páginas que aparecem agora (com o "Ver o painel como" do ADM)
 function paginasAtivas(){ if(E.verComo) return paginasDe(E.verComo); return E.eu?.paginas||paginasDe(E.eu)||TODAS; }
@@ -2489,7 +2545,7 @@ const BLOCOS_DEF=[
   {id:'indicadores.caixa',pag:'indicadores',nome:'Quadro: caixa',fin:true},
   {id:'vendedores.premiacao',pag:'vendedores',nome:'Vendedores: premiação, bônus e apuração (valores de cada vendedor)',fin:false}];
 const BL_TODOS=BLOCOS_DEF.map(b=>b.id), BL_COM=BLOCOS_DEF.filter(b=>!b.fin&&b.id!=='vendedores.premiacao').map(b=>b.id);
-const BL_PADRAO={diretor:BL_TODOS,financeiro:BL_TODOS,comercial:BL_COM,consultor:BL_COM};
+const BL_PADRAO={diretor:BL_TODOS,financeiro:BL_TODOS,comercial:BL_COM,consultor:BL_COM,vendedor:BL_COM};
 function blocosVis(){ const p=E.verComo?E.verComo.perfil:E.eu?.perfil; if(!p||p==='adm') return BL_TODOS; if(E.verComo) return (E.eu?.blocos_perfis||{})[p]||BL_PADRAO[p]||[]; return E.eu?.blocos||BL_PADRAO[p]||[]; }
 const vb=(id)=>blocosVis().includes(id);
 const precisaFinPainel=()=>['painel.financeiro','painel.equilibrio','painel.cascata','painel.grafico','painel.alertas'].some(vb);
@@ -2626,7 +2682,7 @@ function mcTab(){
 function pgControle(){ pgConciliacao(); pgDados(); pgVersoes(); }
 
 // ---------- usuários (ADM) ----------
-const PERF={adm:'ADM',diretor:'Diretor',comercial:'Comercial',financeiro:'Financeiro',consultor:'Consultor externo'};
+const PERF={adm:'ADM',diretor:'Diretor',comercial:'Comercial',financeiro:'Financeiro',consultor:'Consultor externo',vendedor:'Vendedor'};
 async function montarVerComo(){
   let us=[]; try{ us=(await api('/api/usuarios')).usuarios; }catch(e){}
   const ops=[['','Administrador (eu)'],...Object.keys(PERF).filter(k=>k!=='adm').map(k=>['p:'+k,'Perfil '+PERF[k]]),...us.filter(u=>u.perfil!=='adm').map(u=>['u:'+u.id,u.nome+' · '+PERF[u.perfil]])];
@@ -2666,7 +2722,7 @@ async function pgUsuarios(){
     try{ US.link=null; US.temp=await api(`/api/usuarios/${u.id}/senha-temporaria`,{method:'POST'}); mostrarLink(); pgUsuarios(); }catch(e){ alert(e.message); } }));
   $('usLista').querySelectorAll('[data-perm]').forEach(b=>b.addEventListener('click',()=>abrirPerm(US.lista.find(x=>x.id===b.dataset.perm))));
   desenharMatriz(); desenharBlocos();
-  $('usLista').querySelectorAll('[data-ed]').forEach(b=>b.addEventListener('click',()=>{ const u=US.lista.find(x=>x.id===b.dataset.ed); const f=$('usForm'); f.id.value=u.id; f.nome.value=u.nome; f.email.value=u.email; f.perfil.value=u.perfil; f.empresa.value=u.empresa||''; f.valido_ate.value=u.valido_ate||''; consCampos(); $('usFormTit').textContent='Editar '+u.nome; $('usCancelar').hidden=false; f.nome.focus(); }));
+  $('usLista').querySelectorAll('[data-ed]').forEach(b=>b.addEventListener('click',()=>{ const u=US.lista.find(x=>x.id===b.dataset.ed); const f=$('usForm'); f.id.value=u.id; f.nome.value=u.nome; f.email.value=u.email; f.perfil.value=u.perfil; f.empresa.value=u.empresa||''; f.vendedor.value=u.vendedor||''; f.valido_ate.value=u.valido_ate||''; consCampos(); $('usFormTit').textContent='Editar '+u.nome; $('usCancelar').hidden=false; f.nome.focus(); }));
   $('usLista').querySelectorAll('[data-del]').forEach(b=>b.addEventListener('click',async()=>{ const u=US.lista.find(x=>x.id===b.dataset.del); if(!confirm(`Remover o acesso de ${u.nome}?`)) return; await api(`/api/usuarios/${u.id}`,{method:'DELETE'}); pgUsuarios(); }));
   mostrarLink();
 }
@@ -2694,9 +2750,9 @@ function mostrarLink(){
   $('usCopiar').addEventListener('click',e=>cp(L.link,e.target)); $('usCopiarMsg').addEventListener('click',e=>cp(msg,e.target));
 }
 $('usForm').addEventListener('submit',async e=>{ e.preventDefault(); const f=e.target; $('usErro').textContent='';
-  try{ await api('/api/usuarios',{method:'POST',body:JSON.stringify({id:f.id.value||undefined,nome:f.nome.value,email:f.email.value,perfil:f.perfil.value,empresa:f.empresa.value,valido_ate:f.perfil.value==='consultor'?f.valido_ate.value:''})}); f.reset(); f.id.value=''; $('usFormTit').textContent='Novo usuário'; $('usCancelar').hidden=true; pgUsuarios(); }
+  try{ await api('/api/usuarios',{method:'POST',body:JSON.stringify({id:f.id.value||undefined,nome:f.nome.value,email:f.email.value,perfil:f.perfil.value,vendedor:f.perfil.value==='vendedor'?f.vendedor.value:'',empresa:f.empresa.value,valido_ate:f.perfil.value==='consultor'?f.valido_ate.value:''})}); f.reset(); f.id.value=''; $('usFormTit').textContent='Novo usuário'; $('usCancelar').hidden=true; pgUsuarios(); }
   catch(err){ $('usErro').textContent=err.message; } });
-const consCampos=()=>{ const on=$('usPerfil').value==='consultor'; document.querySelectorAll('.us-cons').forEach(x=>x.hidden=!on); if(on&&!$('usValidade').value){ const d=new Date(Date.now()+90*864e5); $('usValidade').value=d.toISOString().slice(0,10); } };
+const consCampos=()=>{ document.querySelectorAll('.us-vend').forEach(x=>x.hidden=$('usPerfil').value!=='vendedor'); if($('usPerfil').value==='vendedor') try{ valoresConhecidos(); }catch(e){} const on=$('usPerfil').value==='consultor'; document.querySelectorAll('.us-cons').forEach(x=>x.hidden=!on); if(on&&!$('usValidade').value){ const d=new Date(Date.now()+90*864e5); $('usValidade').value=d.toISOString().slice(0,10); } };
 $('usPerfil').addEventListener('change',consCampos);
 $('usCancelar').addEventListener('click',()=>{ const f=$('usForm'); f.reset(); f.id.value=''; $('usFormTit').textContent='Novo usuário'; $('usCancelar').hidden=true; });
 async function carregarEu(){
@@ -2716,10 +2772,10 @@ let PERMU=null;
 
 
 function desenharBlocos(){
-  const ed=['diretor','comercial','financeiro','consultor'], cur=E.eu?.blocos_perfis||{}, pad=E.eu?.blocos_padrao||BL_PADRAO;
+  const ed=['diretor','comercial','financeiro','consultor','vendedor'], cur=E.eu?.blocos_perfis||{}, pad=E.eu?.blocos_padrao||BL_PADRAO;
   const de=(k)=>cur[k]||BL_PADRAO[k]||[]; const mudou=(k)=>{ const a=de(k), b=pad[k]||[]; return a.length!==b.length||a.some(x=>!b.includes(x)); };
   const grupos=[['painel','Painel executivo'],['indicadores','Quadro de indicadores'],['vendedores','Vendedores e premiação']];
-  $('usBlocos').innerHTML=`<table><thead><tr><th>Quadro</th><th style="text-align:center">ADM</th>${ed.map(k=>`<th style="text-align:center">${PERF[k]}${mudou(k)?'<div style="font-size:10px;font-weight:600;color:var(--orange);text-transform:none;letter-spacing:0">personalizado</div>':''}</th>`).join('')}</tr></thead><tbody>${grupos.map(([pg,rot])=>`<tr class="grp"><td colspan="6" style="font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--orange);padding-top:12px">${rot}</td></tr>`+BLOCOS_DEF.filter(b=>b.pag===pg).map(b=>`<tr><td>${esc(b.nome)}${b.fin?' <span class="req" title="Usa dados financeiros">fin.</span>':''}</td><td style="text-align:center"><span class="status ok">✓</span></td>${ed.map(k=>`<td style="text-align:center"><input type="checkbox" data-bl="${k}" value="${b.id}" ${de(k).includes(b.id)?'checked':''} aria-label="${PERF[k]}: ${esc(b.nome)}"></td>`).join('')}</tr>`).join('')).join('')}
+  $('usBlocos').innerHTML=`<table><thead><tr><th>Quadro</th><th style="text-align:center">ADM</th>${ed.map(k=>`<th style="text-align:center">${PERF[k]}${mudou(k)?'<div style="font-size:10px;font-weight:600;color:var(--orange);text-transform:none;letter-spacing:0">personalizado</div>':''}</th>`).join('')}</tr></thead><tbody>${grupos.map(([pg,rot])=>`<tr class="grp"><td colspan="7" style="font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--orange);padding-top:12px">${rot}</td></tr>`+BLOCOS_DEF.filter(b=>b.pag===pg).map(b=>`<tr><td>${esc(b.nome)}${b.fin?' <span class="req" title="Usa dados financeiros">fin.</span>':''}</td><td style="text-align:center"><span class="status ok">✓</span></td>${ed.map(k=>`<td style="text-align:center"><input type="checkbox" data-bl="${k}" value="${b.id}" ${de(k).includes(b.id)?'checked':''} aria-label="${PERF[k]}: ${esc(b.nome)}"></td>`).join('')}</tr>`).join('')).join('')}
     <tr><td></td><td></td>${ed.map(k=>`<td style="text-align:center">${mudou(k)?`<button class="bt2" type="button" data-blrest="${k}" style="font-size:11.5px;padding:4px 8px">Voltar ao padrão</button>`:''}</td>`).join('')}</tr></tbody></table><div class="nota" id="usBlocosMsg">Desmarcar um quadro esconde só aquele bloco. Quadros marcados com "fin." usam dados financeiros: se nenhum deles estiver liberado e o perfil não tiver páginas financeiras, o servidor também bloqueia o financeiro para esse perfil.</div>`;
   const salvar=async(k,blocos)=>{ try{ const r=PREVIA?{blocos:blocos||BL_PADRAO[k]}:await api('/api/blocos',{method:'POST',body:JSON.stringify({perfil:k,blocos})}); E.eu.blocos_perfis={...(E.eu.blocos_perfis||{}),[k]:r.blocos}; desenharBlocos(); $('usBlocosMsg').innerHTML=`<b>Salvo.</b> ${PERF[k]}: ${r.blocos.length} de ${BLOCOS_DEF.length} quadros liberados.`; }catch(e){ $('usBlocosMsg').textContent=e.message; } };
   $('usBlocos').querySelectorAll('input[data-bl]').forEach(c=>c.addEventListener('change',()=>{ const k=c.dataset.bl; salvar(k,[...$('usBlocos').querySelectorAll(`input[data-bl="${k}"]:checked`)].map(x=>x.value)); }));
@@ -2727,7 +2783,7 @@ function desenharBlocos(){
 }
 // matriz "O que cada perfil vê": o ADM marca/desmarca e vale para todas as pessoas do perfil
 function desenharMatriz(){
-  const ed=['diretor','comercial','financeiro','consultor'], orig=E.eu?.perfis_originais||{};
+  const ed=['diretor','comercial','financeiro','consultor','vendedor'], orig=E.eu?.perfis_originais||{};
   const mudou=(k)=>orig[k]&&(orig[k].length!==PADRAO[k].length||orig[k].some(p=>!PADRAO[k].includes(p)));
   $('usMatriz').innerHTML=`<table><thead><tr><th>Página</th>${Object.keys(PERF).map(k=>`<th style="text-align:center">${PERF[k]}${mudou(k)?'<div style="font-size:10px;font-weight:600;color:var(--orange);text-transform:none;letter-spacing:0">personalizado</div>':''}</th>`).join('')}</tr></thead><tbody>${MENU.map(g=>`<tr class="grp"><td colspan="6" style="font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--orange);padding-top:12px">${g.grupo}</td></tr>`+g.itens.map(i=>`<tr><td>${i[1]}</td>${Object.keys(PERF).map(k=>{ const on=PADRAO[k].includes(i[0]);
       if(k==='adm'||i[0]==='usuarios') return `<td style="text-align:center">${on?'<span class="status ok">✓</span>':'<span style="color:var(--ink3)">—</span>'}</td>`;

@@ -9,6 +9,7 @@
 import crypto from 'node:crypto';
 import XLSX from 'xlsx';
 import { googleConectado, baixarPlanilha } from './google.js';
+import { scriptConfigurado, baixarPorScript } from './planilhaScript.js';
 
 const env = process.env;
 
@@ -218,7 +219,7 @@ export function normalizarLinhas(matriz) {
 }
 
 // ---------- Acesso ----------
-export const planilhaConfigurada = () => !!(googleConectado() || env.PLANILHA_CSV_URL || (env.GOOGLE_SERVICE_ACCOUNT_JSON && env.PLANILHA_ID));
+export const planilhaConfigurada = () => !!(scriptConfigurado() || googleConectado() || env.PLANILHA_CSV_URL || (env.GOOGLE_SERVICE_ACCOUNT_JSON && env.PLANILHA_ID));
 
 async function tokenContaServico() {
   const sa = JSON.parse(env.GOOGLE_SERVICE_ACCOUNT_JSON);
@@ -325,6 +326,13 @@ export function lerXlsx(bytes, aba = env.PLANILHA_ABA) {
 }
 
 export async function lerPlanilha() {
+  // 1) ligada pelo e-mail de quem tem acesso (script do Google, sem credenciais no Render)
+  if (scriptConfigurado()) {
+    const arq = await baixarPorScript();
+    const r = lerXlsx(arq.bytes);
+    r.arquivo = { nome: arq.nome, alterado_em: arq.alterado_em, aba: r.aba, via: 'e-mail (script do Google)' };
+    return r;
+  }
   if (googleConectado()) {
     const arq = await baixarPlanilha();
     const r = lerXlsx(arq.bytes);
