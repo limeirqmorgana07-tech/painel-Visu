@@ -170,7 +170,9 @@ export function normalizarLinhas(matriz) {
     const mes = data ? data.slice(0, 7) : mesDe(val(lin, 'mes'), env.PLANILHA_ANO_PADRAO);
     const clienteOriginal = String(val(lin, 'clienteLancado') || val(lin, 'cliente')).trim();
     const clientePadrao = String(val(lin, 'cliente')).trim();
-    const pedidoTxt = String(val(lin, 'codigo') || val(lin, 'pedido')).trim();
+    // o cód. interno (ex.: 0004092026) costuma vir como número da planilha e perde os zeros da frente: volta para 10 dígitos
+    const codRaw = String(val(lin, 'codigo') ?? '').trim(), codTxt = /^\d{7,9}$/.test(codRaw) ? codRaw.padStart(10, '0') : codRaw;
+    const pedidoTxt = String(codTxt || val(lin, 'pedido')).trim();
     if (!clienteOriginal && !total) continue; // linhas vazias
     if (!clienteOriginal && !data) continue; // linha de TOTAL ou subtotal no fim da planilha
     if (lin.some((c) => /^\s*(sub)?total\b/i.test(String(c ?? '')))) continue;
@@ -196,7 +198,7 @@ export function normalizarLinhas(matriz) {
       frete: String(val(lin, 'frete')).trim(),
       segmento: String(val(lin, 'segmento')).trim(),
       // campos guardados só para a importação da base no painel (menu Pedidos de venda)
-      codigo: String(val(lin, 'codigo')).trim(), nome_pedido: String(val(lin, 'pedido')).trim(), valor_unit: unit,
+      codigo: codTxt, nome_pedido: String(val(lin, 'pedido')).trim(), valor_unit: unit,
       observacao: String(val(lin, 'observacao')).trim(), pagador: String(val(lin, 'pagador')).trim(),
       duplicado: sem(val(lin, 'duplicado')) === 'verificar',
       nome_novo: sem(val(lin, 'mapeamento')).includes('novo'),

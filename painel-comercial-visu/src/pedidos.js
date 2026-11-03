@@ -139,7 +139,9 @@ export function linhasDoPainel() {
     linha: r.linha_planilha || null, data: r.data, mes: r.mes || (r.data || '').slice(0, 7), cliente: r.cliente || 'Sem cliente',
     cliente_original: r.cliente_lancado || [r.cliente, r.lote].filter(Boolean).join(' '),
     // o complementar conta no mesmo pedido (não infla a quantidade de pedidos nem derruba o ticket)
-    pedido: r.codigo ? codigoBase(r.codigo) : `${r.cliente}|${r.data || r.mes}`, codigo_pedido: r.codigo || '', pedido_informado: !!r.codigo,
+    // linhas importadas seguem a regra da base tratada (pedido = cliente + data), para os números baterem com a planilha;
+    // pedidos lançados no painel usam o código (o complementar "-1" conta no mesmo pedido)
+    pedido: r.codigo && r.origem !== 'planilha' ? codigoBase(r.codigo) : `${r.cliente}|${r.data || r.mes}`, codigo_pedido: r.codigo || '', pedido_informado: !!r.codigo,
     vendedor: r.vendedor || 'Sem vendedor', tipo_venda: (r.tipo_venda || '—').toUpperCase(), novo_recompra: r.novo_recompra || '',
     tipo_produto: r.tipo_produto, material: r.material, especificacao: r.especificacao, cor: r.cor, quantidade: r.quantidade || 0, total: r.total || 0,
     pag1: r.pag1 || 0, pag2: r.pag2 || 0, pago_100: !!r.pago_100, forma_pagamento: r.forma_pagamento || '', prazo_entrega: r.prazo_entrega || '', frete: r.frete || '', segmento: r.segmento || '',
@@ -261,7 +263,7 @@ export async function unificarCliente(de, para, u) {
 async function linhasDaFonte(bytes) {
   if (bytes) return { linhas: lerXlsx(bytes).linhas, origem: 'arquivo' };
   if (config.demo) return { linhas: gerarDemoPlanilha().linhas, origem: 'demonstração' };
-  if (!planilhaConfigurada()) throw new Error('A planilha não está conectada. Conecte o Google em Planilha × sistema ou envie o arquivo .xlsx.');
+  if (!planilhaConfigurada()) throw new Error('A planilha não está conectada. Conecte o Google em Conferência → Sistema × planilha: mês, ou envie o arquivo .xlsx.');
   return { linhas: (await lerPlanilha()).linhas, origem: 'planilha conectada' };
 }
 export async function importar({ de = '2026-01', ate = '2026-10', modo = 'faltam', simular = true, bytes = null, nomeArquivo = '' }, u) {

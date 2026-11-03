@@ -2,9 +2,11 @@
 // O ADM pode restringir ainda mais por usuário, na página Usuários e permissões.
 export const MENU = [
   { grupo: 'Gestão', itens: [['painel', 'Painel executivo'], ['indicadores', 'Quadro de indicadores']] },
-  { grupo: 'Comercial', itens: [['registro', 'Pedidos de venda'], ['vendas', 'Vendas'], ['produtos', 'Produtos e mix'], ['clientes', 'Clientes'], ['vendedores', 'Vendedores e premiação'], ['pedidos', 'Pedidos e entregas'], ['conferencia', 'Conciliação de pedidos'], ['historico', 'Histórico de alterações']] },
+  { grupo: 'Comercial', itens: [['registro', 'Pedidos de venda'], ['vendas', 'Vendas'], ['produtos', 'Produtos e mix'], ['clientes', 'Clientes'], ['vendedores', 'Vendedores e premiação'], ['pedidos', 'Pedidos e entregas']] },
+  // reunião de 03/11/2026: conferência sistema × planilha num grupo próprio (a planilha é a referência das vendas)
+  { grupo: 'Conferência', itens: [['conferencia', 'Sistema × planilha: pedidos'], ['conciliacao', 'Sistema × planilha: mês'], ['inconsistencias', 'Inconsistências'], ['historico', 'Histórico de alterações']] },
   { grupo: 'Financeiro', itens: [['dre', 'DRE gerencial'], ['equilibrio', 'Margem e ponto de equilíbrio'], ['caixa', 'Fluxo de caixa'], ['receber', 'Contas a receber'], ['pagar', 'Contas a pagar']] },
-  { grupo: 'Controle', itens: [['conciliacao', 'Planilha × sistema'], ['dados', 'Qualidade dos dados'], ['versoes', 'Versões do painel']] },
+  { grupo: 'Controle', itens: [['dados', 'Qualidade dos dados'], ['versoes', 'Versões do painel']] },
   { grupo: 'Administração', itens: [['usuarios', 'Usuários e permissões']] },
 ];
 export const TODAS = MENU.flatMap((g) => g.itens.map((i) => i[0]));
@@ -14,15 +16,15 @@ const PADRAO_BASE = {
   adm: TODAS,
   diretor: TODAS.filter((p) => p !== 'usuarios'),
   // reunião de 03/11/2026: vendedores lançam os pedidos no painel e veem a conciliação; o histórico fica com a gestão
-  comercial: ['registro', ...COM, 'conferencia', 'conciliacao', 'versoes'],
-  financeiro: ['painel', 'indicadores', 'registro', ...FIN, 'conferencia', 'historico', 'conciliacao', 'dados', 'versoes'],
+  comercial: ['registro', ...COM, 'conferencia', 'conciliacao', 'inconsistencias', 'versoes'],
+  financeiro: ['painel', 'indicadores', 'registro', ...FIN, 'conferencia', 'conciliacao', 'inconsistencias', 'historico', 'dados', 'versoes'],
   // consultor externo liberado pela diretoria: só o módulo de vendas (em homologação); o ADM pode ampliar
   consultor: [...COM],
 };
 // O ADM pode mudar o que cada perfil vê (vale para todas as pessoas daquele perfil). Guardado na chave perfis_paginas.
 let personalizado = {};
 const LIBERAVEIS = TODAS.filter((p) => p !== 'usuarios');
-const NOVAS_V31 = ['registro', 'conferencia', 'historico'];
+const NOVAS_V31 = ['registro', 'conferencia', 'inconsistencias', 'historico'];
 export function definirPerfis(o) {
   personalizado = {};
   // listas salvas antes da v31 não conheciam os 3 menus novos: entram conforme o padrão do perfil
@@ -71,6 +73,6 @@ export const blocosDe = (perfil) => (perfil === 'adm' ? TODOS_BLOCOS : blocosPer
 export const blocosPadrao = () => ({ ...BLOCOS_PADRAO });
 // financeiro liberado: tem página financeira, ou tem Painel/Quadro com algum bloco financeiro ligado
 export const veFinanceiro = (u) => { const pg = paginasDe(u); if (pg.some((p) => FIN.includes(p))) return true; const bl = blocosDe(u?.perfil); return BLOCOS.some((b) => b.fin && pg.includes(b.pag) && bl.includes(b.id)); };
-export const veVendas = (u) => paginasDe(u).some((p) => COM.includes(p) || ['painel', 'indicadores', 'conciliacao', 'dados', 'registro', 'conferencia'].includes(p));
-export const vePedidos = (u) => paginasDe(u).some((p) => ['registro', 'conferencia', 'historico'].includes(p));
+export const veVendas = (u) => paginasDe(u).some((p) => COM.includes(p) || ['painel', 'indicadores', 'conciliacao', 'dados', 'registro', 'conferencia', 'inconsistencias'].includes(p));
+export const vePedidos = (u) => paginasDe(u).some((p) => ['registro', 'conferencia', 'inconsistencias', 'historico'].includes(p));
 export const veHistorico = (u) => paginasDe(u).includes('historico');

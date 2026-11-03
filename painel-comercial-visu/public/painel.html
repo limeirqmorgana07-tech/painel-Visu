@@ -614,6 +614,19 @@ table.matriz td.vz{color:var(--line2)}
 .hs-m{font-size:12px;color:var(--ink2)}.hs-m b{color:var(--ink)}.hs-m s{color:var(--red);opacity:.8}
 .sem-premio .pr{display:none!important}
 .kpi.alerta{border-color:var(--red)}
+.balao{position:fixed;z-index:96;background:var(--panel);color:var(--ink);border:1px solid var(--line2);border-radius:14px;box-shadow:0 22px 44px -14px rgba(0,25,70,.45);padding:12px 14px;width:300px;font-size:12.5px;line-height:1.5;opacity:0;transform:translateY(6px) scale(.98);transition:opacity .16s,transform .16s;pointer-events:auto}
+.balao.on{opacity:1;transform:none}
+.balao::after{content:"";position:absolute;left:var(--ax,50%);width:13px;height:13px;background:var(--panel);border:1px solid var(--line2);transform:translateX(-50%) rotate(45deg)}
+.balao.cima::after{bottom:-7.5px;border-top:0;border-left:0}.balao.baixo::after{top:-7.5px;border-bottom:0;border-right:0}
+.balao .pgcard{min-width:0}.balao .pgcard hr{border-top:1px solid var(--line)}.balao .pgcard .ln span:first-child{color:var(--ink3);opacity:1}
+.balao .bh{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}.balao .bh b{font-family:var(--display);font-size:13.5px}
+.balao .av{margin-top:8px;padding:6px 8px;border-radius:8px;background:var(--redSoft);color:var(--red);font-weight:600}
+.inc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.inc{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:6px;cursor:pointer;text-align:left;font:inherit;color:var(--ink)}
+.inc:hover{border-color:var(--orange)}.inc.zero{cursor:default;opacity:.72}.inc.zero:hover{border-color:var(--line)}
+.inc .n{font-family:var(--display);font-size:26px;font-weight:700;line-height:1}.inc.grave .n{color:var(--red)}.inc.media .n{color:var(--amber)}.inc.zero .n{color:var(--green)}
+.inc .t{font-weight:700;font-size:13.5px}.inc .d{font-size:12px;color:var(--ink2)}.inc .c{font-size:11.5px;color:var(--ink3);border-top:1px dashed var(--line);padding-top:6px;margin-top:auto}
+.inc .g{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--orange)}
 .exp{position:relative;display:inline-block}.exp-m{position:absolute;right:0;top:calc(100% + 4px);background:var(--panel);border:1px solid var(--line2);border-radius:10px;box-shadow:0 12px 30px -10px rgba(0,0,0,.3);padding:4px;z-index:95;min-width:150px;display:flex;flex-direction:column}.exp-m[hidden]{display:none}.exp-m button{border:0;background:none;text-align:left;padding:7px 10px;border-radius:7px;font:inherit;font-size:13px;color:var(--ink);cursor:pointer}.exp-m button:hover{background:var(--bg);color:var(--orange)}.kpi.alerta .v{color:var(--red)}
 /* densidade compacta */
 :root[data-densidade="compacta"] main{gap:10px;padding-block:12px 36px}
@@ -734,6 +747,7 @@ table.matriz td.vz{color:var(--line2)}
 </div>
 <datalist id="dlCliente"></datalist><datalist id="dlVendedor"></datalist><datalist id="dlSegmento"></datalist><datalist id="dlForma"></datalist><datalist id="dlProduto"></datalist><datalist id="dlMaterial"></datalist><datalist id="dlCor"></datalist><datalist id="dlEspec"></datalist>
 <div class="toast" id="toast" hidden></div>
+<div class="balao" id="balao" role="tooltip" hidden></div>
 <main id="app">
   <div class="aviso erro" id="erroPagina" hidden></div>
   <div class="simula" id="simula" hidden></div>
@@ -861,15 +875,26 @@ table.matriz td.vz{color:var(--line2)}
     <div class="ped-bar">
       <div class="f"><label for="cfMes">Mês</label><select id="cfMes"></select></div>
       <div class="f"><label for="cfVend">Vendedor</label><select id="cfVend"></select></div>
-      <div class="seg" role="group" aria-label="Base" id="cfBase"><button type="button" data-cfb="painel" aria-pressed="true">Pedidos do painel</button><button type="button" data-cfb="planilha" aria-pressed="false">Planilha conectada</button></div>
+      <div class="seg" role="group" aria-label="Base" id="cfBase"><button type="button" data-cfb="planilha" aria-pressed="true">Planilha</button><button type="button" data-cfb="painel" aria-pressed="false">Pedidos do painel</button></div>
       <span style="flex:1"></span><div class="exp" data-exp="cf"><button class="bt2" type="button" aria-haspopup="true" aria-expanded="false">Exportar ▾</button><div class="exp-m" hidden><button type="button" data-fmt="xlsx">Excel (.xlsx)</button><button type="button" data-fmt="pdf">PDF</button><button type="button" data-fmt="csv">CSV</button></div></div>
     </div>
     <div class="aviso" id="cfAviso" hidden></div>
     <div class="kpis kpis6" id="cfKpis" style="margin-bottom:14px"></div>
-    <div class="card"><div class="hd"><div><h3>Pedido a pedido: painel × Conta Azul</h3><div class="sub" id="cfSub">Campo-chave: código do pedido (cód. interno = número da venda na Conta Azul)</div></div><div class="seg" role="group" aria-label="Situação" id="cfSit"></div></div>
+    <div class="card"><div class="hd"><div><h3>Pedido a pedido: sistema × planilha</h3><div class="sub" id="cfSub">Campo-chave: código do pedido (cód. interno = número da venda na Conta Azul)</div></div><div class="seg" role="group" aria-label="Situação" id="cfSit"></div></div>
       <div class="tw" id="cfTabela"></div><div class="nota" id="cfNota"></div></div>
   </section>
 
+  <section data-pagina="inconsistencias" hidden>
+    <div class="ped-bar">
+      <div class="f"><label for="inMes">Mês</label><select id="inMes"></select></div>
+      <div class="f"><label for="inVend">Vendedor</label><select id="inVend"></select></div>
+      <div class="seg" role="group" aria-label="Base" id="inBase"><button type="button" data-inb="planilha" aria-pressed="true">Planilha</button><button type="button" data-inb="painel" aria-pressed="false">Pedidos do painel</button></div>
+    </div>
+    <div class="aviso" id="inAviso"></div>
+    <div class="kpis" id="inKpis" style="margin-bottom:14px"></div>
+    <div class="inc-grid" id="inCards"></div>
+    <div class="card" style="margin-top:16px"><div class="hd"><div><h3>Inconsistências por vendedor</h3><div class="sub">O "dever de casa" de cada vendedor no período · clique num número para ver as linhas</div></div></div><div class="tw" id="inVendT"></div></div>
+  </section>
   <section data-pagina="historico" hidden>
     <div class="ped-bar">
       <div class="f"><label for="hsDias">Período</label><select id="hsDias"><option value="7">Últimos 7 dias</option><option value="30" selected>Últimos 30 dias</option><option value="90">Últimos 90 dias</option><option value="3650">Tudo</option></select></div>
@@ -1012,7 +1037,7 @@ function delta(a,b,inv){ if(!b) return '<span class="delta eq">sem base</span>';
 
 const VERSAO='v31';
 const VERSOES=[
- {v:'v31',data:'03/11/2026',tit:'Pedidos de venda no painel (reunião Visu e Vieira Diniz)',arq:'painel-visu-v31.zip',itens:['Novo menu Pedidos de venda no Comercial: tela com as mesmas colunas da planilha, edição direto na célula, + Novo pedido com vários itens e código automático no padrão da Visu (sequência do mês + mês + ano, ex.: 0005112026).','Regra do acréscimo: quantidade e valores ficam travados para o vendedor 24 h depois do lançamento; acréscimo vira pedido complementar com o mesmo código + "-1", "-2", que gera título complementar na Conta Azul.','Importar base: traz as vendas de janeiro a outubro da planilha conectada (ou de um arquivo .xlsx) e permite subir outubro de novo depois. Campos em branco, novo × recompra vazio e cliente com "lote" no nome ficam em amarelo para os vendedores revisarem; o lote vai para a coluna própria.','Colunas Planilha, Sistema (Conta Azul) e Divergência em cada pedido, e 1º e 2º pagamento preenchidos pela Conta Azul pelo código do pedido, com card de data da baixa, banco e forma ao passar o mouse.','Novo menu Conciliação de pedidos: pedido a pedido, painel × Conta Azul, com batendo, valor diferente, só no painel, só no sistema e sem código.','Novo menu Histórico de alterações (gestão): quem lançou, alterou, excluiu ou importou, quando e o que mudou (antes → depois).','Revisão de cadastro de clientes: junta grafias do mesmo cliente (ex.: Checkpoint, Checkpoint 5 anos, Checkpoint CT) com um clique.','Premiação oculta para vendedores: novo item "Vendedores: premiação" em O que cada perfil vê na Gestão, desligado para Comercial e Consultor.','O ADM escolhe se os indicadores leem a planilha conectada ou os pedidos do painel (para extinguir o controle paralelo a partir de novembro).','Exportar em Excel (.xlsx, com valores numéricos, datas e filtro), PDF (com cabeçalho, totais e páginas numeradas) e CSV em todas as listas: detalhamentos ao clicar nos valores, Pedidos de venda, Conciliação de pedidos e Histórico.']},
+ {v:'v31',data:'03/11/2026',tit:'Pedidos de venda no painel (reunião Visu e Vieira Diniz)',arq:'painel-visu-v31.zip',itens:['Novo menu Pedidos de venda no Comercial: tela com as mesmas colunas da planilha, edição direto na célula, + Novo pedido com vários itens e código automático no padrão da Visu (sequência do mês + mês + ano, ex.: 0005112026).','Regra do acréscimo: quantidade e valores ficam travados para o vendedor 24 h depois do lançamento; acréscimo vira pedido complementar com o mesmo código + "-1", "-2", que gera título complementar na Conta Azul.','Importar base: traz as vendas de janeiro a outubro da planilha conectada (ou de um arquivo .xlsx) e permite subir outubro de novo depois. Campos em branco, novo × recompra vazio e cliente com "lote" no nome ficam em amarelo para os vendedores revisarem; o lote vai para a coluna própria.','Colunas Planilha, Sistema (Conta Azul) e Divergência em cada pedido, e 1º e 2º pagamento preenchidos pela Conta Azul pelo código do pedido, com card de data da baixa, banco e forma ao passar o mouse.','Novo menu Conciliação de pedidos: pedido a pedido, painel × Conta Azul, com batendo, valor diferente, só no painel, só no sistema e sem código.','Novo menu Histórico de alterações (gestão): quem lançou, alterou, excluiu ou importou, quando e o que mudou (antes → depois).','Revisão de cadastro de clientes: junta grafias do mesmo cliente (ex.: Checkpoint, Checkpoint 5 anos, Checkpoint CT) com um clique.','Premiação oculta para vendedores: novo item "Vendedores: premiação" em O que cada perfil vê na Gestão, desligado para Comercial e Consultor.','O ADM escolhe se os indicadores leem a planilha conectada ou os pedidos do painel (para extinguir o controle paralelo a partir de novembro).','Novo grupo Conferência no menu: Sistema × planilha por pedido e por mês, Inconsistências (valor diferente na Conta Azul, pedido sem venda, venda sem pedido, pagamento diferente, sem código, código fora do padrão, código repetido, mesmo cliente e dia com códigos diferentes, lote no nome, grafias, novo × recompra, campos em branco, duplicidade, total × qtd) com o dever de casa por vendedor, e Histórico de alterações.','As vendas seguem a planilha (a Conta Azul aparece só como conferência); pedidos importados contam como na base tratada (cliente + data). Testado com a planilha tratada real: setembro com 104 pedidos, R$ 241.835, 31,2% para clientes novos e 39 clientes novos.','Cód. interno que vinha como número (4092026) volta para 10 dígitos (0004092026). Sem Conta Azul conectada, a conferência não usa mais vendas de demonstração.','1º e 2º pagamento: balão flutuante ao passar o mouse, com situação (recebido, a receber, em atraso), parcela, vencimento, data da baixa, banco e forma.','Exportar em Excel (.xlsx, com valores numéricos, datas e filtro), PDF (com cabeçalho, totais e páginas numeradas) e CSV em todas as listas: detalhamentos ao clicar nos valores, Pedidos de venda, Conciliação de pedidos e Histórico.']},
  {v:'v30',data:'28/10/2026',tit:'Gestão por perfil',arq:'painel-visu-v30.zip',itens:['Em Usuários e permissões, nova tabela "O que cada perfil vê na Gestão": o ADM escolhe, por perfil, quais quadros do Painel executivo e do Quadro de indicadores aparecem (vitrine, indicadores de vendas, indicadores financeiros, ponto de equilíbrio, cascata, gráfico de 12 meses, pontos de atenção; e no Quadro, as partes comercial, financeira e de caixa).','Se nenhum quadro financeiro estiver liberado e o perfil não tiver páginas financeiras, o servidor também bloqueia os dados financeiros.']},
  {v:'v29',data:'28/10/2026',tit:'Premiação pela política da Visu',arq:'painel-visu-v29.zip',itens:['Premiação calculada pela Política de Premiação por Performance 2026: 17 faixas, de 1% a partir de R$ 15 mil até 5% a partir de R$ 50 mil, sobre o total vendido no mês.','Bônus semanal: R$ 75 por semana (segunda a sexta) com R$ 25 mil ou mais em vendas, somado à premiação.','Data de pagamento (5º dia útil do mês seguinte) e botão Ver política de premiação, com o resumo e o PDF.','Página renomeada para Vendedores e premiação. O moderador de margem (item 6) ainda não é aplicado.']},
  {v:'v28',data:'28/10/2026',tit:'Nova marca Visu',arq:'painel-visu-v28.zip',itens:['Logo novo da Visu no menu, na tela de login e no ícone da aba (versão branca nos menus escuros e azul nos claros).','O painel passa a abrir no visual Azul Visu, com as cores da nova marca, para quem ainda não escolheu outro.','Quatro visuais novos com o azul da marca: Azul Visu, Branco & Azul, Degradê azul e Azul profundo. Os anteriores continuam disponíveis.','Tela de login no azul da nova marca.']},
@@ -1152,7 +1177,7 @@ async function carregar(forcar){
     try{ E.vcfg=PREVIA?(E.vcfg||{inativos:[]}):await (await fetch('/api/vendedores',{headers:{Accept:'application/json'}})).json(); }catch(e){ E.vcfg={inativos:[]}; }
     E.dados=d; padronizarNomes(); aplicarVendedores(); $('avisoErro').hidden=true;
     montarFiltros(); desenhar();
-    if(PED.d&&!PREVIA) carregarPedidos().then(()=>{ if(['registro','conferencia'].includes(E.pagina)&&!PED.editando) desenhar(); }).catch(()=>{});
+    if(PED.d&&!PREVIA) carregarPedidos().then(()=>{ if(['registro','conferencia','inconsistencias'].includes(E.pagina)&&!PED.editando) desenhar(); }).catch(()=>{});
   }catch(e){ const a=$('avisoErro'); a.hidden=false; a.textContent='Não foi possível carregar as vendas: '+e.message; }
 }
 
@@ -1175,10 +1200,10 @@ function desenhar(){
   const it=ITEM[E.pagina], grupo=it.grupo, comercial=grupo==='Comercial';
   const perSalvo=E.periodo; if(!comercial) E.periodo='mes'; const j=janela(); E.periodo=perSalvo;
   $('pgTit').textContent=E.pagina==='vendedores'&&!vb('vendedores.premiacao')?'Vendedores':it.rot;
-  const per=['usuarios','versoes','dados','registro','conferencia','historico'].includes(E.pagina)?'':grupo==='Comercial'?j.rot:nomeMes(E.mes);
+  const per=['usuarios','versoes','dados','registro','conferencia','inconsistencias','historico'].includes(E.pagina)?'':grupo==='Comercial'?j.rot:nomeMes(E.mes);
   $('pgCtx').innerHTML=`<b>${grupo}</b>${esc(it.ctx)}${per?' · '+esc(per):''}`;
   document.title=it.rot+' · Painel de Gestão Visu';
-  $('barraFiltros').hidden=['usuarios','versoes','dados','registro','conferencia','historico'].includes(E.pagina);
+  $('barraFiltros').hidden=['usuarios','versoes','dados','registro','conferencia','inconsistencias','historico'].includes(E.pagina);
   document.querySelectorAll('.f.com').forEach(f=>f.hidden=!comercial);
   document.querySelectorAll('.f.per')[0].hidden=!comercial;
   const fx=comercial&&E.periodo==='faixa'; document.querySelectorAll('.f.per2').forEach(f=>f.hidden=!fx); document.querySelectorAll('.f.per')[1].hidden=fx;
@@ -1188,7 +1213,7 @@ function desenhar(){
   const S=$('simula'); if(E.verComo){ S.hidden=false; S.innerHTML=`<span>Visualizando o painel como <b>${esc(E.verComo.nome||PERF[E.verComo.perfil])}</b>. O menu mostra exatamente o que esse perfil vê.</span><button class="bt2" type="button" id="simSair">Voltar para ADM</button>`; $('simSair').onclick=()=>{ E.verComo=null; $('verComo').value=''; desenhar(); }; } else S.hidden=true;
   // se um quadro der erro com os dados reais, a página continua e o erro aparece no topo (em vez de sumir em silêncio)
   const errBox=$('erroPagina'); if(errBox) errBox.hidden=true;
-  try{ ({painel:pgVisao,indicadores:pgIndicadores,vendas:pgGeral,produtos:pgProdutos,clientes:pgClientes,vendedores:pgVendedores,pedidos:pgPedidos,registro:pgRegistro,conferencia:pgConferencia,historico:pgHistorico,dre:pgDRE,equilibrio:pgEquilibrio,caixa:pgCx,receber:pgRc,pagar:pgPg,conciliacao:pgConciliacao,dados:pgDados,versoes:pgVersoes,usuarios:pgUsuarios})[E.pagina](j); }
+  try{ ({painel:pgVisao,indicadores:pgIndicadores,vendas:pgGeral,produtos:pgProdutos,clientes:pgClientes,vendedores:pgVendedores,pedidos:pgPedidos,registro:pgRegistro,conferencia:pgConferencia,inconsistencias:pgInconsistencias,historico:pgHistorico,dre:pgDRE,equilibrio:pgEquilibrio,caixa:pgCx,receber:pgRc,pagar:pgPg,conciliacao:pgConciliacao,dados:pgDados,versoes:pgVersoes,usuarios:pgUsuarios})[E.pagina](j); }
   catch(e){ console.error(e); if(errBox){ errBox.hidden=false; errBox.innerHTML=`<span><b>Parte desta página não pôde ser montada.</b> Mande um print desta mensagem para a Seja Expert: <code>${esc(String(e&&e.message||e))}</code> (${esc(VERSAO)})</span>`; } }
 }
 
@@ -1198,11 +1223,11 @@ function pgGeral(j){
   const hojeD=new Date(Date.now()-3*3600e3), parcialM=E.periodo==='mes'&&E.mes===mesHojeBR(), dm=new Date(+E.mes.slice(0,4),+E.mes.slice(5),0).getDate();
   const peV=E.periodo==='mes'?peRef().valor:0, lsK=linhas(j.atual);
   $('kpis').innerHTML=kpiHtml([
-    (()=>{ // com a planilha ligada, o faturamento do mês (a partir de agosto) vem da Conta Azul; o detalhe vem da planilha
-      const pm=E.dados.conta_azul?.por_mes, desde=E.dados.detalhe_desde||'2026-08', fcF=E.dados.fonte==='planilha'&&E.periodo==='mes'&&!Object.values(E.filtros).some(Boolean)&&pm&&E.mes>=desde&&pm[E.mes];
+    (()=>{ // reunião de 03/11/2026: as vendas seguem a planilha (ou os pedidos do painel); a Conta Azul aparece só como conferência
+      const pm=E.dados.conta_azul?.por_mes, desde=E.dados.detalhe_desde||'2026-08', fcF=(E.dados.fonte==='planilha'||E.dados.fonte==='painel')&&E.periodo==='mes'&&!Object.values(E.filtros).some(Boolean)&&pm&&E.mes>=desde&&pm[E.mes];
       const caM=(m)=>pm&&pm[m]?(pm[m].APROVADO?.t||0)+(pm[m].FATURADO?.t||0):null, va=fcF?caM(E.mes):null, vb=fcF?caM(somaMes(E.mes,-1)):null;
       if(va==null) return ['Faturamento',brl(a.fat),`${delta(a.fat,b.fat)}<span>${j.comp}: ${brl(b.fat)}</span>`,'dest','',()=>detPedidos('Faturamento',lsK)];
-      return ['Faturamento',brl(va),`${vb!=null&&somaMes(E.mes,-1)>=desde?delta(va,vb):''}<span>Conta Azul · planilha: ${brl(a.fat)} (${pct(Math.abs(va-a.fat)/(va||1))} de diferença)</span>`,'dest','',()=>detPedidos('Faturamento (detalhe da planilha)',lsK)]; })(),
+      return ['Faturamento',brl(a.fat),`${delta(a.fat,b.fat)}<span>${j.comp}: ${brl(b.fat)} · Conta Azul: ${brl(va)}${Math.abs(va-a.fat)>1?` (<b>${a.fat>va?'+':'−'}${brl(Math.abs(va-a.fat))}</b>, ver Conferência)`:' (batendo)'}</span>`,'dest','',()=>detPedidos('Faturamento',lsK)]; })(),
     ['Pedidos',a.pedidos==null?'—':int(a.pedidos),a.pedidos==null?'<span>sem detalhe neste período (Conta Azul)</span>':`${delta(a.pedidos,b.pedidos)}<span>${j.comp}: ${b.pedidos==null?'sem detalhe':int(b.pedidos)}</span>`,'','R1',()=>detPedidos('Pedidos',lsK)],
     ['Ticket médio',a.ticket==null?'—':brl(a.ticket),a.ticket==null?'<span>sem detalhe neste período (Conta Azul)</span>':`${delta(a.ticket,b.ticket)}<span>${j.comp}: ${b.ticket==null?'sem detalhe':brl(b.ticket)}</span>`,'','R2',()=>detPedidos('Ticket médio: pedidos do período',lsK)],
     a.consolidado?['Vendas a clientes novos','—','<span>sem detalhe neste período (Conta Azul)</span>','','R3']:['Vendas a clientes novos',pct(a.fat?a.nr.novo.t/a.fat:0),`<span>${brl(a.nr.novo.t)} · ${pl(a.nr.novo.c.size,'cliente novo','clientes novos')}</span>`,'','R3',()=>detPedidos('Vendas a clientes novos',lsK.filter(l=>a.ped.get(l.p)?.nr==='novo'))],
@@ -1883,7 +1908,7 @@ function baixarCsv(nome,cab,rows){ const L=[cab,...rows].map(r=>r.map(v=>{ v=typ
 async function apiBin(url,arq){ if(PREVIA) return previaApi(url,{method:'POST',body:'{}'}); const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/octet-stream',Accept:'application/json'},body:arq}); const d=await r.json().catch(()=>({})); if(!r.ok) throw new Error(d.erro||('erro '+r.status)); return d; }
 async function carregarPedidos(forcar){ if(PED.carr) return PED.carr; PED.carr=api('/api/pedidos'+(forcar?'?forcar=1':'')).then(d=>{ PED.d=d; return d; }).finally(()=>{ PED.carr=null; }); return PED.carr; }
 function precisaPedidos(alvo){ if(PED.d) return true; $(alvo).innerHTML='<div class="vazio">Carregando os pedidos…</div>';
-  carregarPedidos().then(()=>{ if(['registro','conferencia'].includes(E.pagina)) desenhar(); }).catch(e=>{ $(alvo).innerHTML=`<div class="aviso erro">Não foi possível carregar os pedidos: ${esc(e.message)}</div>`; }); return false; }
+  carregarPedidos().then(()=>{ if(['registro','conferencia','inconsistencias'].includes(E.pagina)) desenhar(); }).catch(e=>{ $(alvo).innerHTML=`<div class="aviso erro">Não foi possível carregar os pedidos: ${esc(e.message)}</div>`; }); return false; }
 const regsPed=()=>PED.d?.registros||[];
 function mapaCA(){ const m=new Map(); (E.dados?.conta_azul?.vendas||[]).forEach(v=>{ if(v.n!=null) m.set(ckey(v.n),v); }); return m; }
 function gruposCod(regs){ const g=new Map(); regs.forEach(r=>{ if(!r.codigo) return; const k=ckey(r.codigo); const x=g.get(k)||{codigo:r.codigo,t:0,n:0,regs:[],data:r.data,mes:r.mes,cliente:r.cliente,vendedor:r.vendedor}; x.t+=+r.total||0; x.n++; x.regs.push(r); if(r.data&&(!x.data||r.data<x.data)) x.data=r.data; g.set(k,x); }); return g; }
@@ -1916,16 +1941,17 @@ function valoresConhecidos(){ const S={cliente:new Map(),vendedor:new Map(),segm
 // parcelas da Conta Azul do pedido (1º e 2º pagamento) e o card que aparece ao passar o mouse
 const parcelasDe=(cod)=>PED.d?.pagamentos?.por_codigo?.[ckey(cod)]||[];
 function cardPag(cod,i,valorPlanilha){
-  const ps=parcelasDe(cod), p=ps[i], v=mapaCA().get(ckey(cod));
-  let h=`<div class="pgcard"><b>${i?'2º':'1º'} pagamento · pedido ${esc(cod)}</b>`;
-  if(valorPlanilha) h+=`<div class="ln"><span>Na planilha/painel</span><span>${brl2(valorPlanilha)}</span></div>`;
+  const ps=parcelasDe(cod), p=ps[i], v=mapaCA().get(ckey(cod)), rot=i?'2º pagamento':'1º pagamento';
+  const st=!v?['st-na','sem venda']:!p?['st-na','sem parcela']:p.pago>0?['st-ok','recebido']:p.venc<hojeISO()?['st-dif','em atraso']:['st-so','a receber'];
+  let h=`<div class="pgcard"><div class="bh"><b>${rot}</b><span class="pill ${st[0]}">${st[1]}</span></div><div class="ln"><span>Pedido</span><span><b>${esc(cod)}</b></span></div>`;
+  if(valorPlanilha) h+=`<div class="ln"><span>Na planilha</span><span>${brl2(valorPlanilha)}</span></div>`;
   if(!v) return h+'<hr><div>Venda não encontrada na Conta Azul com este código.</div></div>';
   if(!p) return h+`<hr><div>${ps.length?`A venda tem ${ps.length} parcela${ps.length>1?'s':''}; não há ${i?'2ª':'1ª'} parcela.`:'Sem parcela a receber encontrada na Conta Azul para esta venda.'}</div></div>`;
   const b=p.baixas?.[0];
-  h+=`<hr><div class="ln"><span>Conta Azul</span><span>${esc(p.desc||'')}</span></div><div class="ln"><span>Valor da parcela</span><span>${brl2(p.valor)}</span></div><div class="ln"><span>Vencimento</span><span>${dataBR(p.venc)}</span></div>`;
-  if(p.pago>0){ h+=`<div class="ln"><span>Recebido</span><span>${brl2(p.pago)}</span></div>`+(b?`<div class="ln"><span>Baixado em</span><span>${dataBR(b.data)}</span></div><div class="ln"><span>Banco</span><span>${esc(b.conta||'—')}</span></div>${b.forma?`<div class="ln"><span>Forma</span><span>${esc(b.forma)}</span></div>`:''}`:`<div class="ln"><span>Baixa</span><span>${PED.d.pagamentos?.buscando_baixas?'buscando data e banco…':'data e banco não informados'}</span></div>`); }
-  else h+=`<div class="ln"><span>Situação</span><span>${p.venc<hojeISO()?'em atraso':'em aberto'}</span></div>`;
-  if(valorPlanilha&&Math.abs(valorPlanilha-(p.pago||p.valor))>1) h+=`<hr><div>⚠ Diferença de ${brl2(Math.abs(valorPlanilha-(p.pago||p.valor)))} entre a planilha e a Conta Azul.</div>`;
+  h+=`<hr><div class="ln"><span>Parcela</span><span>${esc((p.desc||'').replace(/^.*?(parcela\s*\d+\/\d+).*$/i,'$1')||'—')}</span></div><div class="ln"><span>Valor</span><span>${brl2(p.valor)}</span></div><div class="ln"><span>Vencimento</span><span>${dataBR(p.venc)}</span></div>`;
+  if(p.pago>0) h+=`<div class="ln"><span>Recebido</span><span><b>${brl2(p.pago)}</b></span></div>`+(b?`<div class="ln"><span>Baixado em</span><span>${dataBR(b.data)}</span></div><div class="ln"><span>Banco</span><span>${esc(b.conta||'—')}</span></div>${b.forma?`<div class="ln"><span>Forma</span><span>${esc(b.forma)}</span></div>`:''}`:`<div class="ln"><span>Baixa</span><span>${PED.d.pagamentos?.buscando_baixas?'buscando data e banco…':'data e banco não informados'}</span></div>`);
+  else if(p.aberto) h+=`<div class="ln"><span>Em aberto</span><span>${brl2(p.aberto)}</span></div>`;
+  if(valorPlanilha&&Math.abs(valorPlanilha-(p.pago||p.valor))>1) h+=`<div class="av">Diferença de ${brl2(Math.abs(valorPlanilha-(p.pago||p.valor)))} entre a planilha e a Conta Azul</div>`;
   return h+'</div>';
 }
 
@@ -1953,7 +1979,7 @@ function pgRegistro(){
   const divDe=(r)=>{ const s=r.codigo?stG.get(ckey(r.codigo))?.[0]:''; return ['dif','so_painel','cancelado','nao_aprov'].includes(s); };
   const vis=ls.filter(r=>!PED.fil||(PED.fil==='pend'?pendPed(r).length:divDe(r)));
   // indicadores
-  const pedSet=new Set(ls.map(r=>r.codigo?cbase(r.codigo):r.cliente+'|'+r.data)), tot=ls.reduce((s,r)=>s+(+r.total||0),0), pend=ls.filter(r=>pendPed(r).length), nrV=ls.filter(r=>!r.novo_recompra).length;
+  const pedSet=new Set(ls.map(r=>r.codigo&&r.origem!=='planilha'?cbase(r.codigo):r.cliente+'|'+r.data)), tot=ls.reduce((s,r)=>s+(+r.total||0),0), pend=ls.filter(r=>pendPed(r).length), nrV=ls.filter(r=>!r.novo_recompra).length;
   const codsMes=[...new Set(ls.filter(r=>r.codigo).map(r=>ckey(r.codigo)))], divs=codsMes.filter(k=>['dif','so_painel','cancelado','nao_aprov'].includes(stG.get(k)?.[0]));
   const comp=ls.filter(r=>r.complemento_de||/-\d+$/.test(r.codigo||'')).length;
   $('pdKpis').innerHTML=kpiHtml([
@@ -2005,7 +2031,7 @@ function pgRegistro(){
 function editarCelula(td){
   if(PED.editando) return; const tr=td.closest('tr'), r=regsPed().find(x=>x.id===tr.dataset.id); if(!r) return;
   const c=td.dataset.c, col=COLS_PED.find(x=>x[0]===c), t=col[2]; const v=r[c];
-  PED.editando={td,r,c}; semDica(); td.classList.add('ed');
+  PED.editando={td,r,c}; esconderBalao(true); td.classList.add('ed');
   let el;
   if(t.startsWith('sel:')){ el=document.createElement('select'); el.innerHTML=t.slice(4).split('|').map(o=>`<option value="${o}">${o?ROT_NR[o]||o:'—'}</option>`).join(''); el.value=v||''; }
   else if(t==='bool'){ el=document.createElement('select'); el.innerHTML='<option value="false">Não</option><option value="true">Sim</option>'; el.value=String(!!v); }
@@ -2094,7 +2120,7 @@ const IM={orig:'planilha',ok:null};
 function abrirImport(){ IM.ok=null; $('imRes').innerHTML=''; $('imErro').textContent=''; $('imOk').disabled=true; $('imOk').textContent='Importar';
   if(!PED.d.planilha_conectada&&IM.orig==='planilha') IM.orig='arquivo'; marcarOrig(); $('pdFundo').hidden=false; $('imModal').hidden=false; }
 function marcarOrig(){ document.querySelectorAll('[data-imo]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.imo===IM.orig))); $('imArqF').hidden=IM.orig!=='arquivo';
-  if(IM.orig==='planilha'&&!PED.d?.planilha_conectada) $('imErro').textContent='A planilha não está conectada (Planilha × sistema → Conectar Google). Use o arquivo .xlsx.'; else $('imErro').textContent=''; }
+  if(IM.orig==='planilha'&&!PED.d?.planilha_conectada) $('imErro').textContent='A planilha não está conectada (Conferência → Sistema × planilha: mês → Conectar Google). Use o arquivo .xlsx.'; else $('imErro').textContent=''; }
 async function rodarImport(simular){
   const o={de:$('imDe').value,ate:$('imAte').value,modo:$('imModo').value,simular};
   $('imErro').textContent=''; $('imConferir').disabled=$('imOk').disabled=true;
@@ -2111,10 +2137,8 @@ async function rodarImport(simular){
 // ---------- menu "Conciliação de pedidos" ----------
 function pgConferencia(){
   if(!precisaPedidos('cfTabela')){ $('cfKpis').innerHTML=''; return; }
-  const regs=regsPed(), temPainel=regs.length>0, temPlan=(E.dados?.linhas||[]).some(l=>l.cd)&&E.dados?.fonte!=='painel';
-  if(!PED.cfBase||(PED.cfBase==='painel'&&!temPainel)||(PED.cfBase==='planilha'&&!temPlan)) PED.cfBase=temPainel?'painel':'planilha';
+  const {base,temPainel,temPlan}=baseConf('cfBase');
   document.querySelectorAll('[data-cfb]').forEach(b=>{ b.setAttribute('aria-pressed',String(b.dataset.cfb===PED.cfBase)); b.disabled=b.dataset.cfb==='painel'?!temPainel:!temPlan; });
-  const base=PED.cfBase==='painel'?regs:(E.dados?.linhas||[]).filter(l=>!l.cs).map(l=>({codigo:l.cd||'',data:l.d,mes:l.m,cliente:l.c,vendedor:l.v,total:l.t}));
   const ca=mapaCA(), desde=DESDE(), hoje=hojeISO().slice(0,7);
   const meses=[...new Set(base.map(r=>r.mes).concat((E.dados?.conta_azul?.vendas||[]).map(v=>(v.d||'').slice(0,7))).filter(m=>m&&m>=desde&&m<=hoje))].sort().reverse();
   if(!PED.cfMes||(PED.cfMes!=='todos'&&!meses.includes(PED.cfMes))) PED.cfMes=meses[0]||'todos';
@@ -2124,23 +2148,24 @@ function pgConferencia(){
   $('cfVend').innerHTML='<option value="">Todos</option>'+vends.map(v=>`<option>${esc(v)}</option>`).join(''); if(!vends.includes(PED.cfVend)) PED.cfVend=''; $('cfVend').value=PED.cfVend;
   const ls=base.filter(r=>noMes(r.mes)&&(!PED.cfVend||r.vendedor===PED.cfVend));
   const av=$('cfAviso');
-  if(!E.dados?.conta_azul){ av.hidden=false; av.className='aviso erro'; av.innerHTML='<span><b>A Conta Azul não está conectada.</b> Sem ela não há o lado do sistema para conferir.</span>'; } else { av.hidden=false; av.className='aviso'; av.innerHTML=`<span>Conferência diária e automática: cada pedido do ${PED.cfBase==='painel'?'painel':'planilha'} é procurado na Conta Azul pelo <b>código do pedido</b> (cód. interno = número da venda). Acréscimos entram como pedido complementar (código + "-1"). Antes de ${nomeMes(desde)} a Conta Azul tem um lançamento único por mês, por isso a conferência começa nele.</span>`; }
+  if(!E.dados?.conta_azul){ av.hidden=false; av.className='aviso erro'; av.innerHTML='<span><b>A Conta Azul não está conectada.</b> Sem ela não há o lado do sistema para conferir.</span>'; } else { av.hidden=false; av.className='aviso'; av.innerHTML=`<span><b>A planilha é a referência das vendas</b> (reunião de 03/11); a Conta Azul é conferida contra ela. Conferência diária e automática: cada pedido da ${PED.cfBase==='painel'?'base do painel':'planilha'} é procurado na Conta Azul pelo <b>código do pedido</b> (o mesmo número nos dois). Acréscimos entram como pedido complementar (código + "-1"). Antes de ${nomeMes(desde)} a Conta Azul tem um lançamento único por mês, por isso a conferência começa nele.</span>`; }
+  const SP=PED.cfBase==='painel'?'Só no painel':'Só na planilha';
   const g=gruposCod(ls), rows=[];
-  for(const [k,x] of g){ const st=statusCod(x.codigo,x.t,x.mes,ca), v=ca.get(k); rows.push({st,cod:x.codigo,data:x.data,cliente:x.cliente,vend:x.vendedor,painel:x.t,sis:v?v.t:null,sit:v?v.s:'',dif:v?(v.t-x.t):null,itens:x.n,sisData:v?.d||'',sisCli:v?.c||''}); }
+  for(const [k,x] of g){ let st=statusCod(x.codigo,x.t,x.mes,ca); const v=ca.get(k); if(st[0]==='so_painel') st=['so_painel',SP]; rows.push({st,cod:x.codigo,data:x.data,cliente:x.cliente,vend:x.vendedor,painel:x.t,sis:v?v.t:null,sit:v?v.s:'',dif:v?(v.t-x.t):null,itens:x.n,sisData:v?.d||'',sisCli:v?.c||''}); }
   const usados=new Set(g.keys());
   if(E.dados?.conta_azul) for(const v of E.dados.conta_azul.vendas){ const m=(v.d||'').slice(0,7); if(!noMes(m)||v.n==null||usados.has(ckey(v.n))||!['APROVADO','FATURADO'].includes(v.s)) continue; if(PED.cfVend&&nv(v.v)!==nv(PED.cfVend)) continue; rows.push({st:['so_sistema','Só no sistema'],cod:String(v.n),data:v.d,cliente:v.c,vend:v.v,painel:null,sis:v.t,sit:v.s,dif:v.t,itens:0}); }
   const semCod=ls.filter(r=>!r.codigo);
   const cnt=(s)=>rows.filter(r=>r.st[0]===s);
   const ok=cnt('ok'), dif=cnt('dif'), soP=rows.filter(r=>['so_painel','cancelado','nao_aprov'].includes(r.st[0])), soS=cnt('so_sistema');
   $('cfKpis').innerHTML=kpiHtml([
-    ['Pedidos conferidos',int(rows.length-soS.length),`<span>${brl(rows.reduce((s,r)=>s+(r.painel||0),0))} no ${PED.cfBase==='painel'?'painel':'planilha'}</span>`,'dest',''],
+    ['Pedidos conferidos',int(rows.length-soS.length),`<span>${brl(rows.reduce((s,r)=>s+(r.painel||0),0))} ${PED.cfBase==='painel'?'no painel':'na planilha'}</span>`,'dest',''],
     ['Batendo',int(ok.length),`<span>${rows.length?pct(ok.length/Math.max(1,rows.length-soS.length)):'—'} dos pedidos</span>`,'',''],
     ['Valor diferente',int(dif.length),`<span>${brl2(dif.reduce((s,r)=>s+Math.abs(r.dif),0))} de diferença somada</span>`,dif.length?'alerta':'',''],
-    ['Só no painel',int(soP.length),`<span>${brl(soP.reduce((s,r)=>s+r.painel,0))} sem venda aprovada no sistema</span>`,soP.length?'alerta':'',''],
+    [SP,int(soP.length),`<span>${brl(soP.reduce((s,r)=>s+r.painel,0))} sem venda aprovada no sistema</span>`,soP.length?'alerta':'',''],
     ['Só no sistema',int(soS.length),`<span>${brl(soS.reduce((s,r)=>s+r.sis,0))} na Conta Azul sem pedido ${PED.cfBase==='painel'?'no painel':'na planilha'}</span>`,soS.length?'alerta':'',''],
     ['Sem código',int(semCod.length),`<span>${pl(semCod.length,'linha','linhas')} · ${brl(semCod.reduce((s,r)=>s+(+r.total||0),0))} sem como conferir</span>`,'',''],
   ]);
-  const SITS=[['','Todos',rows.length],['dif','Valor diferente',dif.length],['so','Só no painel',soP.length],['so_sistema','Só no sistema',soS.length],['ok','Batendo',ok.length]];
+  const SITS=[['','Todos',rows.length],['dif','Valor diferente',dif.length],['so',SP,soP.length],['so_sistema','Só no sistema',soS.length],['ok','Batendo',ok.length]];
   $('cfSit').innerHTML=SITS.map(([k,r,n])=>`<button type="button" data-cfs="${k}" aria-pressed="${PED.cfSit===k}">${r} (${n})</button>`).join('');
   const ORD={dif:0,so_painel:1,cancelado:1,nao_aprov:1,so_sistema:2,ok:3};
   const vis=rows.filter(r=>!PED.cfSit||(PED.cfSit==='so'?['so_painel','cancelado','nao_aprov'].includes(r.st[0]):r.st[0]===PED.cfSit)).sort((a,b)=>(ORD[a.st[0]]??9)-(ORD[b.st[0]]??9)||Math.abs(b.dif||0)-Math.abs(a.dif||0));
@@ -2172,6 +2197,105 @@ function pgHistorico(){
   $('hsTabela').innerHTML=ls.length?`<table class="compacta"><thead><tr><th>Quando</th><th>Quem</th><th>Ação</th><th>Código</th><th>Cliente</th><th>O que mudou</th></tr></thead><tbody>${ls.slice(0,1500).map(x=>`<tr><td style="white-space:nowrap">${new Date(x.quando).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'})}</td><td>${esc(x.usuario)}</td><td><span class="pill ${x.acao==='excluiu'?'st-dif':x.acao==='alterou'?'st-so':x.acao==='importou'?'st-na':'st-ok'}">${ACAO[x.acao]||esc(x.acao)}</span></td><td><b>${esc(x.codigo||'')}</b></td><td class="el">${esc(x.cliente||'')}</td><td class="hs-m">${(x.mudancas||[]).map(m=>m.campo==='item'?(m.antes?`<s>${esc(m.antes)}</s>`:'')+(m.depois?`<b>${esc(m.depois)}</b>`:''):`${esc(ROT_PED[m.campo]||m.campo)}: ${m.antes!==''&&m.antes!=null?`<s>${fv(m.campo,m.antes)}</s> → `:''}<b>${fv(m.campo,m.depois)}</b>`).join('<br>')}${x.detalhe?`<div class="dica-c">${esc(x.detalhe)}</div>`:''}</td></tr>`).join('')}</tbody></table>`:vazio('Nenhuma alteração com esses filtros.');
 }
 
+// ---------- base da conferência: a planilha é a referência das vendas (reunião de 03/11/2026) ----------
+function baseConf(chave){
+  const regs=regsPed(), temPainel=regs.length>0, temPlan=(E.dados?.linhas||[]).some(l=>!l.cs)&&E.dados?.fonte!=='painel'&&E.dados?.fonte!=='conta_azul';
+  let b=PED[chave];
+  if(!b||(b==='painel'&&!temPainel)||(b==='planilha'&&!temPlan)) b=E.dados?.fonte==='painel'&&temPainel?'painel':temPlan?'planilha':'painel';
+  PED[chave]=b;
+  const base=b==='painel'?regs:(E.dados?.linhas||[]).filter(l=>!l.cs).map(l=>({codigo:l.cd||'',data:l.d,mes:l.m,cliente:l.c,cliente_lancado:l.co||'',vendedor:l.vo&&l.vo!==l.v?l.vo:l.v,tipo_venda:l.tv==='—'?'':l.tv,novo_recompra:l.nr||'',tipo_produto:l.tp,material:l.mt,cor:l.cr,quantidade:l.q,total:l.t,pag1:l.p1>1?l.p1:0,pag2:l.p2>1?l.p2:0,possivel_duplicado:!!l.du,_pl:1}));
+  return {b,base,temPainel,temPlan,rot:b==='painel'?'pedidos do painel':'planilha'};
+}
+
+// ---------- menu "Inconsistências" ----------
+function pgInconsistencias(){
+  if(!precisaPedidos('inCards')){ $('inKpis').innerHTML=''; return; }
+  const {b,base,temPainel,temPlan,rot}=baseConf('inBase'), rotA=b==='painel'?'o painel':'a planilha', rotNa=b==='painel'?'no painel':'na planilha', rotDa=b==='painel'?'do painel':'da planilha';
+  document.querySelectorAll('[data-inb]').forEach(x=>{ x.setAttribute('aria-pressed',String(x.dataset.inb===b)); x.disabled=x.dataset.inb==='painel'?!temPainel:!temPlan; });
+  const hoje=hojeISO().slice(0,7), meses=[...new Set(base.map(r=>r.mes).filter(m=>m&&m<=hoje))].sort().reverse();
+  if(!PED.inMes||(PED.inMes!=='todos'&&!meses.includes(PED.inMes))) PED.inMes=meses[0]||'todos';
+  $('inMes').innerHTML=meses.map(m=>`<option value="${m}">${nomeMes(m)}</option>`).join('')+'<option value="todos">Todos os meses</option>'; $('inMes').value=PED.inMes;
+  const noMes=(m)=>PED.inMes==='todos'||m===PED.inMes;
+  const vends=[...new Set(base.filter(r=>noMes(r.mes)).map(r=>r.vendedor).filter(Boolean))].sort();
+  if(!vends.includes(PED.inVend)) PED.inVend=''; $('inVend').innerHTML='<option value="">Todos</option>'+vends.map(v=>`<option>${esc(v)}</option>`).join(''); $('inVend').value=PED.inVend||'';
+  const ls=base.filter(r=>noMes(r.mes)&&(!PED.inVend||r.vendedor===PED.inVend)), ca=mapaCA(), desde=DESDE(), temCA=!!E.dados?.conta_azul;
+  $('inAviso').innerHTML=`<span>Base: <b>${rot}</b>${b==='planilha'?' (a referência das vendas, como combinado na reunião de 03/11)':''}. Cada cartão é um tipo de problema; clique para ver as linhas e exportar em Excel ou PDF. A conferência com a Conta Azul vale a partir de ${nomeMes(desde)}${temCA?'':' e precisa da Conta Azul conectada'}.</span>`;
+  // agrupamento por código
+  const g=gruposCod(ls), stG=new Map(); for(const [k,x] of g) stG.set(k,statusCod(x.codigo,x.t,x.mes,ca));
+  const cod=(r)=>r.codigo?ckey(r.codigo):'';
+  const C=[]; // {id,grupo,tit,desc,como,grave,itens:[linhas], cols, linha(r)->array, valor(r)}
+  const colsLinha=[{rot:'Data',t:'data'},{rot:'Código'},{rot:'Cliente'},{rot:'Vendedor'},{rot:'Produto'},{rot:'Qtd',t:'int'},{rot:'Total',t:'brl',total:1}];
+  const linhaL=(r)=>[r.data,r.codigo||'',r.cliente,r.vendedor||'',[r.tipo_produto,r.material,r.cor].filter(Boolean).join(' · '),r.quantidade,r.total];
+  const add=(o)=>C.push(o);
+  // 1. Conta Azul
+  const pedRows=[...g.entries()].map(([k,x])=>({k,x,st:stG.get(k),v:ca.get(k)}));
+  const colsPed=[{rot:'Código'},{rot:'Data',t:'data'},{rot:'Cliente'},{rot:'Vendedor'},{rot:b==='painel'?'Painel':'Planilha',t:'brl',total:1},{rot:'Conta Azul',t:'brl',total:1},{rot:'Diferença',t:'brl',total:1},{rot:'Situação na Conta Azul'}];
+  const linhaP=(p)=>[p.x.codigo,p.x.data,p.x.cliente,p.x.vendedor||'',p.x.t,p.v?p.v.t:'',p.v?p.v.t-p.x.t:'',p.v?SIT_CA[p.v.s]||p.v.s:'não encontrada'];
+  if(temCA){
+    const dif=pedRows.filter(p=>p.st[0]==='dif');
+    add({id:'dif',grupo:'Conta Azul',tit:'Valor diferente na Conta Azul',desc:'Mesmo código, valor diferente entre '+rotA+' e a Conta Azul.',como:'Conferir acréscimos: se houve peças extras, lançar o pedido complementar (código-1).',grave:1,n:dif.length,val:dif.reduce((s2,p)=>s2+Math.abs(p.v.t-p.x.t),0),abrir:()=>abrirDet('Valor diferente na Conta Azul',`${rot} × Conta Azul · ${PED.inMes==='todos'?'todos os meses':nomeMes(PED.inMes)}`,colsPed,dif.map(linhaP)),vend:(v)=>dif.filter(p=>p.x.vendedor===v).length});
+    const soP=pedRows.filter(p=>['so_painel','cancelado','nao_aprov'].includes(p.st[0]));
+    add({id:'soP',grupo:'Conta Azul',tit:'Pedido sem venda aprovada no sistema',desc:'Código '+rotDa+' que não existe, está cancelado ou não aprovado na Conta Azul.',como:'Lançar a venda na Conta Azul com o mesmo número ou corrigir o código.',grave:1,n:soP.length,val:soP.reduce((s2,p)=>s2+p.x.t,0),abrir:()=>abrirDet('Pedido sem venda aprovada no sistema',rot+' × Conta Azul',colsPed,soP.map(linhaP)),vend:(v)=>soP.filter(p=>p.x.vendedor===v).length});
+    const usados=new Set(g.keys()), soS=(E.dados.conta_azul.vendas||[]).filter(v=>{ const m=(v.d||'').slice(0,7); return m>=desde&&noMes(m)&&v.n!=null&&!usados.has(ckey(v.n))&&['APROVADO','FATURADO'].includes(v.s)&&(!PED.inVend||nv(v.v)===nv(PED.inVend)); });
+    add({id:'soS',grupo:'Conta Azul',tit:'Venda no sistema sem pedido '+rotNa,desc:'Venda aprovada na Conta Azul cujo número não aparece como código.',como:'Lançar o pedido '+rotNa+' com o mesmo código da Conta Azul.',grave:1,n:soS.length,val:soS.reduce((s2,v)=>s2+v.t,0),abrir:()=>abrirDet('Venda no sistema sem pedido '+rotNa,'Conta Azul',[{rot:'Número'},{rot:'Data',t:'data'},{rot:'Cliente'},{rot:'Vendedor'},{rot:'Valor',t:'brl',total:1},{rot:'Situação'}],soS.map(v=>[String(v.n),v.d,v.c,v.v||'',v.t,SIT_CA[v.s]||v.s])),vend:(v)=>soS.filter(x=>nv(x.v)===nv(v)).length});
+    const pag=[]; for(const p of pedRows){ if(p.x.mes<desde) continue; const ps=parcelasDe(p.x.codigo); if(!ps.length) continue; const pl1=p.x.regs.reduce((s2,r)=>s2+(+r.pag1||0),0), pl2=p.x.regs.reduce((s2,r)=>s2+(+r.pag2||0),0);
+      [[pl1,ps[0]],[pl2,ps[1]]].forEach(([vp,pc],i)=>{ if(vp>0&&pc&&Math.abs(vp-(pc.pago||pc.valor))>1) pag.push([p.x.codigo,p.x.cliente,p.x.vendedor||'',i?'2º':'1º',vp,pc.pago||pc.valor,(pc.pago||pc.valor)-vp,pc.baixas?.[0]?.data||'',pc.baixas?.[0]?.conta||'']); }); }
+    add({id:'pag',grupo:'Conta Azul',tit:'Pagamento diferente da Conta Azul',desc:'1º ou 2º pagamento '+rotDa+' diferente da parcela recebida na Conta Azul.',como:'Conferir o comprovante e corrigir a planilha ou a baixa na Conta Azul.',grave:0,n:pag.length,val:pag.reduce((s2,x)=>s2+Math.abs(x[6]),0),abrir:()=>abrirDet('Pagamento diferente da Conta Azul',rot+' × parcelas da Conta Azul',[{rot:'Código'},{rot:'Cliente'},{rot:'Vendedor'},{rot:'Parcela'},{rot:b==='painel'?'Painel':'Planilha',t:'brl'},{rot:'Conta Azul',t:'brl'},{rot:'Diferença',t:'brl',total:1},{rot:'Baixa em',t:'data'},{rot:'Banco'}],pag),vend:(v)=>pag.filter(x=>x[2]===v).length});
+  }
+  // 2. código do pedido
+  const semCod=ls.filter(r=>!r.codigo&&(r.mes||'')>='2026-09');
+  add({id:'semCod',grupo:'Código do pedido',tit:'Sem código do pedido',desc:'Linhas a partir de setembro/2026 sem cód. interno: não dá para conferir com o sistema.',como:'Preencher o cód. interno (o mesmo número da venda na Conta Azul).',grave:1,n:semCod.length,val:semCod.reduce((s2,r)=>s2+(+r.total||0),0),abrir:()=>abrirDet('Sem código do pedido',rot,colsLinha,semCod.map(linhaL)),vend:(v)=>semCod.filter(r=>r.vendedor===v).length});
+  const fora=ls.filter(r=>{ if(!r.codigo) return false; const m=cbase(r.codigo).match(/^(\d{4})(\d{2})(\d{4})$/); return !m||(r.data&&`${m[3]}-${m[2]}`!==r.data.slice(0,7)); });
+  add({id:'fmt',grupo:'Código do pedido',tit:'Código fora do padrão',desc:'Código que não segue sequência + mês + ano (ex.: 0030102026) ou com mês diferente da data da venda.',como:'Corrigir o código ou a data da venda.',grave:0,n:fora.length,val:fora.reduce((s2,r)=>s2+(+r.total||0),0),abrir:()=>abrirDet('Código fora do padrão',rot,colsLinha,fora.map(linhaL)),vend:(v)=>fora.filter(r=>r.vendedor===v).length});
+  const multi=[...g.values()].filter(x=>new Set(x.regs.map(r=>semA(r.cliente))).size>1||new Set(x.regs.map(r=>r.data)).size>1);
+  add({id:'multi',grupo:'Código do pedido',tit:'Mesmo código em pedidos diferentes',desc:'Um código com clientes ou datas diferentes: provavelmente um pedido novo lançado com código repetido.',como:'Dar um código novo ao pedido ou usar o complementar (código-1).',grave:1,n:multi.length,val:multi.reduce((s2,x)=>s2+x.t,0),abrir:()=>abrirDet('Mesmo código em pedidos diferentes',rot,colsLinha,multi.flatMap(x=>x.regs.map(linhaL))),vend:(v)=>multi.filter(x=>x.regs.some(r=>r.vendedor===v)).length});
+  const cd=new Map(); ls.forEach(r=>{ if(!r.codigo) return; const k=semA(r.cliente)+'|'+r.data; const m2=cd.get(k)||new Map(); m2.set(cbase(r.codigo),(m2.get(cbase(r.codigo))||[]).concat([r])); cd.set(k,m2); });
+  const dois=[...cd.values()].filter(m2=>m2.size>1);
+  add({id:'dois',grupo:'Código do pedido',tit:'Mesmo cliente e dia com códigos diferentes',desc:'Dois ou mais códigos para o mesmo cliente no mesmo dia: pode ser acréscimo lançado como pedido novo.',como:'Se for acréscimo, usar o código original com "-1" (pedido complementar); se forem pedidos diferentes, está certo.',grave:0,n:dois.length,val:dois.reduce((s2,m2)=>s2+[...m2.values()].flat().reduce((a3,r)=>a3+(+r.total||0),0),0),abrir:()=>abrirDet('Mesmo cliente e dia com códigos diferentes',rot,colsLinha,dois.flatMap(m2=>[...m2.values()].flat().map(linhaL))),vend:(v)=>dois.filter(m2=>[...m2.values()].flat().some(r=>r.vendedor===v)).length});
+  // 3. cadastro de clientes
+  const lote=ls.filter(r=>/\blote\s*\d/i.test(r.cliente||'')||/\blote\s*\d/i.test(r.cliente_lancado||''));
+  add({id:'lote',grupo:'Cadastro de clientes',tit:'Cliente com "lote" no nome',desc:'"Lote 1, lote 2" no nome do cliente separa o mesmo cliente em vários e distorce curva ABC e ticket.',como:'Deixar só o nome do cliente; o lote vai na coluna Lote / obs.',grave:0,n:lote.length,val:lote.reduce((s2,r)=>s2+(+r.total||0),0),abrir:()=>abrirDet('Cliente com "lote" no nome',rot,[{rot:'Data',t:'data'},{rot:'Código'},{rot:'Como foi lançado'},{rot:'Cliente padronizado'},{rot:'Vendedor'},{rot:'Total',t:'brl',total:1}],lote.map(r=>[r.data,r.codigo||'',r.cliente_lancado||r.cliente,r.cliente,r.vendedor||'',r.total])),vend:(v)=>lote.filter(r=>r.vendedor===v).length});
+  const cont=new Map(); ls.forEach(r=>{ const n=r._pl?(r.cliente_lancado||r.cliente):r.cliente; if(n) cont.set(n,(cont.get(n)||0)+1); });
+  const nomes=[...cont.keys()].map(n=>({n,k:semA(n).replace(/\blote\s*\d+/g,'').replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim()})).filter(x=>x.k.length>=3).sort((a2,b2)=>a2.k.length-b2.k.length);
+  const usadosN=new Set(), grupos=[]; for(const a2 of nomes){ if(usadosN.has(a2.n)) continue; const gg=nomes.filter(b2=>b2.n!==a2.n&&!usadosN.has(b2.n)&&(b2.k===a2.k||b2.k.startsWith(a2.k+' '))); if(!gg.length) continue; [a2,...gg].forEach(x=>usadosN.add(x.n)); grupos.push([a2.n,...gg.map(x=>x.n)]); }
+  add({id:'graf',grupo:'Cadastro de clientes',tit:'Mesmo cliente com nomes diferentes',desc:'Grafias diferentes do mesmo cliente (ex.: Checkpoint, Checkpoint 5 anos, Checkpoint CT).',como:'Padronizar o nome (em Pedidos de venda há o botão Unificar).',grave:0,n:grupos.length,val:null,abrir:()=>abrirDet('Mesmo cliente com nomes diferentes',rot+' · nomes como foram lançados',[{rot:'Nome sugerido'},{rot:'Grafias encontradas'},{rot:'Linhas',t:'int',total:1}],grupos.map(gr=>[gr[0],gr.map(n=>`${n} (${cont.get(n)})`).join(' · '),gr.reduce((s2,n)=>s2+cont.get(n),0)])),vend:()=>null});
+  // 4. campos
+  const nr=ls.filter(r=>!r.novo_recompra);
+  add({id:'nr',grupo:'Campos da venda',tit:'Sem novo × recompra',desc:'Sem essa marcação o painel não calcula vendas a clientes novos (R3) nem a recompra.',como:'Marcar se o cliente é novo ou recompra.',grave:0,n:nr.length,val:nr.reduce((s2,r)=>s2+(+r.total||0),0),abrir:()=>abrirDet('Sem novo × recompra',rot,colsLinha,nr.map(linhaL)),vend:(v)=>nr.filter(r=>r.vendedor===v).length});
+  const OBR=['cliente','vendedor','tipo_venda','tipo_produto','material','cor','quantidade','total'];
+  const vaz=ls.map(r=>({r,f:OBR.filter(c=>!r[c])})).filter(x=>x.f.length);
+  add({id:'vaz',grupo:'Campos da venda',tit:'Campos obrigatórios em branco',desc:'Vendedor, tipo de venda, produto, tecido, cor, quantidade ou total vazios.',como:'Completar os campos indicados em cada linha.',grave:0,n:vaz.length,val:vaz.reduce((s2,x)=>s2+(+x.r.total||0),0),abrir:()=>abrirDet('Campos obrigatórios em branco',rot,[...colsLinha,{rot:'Em branco',wr:1}],vaz.map(x=>[...linhaL(x.r),x.f.map(c=>ROT_PED[c]).join(', ')])),vend:(v)=>vaz.filter(x=>x.r.vendedor===v).length});
+  const vistos=new Map(); ls.forEach(r=>{ const k=[semA(r.cliente),r.data,semA(r.tipo_produto),semA(r.cor),r.quantidade,Math.round((+r.total||0)*100)].join('|'); vistos.set(k,(vistos.get(k)||[]).concat([r])); });
+  const dup=[...new Set([...ls.filter(r=>r.possivel_duplicado),...[...vistos.values()].filter(x=>x.length>1).flat()])];
+  add({id:'dup',grupo:'Campos da venda',tit:'Possível lançamento duplicado',desc:'Mesmo cliente, data, produto, cor, quantidade e total em mais de uma linha (ou marcado na base tratada).',como:'Confirmar se são dois itens de verdade; se não, excluir a linha repetida.',grave:1,n:dup.length,val:dup.reduce((s2,r)=>s2+(+r.total||0),0),abrir:()=>abrirDet('Possível lançamento duplicado',rot,colsLinha,dup.map(linhaL)),vend:(v)=>dup.filter(r=>r.vendedor===v).length});
+  if(b==='painel'){ const conta=ls.filter(r=>r.quantidade&&r.valor_unit&&Math.abs(r.quantidade*r.valor_unit-r.total)>1);
+    add({id:'conta',grupo:'Campos da venda',tit:'Total diferente de qtd × valor/und',desc:'O total da linha não bate com quantidade × valor por unidade.',como:'Corrigir quantidade, valor/und ou total.',grave:0,n:conta.length,val:conta.reduce((s2,r)=>s2+Math.abs(r.quantidade*r.valor_unit-r.total),0),abrir:()=>abrirDet('Total diferente de qtd × valor/und',rot,[...colsLinha,{rot:'Valor/und',t:'brl'},{rot:'Qtd × valor',t:'brl'}],conta.map(r=>[...linhaL(r),r.valor_unit,r.quantidade*r.valor_unit])),vend:(v)=>conta.filter(r=>r.vendedor===v).length}); }
+  PED.inC=C;
+  const graves=C.filter(c=>c.grave&&c.n), tot=C.reduce((s2,c)=>s2+c.n,0);
+  $('inKpis').innerHTML=kpiHtml([
+    ['Inconsistências',int(tot),`<span>${pl(C.filter(c=>c.n).length,'tipo de problema','tipos de problema')} · ${PED.inMes==='todos'?'todos os meses':nomeMes(PED.inMes)}</span>`,tot?'alerta':'dest',''],
+    ['Afetam o valor',int(graves.reduce((s2,c)=>s2+c.n,0)),`<span>${graves.map(c=>c.tit.toLowerCase()).slice(0,2).join(', ')||'nenhuma'}</span>`,graves.length?'alerta':'',''],
+    ['Linhas conferidas',int(ls.length),`<span>${pl(new Set(ls.map(r=>r.codigo?cbase(r.codigo):r.cliente+'|'+r.data)).size,'pedido','pedidos')} · ${brl(ls.reduce((s2,r)=>s2+(+r.total||0),0))}</span>`,'',''],
+    ['Linhas sem problema',pct(ls.length?1-new Set([...semCod,...fora,...lote,...nr,...vaz.map(x=>x.r),...dup]).size/ls.length:1),'<span>de campos, código e cadastro</span>','',''],
+  ]);
+  let gAnt='';
+  $('inCards').innerHTML=C.map((c,i)=>{ const cab=c.grupo!==gAnt?(gAnt=c.grupo,`<div class="g" style="grid-column:1/-1;margin-top:${i?8:0}px">${esc(c.grupo)}</div>`):''; return cab+`<button type="button" class="inc ${c.n?(c.grave?'grave':'media'):'zero'}" data-inc="${i}"${c.n?'':' disabled'}><span class="n">${c.n?int(c.n):'✓'}</span><span class="t">${esc(c.tit)}</span><span class="d">${esc(c.desc)}${c.n&&c.val?` <b>${brl(c.val)}</b>`:''}</span><span class="c">Como corrigir: ${esc(c.como)}</span></button>`; }).join('');
+  const porV=vends.filter(v=>!PED.inVend||v===PED.inVend), cv=C.filter(c=>c.vend(porV[0]||'')!==null);
+  $('inVendT').innerHTML=porV.length?`<table class="compacta"><thead><tr><th>Vendedor</th>${cv.map(c=>`<th class="v" title="${esc(c.tit)}">${esc(c.tit.replace(/ (na planilha|no painel)$/,''))}</th>`).join('')}<th class="v">Total</th></tr></thead><tbody>${porV.map(v=>{ const ns=cv.map(c=>c.vend(v)||0); return `<tr><td class="el"><b>${esc(v)}</b></td>${ns.map((n,i)=>`<td class="v">${n?`<a href="#" class="lk" data-incv="${C.indexOf(cv[i])}" data-v="${esc(v)}">${int(n)}</a>`:'<span style="color:var(--ink3)">—</span>'}</td>`).join('')}<td class="v"><b>${int(ns.reduce((a2,b2)=>a2+b2,0))}</b></td></tr>`; }).join('')}</tbody></table>`:vazio('Sem vendedores no período.');
+}
+
+// ---------- balão flutuante dos pagamentos ----------
+const BAL={t:null,alvo:null};
+function mostrarBalao(alvo,html){
+  clearTimeout(BAL.t); const b=$('balao'); if(BAL.alvo===alvo&&!b.hidden) return;
+  b.innerHTML=html; b.hidden=false; b.classList.remove('on'); BAL.alvo=alvo;
+  const r=alvo.getBoundingClientRect(), bw=b.offsetWidth, bh=b.offsetHeight, cx=r.left+r.width/2;
+  const x=Math.min(Math.max(8,cx-bw/2),innerWidth-bw-8), cima=r.top-bh-14>8;
+  b.style.left=x+'px'; b.style.top=(cima?r.top-bh-12:r.bottom+12)+'px'; b.style.setProperty('--ax',Math.min(Math.max(16,cx-x),bw-16)+'px');
+  b.className='balao '+(cima?'cima':'baixo'); requestAnimationFrame(()=>b.classList.add('on'));
+}
+function esconderBalao(ja){ clearTimeout(BAL.t); const f=()=>{ const b=$('balao'); b.classList.remove('on'); b.hidden=true; BAL.alvo=null; }; if(ja) f(); else BAL.t=setTimeout(f,220); }
+
 // ---------- eventos ----------
 $('pdMes').onchange=()=>{ PED.mes=$('pdMes').value; pgRegistro(); };
 $('pdVend').onchange=()=>{ PED.vend=$('pdVend').value; pgRegistro(); };
@@ -2183,8 +2307,14 @@ $('pdGrade').addEventListener('click',e=>{
     if(b.dataset.ac==='item') abrirPedido('item',r); else if(b.dataset.ac==='comp') abrirPedido('comp',r); else if(b.dataset.ac==='del') excluirLinha(r); else if(b.dataset.ac==='hist'){ $('hsBusca').value=r.codigo; irPara('historico'); } return; }
   const td=e.target.closest('td'); if(!td||td.classList.contains('ed')) return;
   if(td.dataset.c) editarCelula(td); else if(td.classList.contains('lk')) toast(td.title,true); });
-$('pdGrade').addEventListener('mousemove',e=>{ const td=e.target.closest('[data-pg]'); if(!td||PED.editando){ semDica(); return; } const [cod,i,v]=td.dataset.pg.split('|'); dica(e,cardPag(cod,+i,+v)); });
-$('pdGrade').addEventListener('mouseleave',semDica);
+$('pdGrade').addEventListener('mouseover',e=>{ const td=e.target.closest('[data-pg]'); if(!td||PED.editando) return; const [cod,i,v]=td.dataset.pg.split('|'); mostrarBalao(td,cardPag(cod,+i,+v)); });
+$('pdGrade').addEventListener('mouseout',e=>{ const td=e.target.closest('[data-pg]'); if(td&&!td.contains(e.relatedTarget)&&!$('balao').contains(e.relatedTarget)) esconderBalao(); });
+$('pdGrade').addEventListener('scroll',()=>esconderBalao(true),{passive:true}); addEventListener('scroll',()=>esconderBalao(true),{passive:true});
+$('balao').addEventListener('mouseenter',()=>clearTimeout(BAL.t)); $('balao').addEventListener('mouseleave',()=>esconderBalao());
+$('inMes').onchange=()=>{ PED.inMes=$('inMes').value; pgInconsistencias(); }; $('inVend').onchange=()=>{ PED.inVend=$('inVend').value; pgInconsistencias(); };
+document.querySelectorAll('[data-inb]').forEach(x=>x.onclick=()=>{ PED.inBase=x.dataset.inb; pgInconsistencias(); });
+$('inCards').addEventListener('click',e=>{ const b2=e.target.closest('[data-inc]'); if(b2&&PED.inC[+b2.dataset.inc]?.n) PED.inC[+b2.dataset.inc].abrir(); });
+$('inVendT').addEventListener('click',e=>{ const a2=e.target.closest('[data-incv]'); if(!a2) return; e.preventDefault(); PED.inVend=a2.dataset.v; const k=+a2.dataset.incv; pgInconsistencias(); PED.inC[k]?.abrir(); });
 $('pdmForm').addEventListener('submit',salvarPedido); $('pmCancelar').onclick=fecharPedido; $('pdmFechar').onclick=fecharPedido;
 $('pmMais').onclick=()=>{ $('pmItens').insertAdjacentHTML('beforeend',linhaItem()); $('pmItens').lastElementChild.querySelector('input').focus(); };
 $('pmItens').addEventListener('input',totaisItens); $('pmItens').addEventListener('click',e=>{ if(e.target.closest('.itDel')&&$('pmItens').children.length>1){ e.target.closest('tr').remove(); totaisItens(); } });
@@ -2296,9 +2426,10 @@ function previaPedidos(url,op){
 // ---------- menu lateral e permissões por perfil ----------
 const MENU=[
   {grupo:'Gestão',ico:'<path d="M3 3h8v8H3zM13 3h8v5h-8zM13 10h8v11h-8zM3 13h8v8H3z"/>',itens:[['painel','Painel executivo','Vendas, resultado, caixa e o que pede decisão'],['indicadores','Quadro de indicadores','Comercial, resultado e caixa com tendência de 6 meses']]},
-  {grupo:'Comercial',ico:'<path d="M3 4h2l2.4 11h11.2L21 7H7" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="9" cy="19" r="1.6"/><circle cx="17" cy="19" r="1.6"/>',itens:[['registro','Pedidos de venda','Registro de vendas com as mesmas colunas da planilha: os vendedores lançam e revisam aqui'],['vendas','Vendas','Pedidos, ticket médio e novas vendas × recompra (R1, R2, R3)'],['produtos','Produtos e mix','Tipo de produto, tecido e cor em peças ou R$ (R4) e curva ABC'],['clientes','Clientes','Curva ABC, faixas de valor, segmento e quem parou de comprar (C3, C5, C6)'],['vendedores','Vendedores e premiação','Faturamento, clientes novos, régua e apuração da premiação (C7, C8)'],['pedidos','Pedidos e entregas','Ciclo de pagamento e entregas das próximas semanas (C4)'],['conferencia','Conciliação de pedidos','Pedido a pedido: painel × Conta Azul pelo código do pedido'],['historico','Histórico de alterações','Quem lançou, alterou ou excluiu pedidos, e quando']]},
+  {grupo:'Comercial',ico:'<path d="M3 4h2l2.4 11h11.2L21 7H7" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="9" cy="19" r="1.6"/><circle cx="17" cy="19" r="1.6"/>',itens:[['registro','Pedidos de venda','Registro de vendas com as mesmas colunas da planilha: os vendedores lançam e revisam aqui'],['vendas','Vendas','Pedidos, ticket médio e novas vendas × recompra (R1, R2, R3)'],['produtos','Produtos e mix','Tipo de produto, tecido e cor em peças ou R$ (R4) e curva ABC'],['clientes','Clientes','Curva ABC, faixas de valor, segmento e quem parou de comprar (C3, C5, C6)'],['vendedores','Vendedores e premiação','Faturamento, clientes novos, régua e apuração da premiação (C7, C8)'],['pedidos','Pedidos e entregas','Ciclo de pagamento e entregas das próximas semanas (C4)']]},
+  {grupo:'Conferência',ico:'<path d="M4 5h7v14H4zM13 5h7v14h-7z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M6.5 9h2M6.5 12h2M15.5 9h2M15.5 12h2" stroke="currentColor" stroke-width="1.8"/>',itens:[['conferencia','Sistema × planilha: pedidos','Pedido a pedido: Conta Azul conferida contra a planilha pelo código do pedido'],['conciliacao','Sistema × planilha: mês','Por que o total do mês difere entre a planilha do comercial e a Conta Azul'],['inconsistencias','Inconsistências','Tudo o que precisa de correção: valores, códigos, cadastro de clientes e campos em branco'],['historico','Histórico de alterações','Quem lançou, alterou ou excluiu pedidos, e quando']]},
   {grupo:'Financeiro',ico:'<circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 6v12M15 9c0-1.2-1.3-2-3-2s-3 .8-3 2 1.3 2 3 2 3 .8 3 2-1.3 2-3 2-3-.8-3-2" fill="none" stroke="currentColor" stroke-width="1.8"/>',itens:[['dre','DRE gerencial','Receita, custos, despesas e resultado por competência ou caixa'],['equilibrio','Margem e ponto de equilíbrio','Custos fixos × variáveis, margem de contribuição e ponto de equilíbrio (C1)'],['caixa','Fluxo de caixa','Saldo nos bancos, realizado e projeção de 13 semanas'],['receber','Contas a receber','Inadimplência por idade e por cliente'],['pagar','Contas a pagar','Despesas por categoria, centro de custo e fornecedor']]},
-  {grupo:'Controle',ico:'<path d="M6 2h9l4 4v16H6z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 11l2 2 4-4" fill="none" stroke="currentColor" stroke-width="2"/>',itens:[['conciliacao','Planilha × sistema','Por que o total do mês difere entre a planilha do comercial e a Conta Azul'],['dados','Qualidade dos dados','Colunas reconhecidas, campos em branco e grafias diferentes'],['versoes','Versões do painel','O que mudou em cada entrega']]},
+  {grupo:'Controle',ico:'<path d="M6 2h9l4 4v16H6z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 11l2 2 4-4" fill="none" stroke="currentColor" stroke-width="2"/>',itens:[['dados','Qualidade dos dados','Colunas reconhecidas, campos em branco e grafias diferentes'],['versoes','Versões do painel','O que mudou em cada entrega']]},
   {grupo:'Administração',ico:'<circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.6 2.7-6 6-6s6 2.4 6 6z"/><circle cx="17" cy="9" r="2.4"/><path d="M15.5 14.2c2.9.3 5.5 2.4 5.5 5.8h-4.5"/>',itens:[['usuarios','Usuários e permissões','Perfis, senhas temporárias e o que cada pessoa vê']]},
 ];
 const TODAS=MENU.flatMap(g=>g.itens.map(i=>i[0]));
@@ -2306,7 +2437,7 @@ const MESES_PAG=Object.fromEntries(TODAS.map(p=>[p,1]));
 const ITEM=Object.fromEntries(MENU.flatMap(g=>g.itens.map(i=>[i[0],{rot:i[1],ctx:i[2],grupo:g.grupo}])));
 const GRUPO_DE=Object.fromEntries(TODAS.map(p=>[p,ITEM[p].grupo]));
 const COMP=['vendas','produtos','clientes','vendedores','pedidos'], FINP=['dre','equilibrio','caixa','receber','pagar'];
-const PADRAO={adm:TODAS,diretor:TODAS.filter(p=>p!=='usuarios'),comercial:['registro',...COMP,'conferencia','conciliacao','versoes'],financeiro:['painel','indicadores','registro',...FINP,'conferencia','historico','conciliacao','dados','versoes'],consultor:[...COMP]};
+const PADRAO={adm:TODAS,diretor:TODAS.filter(p=>p!=='usuarios'),comercial:['registro',...COMP,'conferencia','conciliacao','inconsistencias','versoes'],financeiro:['painel','indicadores','registro',...FINP,'conferencia','conciliacao','inconsistencias','historico','dados','versoes'],consultor:[...COMP]};
 function paginasDe(u){ if(!u) return []; const base=PADRAO[u.perfil]||[]; if(u.perfil==='adm'||!Array.isArray(u.paginas)) return base; const r=base.filter(p=>u.paginas.includes(p)); return r.length?r:base.slice(0,1); }
 // páginas que aparecem agora (com o "Ver o painel como" do ADM)
 function paginasAtivas(){ if(E.verComo) return paginasDe(E.verComo); return E.eu?.paginas||paginasDe(E.eu)||TODAS; }

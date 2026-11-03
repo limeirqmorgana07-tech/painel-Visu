@@ -13,6 +13,10 @@ Pedido da reunião interna Visu e Vieira Diniz (03/11/2026):
 - **Revisão de cadastro de clientes** com unificação de grafias.
 - **Premiação oculta** para Comercial e Consultor (bloco `vendedores.premiacao`).
 - **Fonte dos indicadores** escolhida pelo ADM: planilha conectada ou pedidos do painel.
+- **Grupo Conferência** no menu: Sistema × planilha (pedidos e mês), **Inconsistências** (14 verificações, com o dever de casa por vendedor) e Histórico de alterações.
+- **Vendas seguem a planilha**: a Conta Azul aparece só como conferência no faturamento. Pedidos importados contam como a base tratada (cliente + data).
+- Código que vem como número da planilha volta para 10 dígitos; sem Conta Azul conectada a conferência não usa dados de demonstração.
+- **Balão flutuante** no 1º/2º pagamento.
 - **Exportar em Excel, PDF e CSV** em todas as listas (detalhamentos, pedidos, conciliação, histórico). As bibliotecas (`xlsx`, `jspdf`, `jspdf-autotable`) são servidas pelo próprio painel em `/vendor/`.
 
 ## v30 · 28/10/2026

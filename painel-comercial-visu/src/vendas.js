@@ -232,6 +232,8 @@ async function montar(bruto) {
   if (origem !== 'planilha' && origem !== 'demo') base = null;
   // fonte "Pedidos do painel" (ADM escolhe em Pedidos de venda): os indicadores leem os pedidos registrados no painel
   if (fontePainel()) { origem = 'painel'; base = { linhas: linhasDoPainel(), mapa: null }; }
+  // sem Conta Azul conectada não existe "lado do sistema": nunca usar as vendas fictícias da demonstração junto com dados reais
+  if (bruto.origem === 'demo' && !config.demo) vendasCA = null;
   if (!base && vendasCA) {
     origem = 'conta_azul';
     const cacheItens = await carregarCacheItens();
@@ -272,6 +274,9 @@ async function montar(bruto) {
       ...(l.codigo_pedido || (l.pedido_informado && !String(l.pedido).includes('|')) ? { cd: l.codigo_pedido || l.pedido } : {}),
       p1: l.pag1, p2: l.pag2, ok: l.pago_100, fp: l.forma_pagamento, pz: l.prazo_entrega, sg: l.segmento,
       ...(l.consolidado ? { cs: 1 } : {}),
+      // para a página Inconsistências: nome como foi lançado (quando difere do padronizado) e possível duplicidade
+      ...(l.cliente_original && l.cliente_original !== l.cliente ? { co: l.cliente_original } : {}),
+      ...(l.duplicado ? { du: 1 } : {}),
     })),
     // vendas do sistema, para a conciliação (data da venda, situação, cliente, valor)
     conta_azul: vendasCA
