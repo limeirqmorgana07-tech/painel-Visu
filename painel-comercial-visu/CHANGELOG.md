@@ -2,6 +2,12 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v34 — 03/11/2026 — Clientes cadastrados, sequência da planilha e pagamentos da Conta Azul
+- `/api/pedidos/clientes`: cadastro da Conta Azul + planilha + vendas + painel, com última compra.
+- Código automático continua a sequência do mês da planilha ligada e dos números de venda da Conta Azul.
+- `preencherPagamentos`: completa pag1/pag2, data_pag1/data_pag2, banco_pag, forma de pagamento e pago_100 com as baixas da Conta Azul (só campos vazios; automático a cada leitura e botão Preencher pagamentos).
+- Parcelas ligadas ao pedido pelo número da venda ou, sem ele, por cliente + valor.
+
 ## v33 — 03/11/2026 — Ligação da planilha pelo e-mail mais fácil
 - Script do Google com a função `autorizar` e passo de autorização na janela "Ligar pelo meu e-mail".
 - Mensagem de erro específica quando o Google devolve uma página (script não autorizado ou acesso diferente de "Qualquer pessoa").

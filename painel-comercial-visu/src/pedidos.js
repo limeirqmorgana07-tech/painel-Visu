@@ -22,7 +22,7 @@ const r2 = (v) => Math.round((Number(v) || 0) * 100) / 100;
 export const CAMPOS = {
   data: 'data', codigo: 'texto', cliente: 'texto', lote: 'texto', nome_pedido: 'texto', vendedor: 'texto', tipo_venda: 'texto',
   novo_recompra: 'nr', segmento: 'texto', tipo_produto: 'texto', material: 'texto', especificacao: 'texto', cor: 'texto',
-  quantidade: 'num', valor_unit: 'num', total: 'num', pag1: 'num', pag2: 'num', pago_100: 'bool', prazo_entrega: 'data',
+  quantidade: 'num', valor_unit: 'num', total: 'num', pag1: 'num', data_pag1: 'data', pag2: 'num', data_pag2: 'data', banco_pag: 'texto', pago_100: 'bool', prazo_entrega: 'data',
   forma_pagamento: 'texto', frete: 'texto', pagador: 'texto', observacao: 'texto',
 };
 // travados para o vendedor 24 h depois do lançamento (o resto, como cliente e novo × recompra, ele revisa sempre)
@@ -170,11 +170,15 @@ export async function listar() {
   const m = await carregar();
   return [...m.values()].filter((r) => !r.excluido).sort((a, b) => (a.data || a.mes || '').localeCompare(b.data || b.mes || '') || String(a.codigo).localeCompare(String(b.codigo)) || (a.ordem || 0) - (b.ordem || 0));
 }
+// códigos usados fora do painel (planilha ligada e números de venda da Conta Azul), para a sequência continuar de onde a planilha parou
+let codigosExternos = [];
+export const codigosExternosLista = () => [...new Set(codigosExternos)];
+export const definirCodigosExternos = (lista) => { codigosExternos = (lista || []).map((c) => { const t = String(c ?? '').replace(/\D/g, ''); return t.length >= 7 && t.length <= 9 ? t.padStart(10, '0') : t; }).filter(Boolean); };
 export function proximoCodigo(data, regs = [...(mem?.values() || [])]) {
   const d = limpar('data', data) || new Date(Date.now() - 3 * 3600e3).toISOString().slice(0, 10);
   const mm = d.slice(5, 7), aa = d.slice(0, 4);
   let max = 0;
-  for (const r of regs) { const m = codigoBase(r.codigo).match(RX_COD); if (m && m[2] === mm && m[3] === aa) max = Math.max(max, +m[1]); }
+  for (const c of [...regs.map((r) => r.codigo), ...codigosExternos]) { const m = codigoBase(c).match(RX_COD); if (m && m[2] === mm && m[3] === aa) max = Math.max(max, +m[1]); }
   return `${String(max + 1).padStart(4, '0')}${mm}${aa}`;
 }
 export function proximoComplemento(codigo, regs = [...(mem?.values() || [])]) {
@@ -323,32 +327,70 @@ function agendarBaixas(parcelas) {
   }
 }
 // vendasCA: vendas da Conta Azul já carregadas pelo painel (com o número da venda = código do pedido)
+function comBaixas(d) {
+  if (!d) return d;
+  const por = {};
+  for (const [k, ps] of Object.entries(d.por_codigo)) por[k] = ps.map((p) => (p.baixas?.length || !pag.baixas?.[p.id]?.b?.length ? p : { ...p, baixas: pag.baixas[p.id].b }));
+  return { ...d, por_codigo: por, buscando_baixas: pag.pendentes };
+}
 export async function pagamentosPorPedido(vendasCA, forcar = false) {
-  if (pag.dados && !forcar && Date.now() - pag.quando < 10 * 60e3) return { ...pag.dados, buscando_baixas: pag.pendentes };
+  if (pag.dados && !forcar && Date.now() - pag.quando < 10 * 60e3) return comBaixas(pag.dados);
   if (pag.carregando) return pag.carregando;
   pag.carregando = (async () => {
-    const vendas = vendasCA || [];
-    const porNumero = new Map(vendas.filter((v) => v.numero != null).map((v) => [chaveCodigo(v.numero), v]));
+    const vendas = (vendasCA || []).filter((v) => v.numero != null);
+    const porNumero = new Map(vendas.map((v) => [chaveCodigo(v.numero), v]));
     let parcelas = [];
     if (config.demo) parcelas = gerarDemoParcelas(vendas);
     else if ((await ca.statusConexao()).conectado) {
       const hoje = new Date();
       parcelas = await ca.buscarParcelas('receber', { vencimento_de: new Date(hoje.getTime() - 460 * 864e5).toISOString().slice(0, 10), vencimento_ate: new Date(hoje.getTime() + 400 * 864e5).toISOString().slice(0, 10) });
-      await cacheBaixas(); agendarBaixas(parcelas);
+      await cacheBaixas();
     }
-    const out = {};
+    const out = {}, usadas = new Set(), item = (p, como) => ({ id: p.id, venc: p.vencimento, valor: r2(p.total), pago: r2(p.pago), aberto: r2(p.aberto), status: p.status, desc: p.descricao, como,
+      baixas: p.baixas?.length ? p.baixas : pag.baixas?.[p.id]?.b?.length ? pag.baixas[p.id].b : p.data_pagamento ? [{ data: p.data_pagamento, conta: p.conta || '', forma: '', valor: r2(p.pago) }] : [] });
+    // 1) a parcela traz o número da venda na descrição (ex.: "Venda 30102026 - parcela 1/2")
     for (const p of parcelas) {
-      // a Conta Azul descreve a parcela com o número da venda (ex.: "Venda 30102026 - parcela 1/2")
-      const nums = (String(p.descricao || '').match(/\d{5,}/g) || []).map(chaveCodigo);
-      const k = nums.find((n) => porNumero.has(n)); if (!k) continue;
-      const bx = p.baixas || pag.baixas?.[p.id]?.b || [];
-      (out[k] ||= []).push({ venc: p.vencimento, valor: r2(p.total), pago: r2(p.pago), aberto: r2(p.aberto), status: p.status, desc: p.descricao,
-        baixas: bx.length ? bx : p.data_pagamento ? [{ data: p.data_pagamento, conta: p.conta || '', forma: '', valor: r2(p.pago) }] : [] });
+      const k = (String(p.descricao || '').match(/\d{5,}/g) || []).map(chaveCodigo).find((n) => porNumero.has(n)); if (!k) continue;
+      (out[k] ||= []).push(item(p, 'número da venda')); usadas.add(p.id);
+    }
+    // 2) sem o número: mesmo cliente, vencimento até 150 dias depois da venda e parcelas que somam o valor da venda
+    const livres = new Map();
+    for (const p of parcelas) { if (usadas.has(p.id)) continue; const c = sem(clienteBase(p.pessoa)); if (!c) continue; (livres.get(c) || livres.set(c, []).get(c)).push(p); }
+    for (const [k, v] of porNumero) {
+      if (out[k] || !['APROVADO', 'FATURADO'].includes(v.situacao)) continue;
+      const cand = (livres.get(sem(clienteBase(v.cliente))) || []).filter((p) => !usadas.has(p.id) && p.vencimento >= v.data.slice(0, 10) && Date.parse(p.vencimento) - Date.parse(v.data) <= 150 * 864e5).sort((a, b) => a.vencimento.localeCompare(b.vencimento));
+      for (let ini = 0; ini < cand.length && !out[k]; ini++) { let soma = 0; for (let fim = ini; fim < Math.min(cand.length, ini + 4); fim++) { soma += cand[fim].total; if (Math.abs(soma - v.total) <= 1) { const g = cand.slice(ini, fim + 1); out[k] = g.map((p) => item(p, 'cliente e valor')); g.forEach((p) => usadas.add(p.id)); break; } if (soma > v.total + 1) break; } }
     }
     for (const k of Object.keys(out)) out[k].sort((a, b) => a.venc.localeCompare(b.venc));
+    // data da baixa e banco: só das parcelas que pertencem a pedidos
+    if (!config.demo) agendarBaixas(parcelas.filter((p) => usadas.has(p.id)));
     pag.dados = { por_codigo: out, atualizado_em: agoraISO(), parcelas_lidas: parcelas.length, conectado: config.demo || parcelas.length > 0 };
     pag.quando = Date.now();
-    return { ...pag.dados, buscando_baixas: pag.pendentes };
+    return comBaixas(pag.dados);
   })().finally(() => { pag.carregando = null; });
   return pag.carregando;
+}
+
+// ---------- preenche 1º/2º pagamento em branco com o que já foi baixado na Conta Azul ----------
+// Só completa campos vazios (nunca troca um valor digitado). Vale para a primeira linha de cada pedido, como na planilha.
+export async function preencherPagamentos(pagamentos, u, { auto = false } = {}) {
+  await carregar();
+  const por = pagamentos?.por_codigo || {}, grupos = new Map();
+  for (const r of mem.values()) if (!r.excluido && r.codigo) (grupos.get(chaveCodigo(r.codigo)) || grupos.set(chaveCodigo(r.codigo), []).get(chaveCodigo(r.codigo))).push(r);
+  const mudou = [], log = [];
+  for (const [k, regs] of grupos) {
+    const ps = por[k]; if (!ps?.length) continue;
+    regs.sort((a, b) => (a.ordem || 0) - (b.ordem || 0) || String(a.id).localeCompare(String(b.id)));
+    const r0 = { ...regs[0] }, ch = [];
+    const set = (c, v) => { if (v === '' || v == null || v === 0) return; if (r0[c] && !(CAMPOS[c] === 'num' && !+r0[c])) return; ch.push({ campo: c, antes: r0[c] ?? '', depois: v }); r0[c] = v; };
+    [0, 1].forEach((i) => { const p = ps[i]; if (!p || !(p.pago > 0)) return; const b = p.baixas?.[0]; set(i ? 'pag2' : 'pag1', r2(p.pago)); if (b?.data) set(i ? 'data_pag2' : 'data_pag1', b.data); if (b?.conta) set('banco_pag', b.conta); if (b?.forma) set('forma_pagamento', b.forma); });
+    const total = regs.reduce((s2, r) => s2 + (+r.total || 0), 0), recebido = ps.reduce((s2, p) => s2 + (+p.pago || 0), 0), quitado = ps.every((p) => !(p.aberto > 0.01)) && Math.abs(recebido - total) <= 1;
+    const marcar = quitado ? regs.filter((r) => !r.pago_100) : [];
+    if (ch.length) { Object.assign(r0, { alterado_em: agoraISO(), alterado_por: auto ? 'Conta Azul (automático)' : u?.nome || '' }); mem.set(r0.id, r0); mudou.push(r0); log.push({ registro: r0.id, codigo: r0.codigo, cliente: r0.cliente, mudancas: ch }); }
+    for (const r of marcar) { const n = { ...(mem.get(r.id)), pago_100: true, alterado_em: agoraISO(), alterado_por: auto ? 'Conta Azul (automático)' : u?.nome || '' }; mem.set(r.id, n); if (!mudou.includes(n)) mudou.push(n); log.push({ registro: r.id, codigo: r.codigo, cliente: r.cliente, mudancas: [{ campo: 'pago_100', antes: false, depois: true }] }); }
+  }
+  if (!mudou.length) return { linhas: 0, pedidos: 0 };
+  await gravar(mudou);
+  await registrarLog(log.map((e) => ({ usuario: auto ? 'Conta Azul (automático)' : u?.nome || 'Sistema', usuario_id: auto ? '' : u?.id || '', acao: 'alterou', ...e, detalhe: 'Pagamento preenchido pela Conta Azul' })));
+  return { linhas: mudou.length, pedidos: new Set(log.map((e) => e.codigo)).size };
 }

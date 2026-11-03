@@ -304,6 +304,18 @@ export async function buscarBaixasParcela(id) {
   })).filter((b) => b.data || b.valor);
 }
 
+// Clientes cadastrados na Conta Azul (para a lista do "+ Novo pedido"). O caminho varia entre versões da API.
+export async function buscarClientes() {
+  for (const [caminho, params] of [['/v1/pessoas', { tipo_perfil: 'Cliente' }], ['/v1/pessoa', { tipo_perfil: 'Cliente' }], ['/v1/pessoas', {}]]) {
+    try {
+      const lista = await todasAsPaginas(caminho, params, 500, 20);
+      if (lista.length) return lista.map((p) => ({ nome: nomeDe(p) || p.nome || '', documento: p.documento || p.cpf || p.cnpj || '', perfis: p.perfis || p.tipo_perfil || '' }))
+        .filter((p) => p.nome && (!p.perfis || /client/i.test(JSON.stringify(p.perfis))));
+    } catch { /* tenta o próximo caminho */ }
+  }
+  return [];
+}
+
 export async function buscarEstruturaDRE() {
   const r = await get('/v1/financeiro/categorias-dre');
   return r?.itens || [];

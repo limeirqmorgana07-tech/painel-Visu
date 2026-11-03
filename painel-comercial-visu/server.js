@@ -302,16 +302,42 @@ app.get('/api/financeiro', exigeLogin, async (req, res) => {
 const exigePedidos = (req, res, next) => (vePedidos(req.usuario) ? next() : res.status(403).json({ erro: 'seu perfil não tem acesso aos pedidos de venda' }));
 const depoisDeMudar = () => remontarVendas();
 const resp = (fn) => async (req, res) => { try { res.json(await fn(req)); } catch (e) { res.status(400).json({ erro: e.message }); } };
+// códigos já usados na planilha ligada e na Conta Azul: a sequência do "+ Novo pedido" continua deles
+async function codigosExternos() {
+  const d = await dadosDeVendas().catch(() => null);
+  pedidos.definirCodigosExternos([...(d?.linhas || []).map((l) => l.cd).filter(Boolean), ...(d?.conta_azul?.vendas || []).map((v) => v.n).filter((n) => n != null)]);
+  return d;
+}
+// clientes cadastrados: Conta Azul (cadastro) + planilha + pedidos do painel
+const cacheClientes = { quando: 0, lista: [] };
+app.get('/api/pedidos/clientes', exigeLogin, exigePedidos, resp(async () => {
+  const d = await dadosDeVendas().catch(() => null), m = new Map();
+  const add = (nome, origem, data, doc) => { nome = String(nome || '').trim(); if (!nome || nome === 'Vendas consolidadas do mês' || nome === 'Sem cliente') return; const k = nome.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/\s+/g, ' '); const x = m.get(k) || { nome, origens: [], ultima: '', vezes: 0, documento: '' }; if (!x.origens.includes(origem)) x.origens.push(origem); if (data && data > x.ultima) x.ultima = data; if (doc) x.documento = doc; x.vezes++; m.set(k, x); };
+  (await pedidos.listar()).forEach((r) => add(r.cliente, 'painel', r.data));
+  if (d?.fonte === 'planilha' || d?.fonte === 'painel') d.linhas.forEach((l) => add(l.c, 'planilha', l.d));
+  (d?.conta_azul?.vendas || []).forEach((v) => add(v.c, 'conta_azul', v.d));
+  if (!config.demo && (await ca.statusConexao().catch(() => ({}))).conectado) {
+    if (Date.now() - cacheClientes.quando > 3600e3) { cacheClientes.lista = await ca.buscarClientes().catch(() => []); cacheClientes.quando = Date.now(); }
+    cacheClientes.lista.forEach((c) => add(c.nome, 'cadastro', '', c.documento));
+  }
+  return { clientes: [...m.values()].sort((a, b) => b.vezes - a.vezes), cadastro_conta_azul: cacheClientes.lista.length };
+}));
+app.post('/api/pedidos/preencher-pagamentos', exigeLogin, exigePedidos, resp(async (req) => {
+  if (!pedidos.podeLancar(req.usuario)) throw new Error('Seu perfil só consulta os pedidos.');
+  const pg = await pedidos.pagamentosPorPedido(vendasContaAzulEmCache(), true);
+  const r = await pedidos.preencherPagamentos(pg, req.usuario); if (r.linhas) depoisDeMudar(); return { ...r, buscando_baixas: pg.buscando_baixas || 0 };
+}));
 app.get('/api/pedidos', exigeLogin, exigePedidos, resp(async (req) => {
-  const [registros, cfg] = await Promise.all([pedidos.listar(), pedidos.configPedidos()]);
+  await codigosExternos();
   let pagamentos = null;
-  try { const vendas = vendasContaAzulEmCache() || (await dadosDeVendas().catch(() => null), vendasContaAzulEmCache()); pagamentos = await pedidos.pagamentosPorPedido(vendas, req.query.forcar === '1'); } catch (e) { pagamentos = { erro: e.message }; }
-  return { registros, config: cfg, pagamentos, campos_valor: pedidos.CAMPOS_VALOR, horas_edicao: Number(process.env.HORAS_EDICAO_PEDIDO || 24),
+  try { pagamentos = await pedidos.pagamentosPorPedido(vendasContaAzulEmCache(), req.query.forcar === '1'); if (pagamentos?.conectado && (await pedidos.preencherPagamentos(pagamentos, null, { auto: true })).linhas) depoisDeMudar(); } catch (e) { pagamentos = { erro: e.message }; }
+  const [registros, cfg] = await Promise.all([pedidos.listar(), pedidos.configPedidos()]);
+  return { registros, config: cfg, pagamentos, campos_valor: pedidos.CAMPOS_VALOR, proximo_codigo: pedidos.proximoCodigo(new Date(Date.now() - 3 * 3600e3).toISOString().slice(0, 10)), codigos_externos: pedidos.codigosExternosLista(), horas_edicao: Number(process.env.HORAS_EDICAO_PEDIDO || 24),
     vendedor: req.usuario.perfil === 'vendedor' ? req.usuario.vendedor || '' : '', pode: { lancar: pedidos.podeLancar(req.usuario), gestao: pedidos.podeEditarTudo(req.usuario), importar: pedidos.podeEditarTudo(req.usuario), fonte: req.usuario.perfil === 'adm' },
     planilha_conectada: planilhaConfigurada() || config.demo, eu: { id: req.usuario.id, nome: req.usuario.nome, perfil: req.usuario.perfil, vendedor: req.usuario.vendedor || '' } };
 }));
-app.get('/api/pedidos/proximo-codigo', exigeLogin, exigePedidos, resp(async (req) => { await pedidos.listar(); return { codigo: req.query.de ? pedidos.proximoComplemento(req.query.de) : pedidos.proximoCodigo(req.query.data) }; }));
-app.post('/api/pedidos', exigeLogin, exigePedidos, resp(async (req) => { const r = await pedidos.criarPedido(req.body, req.usuario); depoisDeMudar(); return { registros: r }; }));
+app.get('/api/pedidos/proximo-codigo', exigeLogin, exigePedidos, resp(async (req) => { await pedidos.listar(); await codigosExternos(); return { codigo: req.query.de ? pedidos.proximoComplemento(req.query.de) : pedidos.proximoCodigo(req.query.data) }; }));
+app.post('/api/pedidos', exigeLogin, exigePedidos, resp(async (req) => { await codigosExternos(); const r = await pedidos.criarPedido(req.body, req.usuario); depoisDeMudar(); return { registros: r }; }));
 app.patch('/api/pedidos/:id', exigeLogin, exigePedidos, resp(async (req) => { const r = await pedidos.alterar(req.params.id, req.body?.mudancas || req.body, req.usuario); depoisDeMudar(); return { registro: r }; }));
 app.delete('/api/pedidos/:id', exigeLogin, exigePedidos, resp(async (req) => { await pedidos.excluir(req.params.id, req.usuario); depoisDeMudar(); return { ok: true }; }));
 app.post('/api/pedidos/unificar-cliente', exigeLogin, exigePedidos, resp(async (req) => { const r = await pedidos.unificarCliente(req.body?.de, req.body?.para, req.usuario); depoisDeMudar(); return r; }));
