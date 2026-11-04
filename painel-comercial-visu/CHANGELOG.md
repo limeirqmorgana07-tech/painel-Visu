@@ -2,6 +2,9 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v40 — 03/11/2026 — Proteção de fórmulas
+- Script do Google não escreve em célula com fórmula.
+
 ## v39 — 03/11/2026 — Importar só as linhas novas
 - Modo `novas` (padrão) na importação: só as linhas da planilha que ainda não estão no painel (chave: código, data, cliente, produto, cor, quantidade, total).
 

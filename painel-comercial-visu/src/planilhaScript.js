@@ -111,7 +111,7 @@ function aplicar(ss, itens) {
   const col = (p) => cab.findIndex((x) => x.indexOf(p) === 0);
   const cCod = col('cod interno'), c1 = col('1o pagamento'), c2 = col('2o pagamento'), c100 = col('pedido 100% pago'), cFp = col('forma de pagamento');
   const n = aba.getLastRow() - linhaCab; if (n < 1) return { celulas: 0, pedidos: 0, aba: aba.getName() };
-  const vals = aba.getRange(linhaCab + 1, 1, n, cab.length).getValues();
+  const faixa = aba.getRange(linhaCab + 1, 1, n, cab.length), vals = faixa.getValues(), formulas = faixa.getFormulas();
   const chave = (c) => String(c).replace(/\\D/g, '').replace(/^0+/, '');
   const porCod = {};
   vals.forEach((r, i) => { const k = chave(r[cCod]); if (k) (porCod[k] = porCod[k] || []).push(i); });
@@ -120,9 +120,10 @@ function aplicar(ss, itens) {
   itens.forEach((it) => {
     const rows = porCod[chave(it.codigo)]; if (!rows) return;
     const r0 = rows[0]; let mexeu = false;
-    const grava = (c, v, nota) => { if (c < 0 || v == null || v === '' || !vazio(vals[r0][c])) return; const cel = aba.getRange(linhaCab + 1 + r0, c + 1); cel.setValue(v); if (nota) cel.setNote(nota); celulas++; mexeu = true; };
+    // nunca escreve por cima de fórmula
+    const grava = (c, v, nota) => { if (c < 0 || v == null || v === '' || !vazio(vals[r0][c]) || formulas[r0][c]) return; const cel = aba.getRange(linhaCab + 1 + r0, c + 1); cel.setValue(v); if (nota) cel.setNote(nota); celulas++; mexeu = true; };
     grava(c1, it.pag1, it.nota1); grava(c2, it.pag2, it.nota2); grava(cFp, it.forma, '');
-    if (it.pago100 && c100 >= 0) rows.forEach((i) => { const a = sem(vals[i][c100]); if (a === '' || a === 'nao') { aba.getRange(linhaCab + 1 + i, c100 + 1).setValue('SIM'); celulas++; mexeu = true; } });
+    if (it.pago100 && c100 >= 0) rows.forEach((i) => { const a = sem(vals[i][c100]); if ((a === '' || a === 'nao') && !formulas[i][c100]) { aba.getRange(linhaCab + 1 + i, c100 + 1).setValue('SIM'); celulas++; mexeu = true; } });
     if (mexeu) feitos.push(it.codigo);
   });
   return { celulas: celulas, pedidos: feitos.length, codigos: feitos, aba: aba.getName() };
