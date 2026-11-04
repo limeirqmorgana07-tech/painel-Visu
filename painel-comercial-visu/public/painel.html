@@ -582,7 +582,7 @@ table.matriz td.vz{color:var(--line2)}
 .kpis.kpis6{grid-template-columns:repeat(6,minmax(0,1fr))}@media (max-width:1100px){.kpis.kpis6{grid-template-columns:repeat(3,minmax(0,1fr))}}@media (max-width:640px){.kpis.kpis6{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .ped-card{padding-bottom:10px}
 .ped-grade{overflow:auto;max-height:68vh;border:1px solid var(--line);border-radius:10px}
-.ped-grade table{font-size:12.5px;min-width:2600px}
+.ped-grade table{font-size:12.5px;min-width:2600px}.pl-tab td{padding:4px 4px;vertical-align:middle}.pl-tab input,.pl-tab select{width:100%;min-width:90px;font:inherit;font-size:12.5px;padding:5px 6px;border:1px solid var(--line2);border-radius:6px;background:var(--panel);color:var(--ink)}.pl-tab .ro{color:var(--ink3);white-space:nowrap}.pl-tab tr.it2 input.cab,.pl-tab tr.it2 select.cab{color:var(--ink3);background:transparent}.pl-tab .w2{min-width:170px}
 .ped-grade th{position:sticky;top:0;background:var(--panel);z-index:2;font-size:10px;padding:8px 7px;box-shadow:0 1px 0 var(--line2)}
 .ped-grade td{padding:5px 7px;white-space:nowrap;max-width:220px;overflow:hidden;text-overflow:ellipsis;font-size:12.5px;height:30px}
 .ped-grade td.ac,.ped-grade th.ac{position:sticky;left:0;background:var(--panel);z-index:1;box-shadow:1px 0 0 var(--line)}.ped-grade th.ac{z-index:3}
@@ -905,6 +905,11 @@ table.matriz td.vz{color:var(--line2)}
     </div>
     <div class="aviso" id="pdAviso" hidden></div>
     <div class="kpis" id="pdKpis" style="margin-bottom:14px"></div>
+    <div class="card ped-card" id="plCard" hidden style="margin-bottom:14px;border-color:var(--orange)"><div class="hd"><div><h3>Novo pedido</h3><div class="sub">Uma linha por item, nas mesmas colunas da planilha. Pedido com itens diferentes: clique em <b>+ Item do mesmo pedido</b> (mesmo código, só muda o item)</div></div><button class="bt2" type="button" id="plForm" title="Lançar pelo formulário (card)">Abrir no formulário</button></div>
+      <div class="ped-grade" style="max-height:none"><table class="pl-tab"><thead id="plHead"></thead><tbody id="plCorpo"></tbody></table></div>
+      <div style="display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap"><button class="bt2" type="button" id="plMais">+ Item do mesmo pedido</button><span class="dica-c" id="plDica"></span><span style="flex:1"></span><span class="ped-tot" id="plTotal">Total do pedido: R$ 0,00</span><button class="bt2" type="button" id="plCancelar">Cancelar</button><button class="bt2 pri" type="button" id="plSalvar">Salvar pedido</button></div>
+      <div class="e" id="plErro"></div>
+    </div>
     <div class="card ped-card"><div class="hd"><div><h3>Registro de vendas</h3><div class="sub" id="pdSub">As mesmas colunas da planilha do comercial</div></div></div>
       <div class="ped-grade" id="pdGrade"></div>
       <div class="nota" id="pdNota"></div>
@@ -1102,8 +1107,9 @@ const nomeMes=(m)=>{const[a,b]=m.split('-');return MES_L[+b-1]+' de '+a};
 const somaMes=(m,n)=>{const[a,b]=m.split('-').map(Number);const d=new Date(Date.UTC(a,b-1+n,1));return d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0')};
 function delta(a,b,inv){ if(!b) return '<span class="delta eq">sem base</span>'; const d=(a-b)/b; const c=Math.abs(d)<.005?'eq':(d>0)!==!!inv?'up':'down'; return `<span class="delta ${c}">${d>0?'▲':d<0?'▼':'■'} ${pct(Math.abs(d))}</span>`; }
 
-const VERSAO='v47';
+const VERSAO='v48';
 const VERSOES=[
+ {v:'v48',data:'04/11/2026',tit:'Novo pedido em linha, igual à planilha, com vários itens',arq:'painel-visu-v48.zip',itens:['+ Novo pedido agora abre uma linha em cima da grade, nas mesmas colunas e na mesma ordem da planilha (data, mês, código, cliente, lote, nome do pedido, vendedor… observação), em vez do card. O formulário (card) continua em \'Abrir no formulário\'.', 'Pedido com itens diferentes: o botão + Item do mesmo pedido acrescenta outra linha com o mesmo código, já com cliente, data, vendedor e demais dados do pedido; só se preenche o item (tipo de produto, material, especificação, quantidade, cor, valor/und, lote e observação). O total de cada linha e do pedido é calculado na hora, e novo × recompra é sugerido pelo histórico do cliente.']},
  {v:'v47',data:'04/11/2026',tit:'Correção da lista vazia e aviso do script antigo',arq:'painel-visu-v47.zip',itens:['Corrigido o erro \'vazio is not defined\', que quebrava Inconsistências (e outras listas) quando um filtro não tinha nenhuma linha.', 'Ao ligar a planilha pelo e-mail, o painel avisa na hora se o endereço ainda roda o código antigo do script (lê, mas não grava).']},
  {v:'v46',data:'04/11/2026',tit:'Mês a mês clicável e endereço do script',arq:'painel-visu-v46.zip',itens:['Planilha × sistema (mês): clicar num mês da tabela Mês a mês abre a conta daquele mês (ponte, motivos e pedidos) no alto da página. O resumo explica o que é \'achado pelo código\' e \'achado pelo cliente e data\'.', 'Gravação na planilha: quando o endereço ligado no painel ainda é o da implantação antiga, a mensagem explica que uma implantação nova muda o endereço e que é preciso colar a URL do App da Web no painel. Ao religar, o painel já mostra a versão do script.']},
  {v:'v45',data:'04/11/2026',tit:'Conciliação do mês pedido a pedido e quanto falta receber',arq:'painel-visu-v45.zip',itens:['Planilha × sistema (mês) refeito pedido a pedido: o painel casa cada pedido da planilha com a venda da Conta Azul pelo código (cód. interno = número da venda) e, só quando não há código, pelo cliente e a data (até 20 dias). Antes a comparação era por nome de cliente, e nomes escritos de jeitos diferentes viravam \'só no sistema\' e \'sem lançamento\' ao mesmo tempo.', 'Itens do mesmo pedido (mesmo código, variação de produto, lote ou observação) contam como um pedido só. A conta mostra quantos pedidos batem e quantos foram casados pelo código.', '\'Lançadas com data de outro mês\' virou \'Mesma venda, data de outro mês no sistema\': mostra a venda, as duas datas e quantos dias de diferença. O pedido está certo; só muda em qual mês o valor entra. Novo motivo para o caso contrário (venda do mês no sistema que está em outro mês na planilha).', 'Cada motivo abre a lista com o pedido da planilha e a venda do sistema lado a lado (código, cliente, datas, dias, valores e como casou).', 'Inconsistências: nova coluna Falta receber (recebido × total do pedido, ou \'quitado\'), também na exportação e no texto de \'Pagamento em branco, já baixado\'.', '\'Valor do pedido diferente na Conta Azul\' (total da venda) e \'Valor recebido diferente do anotado na planilha\' (1º/2º pagamento) ficaram com nomes e explicações claros. O de pagamento não aparece mais quando o pedido já está em valor diferente, e em pedido com vários itens vale a soma das linhas ou o valor repetido em cada linha.', '\'Mesmo cliente com nomes diferentes\' passou a ser \'Mesmo cliente escrito de jeitos diferentes\': só maiúscula, acento ou pontuação. Complementos do nome (destino, setor, classificação interna) não são mais inconsistência.', 'Gravação na planilha: a mensagem \'o script na sua conta ainda é o antigo\' aparecia para qualquer erro do Google. Agora o painel mostra o erro de verdade, e o script novo (versão 45) devolve o motivo do erro e informa a própria versão, que aparece no quadro de gravação.']},
@@ -2652,7 +2658,60 @@ $('pdMes').onchange=()=>{ PED.mes=$('pdMes').value; pgRegistro(); };
 $('pdVend').onchange=()=>{ PED.vend=$('pdVend').value; PED.vendEscolhido=true; pgRegistro(); };
 let tBusca=null; $('pdBusca').oninput=()=>{ clearTimeout(tBusca); tBusca=setTimeout(()=>{ PED.busca=$('pdBusca').value; pgRegistro(); },250); };
 document.querySelectorAll('[data-pdf]').forEach(b=>b.onclick=()=>{ PED.fil=b.dataset.pdf; pgRegistro(); });
-$('pdNovo').onclick=()=>abrirPedido('novo');
+$('pdNovo').onclick=()=>abrirLinha();
+// ---------- novo pedido em linha (v48): igual à planilha, uma linha por item ----------
+const PL_CAB=['data','cliente','lote','nome_pedido','vendedor','tipo_venda','novo_recompra','segmento','prazo_entrega','forma_pagamento','pagador'];
+const PL_ITEM=['tipo_produto','material','especificacao','quantidade','cor','valor_unit','observacao','lote'];
+const PL_RO=new Set(['mes','codigo','total','pag1','pag2','pago_100']);
+function abrirLinha(){ $('plCard').hidden=false; $('plErro').textContent=''; $('plHead').innerHTML='<tr>'+COLS_PED.map(c=>`<th${['quantidade','valor_unit','total'].includes(c[0])?' class="v"':''}>${esc(c[1])}${(REQ_PED.includes(c[0])&&c[0]!=='total')||c[0]==='data'||c[0]==='valor_unit'?' *':''}</th>`).join('')+'<th></th></tr>';
+  $('plCorpo').innerHTML=''; addLinhaPl(); carregarClientes().catch(()=>{}); $('plCard').scrollIntoView({behavior:'smooth',block:'start'}); setTimeout(()=>$('plCorpo').querySelector('[data-k="cliente"]')?.focus(),250); }
+function addLinhaPl(){
+  const prim=$('plCorpo').querySelector('tr'), base=prim?Object.fromEntries([...prim.querySelectorAll('[data-k]')].map(i=>[i.dataset.k,i.value])):{};
+  const conh=valoresConhecidos(), eu=semA(E.eu?.nome||'').split(' ')[0];
+  const vend=meuVend()?(conh.vendedor.find(x=>semA(x)===semA(meuVend()))||meuVend()):(eu&&conh.vendedor.find(x=>semA(x).split(' ')[0]===eu))||'';
+  const v=(k)=>prim?(PL_CAB.includes(k)&&k!=='lote'?base[k]:''):k==='data'?hojeISO():k==='vendedor'?vend:'';
+  const cel=([k,,t,dl])=>{ const cab=PL_CAB.includes(k)&&k!=='lote'&&!!prim; const cls=(cab?'cab ':'')+(['cliente','nome_pedido','especificacao','observacao'].includes(k)?'w2':'');
+    if(k==='mes') return `<td class="ro" data-mes>${v('data')?nomeMes(v('data').slice(0,7)):'—'}</td>`;
+    if(k==='codigo') return `<td class="ro" data-cod>${prim?'mesmo código':'automático: '+proxCod(v('data'))}</td>`;
+    if(k==='total') return `<td class="v ro"><b data-tot>—</b></td>`;
+    if(PL_RO.has(k)) return `<td class="ro" title="Preenchido pela Conta Azul quando o pagamento for baixado">—</td>`;
+    if(t&&t.startsWith('sel:')){ const ops=t.slice(4).split('|'); return `<td><select data-k="${k}" class="${cls}">${ops.map(o=>`<option value="${o}"${o===v(k)?' selected':''}>${o?esc(ROT_NR[o]||o):'—'}</option>`).join('')}</select></td>`; }
+    const ty=t==='data'?'date':t==='num'||t==='brl'?'number':'text';
+    return `<td${ty==='number'?' class="v"':''}><input data-k="${k}" class="${cls}" type="${ty}" ${ty==='number'?`min="0" step="${t==='brl'?'0.01':'1'}"`:''} ${dl?`list="${dl}"`:''} value="${esc(v(k)||'')}" ${k==='vendedor'&&meuVend()?'readonly':''} aria-label="${esc(ROT_PED[k])}"></td>`; };
+  const tr=document.createElement('tr'); if(prim) tr.className='it2';
+  tr.innerHTML=COLS_PED.map(cel).join('')+`<td>${prim?'<button type="button" class="bt2 del" data-pldel aria-label="Remover item">✕</button>':''}</td>`;
+  $('plCorpo').appendChild(tr); totLinhaPl(); if(prim) setTimeout(()=>tr.querySelector('[data-k="tipo_produto"]').focus(),20);
+}
+function totLinhaPl(){ let s2=0; const trs=[...$('plCorpo').querySelectorAll('tr')]; trs.forEach(tr=>{ const q=+tr.querySelector('[data-k="quantidade"]').value||0, u=+tr.querySelector('[data-k="valor_unit"]').value||0; tr.querySelector('[data-tot]').textContent=q&&u?brl2(q*u):'—'; s2+=q*u; });
+  $('plTotal').textContent=`Total do pedido: ${brl2(s2)}${trs.length>1?` · ${trs.length} itens`:''}`; }
+$('plCorpo').addEventListener('input',e=>{ const el=e.target, tr=el.closest('tr'), prim=tr===$('plCorpo').querySelector('tr');
+  // dados do pedido (cliente, data, vendedor...) mudados na 1ª linha valem para os outros itens
+  if(prim&&PL_CAB.includes(el.dataset.k)&&el.dataset.k!=='lote') $('plCorpo').querySelectorAll('tr.it2 [data-k="'+el.dataset.k+'"]').forEach(x=>x.value=el.value);
+  if(el.dataset.k==='data'){ $('plCorpo').querySelectorAll('[data-mes]').forEach(td=>td.textContent=el.value?nomeMes(el.value.slice(0,7)):'—'); const c=$('plCorpo').querySelector('[data-cod]'); if(c) c.textContent='automático: '+proxCod(el.value); }
+  if(el.dataset.k==='cliente'||el.dataset.k==='data') sugerirNRLinha();
+  totLinhaPl(); });
+$('plCorpo').addEventListener('change',e=>{ if(e.target.dataset.k==='novo_recompra') e.target.dataset.manual='1'; const el=e.target, tr=el.closest('tr'); if(tr===$('plCorpo').querySelector('tr')&&PL_CAB.includes(el.dataset.k)&&el.dataset.k!=='lote') $('plCorpo').querySelectorAll('tr.it2 [data-k="'+el.dataset.k+'"]').forEach(x=>x.value=el.value); });
+$('plCorpo').addEventListener('click',e=>{ const b=e.target.closest('[data-pldel]'); if(b){ b.closest('tr').remove(); totLinhaPl(); } });
+function sugerirNRLinha(){ const tr=$('plCorpo').querySelector('tr'); if(!tr) return; const sel=tr.querySelector('[data-k="novo_recompra"]'), c=semA(tr.querySelector('[data-k="cliente"]').value), d=tr.querySelector('[data-k="data"]').value||hojeISO(); if(!c){ $('plDica').textContent=''; return; }
+  const ant=regsPed().find(r=>semA(r.cliente)===c&&(r.data||'')<d)||(E.dados?.linhas||[]).find(l=>semA(l.c)===c&&(l.d||'')<d)||(PED.cli?.l||[]).find(y=>semA(y.nome)===c&&y.ultima&&y.ultima<d);
+  const sug=ant?'recompra':'novo'; $('plDica').textContent=`Cliente ${sug==='novo'?'novo (sem compra anterior)':'com compra anterior: recompra'}`; if(sel&&!sel.dataset.manual){ sel.value=sug; $('plCorpo').querySelectorAll('tr.it2 [data-k="novo_recompra"]').forEach(x=>x.value=sug); } }
+$('plMais').onclick=addLinhaPl;
+$('plCancelar').onclick=()=>{ $('plCard').hidden=true; };
+$('plForm').onclick=()=>{ $('plCard').hidden=true; abrirPedido('novo'); };
+$('plSalvar').onclick=async()=>{
+  const trs=[...$('plCorpo').querySelectorAll('tr')], val=(tr)=>Object.fromEntries([...tr.querySelectorAll('[data-k]')].map(i=>[i.dataset.k,i.type==='number'?(+i.value||0):i.value.trim()]));
+  const rows=trs.map(val), cab={}; PL_CAB.forEach(k=>cab[k]=rows[0][k]||''); cab.codigo=''; cab.observacao=rows[0].observacao||'';
+  const err=(t)=>{ $('plErro').textContent=t; };
+  if(!cab.data) return err('Informe a data da venda.'); if(!cab.cliente) return err('Informe o cliente.'); if(!cab.vendedor) return err('Informe o vendedor.'); if(!cab.novo_recompra) return err('Marque se o cliente é novo ou recompra.');
+  if(/\blote\s*\d/i.test(cab.cliente)){ const m=cab.cliente.match(/\s*[-–(]?\s*\b(lote\s*\d+)\)?\s*$/i); if(m){ cab.lote=cab.lote||m[1].replace(/^l/,'L'); cab.cliente=cab.cliente.slice(0,m.index).trim(); } }
+  const itens=rows.map(r=>({tipo_produto:r.tipo_produto,material:r.material,especificacao:r.especificacao,quantidade:r.quantidade,cor:r.cor,valor_unit:r.valor_unit,observacao:r.observacao||cab.observacao,lote:r.lote||cab.lote})).filter(i=>i.tipo_produto||i.quantidade||i.valor_unit);
+  if(!itens.length) return err('Inclua pelo menos um item (tipo de produto, quantidade e valor/und).');
+  const ruim=itens.findIndex(i=>!i.tipo_produto||!i.quantidade||!i.valor_unit); if(ruim>=0) return err(`O item ${ruim+1} precisa de tipo de produto, quantidade e valor/und.`);
+  $('plSalvar').disabled=true; err('');
+  try{ const r=await api('/api/pedidos',{method:'POST',body:JSON.stringify({pedido:cab,itens})});
+    PED.d.registros=regsPed().concat(r.registros); PED.mes=r.registros[0].mes||PED.mes; PED.fil=''; PED.flash=r.registros[0].id; $('plCard').hidden=true; depoisPedido();
+    toast(`Pedido ${r.registros[0].codigo} salvo: ${pl(r.registros.length,'item','itens')}, ${brl2(r.registros.reduce((s2,x)=>s2+x.total,0))}.`); pgRegistro(); }
+  catch(x){ err(x.message); } finally{ $('plSalvar').disabled=false; } };
 $('pdPagar').onclick=async()=>{ $('pdPagar').disabled=true; toast('Conferindo as baixas na Conta Azul…'); try{ const r=await api('/api/pedidos/preencher-pagamentos',{method:'POST',body:'{}'}); await carregarPedidos(true); depoisPedido(); let t=r.linhas?`Planilha de vendas do painel: pagamentos preenchidos em ${pl(r.pedidos,'pedido','pedidos')}.${r.buscando_baixas?' Ainda buscando data e banco de algumas parcelas.':''}`:r.buscando_baixas?'Buscando data e banco das parcelas na Conta Azul; clique de novo em alguns minutos.':'Painel: nada a preencher (os pagamentos em branco ainda não foram baixados).'; if(E.eu?.perfil==='adm'&&E.dados?.planilha_script?.configurado) t+=' '+await gravarPlanilhaAgora(true); toast(t); pgRegistro(); }catch(e){ toast(e.message,true); } finally{ $('pdPagar').disabled=false; } }; $('pdImportar').onclick=abrirImport;
 $('pdGrade').addEventListener('click',e=>{
   const b=e.target.closest('[data-ac]'); if(b){ const r=regsPed().find(x=>x.id===b.closest('tr').dataset.id); if(!r) return;

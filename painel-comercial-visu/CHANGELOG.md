@@ -2,6 +2,11 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v48 — 04/11/2026 — Novo pedido em linha, igual à planilha, com vários itens
+
+- + Novo pedido agora abre uma linha em cima da grade, nas mesmas colunas e na mesma ordem da planilha (data, mês, código, cliente, lote, nome do pedido, vendedor… observação), em vez do card. O formulário (card) continua em "Abrir no formulário".
+- Pedido com itens diferentes: o botão + Item do mesmo pedido acrescenta outra linha com o mesmo código, já com cliente, data, vendedor e demais dados do pedido; só se preenche o item (tipo de produto, material, especificação, quantidade, cor, valor/und, lote e observação). O total de cada linha e do pedido é calculado na hora, e novo × recompra é sugerido pelo histórico do cliente.
+
 ## v47 — 04/11/2026 — Correção da lista vazia e aviso do script antigo
 
 - Corrigido o erro "vazio is not defined", que quebrava Inconsistências (e outras listas) quando um filtro não tinha nenhuma linha.
