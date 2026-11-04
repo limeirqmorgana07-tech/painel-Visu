@@ -276,26 +276,39 @@ async function linhasDaFonte(bytes) {
   if (!planilhaConfigurada()) throw new Error('A planilha não está conectada. Ligue a planilha em Controle → Planilha × sistema (mês) → Ligar pelo meu e-mail, ou envie o arquivo .xlsx.');
   return { linhas: (await lerPlanilha()).linhas, origem: 'planilha conectada' };
 }
-export async function importar({ de = '2026-01', ate = '2026-10', modo = 'faltam', simular = true, bytes = null, nomeArquivo = '' }, u) {
+const chaveLinhaImport = (o) => [chaveCodigo(o.codigo_pedido || o.codigo || ''), o.data || '', sem(clienteBase(o.cliente_original || o.cliente || '')), sem(o.tipo_produto), sem(o.cor), Number(o.quantidade) || 0, Math.round((Number(o.total) || 0) * 100)].join('|');
+export async function importar({ de = '2026-01', ate = '2026-10', modo = 'novas', simular = true, bytes = null, nomeArquivo = '' }, u) {
   if (!podeEditarTudo(u)) throw new Error('Só a gestão importa a base.');
   await carregar();
   const fonte = await linhasDaFonte(bytes);
-  const noPeriodo = fonte.linhas.filter((l) => l.mes && l.mes >= de && l.mes <= ate && (l.total || l.quantidade));
+  let noPeriodo = fonte.linhas.filter((l) => l.mes && l.mes >= de && l.mes <= ate && (l.total || l.quantidade));
+  // "só as linhas novas": compara cada linha da planilha com o que já está no painel (código, data, cliente, produto, cor, qtd e total)
+  const chaveLinha = (o) => [chaveCodigo(o.codigo_pedido || o.codigo || ''), o.data || '', sem(clienteBase(o.cliente_original || o.cliente_lancado || o.cliente || '')), sem(o.tipo_produto), sem(o.cor), Number(o.quantidade) || 0, Math.round((Number(o.total) || 0) * 100)].join('|');
+  let jaTem = null;
+  if (modo === 'novas') {
+    jaTem = new Map();
+    for (const r of mem.values()) if (!r.excluido && r.mes >= de && r.mes <= ate && r.chave_origem) jaTem.set(r.chave_origem, (jaTem.get(r.chave_origem) || 0) + 1);
+    for (const r of mem.values()) if (!r.excluido && r.mes >= de && r.mes <= ate && !r.chave_origem) { const k = chaveLinha({ ...r, cliente_original: r.cliente_lancado || [r.cliente, r.lote].filter(Boolean).join(' ') }); jaTem.set(k, (jaTem.get(k) || 0) + 1); const k2 = chaveLinha({ ...r, cliente_original: r.cliente }); if (k2 !== k) jaTem.set(k2, (jaTem.get(k2) || 0) + 1); }
+    const novas = [];
+    for (const l of noPeriodo) { const k = chaveLinha(l); if (jaTem.get(k) > 0) jaTem.set(k, jaTem.get(k) - 1); else novas.push(l); }
+    noPeriodo.novas = novas;
+  }
   const meses = [...new Set(noPeriodo.map((l) => l.mes))].sort();
   const existentes = [...mem.values()].filter((r) => !r.excluido && r.origem === 'planilha');
   const porMes = Object.fromEntries(meses.map((m) => {
     const ja = existentes.filter((r) => r.mes === m);
-    return [m, { planilha: noPeriodo.filter((l) => l.mes === m).length, no_painel: ja.length, corrigidas: ja.filter((r) => r.alterado_em).length, lancadas_no_painel: [...mem.values()].filter((r) => !r.excluido && r.origem === 'painel' && r.mes === m).length }];
+    return [m, { planilha: noPeriodo.filter((l) => l.mes === m).length, novas: noPeriodo.novas ? noPeriodo.novas.filter((l) => l.mes === m).length : null, no_painel: ja.length, corrigidas: ja.filter((r) => r.alterado_em).length, lancadas_no_painel: [...mem.values()].filter((r) => !r.excluido && r.origem === 'painel' && r.mes === m).length }];
   }));
-  const alvo = modo === 'substituir' ? meses : meses.filter((m) => !porMes[m].no_painel);
-  const resumo = { fonte: fonte.origem, arquivo: nomeArquivo || null, de, ate, modo, meses: porMes, importar_meses: alvo, linhas: noPeriodo.filter((l) => alvo.includes(l.mes)).length,
+  const alvo = modo === 'substituir' ? meses : modo === 'novas' ? meses.filter((m) => porMes[m].novas) : meses.filter((m) => !porMes[m].no_painel);
+  const aImportar = modo === 'novas' ? noPeriodo.novas : noPeriodo.filter((l) => alvo.includes(l.mes));
+  const resumo = { fonte: fonte.origem, arquivo: nomeArquivo || null, de, ate, modo, meses: porMes, importar_meses: alvo, linhas: aImportar.length,
     perde_correcoes: modo === 'substituir' ? alvo.reduce((s, m) => s + porMes[m].corrigidas, 0) : 0 };
   if (simular) return resumo;
   const quando = agoraISO();
   const remover = modo === 'substituir' ? existentes.filter((r) => alvo.includes(r.mes)) : [];
   remover.forEach((r) => mem.delete(r.id));
   await apagarDefinitivo(remover.map((r) => r.id));
-  const novos = noPeriodo.filter((l) => alvo.includes(l.mes)).map((l, k) => {
+  const novos = aImportar.map((l, k) => {
     const sl = separarLote(l.cliente_original);
     const r = { id: crypto.randomUUID(), origem: 'planilha', linha_planilha: l.linha || null, importado_em: quando, ordem: k,
       criado_em: quando, criado_por: `Importação (${fonte.origem})`, criado_por_id: u?.id || '', cliente_lancado: l.cliente_original || '' };
@@ -305,11 +318,12 @@ export async function importar({ de = '2026-01', ate = '2026-10', modo = 'faltam
       pag1: l.pag1 > 1 ? l.pag1 : 0, pag2: l.pag2 > 1 ? l.pag2 : 0, pago_100: l.pago_100, prazo_entrega: l.prazo_entrega, forma_pagamento: l.forma_pagamento, frete: l.frete, pagador: l.pagador, observacao: l.observacao };
     for (const c of Object.keys(CAMPOS)) r[c] = limpar(c, v[c]);
     r.mes = l.mes; if (l.duplicado) r.possivel_duplicado = true;
+    r.chave_origem = chaveLinhaImport(l);
     return r;
   });
   novos.forEach((r) => mem.set(r.id, r));
   await gravar(novos);
-  await registrarLog([{ ...quem(u), acao: 'importou', detalhe: `${novos.length} linhas de ${alvo.map((m) => m.split('-').reverse().join('/')).join(', ') || 'nenhum mês'} (${fonte.origem}${nomeArquivo ? ': ' + nomeArquivo : ''}; ${modo === 'substituir' ? `substituiu ${remover.length} linhas` : 'só meses que faltavam'})`, mudancas: [] }]);
+  await registrarLog([{ ...quem(u), acao: 'importou', detalhe: `${novos.length} linhas de ${alvo.map((m) => m.split('-').reverse().join('/')).join(', ') || 'nenhum mês'} (${fonte.origem}${nomeArquivo ? ': ' + nomeArquivo : ''}; ${modo === 'substituir' ? `substituiu ${remover.length} linhas` : modo === 'novas' ? 'só as linhas novas' : 'só meses que faltavam'})`, mudancas: [] }]);
   return { ...resumo, importadas: novos.length, removidas: remover.length };
 }
 

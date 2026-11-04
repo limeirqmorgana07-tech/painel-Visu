@@ -240,7 +240,7 @@ async function montar(bruto) {
     soPlanilha = depois.filter((l) => { const c = chaveCodigo(l.codigo_pedido || l.codigo || ''); return !c || !codPainel.has(c); });
     base = { ...base, linhas: [...plan.filter((l) => (l.mes || '') < corte), ...doPainel] };
     origem = 'misto';
-    if (soPlanilha.length) avisos.push(`${soPlanilha.length} ${soPlanilha.length === 1 ? 'linha de venda' : 'linhas de venda'} a partir de ${corte.split('-').reverse().join('/')} ${soPlanilha.length === 1 ? 'está' : 'estão'} só na planilha (R$ ${soPlanilha.reduce((s2, l) => s2 + (l.total || 0), 0).toLocaleString('pt-BR', { maximumFractionDigits: 0 })}). Desde novembro as vendas são lançadas no sistema: veja em Inconsistências.`);
+    if (soPlanilha.length) avisos.push(`${soPlanilha.length} ${soPlanilha.length === 1 ? 'linha de venda' : 'linhas de venda'} a partir de ${corte.split('-').reverse().join('/')} ${soPlanilha.length === 1 ? 'está' : 'estão'} só na planilha (R$ ${soPlanilha.reduce((s2, l) => s2 + (l.total || 0), 0).toLocaleString('pt-BR', { maximumFractionDigits: 0 })}). Desde novembro as vendas são lançadas no sistema: traga com Planilha de vendas → Importar base → Só as linhas novas, ou veja em Inconsistências.`);
   }
   // sem Conta Azul conectada não existe "lado do sistema": nunca usar as vendas fictícias da demonstração junto com dados reais
   if (bruto.origem === 'demo' && !config.demo) vendasCA = null;

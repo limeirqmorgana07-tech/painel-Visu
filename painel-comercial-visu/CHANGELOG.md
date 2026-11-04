@@ -2,6 +2,9 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v39 — 03/11/2026 — Importar só as linhas novas
+- Modo `novas` (padrão) na importação: só as linhas da planilha que ainda não estão no painel (chave: código, data, cliente, produto, cor, quantidade, total).
+
 ## v38 — 03/11/2026 — Correção da fonte mista
 - Planilha × sistema (mês), faturamento em Vendas e lista de clientes reconhecem a fonte `misto` (antes mostravam "a leitura falhou" / "planilha não ligada").
 

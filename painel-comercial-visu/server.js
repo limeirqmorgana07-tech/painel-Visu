@@ -362,7 +362,7 @@ app.post('/api/pedidos/unificar-cliente', exigeLogin, exigePedidos, resp(async (
 app.post('/api/pedidos/importar', exigeLogin, exigePedidos, express.raw({ type: ['application/octet-stream', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'], limit: '25mb' }), resp(async (req) => {
   const arquivo = Buffer.isBuffer(req.body) && req.body.length ? req.body : null;
   const o = arquivo ? req.query : req.body || {};
-  const r = await pedidos.importar({ de: String(o.de || '2026-01'), ate: String(o.ate || '2026-10'), modo: o.modo === 'substituir' ? 'substituir' : 'faltam', simular: String(o.simular) !== 'false' && o.simular !== false, bytes: arquivo, nomeArquivo: String(req.query.arquivo || '') }, req.usuario);
+  const r = await pedidos.importar({ de: String(o.de || '2026-01'), ate: String(o.ate || '2026-10'), modo: ['substituir', 'faltam'].includes(o.modo) ? o.modo : 'novas', simular: String(o.simular) !== 'false' && o.simular !== false, bytes: arquivo, nomeArquivo: String(req.query.arquivo || '') }, req.usuario);
   if (!r.simular && r.importadas !== undefined) depoisDeMudar();
   return r;
 }));
