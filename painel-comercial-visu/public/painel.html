@@ -611,7 +611,7 @@ table.matriz td.vz{color:var(--line2)}
 #imModal{width:min(720px,94vw)}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--panel);padding:10px 16px;border-radius:10px;font-size:13px;z-index:90;max-width:min(560px,92vw);box-shadow:0 10px 30px -10px rgba(0,0,0,.4)}
 .toast.erro{background:var(--red);color:#fff}
-.pgcard{min-width:240px;font-size:12.5px;line-height:1.5}.pgcard b{font-size:13px}.pgcard .ln{display:flex;justify-content:space-between;gap:14px}.pgcard .ln span:first-child{opacity:.75}.pgcard hr{border:0;border-top:1px solid rgba(255,255,255,.2);margin:6px 0}
+.pgcard{min-width:240px;font-size:12.5px;line-height:1.5}.pgcard b{font-size:13px}.pgcard .ln{display:flex;justify-content:space-between;gap:14px}.pgcard .ln span:first-child{opacity:.75}.pgcard .ok{margin-top:6px;color:var(--green);font-weight:600}.pgcard hr{border:0;border-top:1px solid rgba(255,255,255,.2);margin:6px 0}
 .st-ok{background:var(--greenSoft);color:var(--green)}.st-dif{background:var(--redSoft);color:var(--red)}.st-so{background:var(--amberSoft);color:var(--amber)}.st-na{background:var(--line);color:var(--ink2)}
 .hs-m{font-size:12px;color:var(--ink2)}.hs-m b{color:var(--ink)}.hs-m s{color:var(--red);opacity:.8}
 .sem-premio .pr{display:none!important}
@@ -623,7 +623,7 @@ table.matriz td.vz{color:var(--line2)}
 .balao .pgcard{min-width:0}.balao .pgcard hr{border-top:1px solid var(--line)}.balao .pgcard .ln span:first-child{color:var(--ink3);opacity:1}
 .balao .bh{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}.balao .bh b{font-family:var(--display);font-size:13.5px}
 .balao .av{margin-top:8px;padding:6px 8px;border-radius:8px;background:var(--redSoft);color:var(--red);font-weight:600}
-.inc-tipos{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}.inc-t{border:1px solid var(--line2);background:var(--panel);color:var(--ink);border-radius:999px;padding:5px 11px;font:inherit;font-size:12px;cursor:pointer}.inc-t b{margin-left:4px}.inc-t.grave b{color:var(--red)}.inc-t.media b{color:var(--amber)}.inc-t.zero{opacity:.55;cursor:default}.inc-t.zero b{color:var(--green)}.inc-t.on{background:var(--ink);color:var(--panel);border-color:var(--ink)}.inc-t.on b{color:inherit}
+.inc-tipos{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}.inc-t{border:1px solid var(--line2);background:var(--panel);color:var(--ink);border-radius:999px;padding:5px 11px;font:inherit;font-size:12px;cursor:pointer}.inc-t b{margin-left:4px}.inc-t.grave b{color:var(--red)}.inc-t.media b{color:var(--amber)}.inc-t.zero{opacity:.55;cursor:default}.inc-t.zero b{color:var(--green)}.inc-t.ok b{color:var(--green)}.inc-t.on{background:var(--ink);color:var(--panel);border-color:var(--ink)}.inc-t.on b{color:inherit}
 .inc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
 .inc{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:6px;cursor:pointer;text-align:left;font:inherit;color:var(--ink)}
 .inc:hover{border-color:var(--orange)}.inc.zero{cursor:default;opacity:.72}.inc.zero:hover{border-color:var(--line)}
@@ -765,6 +765,13 @@ table.matriz td.vz{color:var(--line2)}
     <div class="f f2"><label for="ixConta">Conta (banco)</label><input id="ixConta" list="dlContas" placeholder="ex.: Sicredi"></div>
   </div><datalist id="dlContas"></datalist><div id="ixRes" style="margin-top:10px"></div><div class="e" id="ixErro"></div>
   <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px"><button class="bt2" type="button" id="ixConferir">Conferir</button><button class="bt2 pri" type="button" id="ixOk" disabled>Importar</button></div></div>
+</div>
+<div id="vzModal" class="pol" role="dialog" aria-modal="true" aria-labelledby="vzTit" hidden style="width:min(1100px,96vw)">
+  <div class="pol-hd"><div><div class="eyebrow">Controle · Qualidade dos dados</div><h3 id="vzTit">Campos em branco</h3><div class="sub" id="vzSub"></div></div><button class="bt2" type="button" id="vzFechar" aria-label="Fechar">✕</button></div>
+  <div class="pol-corpo"><div class="ped-bar" style="margin:6px 0 10px"><div class="f" style="flex:1;min-width:200px"><label for="vzBusca">Pesquisa rápida</label><input id="vzBusca" type="search" placeholder="Cliente, código, vendedor, data…"></div><div class="f"><label for="vzMes">Mês</label><select id="vzMes"></select></div><span style="flex:1"></span>
+    <div class="exp" data-exp="vz"><button class="bt2" type="button" aria-haspopup="true" aria-expanded="false">Exportar ▾</button><div class="exp-m" hidden><button type="button" data-fmt="xlsx">Excel (.xlsx)</button><button type="button" data-fmt="pdf">PDF</button><button type="button" data-fmt="csv">CSV</button></div></div></div>
+    <div class="nota" id="vzNota" style="margin:0 0 8px"></div><div class="tw" id="vzTabela" style="max-height:56vh;overflow:auto"></div><div class="e" id="vzErro"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;align-items:center;margin-top:12px;flex-wrap:wrap"><span class="nota" id="vzConta" style="margin:0"></span><button class="bt2 pri" type="button" id="vzGravar" hidden>Gravar na planilha</button></div></div>
 </div>
 <div id="imModal" class="pol" role="dialog" aria-modal="true" aria-labelledby="imTit" hidden>
   <div class="pol-hd"><div><div class="eyebrow">Gestão · Pedidos de venda</div><h3 id="imTit">Importar a base de vendas</h3><div class="sub">Traz as vendas da planilha para o painel, para os vendedores revisarem (novo × recompra, nome do cliente, campos vazios)</div></div><button class="bt2" type="button" id="imFechar" aria-label="Fechar">✕</button></div>
@@ -912,7 +919,7 @@ table.matriz td.vz{color:var(--line2)}
     <div class="ped-bar">
       <div class="f"><label for="cfMes">Mês</label><select id="cfMes"></select></div>
       <div class="f"><label for="cfVend">Vendedor</label><select id="cfVend"></select></div>
-      <div class="seg" role="group" aria-label="Base" id="cfBase"><button type="button" data-cfb="planilha" aria-pressed="true">Planilha</button><button type="button" data-cfb="painel" aria-pressed="false">Pedidos do painel</button></div>
+      <div class="seg" role="group" aria-label="Base" id="cfBase" hidden><button type="button" data-cfb="planilha" aria-pressed="true">Planilha</button><button type="button" data-cfb="painel" aria-pressed="false">Pedidos do painel</button></div>
       <span style="flex:1"></span><div class="exp" data-exp="cf"><button class="bt2" type="button" aria-haspopup="true" aria-expanded="false">Exportar ▾</button><div class="exp-m" hidden><button type="button" data-fmt="xlsx">Excel (.xlsx)</button><button type="button" data-fmt="pdf">PDF</button><button type="button" data-fmt="csv">CSV</button></div></div>
     </div>
     <div class="aviso" id="cfAviso" hidden></div>
@@ -929,11 +936,12 @@ table.matriz td.vz{color:var(--line2)}
       <button class="bt2 in-fx" type="button" id="inFiltrar" hidden style="align-self:flex-end">Filtrar</button>
       <div class="f"><label for="inVend">Vendedor</label><select id="inVend"></select></div>
       <div class="f" style="flex:1;min-width:200px"><label for="inBusca">Pesquisa rápida</label><input id="inBusca" type="search" placeholder="Cliente, pedido, vendedor, data (ex.: 15/10)…"></div>
-      <div class="seg" role="group" aria-label="Base" id="inBase"><button type="button" data-inb="planilha" aria-pressed="true">Planilha</button><button type="button" data-inb="painel" aria-pressed="false">Planilha de vendas do painel</button></div>
+      <div class="f"><label for="inTipoSel">Tipo de inconsistência</label><select id="inTipoSel"></select></div>
       <span style="flex:1"></span>
       <div class="exp" data-exp="in"><button class="bt2" type="button" aria-haspopup="true" aria-expanded="false">Exportar ▾</button><div class="exp-m" hidden><button type="button" data-fmt="xlsx">Excel (.xlsx)</button><button type="button" data-fmt="pdf">PDF</button><button type="button" data-fmt="csv">CSV</button></div></div>
     </div>
     <div class="aviso" id="inAviso"></div>
+    <div class="aviso" id="inGrava" hidden></div>
     <div class="kpis" id="inKpis" style="margin-bottom:14px"></div>
     <div class="card"><div class="hd"><div><h3>Todas as inconsistências</h3><div class="sub">Sistema × planilha, colunas vazias, código do pedido e cadastro de clientes, numa lista só · clique num tipo para filtrar</div></div></div>
       <div class="inc-tipos" id="inResumo"></div><div class="tw" id="inTabela"></div></div>
@@ -1023,7 +1031,7 @@ table.matriz td.vz{color:var(--line2)}
     
     <div class="g2">
       <div class="card"><div class="hd"><div><h3>De onde vem a diferença</h3><div class="sub" id="concSub">—</div></div></div><div id="ponte"></div></div>
-      <div class="card"><div class="hd"><div><h3>Motivos encontrados</h3><div class="sub">Calculados a partir das duas bases</div></div></div><ul class="motivos" id="motivos"></ul></div>
+      <div class="card"><div class="hd"><div><h3>Motivos encontrados</h3><div class="sub">Planilha × Conta Azul no mês · clique num motivo para ver as vendas</div></div></div><ul class="motivos" id="motivos"></ul></div>
     </div>
     <div class="card" style="margin-top:16px"><div class="hd"><div><h3>Mês a mês</h3><div class="sub">Valores pela data da venda</div></div></div><div class="tw" id="concMeses"></div></div>
     <div class="card" style="margin-top:16px"><div class="hd"><div><h3>Clientes com diferença no mês</h3><div class="sub">Maiores diferenças entre o que está na planilha e o que está no sistema</div></div></div><div class="tw" id="concClientes"></div></div>
@@ -1094,8 +1102,9 @@ const nomeMes=(m)=>{const[a,b]=m.split('-');return MES_L[+b-1]+' de '+a};
 const somaMes=(m,n)=>{const[a,b]=m.split('-').map(Number);const d=new Date(Date.UTC(a,b-1+n,1));return d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0')};
 function delta(a,b,inv){ if(!b) return '<span class="delta eq">sem base</span>'; const d=(a-b)/b; const c=Math.abs(d)<.005?'eq':(d>0)!==!!inv?'up':'down'; return `<span class="delta ${c}">${d>0?'▲':d<0?'▼':'■'} ${pct(Math.abs(d))}</span>`; }
 
-const VERSAO='v43';
+const VERSAO='v44';
 const VERSOES=[
+ {v:'v44',data:'04/11/2026',tit:'Gravação na planilha, inconsistências numa base só e campos em branco clicáveis',arq:'painel-visu-v44.zip',itens:['Gravação na planilha do Google: religar a planilha desligava sem avisar a gravação automática dos pagamentos (por isso os pagamentos baixados pararam de ir para a planilha). Agora religar mantém a gravação, o horário e o mês-limite, e a gravação vem ligada por padrão.', 'Inconsistências mostra o quadro ’Gravação na planilha do Google’: ligada ou desligada, a última gravação (quantas células, erro ou motivo do adiamento) e os botões Gravar na planilha agora e Gravar mesmo assim. Cada pedido que não foi gravado mostra o motivo (célula com fórmula, já tinha valor, código não encontrado) e a linha.', 'Inconsistências usa uma base só: a planilha do Google até outubro e a Planilha de vendas do painel a partir de novembro (sai a escolha Planilha × Planilha de vendas do painel). Novo filtro Tipo de inconsistência e a opção ’Batendo com a Conta Azul’, que lista os pedidos já certos (mesmo código e mesmo valor, com o que foi recebido).', '’Mesmo cliente e dia com códigos diferentes’ saiu: são itens do mesmo pedido. ’Mesmo código em pedidos diferentes’ virou ’Mesmo código para clientes diferentes’: linhas do mesmo código e do mesmo cliente (variação de produto, lote ou destino) não aparecem mais.', 'Qualidade dos dados: cada campo em branco abre a lista das linhas (com o número da linha na planilha), com pesquisa, filtro por mês e exportação em Excel, PDF ou CSV. ADM, diretoria e financeiro preenchem ali mesmo e o painel grava na planilha do Google, só em célula vazia, conferindo o cliente da linha e respeitando as listas suspensas. Código em branco só é cobrado a partir de setembro/2026.', 'Grafias diferentes mostra o valor consolidado que o painel usa. Nome dos vendedores num padrão só (Daniel, não DANIEL ou daniel) em todas as telas e nos pedidos do painel.', 'Planilha × sistema (mês): cada motivo encontrado abre as vendas ou linhas por trás do valor. Meses antes de agosto/2026 aparecem como ’antes da Conta Azul’.', 'Nota dos pagamentos na planilha: em pedido com mais de uma linha, a nota diz que o valor é do pedido inteiro. O script novo (copiar de novo pelo painel) é preciso para preencher campos em branco e para ver os motivos do que não foi gravado.']},
  {v:'v43',data:'03/11/2026',tit:'Conciliação bancária e Planilha de vendas completa',arq:'painel-visu-v43.zip',itens:['Nova página Financeiro → Conciliação bancária: importa o extrato do banco (OFX, CSV ou Excel) e confere cada lançamento com os recebimentos e pagamentos baixados na Conta Azul (valor exato, até 3 dias de diferença): conciliados, só no extrato e só no sistema, com filtro por conta, período, situação e busca, e exportação. Atalho em Contas a receber.','A Planilha de vendas volta a mostrar janeiro a outubro, lidos da planilha do Google (só consulta), com os balões de 1º/2º pagamento e Pedido 100% pago; a partir de novembro, as vendas lançadas no sistema.','Inconsistências ganhou a pesquisa rápida: cliente, pedido, vendedor, data ou tipo.','O + Novo pedido mostra quantos clientes vieram (e quantos do cadastro da Conta Azul).']},
  {v:'v42',data:'03/11/2026',tit:'Filtro de período nas Inconsistências',arq:'painel-visu-v42.zip',itens:['Inconsistências ganhou o filtro Período: um mês, o ano inteiro, todos os meses ou Período personalizado (de/até, pela data da venda). Vale para a lista, o resumo por tipo, a tabela por vendedor e a exportação.']},
  {v:'v41',data:'03/11/2026',tit:'Nota na planilha igual ao balão do painel',arq:'painel-visu-v41.zip',itens:['A nota que o painel grava na planilha do Google ficou igual ao balão do painel e só com aquele pedido, cliente e parcela: pedido e cliente, parcela, vencimento, valor recebido e data, banco e forma.','Em PEDIDO 100% PAGO, a nota mostra todas as parcelas do pedido, como o balão do painel (precisa do script novo no Apps Script).']},
@@ -1591,25 +1600,74 @@ function tratamentoHtml(m){
   return h;
 }
 function pgDados(){
-  const q=E.dados.qualidade, mapa=q.colunas||{}, fonte=E.dados.fonte;
-  if(fonte!=='planilha'){
-    $('colSub').textContent=fonte==='demo'?'Aparece quando a planilha real for ligada':'Lendo da Conta Azul, sem a planilha';
-    $('colunas').innerHTML='<div class="vazio">Quando a planilha for ligada, aqui aparece quais colunas o painel reconheceu e quais não encontrou. As colunas esperadas são as da seção 5 da especificação.</div>';
+  const q=E.dados.qualidade, mapa=q.colunas||{}, fonte=E.dados.fonte, corte=E.dados.corte_sistema;
+  if(fonte!=='planilha'&&fonte!=='misto'){
+    $('colSub').textContent=fonte==='demo'?'Aparece quando a planilha real for ligada':fonte==='painel'?'Lendo só a Planilha de vendas do painel':'Lendo da Conta Azul, sem a planilha';
+    $('colunas').innerHTML='<div class="vazio">Quando a planilha for ligada, aqui aparece quais colunas o painel reconheceu e quais não encontrou.</div>';
   } else {
     const rec=mapa.reconhecidas||{};
-    $('colSub').textContent=`${Object.keys(rec).length} de ${Object.keys(ROT_COL).length} reconhecidas · cabeçalho na linha ${mapa.linha_cabecalho}`;
+    $('colSub').textContent=`${Object.keys(rec).length} de ${Object.keys(ROT_COL).length} reconhecidas · cabeçalho na linha ${mapa.linha_cabecalho||'—'}${fonte==='misto'&&corte?` · planilha do Google até ${nomeMes(somaMes(corte,-1))}, painel a partir de ${nomeMes(corte)}`:''}`;
     $('colunas').innerHTML=`<div class="tw"><table><thead><tr><th>Campo do painel</th><th>Coluna na planilha</th></tr></thead><tbody>
       ${Object.keys(ROT_COL).map(k=>`<tr><td>${ROT_COL[k]}</td><td>${rec[k]?`<span class="status ok">✓ ${esc(rec[k])}</span>`:`<span class="status at">não encontrada</span>`}</td></tr>`).join('')}</tbody></table></div>`+tratamentoHtml(mapa);
   }
-  const f=q.faltando, ROTV={data:'Data ou mês',pedido:'Código do pedido',novo_recompra:'Novo ou recompra',tipo_produto:'Tipo de produto',material:'Material',cor:'Cor',quantidade:'Quantidade',total:'Total'};
-  $('vazSub').textContent=`${int(q.total_linhas)} linhas lidas`;
-  $('tbVazios').innerHTML=Object.entries(ROTV).map(([k,r])=>`<tr><td>${r}</td><td class="v">${f[k]?`<span class="status at">${int(f[k])} em branco</span>`:'<span class="status ok">✓ completo</span>'}</td></tr>`).join('')
-    +(f.pedido?`<tr><td colspan="2" class="nota">Sem código do pedido, o painel junta as linhas do mesmo cliente no mesmo dia como um pedido só.</td></tr>`:'');
+  const ls=(E.dados.linhas||[]).filter(l=>!l.cs);
+  $('vazSub').textContent=`${int(ls.length)} linhas lidas · clique num campo para ver as linhas, exportar ou preencher`;
+  $('tbVazios').innerHTML=VZ_CAMPOS.map(([k,r,f,obs])=>{ const n=ls.filter(f).length; return `<tr${n?` data-vz="${k}" style="cursor:pointer" title="Ver as linhas"`:''}><td>${r}${obs?`<div class="dica-c">${obs}</div>`:''}</td><td class="v">${n?`<span class="status at">${int(n)} em branco</span> <span class="lk">ver ›</span>`:'<span class="status ok">✓ completo</span>'}</td></tr>`; }).join('')
+    +`<tr><td colspan="2" class="nota">Sem código do pedido, o painel junta as linhas do mesmo cliente no mesmo dia como um pedido só. O código só passou a ser usado em setembro/2026 e a Conta Azul começou em agosto/2026: antes disso o código em branco não é cobrado.</td></tr>`;
   const gr=(lista)=>lista.map(g=>`<span>${esc(g.texto)}<em>${int(g.linhas)} ${g.linhas===1?'linha':'linhas'}</em></span>`).join('');
   $('qClientes').innerHTML=q.clientes_duplicados.length?q.clientes_duplicados.slice(0,20).map(c=>`<div class="q-item"><b>${esc(c.cliente)}</b><div class="gr">${gr(c.grafias)}</div></div>`).join(''):'<div class="vazio">Nenhum cliente com nomes diferentes.</div>';
   const blocos=[['tipo_produto','Tipo de produto'],['material','Material'],['cor','Cor'],['vendedor','Vendedor']].flatMap(([k,r])=>(q.variacoes[k]||[]).map(v=>({...v,campo:r})));
-  $('qGrafias').innerHTML=blocos.length?blocos.slice(0,24).map(v=>`<div class="q-item"><span class="campo">${v.campo}</span><b>${esc(v.valor)}</b><div class="gr">${gr(v.grafias)}</div></div>`).join(''):'<div class="vazio">Nenhuma grafia diferente encontrada.</div>';
+  $('qGrafias').innerHTML=(blocos.length?'<div class="nota" style="margin:0 0 8px">O painel já consolida cada grupo num valor só (é o que aparece nos gráficos, filtros e comissões). Para a planilha ficar igual, use a lista suspensa com o valor consolidado.</div>':'')+(blocos.length?blocos.slice(0,40).map(v=>`<div class="q-item"><span class="campo">${v.campo}</span><b>${esc(nomeBonito(v.valor))}</b> <span class="pill st-ok" title="Como aparece no painel">consolidado</span><div class="gr">${gr(v.grafias)}</div></div>`).join(''):'<div class="vazio">Nenhuma grafia diferente encontrada.</div>');
 }
+// campos em branco (v44): clicar mostra as linhas, exporta e (ADM, diretoria, financeiro) preenche direto na planilha do Google
+const VZ_CAMPOS=[
+  ['data','Data ou mês',l=>!l.d&&!l.m,''],
+  ['codigo','Código do pedido',l=>!l.cd&&(l.m||'')>='2026-09','cobrado a partir de setembro/2026'],
+  ['vendedor','Vendedor',l=>!l.v||l.v==='Sem vendedor',''],
+  ['novo_recompra','Novo ou recompra',l=>!l.nr,''],
+  ['tipo_produto','Tipo de produto',l=>!l.tp,''],
+  ['material','Material',l=>!l.mt,''],
+  ['cor','Cor',l=>!l.cr,''],
+  ['quantidade','Quantidade',l=>!l.q,''],
+  ['total','Total',l=>!l.t,'valor: corrigir direto na planilha'],
+];
+const VZ_K={data:'d',codigo:'cd',vendedor:'v',novo_recompra:'nr',tipo_produto:'tp',material:'mt',cor:'cr',quantidade:'q'};
+const VZ={campo:'',vals:{},mes:''};
+const podeVz=()=>['adm','diretor','financeiro'].includes(E.eu?.perfil)&&!!E.dados?.planilha_script?.configurado;
+function abrirVazios(campo){ VZ.campo=campo; VZ.vals={}; VZ.mes=''; $('vzBusca').value=''; $('vzErro').textContent=''; $('pdFundo').hidden=false; $('vzModal').hidden=false; desenharVazios(); }
+function linhasVazias(){ const def=VZ_CAMPOS.find(c=>c[0]===VZ.campo); if(!def) return []; const q=semA($('vzBusca').value||'');
+  return (E.dados.linhas||[]).filter(l=>!l.cs&&def[2](l)&&(!VZ.mes||l.m===VZ.mes)&&(!q||semA([l.c,l.cd,l.v,dataBR(l.d),l.tp,l.mt,l.cr].join(' ')).includes(q))).sort((a,b)=>(a.d||a.m||'').localeCompare(b.d||b.m||'')||(a.ln||0)-(b.ln||0)); }
+function desenharVazios(){
+  const def=VZ_CAMPOS.find(c=>c[0]===VZ.campo), todas=(E.dados.linhas||[]).filter(l=>!l.cs&&def[2](l)), ls=linhasVazias(), pode=podeVz()&&VZ_K[VZ.campo];
+  const meses=[...new Set(todas.map(l=>l.m).filter(Boolean))].sort().reverse(); $('vzMes').innerHTML='<option value="">Todos</option>'+meses.map(m=>`<option value="${m}">${nomeMes(m)}</option>`).join(''); $('vzMes').value=VZ.mes;
+  $('vzTit').textContent=`${def[1]} em branco`; $('vzSub').textContent=`${pl(todas.length,'linha','linhas')}${def[3]?' · '+def[3]:''}`;
+  const sug=[...new Set((E.dados.linhas||[]).map(l=>l[VZ_K[VZ.campo]]).filter(x=>x&&x!=='Sem vendedor'))].sort((a,b)=>String(a).localeCompare(String(b),'pt-BR'));
+  $('vzNota').innerHTML=pode?'Preencha na coluna <b>Preencher</b> e clique em <b>Gravar na planilha</b>: o painel escreve só nas células vazias, confere o cliente da linha antes e respeita as listas suspensas da planilha. Linhas de novembro em diante ficam na Planilha de vendas do painel (botão <b>Abrir</b>).'
+    :E.dados?.planilha_script?.configurado?'Para corrigir, preencha na planilha do Google (coluna <b>Linha</b> = número da linha) ou, nas linhas do painel, clique em <b>Abrir</b>. ADM, diretoria e financeiro preenchem por aqui.':'Para preencher por aqui, ligue a planilha pelo e-mail (Controle → Planilha × sistema (mês)). Enquanto isso, exporte a lista e corrija na planilha.';
+  const inp=(l)=>{ const k=l.ln, v=VZ.vals[k]??''; if(VZ.campo==='novo_recompra') return `<select data-vzl="${k}"><option value=""></option><option value="Novo"${v==='Novo'?' selected':''}>Novo</option><option value="Recompra"${v==='Recompra'?' selected':''}>Recompra</option></select>`;
+    return `<input data-vzl="${k}" value="${esc(v)}" ${VZ.campo==='data'?'type="date"':VZ.campo==='quantidade'?'inputmode="numeric"':'list="dlVz"'} style="width:100%;min-width:120px">`; };
+  $('vzTabela').innerHTML=ls.length?`<datalist id="dlVz">${sug.slice(0,300).map(x=>`<option value="${esc(x)}">`).join('')}</datalist><table class="compacta"><thead><tr><th>Linha</th><th>Data</th><th>Código</th><th>Cliente</th><th>Vendedor</th><th>Produto</th><th class="v">Qtd.</th><th class="v">Total</th>${VZ_K[VZ.campo]?'<th>Preencher</th>':''}</tr></thead><tbody>${ls.slice(0,400).map(l=>`<tr><td class="num">${l.sp?'<span class="pill st-na">painel</span>':l.ln?int(l.ln):'—'}</td><td style="white-space:nowrap">${l.d?dataBR(l.d):l.m?nomeMes(l.m):'—'}</td><td><b>${esc(l.cd||'')}</b></td><td class="el">${esc(l.c||'')}</td><td class="el">${esc(l.vo||l.v||'')}</td><td class="el">${esc([l.tp,l.mt,l.cr].filter(Boolean).join(' · '))}</td><td class="v">${l.q?int(l.q):'—'}</td><td class="v">${l.t?brl2(l.t):'—'}</td>${VZ_K[VZ.campo]?`<td>${l.sp?`<button class="bt2" type="button" data-vzab="${esc(l.cd||l.c)}" data-vzm="${l.m||''}">Abrir</button>`:pode&&l.ln?inp(l):'<span style="color:var(--ink3)">na planilha</span>'}</td>`:''}</tr>`).join('')}</tbody></table>${ls.length>400?'<div class="nota">Mostrando 400; filtre por mês ou exporte para ver todas.</div>':''}`:vazio('Nada em branco com esse filtro. ✓');
+  const n=Object.values(VZ.vals).filter(v=>String(v).trim()).length; $('vzGravar').hidden=!pode; $('vzGravar').disabled=!n; $('vzConta').textContent=n?pl(n,'campo preenchido','campos preenchidos')+' para gravar':'';
+}
+$('vzTabela').addEventListener('input',e=>{ const el=e.target.closest('[data-vzl]'); if(!el) return; VZ.vals[el.dataset.vzl]=el.value; const n=Object.values(VZ.vals).filter(v=>String(v).trim()).length; $('vzGravar').disabled=!n; $('vzConta').textContent=n?pl(n,'campo preenchido','campos preenchidos')+' para gravar':''; });
+$('vzTabela').addEventListener('change',e=>{ const el=e.target.closest('select[data-vzl]'); if(el){ VZ.vals[el.dataset.vzl]=el.value; $('vzGravar').disabled=!Object.values(VZ.vals).some(v=>String(v).trim()); } });
+$('vzTabela').addEventListener('click',e=>{ const b=e.target.closest('[data-vzab]'); if(!b) return; $('vzModal').hidden=true; $('pdFundo').hidden=true; PED.busca=b.dataset.vzab; PED.fil=''; PED.vend=''; PED.vendEscolhido=true; if(b.dataset.vzm) PED.mes=b.dataset.vzm; irPara('registro'); });
+$('vzBusca').addEventListener('input',()=>{ clearTimeout(VZ.t); VZ.t=setTimeout(desenharVazios,250); });
+$('vzMes').onchange=()=>{ VZ.mes=$('vzMes').value; desenharVazios(); };
+$('vzFechar').onclick=()=>{ $('vzModal').hidden=true; $('pdFundo').hidden=true; };
+$('tbVazios').addEventListener('click',e=>{ const tr=e.target.closest('[data-vz]'); if(tr) abrirVazios(tr.dataset.vz); });
+$('vzGravar').onclick=async()=>{
+  const porLn=new Map((E.dados.linhas||[]).filter(l=>l.ln).map(l=>[String(l.ln),l]));
+  const itens=Object.entries(VZ.vals).filter(([,v])=>String(v).trim()).map(([ln,v])=>({linha:+ln,campo:VZ.campo,valor:VZ.campo==='novo_recompra'?v.toUpperCase():String(v).trim(),cliente:porLn.get(ln)?.co||porLn.get(ln)?.c||''}));
+  if(!itens.length) return; $('vzGravar').disabled=true; $('vzGravar').textContent='Gravando…'; $('vzErro').textContent='';
+  try{ const r=await api('/api/planilha-script/celulas',{method:'POST',body:JSON.stringify({itens})});
+    if(r.aviso){ $('vzErro').textContent=r.aviso; toast(r.aviso,true); }
+    else if(r.adiado) toast(`Guardado: a planilha foi editada há pouco (${r.motivo}). O painel grava sozinho assim que ela ficar 15 minutos sem edição.`);
+    else toast(`Planilha do Google: ${pl(r.celulas||0,'célula preenchida','células preenchidas')}.${r.na_fila?` ${pl(r.na_fila,'campo ficou','campos ficaram')} na fila.`:''}`);
+    VZ.vals={}; if(!r.aviso&&!r.adiado) setTimeout(()=>carregar(true),1500); desenharVazios();
+  }catch(e){ $('vzErro').textContent=e.message; }
+  $('vzGravar').textContent='Gravar na planilha';
+};
 
 
 // ---------- vitrine ----------
@@ -1868,14 +1926,14 @@ function pgConciliacao(){
   const andamento=caMes(m,['EM_ANDAMENTO']), canc=caMes(m,['CANCELADO']), orc=caMes(m,['ORCAMENTO']);
   const outros=new Map(); [somaMes(m,1),somaMes(m,-1)].forEach(mm=>caMes(mm,EF).forEach(v=>{const k=kc(v.c); outros.set(k,(outros.get(k)||0)+v.t);}));
   const totPl=temPlanilha?soma([...P.values()]):(+totalInformado[m]||0), totCA=soma([...C.values()]);
-  let naoLancado=0,outroMes=0,emAnd=0,difValor=0,soSistema=0; const linhasCli=[];
+  let naoLancado=0,outroMes=0,emAnd=0,difValor=0,soSistema=0; const linhasCli=[], cliNao=new Set(), cliDif=new Set(), cliOutro=new Set(), cliSoS=new Set();
   const andPorCli=new Map(); andamento.forEach(v=>{const k=kc(v.c); andPorCli.set(k,(andPorCli.get(k)||0)+v.t);});
   if(temPlanilha){
     for(const [k,p] of P){ const c=C.get(k)?.t||0; let falta=p.t-c;
-      if(falta>0.5){ const a=Math.min(falta,andPorCli.get(k)||0); emAnd+=a; falta-=a; const o=Math.min(falta,outros.get(k)||0); outroMes+=o; falta-=o; if(!C.has(k)&&!(andPorCli.get(k))&&!(outros.get(k))){naoLancado+=falta;falta=0;} difValor+=falta; }
-      else difValor+=falta;
+      if(falta>0.5){ const a=Math.min(falta,andPorCli.get(k)||0); emAnd+=a; falta-=a; const o=Math.min(falta,outros.get(k)||0); outroMes+=o; if(o>0.5) cliOutro.add(k); falta-=o; if(!C.has(k)&&!(andPorCli.get(k))&&!(outros.get(k))){naoLancado+=falta;falta=0;cliNao.add(k);} difValor+=falta; if(Math.abs(falta)>0.5) cliDif.add(k); }
+      else { difValor+=falta; if(Math.abs(falta)>0.5) cliDif.add(k); }
       if(Math.abs(p.t-c)>1) linhasCli.push({nome:p.nome,pl:p.t,ca:c,dif:p.t-c,obs:!C.has(k)?(andPorCli.get(k)?'Venda em andamento no sistema':outros.get(k)?'Lançada em outro mês':'Não encontrada no sistema'):'Valor diferente (frete, peças extras ou desconto)'}); }
-    for(const [k,c] of C) if(!P.has(k)){ soSistema+=c.t; linhasCli.push({nome:c.nome,pl:0,ca:c.t,dif:-c.t,obs:'Só no sistema (data ou nome diferente na planilha)'}); }
+    for(const [k,c] of C) if(!P.has(k)){ soSistema+=c.t; cliSoS.add(k); linhasCli.push({nome:c.nome,pl:0,ca:c.t,dif:-c.t,obs:'Só no sistema (data ou nome diferente na planilha)'}); }
   }
   $('concSub').textContent=temPlanilha?`${nomeMes(m)} · planilha ${brl(totPl)} × sistema ${brl(totCA)}`:`${nomeMes(m)} · sistema ${brl(totCA)}`;
   const ln=(rot,v,cls)=>{ v=Math.abs(v)<0.5?0:v; return `<div class="ln ${cls||''}"><span>${rot}</span><span class="num ${v<0?'neg':''}">${brl(v)}</span></div>`; };
@@ -1892,18 +1950,25 @@ function pgConciliacao(){
   // motivos
   const lancMesSeguinte=caD.vendas.filter(v=>v.d.slice(0,7)===somaMes(m,1)&&v.e&&v.e.slice(0,7)<=m);
   const criadoDepois=caMes(m,EF).filter(v=>v.e&&v.e.slice(0,7)>m);
+  // clicar num motivo abre as vendas / linhas por trás do valor (v44)
+  const COLV=[{rot:'Venda'},{rot:'Data',t:'data'},{rot:'Cadastrada em',t:'data'},{rot:'Cliente'},{rot:'Vendedor'},{rot:'Situação'},{rot:'Valor',t:'brl',total:1}];
+  const detV=(tit,vs)=>()=>abrirDet(tit,`${nomeMes(m)} · ${pl(vs.length,'venda','vendas')} na Conta Azul`,COLV,vs.map(v=>[String(v.n??''),v.d,v.e||'',v.c,v.v||'',SIT_CA[v.s]||v.s,v.t]));
+  const detL=(tit,ks)=>()=>{ const ls=plMes(m).filter(l=>ks.has(kc(l.c))); abrirDet(tit,`${nomeMes(m)} · ${pl(ls.length,'linha','linhas')} da planilha`,[{rot:'Data',t:'data'},{rot:'Código'},{rot:'Cliente'},{rot:'Vendedor'},{rot:'Produto'},{rot:'Qtd.',t:'int'},{rot:'Total',t:'brl',total:1}],ls.map(l=>[l.d||l.m,l.cd||'',l.c,l.v,[l.tp,l.mt,l.cr].filter(Boolean).join(' · '),l.q,l.t])); };
+  const detC=(tit,ks)=>()=>{ const rows=linhasCli.filter(x=>ks.has(kc(x.nome))); abrirDet(tit,`${nomeMes(m)} · ${pl(rows.length,'cliente','clientes')}`,[{rot:'Cliente'},{rot:'Planilha',t:'brl',total:1},{rot:'Sistema',t:'brl'},{rot:'Diferença',t:'brl'},{rot:'Provável motivo',wr:1}],rows.map(x=>[x.nome,x.pl,x.ca,x.dif,x.obs])); };
+  const vSoS=caMes(m,EF).filter(v=>cliSoS.has(kc(v.c))), vOutro=[somaMes(m,1),somaMes(m,-1)].flatMap(mm=>caMes(mm,EF)).filter(v=>cliOutro.has(kc(v.c)));
   const mot=[
-    ['Vendas aguardando aprovação no sistema',soma(andamento),`${pl(andamento.length,'venda','vendas')} com data em ${nomeMes(m)} ainda "em andamento / esperando aprovação". Não entram como vendidas até serem aprovadas.`,'var(--s2)'],
-    ['Data de emissão diferente da data da venda',soma(lancMesSeguinte),`${pl(lancMesSeguinte.length,'venda','vendas')} cadastradas até ${nomeMes(m)} mas com data no mês seguinte. Na reunião de 06/10 foi citado um caso assim: venda em setembro com nota em outubro.`,'var(--s1)'],
-    ['Vendas lançadas depois do fechamento',soma(criadoDepois),`${pl(criadoDepois.length,'venda','vendas')} de ${nomeMes(m)} foram cadastradas no sistema só depois do mês.`,'var(--s3)'],
-    ['Canceladas no sistema',soma(canc),`${pl(canc.length,'venda','vendas')} canceladas em ${nomeMes(m)}.`,'var(--red)'],
+    ['Vendas aguardando aprovação no sistema',soma(andamento),`${pl(andamento.length,'venda','vendas')} com data em ${nomeMes(m)} ainda "em andamento / esperando aprovação". Não entram como vendidas até serem aprovadas.`,'var(--s2)',detV('Vendas aguardando aprovação no sistema',andamento)],
+    ['Data de emissão diferente da data da venda',soma(lancMesSeguinte),`${pl(lancMesSeguinte.length,'venda','vendas')} cadastradas até ${nomeMes(m)} mas com data no mês seguinte. Na reunião de 06/10 foi citado um caso assim: venda em setembro com nota em outubro.`,'var(--s1)',detV('Data de emissão diferente da data da venda',lancMesSeguinte)],
+    ['Vendas lançadas depois do fechamento',soma(criadoDepois),`${pl(criadoDepois.length,'venda','vendas')} de ${nomeMes(m)} foram cadastradas no sistema só depois do mês.`,'var(--s3)',detV('Vendas lançadas depois do fechamento',criadoDepois)],
+    ['Canceladas no sistema',soma(canc),`${pl(canc.length,'venda','vendas')} canceladas em ${nomeMes(m)}.`,'var(--red)',detV('Canceladas no sistema',canc)],
   ];
-  if(temPlanilha) mot.push(['Vendas só no sistema',soSistema,'Venda no sistema sem pedido do mesmo cliente na planilha do mês: data diferente ou cliente com outro nome.','var(--teal)']);
-  if(temPlanilha) mot.unshift(['Pedidos da planilha sem lançamento no sistema',naoLancado,'Cliente com venda na planilha e nenhuma venda no sistema no mês, no anterior ou no seguinte.','var(--orange)'],['Valores diferentes no mesmo cliente',Math.abs(difValor),`Frete, peças extras da sublimação ou desconto lançados só em uma das bases (no total, ${difValor>=0?'a planilha está maior':'o sistema está maior'}).`,'var(--sNone)']);
-  $('motivos').innerHTML=mot.filter(x=>Math.abs(x[1])>0.5).map(([t,v,ds,c])=>`<li><i style="background:${c}"></i><b>${t}</b><span class="vv">${brl(v)}</span><span class="ds">${ds}</span></li>`).join('')||'<li><span></span><b>Nenhuma diferença relevante encontrada no sistema neste mês.</b><span></span></li>';
+  if(temPlanilha) mot.push(['Vendas só no sistema',soSistema,'Venda no sistema sem pedido do mesmo cliente na planilha do mês: data diferente ou cliente com outro nome.','var(--teal)',detV('Vendas só no sistema',vSoS)]);
+  if(temPlanilha&&outroMes>0.5) mot.push(['Lançadas no sistema com data de outro mês',outroMes,'Cliente com pedido na planilha deste mês e venda no sistema no mês anterior ou seguinte.','var(--s1)',detV('Lançadas no sistema com data de outro mês',vOutro)]);
+  if(temPlanilha) mot.unshift(['Pedidos da planilha sem lançamento no sistema',naoLancado,'Cliente com venda na planilha e nenhuma venda no sistema no mês, no anterior ou no seguinte.','var(--orange)',detL('Pedidos da planilha sem lançamento no sistema',cliNao)],['Valores diferentes no mesmo cliente',Math.abs(difValor),`Frete, peças extras da sublimação ou desconto lançados só em uma das bases (no total, ${difValor>=0?'a planilha está maior':'o sistema está maior'}).`,'var(--sNone)',detC('Valores diferentes no mesmo cliente',cliDif)]);
+  $('motivos').innerHTML=(m<'2026-08'?`<li><span></span><b>${nomeMes(m)} é antes da Conta Azul (começou em agosto/2026): não há sistema para comparar neste mês.</b><span></span></li>`:'')+mot.filter(x=>Math.abs(x[1])>0.5).map(([t,v,ds,c,fn])=>`<li${fn?` data-d="${dk(fn)}" tabindex="0" role="button" style="cursor:pointer" title="Clique para ver as vendas e linhas"`:''}><i style="background:${c}"></i><b>${t}${fn?' <span class="lk" style="font-weight:400">ver ›</span>':''}</b><span class="vv">${brl(v)}</span><span class="ds">${ds}</span></li>`).join('')||'<li><span></span><b>Nenhuma diferença relevante encontrada no sistema neste mês.</b><span></span></li>';
   // mês a mês
   const meses=[]; for(let i=5;i>=0;i--) meses.push(somaMes(m,-i));
-  $('concMeses').innerHTML=`<table><thead><tr><th>Mês</th>${temPlanilha?'<th class="v">Planilha</th>':'<th class="v">Planilha (informado)</th>'}<th class="v">Sistema: aprovadas/faturadas</th><th class="v">Em andamento</th><th class="v">Canceladas</th><th class="v">Diferença</th></tr></thead><tbody>${meses.map(mm=>{ const p=temPlanilha?soma(plMes(mm)):(+totalInformado[mm]||0), c=soma(caMes(mm,EF)); return `<tr class="${mm===m?'tot':''}"><td>${nomeMes(mm)}</td><td class="v">${p?brl(p):'—'}</td><td class="v">${brl(c)}</td><td class="v">${brl(soma(caMes(mm,['EM_ANDAMENTO'])))}</td><td class="v">${brl(soma(caMes(mm,['CANCELADO'])))}</td><td class="v ${p&&p-c<0?'neg':''}">${p?brl(p-c):'—'}</td></tr>`; }).join('')}</tbody></table>`;
+  $('concMeses').innerHTML=`<table><thead><tr><th>Mês</th>${temPlanilha?'<th class="v">Planilha</th>':'<th class="v">Planilha (informado)</th>'}<th class="v">Sistema: aprovadas/faturadas</th><th class="v">Em andamento</th><th class="v">Canceladas</th><th class="v">Diferença</th></tr></thead><tbody>${meses.map(mm=>{ const p=temPlanilha?soma(plMes(mm)):(+totalInformado[mm]||0), c=soma(caMes(mm,EF)); return `<tr class="${mm===m?'tot':''}"><td>${nomeMes(mm)}${mm<'2026-08'?' <span class="pill st-na" title="A Conta Azul começou em agosto/2026">antes da Conta Azul</span>':''}</td><td class="v">${p?brl(p):'—'}</td><td class="v">${mm<'2026-08'?'—':brl(c)}</td><td class="v">${mm<'2026-08'?'—':brl(soma(caMes(mm,['EM_ANDAMENTO'])))}</td><td class="v">${mm<'2026-08'?'—':brl(soma(caMes(mm,['CANCELADO'])))}</td><td class="v ${p&&p-c<0&&mm>='2026-08'?'neg':''}">${p&&mm>='2026-08'?brl(p-c):'—'}</td></tr>`; }).join('')}</tbody></table>`;
   linhasCli.sort((a,b)=>Math.abs(b.dif)-Math.abs(a.dif));
   $('concClientes').innerHTML=temPlanilha?(linhasCli.length?`<table><thead><tr><th>Cliente</th><th class="v">Planilha</th><th class="v">Sistema</th><th class="v">Diferença</th><th>Provável motivo</th></tr></thead><tbody>${linhasCli.slice(0,25).map(x=>`<tr><td class="el">${esc(x.nome)}</td><td class="v">${brl(x.pl)}</td><td class="v">${brl(x.ca)}</td><td class="v ${x.dif<0?'neg':''}">${brl(x.dif)}</td><td>${x.obs}</td></tr>`).join('')}</tbody></table>`:'<div class="vazio">Planilha e sistema batem cliente a cliente neste mês.</div>')
     :`<table><thead><tr><th>Venda</th><th>Data</th><th>Cadastrada em</th><th>Cliente</th><th>Situação</th><th class="v">Valor</th></tr></thead><tbody>${[...andamento,...lancMesSeguinte,...criadoDepois].slice(0,30).map(v=>`<tr><td>${esc(v.n)}</td><td class="num">${v.d.split('-').reverse().join('/')}</td><td class="num">${v.e?v.e.split('-').reverse().join('/'):'—'}</td><td class="el">${esc(v.c)}</td><td>${v.s==='EM_ANDAMENTO'?'Em andamento':v.s==='APROVADO'?'Aprovada':v.s==='FATURADO'?'Faturada':v.s}</td><td class="v">${brl2(v.t)}</td></tr>`).join('')||'<tr><td colspan="6" class="vazio">Nenhuma venda pendente ou fora do mês.</td></tr>'}</tbody></table>`;
@@ -2029,7 +2094,12 @@ function cardPag(cod,i,valorPlanilha,rid){
   const ps=parcelasDe(cod), p=ps[i], v=mapaCA().get(ckey(cod)), rot=i?'2º pagamento':'1º pagamento', rg=rid?regsPed().find(x=>x.id===rid):null, dReg=rg?.[i?'data_pag2':'data_pag1'], bReg=rg?.banco_pag;
   const st=!v?['st-na','sem venda']:!p?['st-na','sem parcela']:p.pago>0?['st-ok','recebido']:p.venc<hojeISO()?['st-dif','em atraso']:['st-so','a receber'];
   let h=`<div class="pgcard"><div class="bh"><b>${rot}</b><span class="pill ${st[0]}">${st[1]}</span></div><div class="ln"><span>Pedido</span><span><b>${esc(cod)}</b></span></div>`;
-  if(valorPlanilha) h+=`<div class="ln"><span>Na planilha</span><span>${brl2(valorPlanilha)}</span></div>`;
+  // pedido com mais de uma linha (itens/variações com o mesmo código): a parcela da Conta Azul é do pedido inteiro,
+  // então compara com a soma das linhas, não com a linha em que o mouse está (v44)
+  const gp=PED.gruposGrade?.get(ckey(cod)), nL=gp?.regs?.length||1, somaPl=nL>1?gp.regs.reduce((a,x)=>a+(+x[i?'pag2':'pag1']||0),0):valorPlanilha;
+  if(nL>1) h+=`<div class="ln"><span>Pedido com</span><span>${nL} linhas (itens)</span></div>`;
+  if(valorPlanilha) h+=`<div class="ln"><span>${nL>1?'Nesta linha':'Na planilha'}</span><span>${brl2(valorPlanilha)}</span></div>`;
+  if(nL>1&&somaPl&&Math.abs(somaPl-valorPlanilha)>0.01) h+=`<div class="ln"><span>Soma das ${nL} linhas</span><span><b>${brl2(somaPl)}</b></span></div>`;
   if((dReg||bReg)&&!(p&&p.baixas?.length)) h+=`<div class="ln"><span>Pago em</span><span>${dataBR(dReg)||'—'}</span></div>${bReg?`<div class="ln"><span>Banco</span><span>${esc(bReg)}</span></div>`:''}`;
   if(!v) return h+'<hr><div>Venda não encontrada na Conta Azul com este código.</div></div>';
   if(!p) return h+`<hr><div>${ps.length?`A venda tem ${ps.length} parcela${ps.length>1?'s':''}; não há ${i?'2ª':'1ª'} parcela.`:'Sem parcela a receber encontrada na Conta Azul para esta venda.'}</div></div>`;
@@ -2037,7 +2107,8 @@ function cardPag(cod,i,valorPlanilha,rid){
   h+=`<hr><div class="ln"><span>Parcela</span><span>${esc((p.desc||'').replace(/^.*?(parcela\s*\d+\/\d+).*$/i,'$1')||'—')}</span></div><div class="ln"><span>Valor</span><span>${brl2(p.valor)}</span></div><div class="ln"><span>Vencimento</span><span>${dataBR(p.venc)}</span></div>`;
   if(p.pago>0) h+=`<div class="ln"><span>Recebido</span><span><b>${brl2(p.pago)}</b></span></div>`+(b?`<div class="ln"><span>Baixado em</span><span>${dataBR(b.data)}</span></div><div class="ln"><span>Banco</span><span>${esc(b.conta||'—')}</span></div>${b.forma?`<div class="ln"><span>Forma</span><span>${esc(b.forma)}</span></div>`:''}`:`<div class="ln"><span>Baixa</span><span>${PED.d.pagamentos?.buscando_baixas?'buscando data e banco…':'data e banco não informados'}</span></div>`);
   else if(p.aberto) h+=`<div class="ln"><span>Em aberto</span><span>${brl2(p.aberto)}</span></div>`;
-  if(valorPlanilha&&Math.abs(valorPlanilha-(p.pago||p.valor))>1) h+=`<div class="av">Diferença de ${brl2(Math.abs(valorPlanilha-(p.pago||p.valor)))} entre a planilha e a Conta Azul</div>`;
+  if(somaPl&&Math.abs(somaPl-(p.pago||p.valor))>1) h+=`<div class="av">Diferença de ${brl2(Math.abs(somaPl-(p.pago||p.valor)))} entre a planilha${nL>1?' (soma das linhas do pedido)':''} e a Conta Azul</div>`;
+  else if(nL>1&&somaPl) h+=`<div class="ok">A soma das ${nL} linhas bate com a Conta Azul.</div>`;
   return h+'</div>';
 }
 
@@ -2051,7 +2122,7 @@ function linhasPlanilhaViva(){
 function pgRegistro(){
   if(PED.editando) return;
   if(!precisaPedidos('pdGrade')){ $('pdKpis').innerHTML=''; return; }
-  const d=PED.d, P=d.pode, regs=[...regsPed(),...linhasPlanilhaViva()], ca=mapaCA(), grupos=gruposCod(regs), conhecidos=valoresConhecidos(); PED.todas=regs;
+  const d=PED.d, P=d.pode, regs=[...regsPed(),...linhasPlanilhaViva()], ca=mapaCA(), grupos=gruposCod(regs), conhecidos=valoresConhecidos(); PED.todas=regs; PED.gruposGrade=grupos;
   // meses
   const hoje=hojeISO().slice(0,7), meses=[...new Set(regs.map(r=>r.mes).filter(Boolean).concat([hoje]))].sort().reverse();
   if(!PED.mes||(PED.mes!=='todos'&&!meses.includes(PED.mes))) PED.mes=meses.includes(hoje)&&regs.some(r=>r.mes===hoje)?hoje:(meses.find(m=>regs.some(r=>r.mes===m))||hoje);
@@ -2301,12 +2372,14 @@ function pgHistorico(){
 
 // ---------- base da conferência: a planilha é a referência das vendas (reunião de 03/11/2026) ----------
 function baseConf(chave){
+  // uma base só (v44): a planilha do Google até o mês anterior ao corte e a Planilha de vendas do painel a partir do corte.
+  // As duas não se repetem: de janeiro a outubro vale a planilha; de novembro em diante, o que foi lançado no painel.
   const regs=regsPed(), temPainel=regs.length>0, f=E.dados?.fonte, temPlan=(E.dados?.linhas||[]).some(l=>!l.cs)&&(f==='planilha'||f==='misto'||(f==='demo'&&(PREVIA||E.dados?.modo_demo)));
-  let b=PED[chave];
-  if(!b||(b==='painel'&&!temPainel)||(b==='planilha'&&!temPlan)) b=E.dados?.fonte==='painel'&&temPainel?'painel':temPlan?'planilha':'painel';
-  PED[chave]=b;
-  const base=b==='painel'?regs:(E.dados?.linhas||[]).filter(l=>!l.cs).map(l=>({codigo:l.cd||'',data:l.d,mes:l.m,cliente:l.c,cliente_lancado:l.co||'',vendedor:l.vo&&l.vo!==l.v?l.vo:l.v,tipo_venda:l.tv==='—'?'':l.tv,novo_recompra:l.nr||'',tipo_produto:l.tp,material:l.mt,cor:l.cr,quantidade:l.q,total:l.t,pag1:l.p1>1?l.p1:0,pag2:l.p2>1?l.p2:0,pago_100:!!l.ok,forma_pagamento:l.fp||'',prazo_entrega:l.pz||'',possivel_duplicado:!!l.du,_pl:1}));
-  return {b,base,temPainel,temPlan,rot:b==='painel'?'pedidos do painel':'planilha'};
+  const b=f==='painel'&&temPainel?'painel':temPlan?'planilha':'painel'; PED[chave]=b;
+  const base=b==='painel'?regs.map(r=>({...r,_sp:1})):(E.dados?.linhas||[]).filter(l=>!l.cs).map(l=>({codigo:l.cd||'',data:l.d,mes:l.m,cliente:l.c,cliente_lancado:l.co||'',vendedor:nomeBonito(l.vo||l.v),tipo_venda:l.tv==='—'?'':l.tv,novo_recompra:l.nr||'',tipo_produto:l.tp,material:l.mt,cor:l.cr,quantidade:l.q,total:l.t,pag1:l.p1>1?l.p1:0,pag2:l.p2>1?l.p2:0,pago_100:!!l.ok,forma_pagamento:l.fp||'',prazo_entrega:l.pz||'',possivel_duplicado:!!l.du,_pl:l.sp?0:1,_sp:l.sp?1:0,_ln:l.ln||0}));
+  const corte=E.dados?.corte_sistema;
+  const rot=b==='painel'?'Planilha de vendas do painel':f==='misto'&&corte?`planilha do Google até ${nomeMes(somaMes(corte,-1))} + Planilha de vendas do painel a partir de ${nomeMes(corte)}`:'planilha do Google';
+  return {b,base,temPainel,temPlan,rot};
 }
 
 // ---------- menu "Inconsistências" (v32: tudo num lugar só, uma lista única) ----------
@@ -2322,18 +2395,45 @@ const TIPOS_INC=[
   ['pge','Pagamento ou entrega em branco',0,'Preencher forma de pagamento, prazo de entrega e 1º pagamento (ainda não recebido na Conta Azul).'],
   ['semCod','Sem código do pedido',1,'Preencher o cód. interno (o mesmo número da venda na Conta Azul).'],
   ['fmt','Código fora do padrão',0,'Corrigir o código (sequência + mês + ano) ou a data da venda.'],
-  ['multi','Mesmo código em pedidos diferentes',1,'Dar um código novo ou usar o complementar (código-1).'],
-  ['dois','Mesmo cliente e dia com códigos diferentes',0,'Se for acréscimo, usar o código original com "-1".'],
+  ['multi','Mesmo código para clientes diferentes',1,'Um código é um pedido de um cliente. Linhas com o mesmo código e o mesmo cliente (variação de produto, lote ou destino) estão certas; aqui só aparecem códigos usados por clientes diferentes.'],
   ['dup','Possível lançamento duplicado',1,'Confirmar se são dois itens; se não, excluir a linha repetida.'],
   ['conta','Total diferente de qtd × valor/und',0,'Corrigir quantidade, valor/und ou total.'],
   ['lote','Cliente com "lote" no nome',0,'Deixar só o nome do cliente; o lote vai na coluna Lote / obs.'],
   ['graf','Mesmo cliente com nomes diferentes',0,'Padronizar o nome (botão Unificar na Planilha de vendas).'],
 ];
+const TI=(t)=>t==='ok'?['ok','Batendo com a Conta Azul',0,'Nada a corrigir: mesmo código e mesmo valor na Conta Azul.']:TIPOS_INC.find(x=>x[0]===t)||[t,t,0,''];
+// o que aconteceu com a gravação dos pagamentos na planilha do Google (v44)
+function statusGravacaoInc(pend){
+  const el=$('inGrava'), st=E.dados?.planilha_script, ug=st?.ultima_gravacao, adm=E.eu?.perfil==='adm';
+  if(!st?.configurado||(!pend?.length&&!ug?.erro)){ el.hidden=true; return; }
+  const quando=ug?.em?new Date(ug.em).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'';
+  const pul=ug?.pulados||[], porMot=pul.reduce((m,p)=>(m[p.motivo]=(m[p.motivo]||0)+1,m),{});
+  const ult=!ug?'O painel ainda não tentou gravar.':ug.erro?`<b>Última tentativa (${quando}) deu erro:</b> ${esc(ug.erro)}`:ug.adiado?`Última tentativa (${quando}): adiada, ${esc(ug.motivo||'')}.`:`Última gravação (${quando}): ${pl(ug.celulas||0,'célula preenchida','células preenchidas')} em ${pl(ug.pedidos||0,'pedido','pedidos')}${ug.enviados!=null?` de ${int(ug.enviados)} enviados`:''}.`;
+  el.hidden=false; el.className='aviso'+(ug?.erro||!st.gravar?' erro':'');
+  el.innerHTML=`<span><b>Gravação na planilha do Google:</b> ${st.gravar?'automática, a cada 10 minutos':'<b>desligada</b> (por isso os pagamentos baixados não foram para a planilha)'} · grava pagamentos até ${nomeMes(st.gravar_ate||'2026-10')}. ${ult}
+    ${Object.keys(porMot).length?`<br>Não gravados: ${Object.entries(porMot).map(([m,n])=>`${int(n)} ${esc(m)}`).join(' · ')} <a href="#" class="lk" id="inPulados">ver quais</a>.`:''}
+    ${st.celulas_fila?`<br>${pl(st.celulas_fila,'campo em branco esperando','campos em branco esperando')} para ir para a planilha.`:''}</span>
+    ${adm?`<span style="display:flex;gap:8px;flex-wrap:wrap">${st.gravar?'':'<button class="bt2" type="button" id="inLigarGrav">Ligar gravação automática</button>'}<button class="bt2 pri" type="button" id="inGravarAgora">Gravar na planilha agora</button>${PED.incAdiado?'<button class="bt2" type="button" id="inForcar" title="Grava mesmo que a planilha tenha sido editada há menos de 15 minutos">Gravar mesmo assim</button>':''}</span>`:''}`;
+  const fz=$('inForcar'); if(fz) fz.onclick=async()=>{ fz.disabled=true; fz.textContent='Gravando…'; PED.incAdiado=false; await gravarDaInc(true); };
+  const ag=$('inGravarAgora'); if(ag) ag.onclick=async()=>{ ag.disabled=true; ag.textContent='Gravando… (até 1 minuto)'; await gravarDaInc(false); };
+  const lg=$('inLigarGrav'); if(lg) lg.onclick=async()=>{ lg.disabled=true; try{ const r=await api('/api/planilha-script/gravar',{method:'POST',body:JSON.stringify({ativo:true})}); E.dados.planilha_script={...st,...r}; toast('Gravação automática ligada.'); }catch(e){ toast(e.message,true); } pgInconsistencias(); };
+  const vp=$('inPulados'); if(vp) vp.onclick=(e)=>{ e.preventDefault(); abrirDet('Não gravados na planilha',`Última gravação: ${quando}`,[{rot:'Código'},{rot:'Linha',t:'int'},{rot:'Campo'},{rot:'Motivo',wr:1}],pul.map(p=>[p.codigo||'',p.linha||'',p.campo||'',p.motivo==='célula com fórmula'?'a célula tem fórmula (ex.: 2º pagamento = total − 1º); o painel não apaga fórmula. Apague a fórmula dessa célula se quiser que o valor da Conta Azul entre.':p.motivo==='já tem valor'?'a célula já tinha valor digitado':p.motivo])); };
+}
+async function gravarDaInc(forcar){
+  try{ const r=await api('/api/planilha-script/gravar',{method:'POST',body:JSON.stringify({agora:true,forcar:!!forcar})});
+    E.dados.planilha_script={...(E.dados.planilha_script||{}),...r,ultima_gravacao:{em:new Date().toISOString(),...(r.ultima_gravacao||{}),celulas:r.celulas,pedidos:r.pedidos,adiado:r.adiado,motivo:r.motivo,pulados:r.pulados||null,enviados:r.pendentes??r.ultima_gravacao?.enviados}};
+    PED.incAdiado=!!r.adiado;
+    if(r.adiado) toast(`Gravação adiada: ${r.motivo}. O painel tenta de novo sozinho a cada 10 minutos, ou clique em "Gravar mesmo assim".`);
+    else toast(r.celulas?`Planilha do Google: ${pl(r.celulas,'célula preenchida','células preenchidas')} em ${pl(r.pedidos,'pedido','pedidos')}.`:'Nada novo gravado na planilha (veja os motivos no quadro).');
+    if(r.celulas) setTimeout(()=>carregar(true),1500);
+  }catch(e){ E.dados.planilha_script={...(E.dados.planilha_script||{}),ultima_gravacao:{em:new Date().toISOString(),erro:e.message}}; toast(e.message,true); }
+  pgInconsistencias();
+}
 function linhasInconsistencias(ls,b,ca,desde,noMes,vendSel){
-  const out=[], push=(tipo,r,extra={})=>out.push({tipo,data:r.data||'',codigo:r.codigo||'',cliente:r.cliente||'',vendedor:r.vendedor||'',plan:+r.total||0,sis:'',dif:'',falta:'',...extra});
+  const out=[], push=(tipo,r,extra={})=>out.push({tipo,data:r.data||'',codigo:r.codigo||'',cliente:r.cliente||'',vendedor:r.vendedor||'',plan:+r.total||0,sis:'',dif:'',falta:'',sp:r._sp||0,...extra});
   const g=gruposCod(ls), temCA=!!E.dados?.conta_azul;
   if(temCA){
-    for(const [k,x] of g){ const st=statusCod(x.codigo,x.t,x.mes,ca), v=ca.get(k), base={data:x.data,codigo:x.codigo,cliente:x.cliente,vendedor:x.vendedor||'',total:x.t};
+    for(const [k,x] of g){ const st=statusCod(x.codigo,x.t,x.mes,ca), v=ca.get(k), base={data:x.data,codigo:x.codigo,cliente:x.cliente,vendedor:x.vendedor||'',total:x.t,_sp:x.regs[0]?._sp};
       if(st[0]==='dif') push('dif',base,{sis:v.t,dif:v.t-x.t,falta:'Conta Azul '+brl2(v.t)});
       else if(['so_painel','cancelado','nao_aprov'].includes(st[0])) push('soP',base,{sis:v?v.t:'',dif:v?v.t-x.t:'',falta:v?SIT_CA[v.s]||v.s:'não existe na Conta Azul'});
       if(x.mes>=desde){ const ps=parcelasDe(x.codigo); if(ps.length){ const p1=x.regs.reduce((a,r)=>a+(+r.pag1||0),0), p2=x.regs.reduce((a,r)=>a+(+r.pag2||0),0); [[p1,ps[0]],[p2,ps[1]]].forEach(([vp,pc],i)=>{ if(vp>0&&pc&&Math.abs(vp-(pc.pago||pc.valor))>1) push('pag',base,{plan:vp,sis:pc.pago||pc.valor,dif:(pc.pago||pc.valor)-vp,falta:(i?'2º':'1º')+' pagamento'}); }); } } }
@@ -2349,7 +2449,7 @@ function linhasInconsistencias(ls,b,ca,desde,noMes,vendSel){
     // pagamento em branco: confere na Conta Azul se a parcela já foi baixada
     const grpR=r.codigo?g.get(ckey(r.codigo)):null, prim=!grpR||grpR.regs[0]===r, psR=r.codigo&&temCA?parcelasDe(r.codigo):[], pagoCA=psR.filter(p=>p.pago>0);
     const semPag=prim&&!(grpR?grpR.regs.some(x=>+x.pag1>0):+r.pag1>0);
-    if(semPag&&pagoCA.length&&(r.mes||'')>=desde){ const tx=pagoCA.map((p,i)=>`${i+1}º ${brl2(p.pago)}${p.baixas?.[0]?.data?' em '+dataBR(p.baixas[0].data):''}${p.baixas?.[0]?.conta?' · '+p.baixas[0].conta:''}`).join(' | '); push('pgeCA',r,{plan:grpR?grpR.t:+r.total||0,sis:pagoCA.reduce((a,p)=>a+p.pago,0),dif:'',falta:'baixado na Conta Azul: '+tx}); }
+    if(semPag&&pagoCA.length&&(r.mes||'')>=desde){ const tx=pagoCA.map((p,i)=>`${i+1}º ${brl2(p.pago)}${p.baixas?.[0]?.data?' em '+dataBR(p.baixas[0].data):''}${p.baixas?.[0]?.conta?' · '+p.baixas[0].conta:''}`).join(' | '); const pu=r._pl?(E.dados?.planilha_script?.ultima_gravacao?.pulados||[]).find(p=>p.codigo&&ckey(p.codigo)===ckey(r.codigo)):null; push('pgeCA',r,{plan:grpR?grpR.t:+r.total||0,sis:pagoCA.reduce((a,p)=>a+p.pago,0),dif:'',falta:'baixado na Conta Azul: '+tx+(pu?` · não gravado na planilha: ${pu.motivo}${pu.linha?' (linha '+pu.linha+')':''}`:'')}); }
     const pe=[!r.forma_pagamento&&'forma de pagamento',!r.prazo_entrega&&'prazo de entrega',semPag&&!pagoCA.length&&!r.pago_100&&'1º pagamento (ainda não recebido no sistema)'].filter(Boolean); if(pe.length&&(r.mes||'')>='2026-09') push('pge',r,{falta:pe.join(', ')});
     if(!r.codigo&&(r.mes||'')>='2026-09') push('semCod',r,{falta:'cód. interno'});
     if(r.codigo){ const m=cbase(r.codigo).match(/^(\d{4})(\d{2})(\d{4})$/); if(!m) push('fmt',r,{falta:'formato do código'}); else if(r.data&&`${m[3]}-${m[2]}`!==r.data.slice(0,7)) push('fmt',r,{falta:`código de ${m[2]}/${m[3]}, venda em ${dataBR(r.data)}`});
@@ -2358,8 +2458,12 @@ function linhasInconsistencias(ls,b,ca,desde,noMes,vendSel){
     if(/\blote\s*\d/i.test(r.cliente||'')||/\blote\s*\d/i.test(r.cliente_lancado||'')) push('lote',r,{falta:'lançado como "'+(r.cliente_lancado||r.cliente)+'"'});
     const kd=[semA(r.cliente),r.data,semA(r.tipo_produto),semA(r.cor),r.quantidade,Math.round((+r.total||0)*100)].join('|'); visto.set(kd,(visto.get(kd)||[]).concat([r]));
   }
-  for(const x of g.values()) if(new Set(x.regs.map(r=>semA(r.cliente))).size>1||new Set(x.regs.map(r=>r.data)).size>1) x.regs.forEach(r=>push('multi',r,{falta:'mesmo código com '+(new Set(x.regs.map(r=>semA(r.cliente))).size>1?'clientes':'datas')+' diferentes'}));
-  for(const r of ls){ const mm=cd.get(semA(r.cliente)+'|'+r.data); if(r.codigo&&mm&&mm.size>1) push('dois',r,{falta:'códigos '+[...mm.keys()].join(', ')}); }
+  // mesmo código em várias linhas = itens do mesmo pedido (variação de produto, lote ou observação): normal.
+  // Só é problema quando o código aparece em clientes que não são o mesmo (nem um nome contém o outro).
+  const nomeK=(n)=>semA(n).replace(/\blote\s*\d+/g,'').replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim();
+  for(const x of g.values()){ const ns=[...new Set(x.regs.map(r=>nomeK(r.cliente)).filter(Boolean))]; if(ns.length<2) continue;
+    const mesmo=ns.every(a=>ns.every(c=>a===c||a.startsWith(c)||c.startsWith(a)||a.split(' ')[0]===c.split(' ')[0])); if(mesmo) continue;
+    x.regs.forEach(r=>push('multi',r,{falta:'mesmo código em: '+[...new Set(x.regs.map(r2=>r2.cliente))].join(' · ')})); }
   const dupS=new Set([...ls.filter(r=>r.possivel_duplicado),...[...visto.values()].filter(x=>x.length>1).flat()]); dupS.forEach(r=>push('dup',r,{falta:r.possivel_duplicado?'marcado na base tratada':'linha igual repetida'}));
   const cont=new Map(); ls.forEach(r=>{ const n=r._pl?(r.cliente_lancado||r.cliente):r.cliente; if(n) cont.set(n,(cont.get(n)||0)+1); });
   const nomes=[...cont.keys()].map(n=>({n,k:semA(n).replace(/\blote\s*\d+/g,'').replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim()})).filter(x=>x.k.length>=3).sort((a,c)=>a.k.length-c.k.length);
@@ -2370,7 +2474,6 @@ function linhasInconsistencias(ls,b,ca,desde,noMes,vendSel){
 function pgInconsistencias(){
   if(!precisaPedidos('inTabela')){ $('inKpis').innerHTML=''; return; }
   const {b,base,temPainel,temPlan,rot}=baseConf('inBase');
-  document.querySelectorAll('[data-inb]').forEach(x=>{ x.setAttribute('aria-pressed',String(x.dataset.inb===b)); x.disabled=x.dataset.inb==='painel'?!temPainel:!temPlan; });
   const av=$('inAviso');
   if(!base.length){ av.className='aviso erro'; av.innerHTML=`<span><b>Ainda não há planilha para conferir.</b> A planilha do comercial não está ligada ao painel e a base não foi importada, por isso não dá para comparar com a Conta Azul (se comparasse, tudo apareceria como "só no sistema"). ${E.eu?.perfil==='adm'?'Ligue a planilha em <b>Controle → Planilha × sistema (mês)</b> (botão <b>Ligar pelo meu e-mail</b>) ou importe o arquivo em <b>Planilha de vendas → Importar base</b>.':'Peça ao administrador para ligar a planilha.'}</span>`;
     ['inKpis','inResumo','inTabela','inVendT'].forEach(id=>$(id).innerHTML=''); $('inMes').innerHTML=''; $('inVend').innerHTML=''; PED.inRows=[]; return; }
@@ -2388,25 +2491,31 @@ function pgInconsistencias(){
   if(PED.inVend==null&&meuVend()) PED.inVend=vends.find(v=>semA(v)===semA(meuVend()))||'';
   if(!vends.includes(PED.inVend)) PED.inVend=''; $('inVend').innerHTML='<option value="">Todos</option>'+vends.map(v=>`<option>${esc(v)}</option>`).join(''); $('inVend').value=PED.inVend||'';
   const ls=base.filter(r=>noPer(r)&&(!PED.inVend||r.vendedor===PED.inVend)), desde=DESDE(), temCA=!!E.dados?.conta_azul;
-  av.className='aviso'; av.innerHTML=`<span>Base: <b>${rot}</b>${b==='planilha'?' (a referência das vendas, como combinado na reunião de 03/11)':''}. Uma lista só com tudo que precisa de correção: sistema × planilha pedido a pedido${temCA?` (a partir de ${nomeMes(desde)})`:' (<b>Conta Azul não conectada</b>)'}, colunas vazias, código do pedido e cadastro de clientes. Clique num tipo para filtrar.</span>`;
+  av.className='aviso'; av.innerHTML=`<span>Base: <b>${rot}</b>${b==='planilha'?' (a referência das vendas, como combinado na reunião de 03/11; a Conta Azul começou em agosto/2026, então a conferência com o sistema vale a partir daí)':''}. Uma lista só com tudo que precisa de correção: sistema × planilha pedido a pedido${temCA?` (a partir de ${nomeMes(desde)})`:' (<b>Conta Azul não conectada</b>)'}, colunas vazias, código do pedido e cadastro de clientes. Clique num tipo para filtrar.</span>`;
   const todas=linhasInconsistencias(ls,b,mapaCA(),desde,noPer,PED.inVend);
-  const rotT=(t)=>t==='soS'?'Venda no sistema sem pedido '+(b==='painel'?'no painel':'na planilha'):TIPOS_INC.find(x=>x[0]===t)[1];
+  const rotT=(t)=>t==='ok'?'Batendo com a Conta Azul':t==='soS'?'Venda no sistema sem pedido '+(b==='painel'?'no painel':'na planilha'):TI(t)[1];
   const porT=new Map(TIPOS_INC.map(t=>[t[0],[]])); todas.forEach(x=>porT.get(x.tipo).push(x));
+  // pedidos que batem com a Conta Azul (para ver o que já está certo)
+  const okRows=[]; if(temCA){ const caM=mapaCA(); for(const x of gruposCod(ls).values()){ if((x.mes||'')<desde) continue; const st=statusCod(x.codigo,x.t,x.mes,caM); if(st[0]!=='ok') continue; const v=caM.get(ckey(x.codigo)); const ps=parcelasDe(x.codigo), rec=ps.reduce((a,p)=>a+(+p.pago||0),0);
+    okRows.push({tipo:'ok',data:x.data,codigo:x.codigo,cliente:x.cliente,vendedor:x.vendedor||'',plan:x.t,sis:v.t,dif:'',sp:x.regs[0]?._sp,falta:(SIT_CA[v.s]||v.s)+(x.n>1?` · ${x.n} itens`:'')+(ps.length?` · recebido ${brl2(rec)} de ${pl(ps.length,'parcela','parcelas')}`:'')}); } }
+  porT.set('ok',okRows);
   if(PED.inTipo&&!porT.get(PED.inTipo)?.length) PED.inTipo='';
+  $('inTipoSel').innerHTML=`<option value="">Todas as inconsistências (${int(todas.length)})</option>`+TIPOS_INC.filter(t=>porT.get(t[0]).length).map(t=>`<option value="${t[0]}">${esc(rotT(t[0]))} (${int(porT.get(t[0]).length)})</option>`).join('')+(temCA?`<option value="ok">✓ Pedidos batendo com a Conta Azul (${int(okRows.length)})</option>`:''); $('inTipoSel').value=PED.inTipo||'';
   const qI=semA(PED.inBusca||''), achaI=(x)=>!qI||semA([x.cliente,x.codigo,x.vendedor,dataBR(x.data),x.falta,rotT(x.tipo)].join(' ')).includes(qI)||ckey(x.codigo)&&ckey(qI)&&ckey(x.codigo).includes(ckey(qI));
-  const vis=todas.filter(x=>(!PED.inTipo||x.tipo===PED.inTipo)&&achaI(x)).sort((a,c)=>TIPOS_INC.findIndex(t=>t[0]===a.tipo)-TIPOS_INC.findIndex(t=>t[0]===c.tipo)||(a.data||'').localeCompare(c.data||''));
+  const vis=(PED.inTipo==='ok'?okRows:todas).filter(x=>(!PED.inTipo||x.tipo===PED.inTipo)&&achaI(x)).sort((a,c)=>TIPOS_INC.findIndex(t=>t[0]===a.tipo)-TIPOS_INC.findIndex(t=>t[0]===c.tipo)||(a.data||'').localeCompare(c.data||''));
   PED.inRows=vis;
   const linhasProb=new Set(todas.filter(x=>!['soS'].includes(x.tipo)).map(x=>x.codigo+'|'+x.cliente+'|'+x.data+'|'+x.plan));
-  const graves=todas.filter(x=>TIPOS_INC.find(t=>t[0]===x.tipo)[2]);
+  const graves=todas.filter(x=>TI(x.tipo)[2]);
   $('inKpis').innerHTML=kpiHtml([
     ['Inconsistências',int(todas.length),`<span>${pl([...porT.values()].filter(v=>v.length).length,'tipo','tipos')} · ${esc(PED.inPerRot)}${PED.inVend?' · '+esc(PED.inVend):''}</span>`,todas.length?'alerta':'dest',''],
     ['Graves',int(graves.length),'<span>afetam valor, código ou a conferência com o sistema</span>',graves.length?'alerta':'',''],
     ['Linhas conferidas',int(ls.length),`<span>${brl(ls.reduce((a,r)=>a+(+r.total||0),0))} na ${b==='painel'?'base do painel':'planilha'}</span>`,'',''],
     ['Sistema × planilha',temCA?int([...porT.get('dif'),...porT.get('soP'),...porT.get('soS')].length):'—',temCA?`<span>${int(porT.get('dif').length)} valor diferente · ${int(porT.get('soP').length)} só ${b==='painel'?'no painel':'na planilha'} · ${int(porT.get('soS').length)} só no sistema</span>`:'<span>conecte a Conta Azul</span>','',''],
   ]);
-  $('inResumo').innerHTML=`<button type="button" class="inc-t ${PED.inTipo?'':'on'}" data-int="">Todas <b>${int(todas.length)}</b></button>`+TIPOS_INC.map(([t,,gr,como])=>{ const n=porT.get(t).length; return `<button type="button" class="inc-t ${PED.inTipo===t?'on':''} ${n?(gr?'grave':'media'):'zero'}" data-int="${t}" ${n?'':'disabled'} title="Como corrigir: ${esc(como)}">${esc(rotT(t))} <b>${n?int(n):'✓'}</b></button>`; }).join('');
-  const como=PED.inTipo?TIPOS_INC.find(t=>t[0]===PED.inTipo)[3]:'';
-  $('inTabela').innerHTML=(como?`<div class="nota" style="margin:0 0 8px"><b>Como corrigir:</b> ${esc(como)}</div>`:'')+(vis.length?`<table class="compacta"><thead><tr><th>Inconsistência</th><th>Data</th><th>Código</th><th>Cliente</th><th>Vendedor</th><th>O que falta / detalhe</th><th class="v">Planilha</th><th class="v">Sistema</th><th class="v">Diferença</th></tr></thead><tbody>${vis.slice(0,1500).map(x=>{ const gr=TIPOS_INC.find(t=>t[0]===x.tipo)[2]; return `<tr${x.codigo&&b==='painel'&&x.tipo!=='soS'?` data-incod="${esc(x.codigo)}" style="cursor:pointer" title="Abrir na Planilha de vendas"`:''}><td><span class="pill ${gr?'st-dif':'st-so'}">${esc(rotT(x.tipo))}</span></td><td style="white-space:nowrap">${dataBR(x.data)}</td><td><b>${esc(x.codigo)}</b></td><td class="el">${esc(x.cliente)}</td><td class="el">${esc(x.vendedor)}</td><td class="hs-m" style="white-space:normal;min-width:180px">${esc(x.falta)}</td><td class="v">${x.plan===''?'—':brl2(x.plan)}</td><td class="v">${x.sis===''?'—':brl2(x.sis)}</td><td class="v">${x.dif===''||Math.abs(x.dif)<=1?'—':`<b style="color:var(--red)">${x.dif>0?'+':''}${brl2(x.dif)}</b>`}</td></tr>`; }).join('')}</tbody></table>${vis.length>1500?'<div class="nota">Mostrando 1.500; exporte para ver todas.</div>':''}`:vazio('Nenhuma inconsistência com esses filtros. ✓'));
+  $('inResumo').innerHTML=`<button type="button" class="inc-t ${PED.inTipo?'':'on'}" data-int="">Todas <b>${int(todas.length)}</b></button>`+TIPOS_INC.map(([t,,gr,como])=>{ const n=porT.get(t).length; return `<button type="button" class="inc-t ${PED.inTipo===t?'on':''} ${n?(gr?'grave':'media'):'zero'}" data-int="${t}" ${n?'':'disabled'} title="Como corrigir: ${esc(como)}">${esc(rotT(t))} <b>${n?int(n):'✓'}</b></button>`; }).join('')+(temCA?`<button type="button" class="inc-t ok ${PED.inTipo==='ok'?'on':''}" data-int="ok" ${okRows.length?'':'disabled'} title="Pedidos com o mesmo código e o mesmo valor na Conta Azul">✓ Batendo com a Conta Azul <b>${int(okRows.length)}</b></button>`:'');
+  const como=PED.inTipo?TI(PED.inTipo)[3]:'';
+  $('inTabela').innerHTML=(como?`<div class="nota" style="margin:0 0 8px"><b>Como corrigir:</b> ${esc(como)}</div>`:'')+(vis.length?`<table class="compacta"><thead><tr><th>Inconsistência</th><th>Data</th><th>Código</th><th>Cliente</th><th>Vendedor</th><th>O que falta / detalhe</th><th class="v">Planilha</th><th class="v">Sistema</th><th class="v">Diferença</th></tr></thead><tbody>${vis.slice(0,1500).map(x=>{ const gr=TI(x.tipo)[2]; const pc=x.tipo==='ok'?'st-ok':gr?'st-dif':'st-so'; return `<tr${x.codigo&&(b==='painel'||x.sp)&&x.tipo!=='soS'?` data-incod="${esc(x.codigo)}" style="cursor:pointer" title="Abrir na Planilha de vendas"`:''}><td><span class="pill ${pc}">${esc(rotT(x.tipo))}</span></td><td style="white-space:nowrap">${dataBR(x.data)}</td><td><b>${esc(x.codigo)}</b></td><td class="el">${esc(x.cliente)}</td><td class="el">${esc(x.vendedor)}</td><td class="hs-m" style="white-space:normal;min-width:180px">${esc(x.falta)}</td><td class="v">${x.plan===''?'—':brl2(x.plan)}</td><td class="v">${x.sis===''?'—':brl2(x.sis)}</td><td class="v">${x.dif===''||Math.abs(x.dif)<=1?'—':`<b style="color:var(--red)">${x.dif>0?'+':''}${brl2(x.dif)}</b>`}</td></tr>`; }).join('')}</tbody></table>${vis.length>1500?'<div class="nota">Mostrando 1.500; exporte para ver todas.</div>':''}`:vazio('Nenhuma inconsistência com esses filtros. ✓'));
+  statusGravacaoInc(porT.get('pgeCA'));
   const porV=vends.filter(v=>!PED.inVend||v===PED.inVend), tv=TIPOS_INC.filter(t=>t[0]!=='soS'&&porT.get(t[0]).length);
   $('inVendT').innerHTML=porV.length&&tv.length?`<table class="compacta"><thead><tr><th>Vendedor</th>${tv.map(t=>`<th class="v" title="${esc(t[1])}">${esc(rotT(t[0]))}</th>`).join('')}<th class="v">Total</th></tr></thead><tbody>${porV.map(v=>{ const ns=tv.map(t=>porT.get(t[0]).filter(x=>x.vendedor===v).length); return `<tr><td class="el"><b>${esc(v)}</b></td>${ns.map((n,i)=>`<td class="v">${n?`<a href="#" class="lk" data-incv="${tv[i][0]}" data-v="${esc(v)}">${int(n)}</a>`:'<span style="color:var(--ink3)">—</span>'}</td>`).join('')}<td class="v"><b>${int(ns.reduce((a,c)=>a+c,0))}</b></td></tr>`; }).join('')}</tbody></table>`:vazio('Nada a corrigir por vendedor.');
 }
@@ -2518,7 +2627,7 @@ $('inMes').onchange=()=>{ PED.inMes=$('inMes').value; pgInconsistencias(); };
 $('inBusca').addEventListener('input',()=>{ clearTimeout(tBusca); tBusca=setTimeout(()=>{ PED.inBusca=$('inBusca').value; pgInconsistencias(); },250); });
 $('inFiltrar').onclick=()=>{ PED.inDe=$('inDe').value; PED.inAte=$('inAte').value; if(PED.inDe&&PED.inAte&&PED.inDe>PED.inAte){ toast('A data inicial precisa ser antes da final.',true); return; } pgInconsistencias(); };
 ['inDe','inAte'].forEach(id=>$(id).addEventListener('keydown',e=>{ if(e.key==='Enter') $('inFiltrar').click(); })); $('inVend').onchange=()=>{ PED.inVend=$('inVend').value; pgInconsistencias(); };
-document.querySelectorAll('[data-inb]').forEach(x=>x.onclick=()=>{ PED.inBase=x.dataset.inb; pgInconsistencias(); });
+$('inTipoSel').onchange=()=>{ PED.inTipo=$('inTipoSel').value; pgInconsistencias(); };
 $('inResumo').addEventListener('click',e=>{ const b2=e.target.closest('[data-int]'); if(!b2||b2.disabled) return; PED.inTipo=b2.dataset.int; pgInconsistencias(); });
 $('inVendT').addEventListener('click',e=>{ const a2=e.target.closest('[data-incv]'); if(!a2) return; e.preventDefault(); PED.inVend=a2.dataset.v; PED.inTipo=a2.dataset.incv; pgInconsistencias(); $('inTabela').scrollIntoView({behavior:'smooth',block:'start'}); });
 $('inTabela').addEventListener('click',e=>{ const tr=e.target.closest('[data-incod]'); if(!tr) return; const cod=tr.dataset.incod, r=regsPed().find(x=>x.codigo===cod); PED.busca=cod; PED.fil=''; PED.vend=''; PED.vendEscolhido=true; if(r) PED.mes=r.mes; irPara('registro'); });
@@ -2540,7 +2649,7 @@ $('psLigar').onclick=async()=>{ $('psErro').textContent=''; $('psOk').textConten
 document.querySelectorAll('[data-imo]').forEach(b=>b.onclick=()=>{ IM.orig=b.dataset.imo; IM.ok=null; $('imOk').disabled=true; $('imRes').innerHTML=''; marcarOrig(); });
 ['imDe','imAte','imModo','imArq'].forEach(id=>$(id).addEventListener('change',()=>{ IM.ok=null; $('imOk').disabled=true; $('imOk').textContent='Importar'; $('imRes').innerHTML=''; }));
 $('imConferir').onclick=()=>rodarImport(true); $('imOk').onclick=()=>rodarImport(false);
-$('pdFundo').onclick=()=>{ fecharPedido(); $('imModal').hidden=true; $('psModal').hidden=true; $('ixModal').hidden=true; };
+$('pdFundo').onclick=()=>{ fecharPedido(); $('vzModal').hidden=true; $('imModal').hidden=true; $('psModal').hidden=true; $('ixModal').hidden=true; };
 document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&(!$('pdModal').hidden||!$('imModal').hidden)){ fecharPedido(); $('imModal').hidden=true; } });
 $('cfMes').onchange=()=>{ PED.cfMes=$('cfMes').value; pgConferencia(); }; $('cfVend').onchange=()=>{ PED.cfVend=$('cfVend').value; pgConferencia(); };
 document.querySelectorAll('[data-cfb]').forEach(b=>b.onclick=()=>{ PED.cfBase=b.dataset.cfb; pgConferencia(); });
@@ -2591,6 +2700,9 @@ async function exportar(fmt,X){
 const SIT_CA={APROVADO:'Aprovada',FATURADO:'Faturada',EM_ANDAMENTO:'Em andamento',ORCAMENTO:'Orçamento',CANCELADO:'Cancelada'};
 const T_PED={data:'data',ro:'mes',brl:'brl',pag:'brl',num:'num'};
 const FONTES_EXP={
+  vz:()=>{ const def=VZ_CAMPOS.find(c=>c[0]===VZ.campo); return {nome:'campos-em-branco-'+VZ.campo,titulo:`${def?def[1]:''} em branco`,sub:$('vzSub').textContent,
+    cols:[{rot:'Linha na planilha'},{rot:'Data',t:'data'},{rot:'Mês'},{rot:'Código'},{rot:'Cliente'},{rot:'Vendedor'},{rot:'Tipo de produto'},{rot:'Material'},{rot:'Cor'},{rot:'Qtd.',t:'int'},{rot:'Total',t:'brl',total:1}],
+    rows:linhasVazias().map(l=>[l.sp?'painel':l.ln||'',l.d||'',l.m||'',l.cd||'',l.co||l.c||'',l.vo||l.v||'',l.tp||'',l.mt||'',l.cr||'',l.q||0,l.t||0])}; },
   det:()=>({titulo:DET.titulo,sub:$('detSub').textContent,cols:DET.cols.map(c=>({rot:c.rot,t:c.t||'',total:c.total})),rows:DET.linhas}),
   pd:()=>{ const ls=(PED.todas||regsPed()).filter(r=>(PED.mes==='todos'||r.mes===PED.mes)&&(!PED.vend||r.vendedor===PED.vend)).sort((a,b)=>(a.data||a.mes||'').localeCompare(b.data||b.mes||'')||String(a.codigo).localeCompare(String(b.codigo)));
     return {nome:'pedidos-de-venda-'+PED.mes,titulo:'Pedidos de venda · '+(PED.mes==='todos'?'todos os meses':nomeMes(PED.mes)),sub:(PED.vend?'Vendedor: '+PED.vend+' · ':'')+pl(ls.length,'linha','linhas'),
@@ -2599,9 +2711,9 @@ const FONTES_EXP={
   cf:()=>({nome:'conciliacao-pedidos-'+PED.cfMes,titulo:'Conciliação de pedidos · '+(PED.cfMes==='todos'?'todos os meses':nomeMes(PED.cfMes)),sub:`${PED.cfBase==='painel'?'Pedidos do painel':'Planilha conectada'} × Conta Azul, pelo código do pedido${PED.cfVend?' · '+PED.cfVend:''}`,
     cols:[{rot:'Situação'},{rot:'Código'},{rot:'Data',t:'data'},{rot:'Cliente'},{rot:'Vendedor'},{rot:PED.cfBase==='painel'?'Painel':'Planilha',t:'brl',total:1},{rot:'Sistema',t:'brl',total:1},{rot:'Divergência',t:'brl',total:1},{rot:'Situação na Conta Azul'}],
     rows:(PED.cfRows||[]).map(r=>[r.st[1],r.cod,r.data,r.cliente||r.sisCli||'',r.vend||'',r.painel??'',r.sis??'',r.dif==null||Math.abs(r.dif)<=1?'':r.dif,SIT_CA[r.sit]||r.sit||''])}),
-  in:()=>({nome:'inconsistencias-'+String(PED.inPerRot||'').replace(/[^\w]+/g,'-'),titulo:'Inconsistências · '+(PED.inPerRot||''),sub:(PED.inVend?'Vendedor: '+PED.inVend+' · ':'')+(PED.inTipo?TIPOS_INC.find(t=>t[0]===PED.inTipo)[1]:'todos os tipos'),
+  in:()=>({nome:'inconsistencias-'+String(PED.inPerRot||'').replace(/[^\w]+/g,'-'),titulo:'Inconsistências · '+(PED.inPerRot||''),sub:(PED.inVend?'Vendedor: '+PED.inVend+' · ':'')+(PED.inTipo?TI(PED.inTipo)[1]:'todos os tipos'),
     cols:[{rot:'Inconsistência'},{rot:'Data',t:'data'},{rot:'Código'},{rot:'Cliente'},{rot:'Vendedor'},{rot:'Planilha',t:'brl'},{rot:'Sistema',t:'brl'},{rot:'Diferença',t:'brl',total:1},{rot:'O que falta / detalhe'}],
-    rows:(PED.inRows||[]).map(x=>[TIPOS_INC.find(t=>t[0]===x.tipo)[1],x.data,x.codigo,x.cliente,x.vendedor,x.plan,x.sis,x.dif===''||Math.abs(x.dif)<=1?'':x.dif,x.falta])}),
+    rows:(PED.inRows||[]).map(x=>[TI(x.tipo)[1],x.data,x.codigo,x.cliente,x.vendedor,x.plan,x.sis,x.dif===''||Math.abs(x.dif)<=1?'':x.dif,x.falta])}),
   ex:()=>({nome:'conciliacao-bancaria-'+(EXT.conta||'todas'),titulo:'Conciliação bancária · '+(EXT.conta||'todas as contas'),sub:`${dataBR(EXT.de)} a ${dataBR(EXT.ate)}${EXT.sit?' · '+ST_EXT[EXT.sit][1]:''}`,
     cols:[{rot:'Situação'},{rot:'Data no banco',t:'data'},{rot:'Descrição no extrato'},{rot:'Conta'},{rot:'Valor',t:'brl',total:1},{rot:'Data no sistema',t:'data'},{rot:'Cliente / fornecedor'},{rot:'Descrição no sistema'}],
     rows:(EXT.rows||[]).map(r=>[ST_EXT[r.st][1],r.e?.data||'',r.e?.desc||'',r.e?.conta||r.s?.conta||'',(r.e||r.s).valor,r.s?.data||'',r.s?.pessoa||'',r.s?.desc||''])}),

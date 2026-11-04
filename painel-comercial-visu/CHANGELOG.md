@@ -2,6 +2,17 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v44 — 04/11/2026 — Gravação na planilha, inconsistências numa base só e campos em branco clicáveis
+
+- Gravação na planilha do Google: religar a planilha desligava sem avisar a gravação automática dos pagamentos (por isso os pagamentos baixados pararam de ir para a planilha). Agora religar mantém a gravação, o horário e o mês-limite, e a gravação vem ligada por padrão.
+- Inconsistências mostra o quadro "Gravação na planilha do Google": ligada ou desligada, a última gravação (quantas células, erro ou motivo do adiamento) e os botões Gravar na planilha agora e Gravar mesmo assim. Cada pedido que não foi gravado mostra o motivo (célula com fórmula, já tinha valor, código não encontrado) e a linha.
+- Inconsistências usa uma base só: a planilha do Google até outubro e a Planilha de vendas do painel a partir de novembro (sai a escolha Planilha × Planilha de vendas do painel). Novo filtro Tipo de inconsistência e a opção "Batendo com a Conta Azul", que lista os pedidos já certos (mesmo código e mesmo valor, com o que foi recebido).
+- "Mesmo cliente e dia com códigos diferentes" saiu: são itens do mesmo pedido. "Mesmo código em pedidos diferentes" virou "Mesmo código para clientes diferentes": linhas do mesmo código e do mesmo cliente (variação de produto, lote ou destino) não aparecem mais.
+- Qualidade dos dados: cada campo em branco abre a lista das linhas (com o número da linha na planilha), com pesquisa, filtro por mês e exportação em Excel, PDF ou CSV. ADM, diretoria e financeiro preenchem ali mesmo e o painel grava na planilha do Google, só em célula vazia, conferindo o cliente da linha e respeitando as listas suspensas. Código em branco só é cobrado a partir de setembro/2026.
+- Grafias diferentes mostra o valor consolidado que o painel usa. Nome dos vendedores num padrão só (Daniel, não DANIEL ou daniel) em todas as telas e nos pedidos do painel.
+- Planilha × sistema (mês): cada motivo encontrado abre as vendas ou linhas por trás do valor. Meses antes de agosto/2026 aparecem como "antes da Conta Azul".
+- Nota dos pagamentos na planilha: em pedido com mais de uma linha, a nota diz que o valor é do pedido inteiro. O script novo (copiar de novo pelo painel) é preciso para preencher campos em branco e para ver os motivos do que não foi gravado.
+
 ## v43 — 03/11/2026 — Conciliação bancária e Planilha de vendas completa
 - `src/extrato.js` e `/api/extrato`: importa OFX/CSV/Excel por conta (sem duplicar) e cruza com as baixas de receber/pagar da Conta Azul (valor exato, ±3 dias).
 - Página Financeiro → Conciliação bancária (permissão `extrato`, incluída para Financeiro e Diretor).

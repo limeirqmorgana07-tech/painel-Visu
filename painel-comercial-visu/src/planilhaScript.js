@@ -18,7 +18,7 @@ export async function chaveScript() {
 export const ateScript = () => memo?.gravar_ate || '2026-10';
 export async function definirAte(m) { await carregarScript(); if (/^\d{4}-\d{2}$/.test(String(m))) { memo = { ...memo, gravar_ate: m }; await salvarKV(CHAVE_KV, memo); } return ateScript(); }
 export const statusScript = () => ({ gravar_ate: ateScript(), configurado: scriptConfigurado(), url: memo?.url || '', ligado_em: memo?.ligado_em || null, por: memo?.por || '', nome: memo?.nome || '',
-  arquivo_id: memo?.arquivo_id || '', gravar: !!memo?.gravar, ultima_gravacao: memo?.ultima_gravacao || null });
+  arquivo_id: memo?.arquivo_id || '', gravar: memo?.gravar !== false, ultima_gravacao: memo?.ultima_gravacao || null, celulas_fila: (memo?.celulas_fila || []).length });
 export const arquivoScript = () => memo?.arquivo_id || '';
 // a planilha mudou de endereço (ex.: o .xlsx foi convertido para Planilha Google): o script novo leva o novo ID
 export async function definirArquivo(link) {
@@ -28,6 +28,22 @@ export async function definirArquivo(link) {
   memo = { ...memo, arquivo_id: id }; await salvarKV(CHAVE_KV, memo); return id;
 }
 export async function definirGravar(ativo) { await carregarScript(); memo = { ...memo, gravar: !!ativo }; await salvarKV(CHAVE_KV, memo); return memo.gravar; }
+// fila dos campos em branco preenchidos no painel, gravados na planilha junto com os recebimentos
+export const filaCelulas = () => memo?.celulas_fila || [];
+export async function adicionarCelulas(lista, u) {
+  await carregarScript();
+  const f = filaCelulas().filter((c) => !lista.some((x) => x.linha === c.linha && x.campo === c.campo));
+  for (const x of lista) f.push({ id: crypto.randomBytes(6).toString('hex'), linha: Number(x.linha), campo: String(x.campo), valor: x.valor, cliente: String(x.cliente || ''), por: u?.nome || '', em: new Date().toISOString() });
+  memo = { ...memo, celulas_fila: f.slice(-500) }; await salvarKV(CHAVE_KV, memo); return f;
+}
+export async function concluirCelulas(ids, pulados = []) {
+  const feitos = new Set(ids || []), motivo = new Map((pulados || []).filter((p) => p.id).map((p) => [p.id, p.motivo]));
+  // célula que não deu para gravar por um motivo definitivo (cliente mudou, linha sumiu) sai da fila e fica no histórico
+  const fim = (filaCelulas()).filter((c) => feitos.has(c.id) || motivo.has(c.id));
+  memo = { ...memo, celulas_fila: filaCelulas().filter((c) => !feitos.has(c.id) && !motivo.has(c.id)), celulas_hist: [...fim.map((c) => ({ ...c, ok: feitos.has(c.id) && !motivo.has(c.id), motivo: motivo.get(c.id) || '', gravado_em: new Date().toISOString() })), ...(memo?.celulas_hist || [])].slice(0, 300) };
+  await salvarKV(CHAVE_KV, memo);
+}
+export const historicoCelulas = () => memo?.celulas_hist || [];
 export async function marcarGravacao(r) { memo = { ...memo, ultima_gravacao: { em: new Date().toISOString(), ...r } }; await salvarKV(CHAVE_KV, memo).catch(() => {}); }
 
 export function modeloScript(chave, arquivoId) {
@@ -73,7 +89,7 @@ function doPost(e) {
     const arquivo = DriveApp.getFileById(ARQUIVO_ID);
     const editadoEm = arquivo.getLastUpdated().getTime(), parado = (Date.now() - editadoEm) / 60000;
     if (!dados.forcar && parado < MINUTOS_SEM_USO) return saida({ adiado: true, motivo: 'a planilha foi editada há ' + Math.floor(parado) + ' min', editado_em: new Date(editadoEm).toISOString() });
-    if (arquivo.getMimeType() === MimeType.GOOGLE_SHEETS) return saida(aplicar(SpreadsheetApp.openById(ARQUIVO_ID), dados.itens || []));
+    if (arquivo.getMimeType() === MimeType.GOOGLE_SHEETS) return saida(aplicar(SpreadsheetApp.openById(ARQUIVO_ID), dados.itens || [], dados.celulas || []));
     // .xlsx: cópia temporária convertida → preenche → volta a ser .xlsx no mesmo arquivo
     const token = ScriptApp.getOAuthToken(), h = { Authorization: 'Bearer ' + token };
     const meta = JSON.parse(UrlFetchApp.fetch('https://www.googleapis.com/drive/v3/files/' + ARQUIVO_ID + '?fields=headRevisionId,mimeType&supportsAllDrives=true', { headers: h }).getContentText());
@@ -81,7 +97,7 @@ function doPost(e) {
       payload: JSON.stringify({ name: 'temporário painel Visu (pode apagar)', mimeType: 'application/vnd.google-apps.spreadsheet' }) }).getContentText());
     let r;
     try {
-      r = aplicar(SpreadsheetApp.openById(copia.id), dados.itens || []);
+      r = aplicar(SpreadsheetApp.openById(copia.id), dados.itens || [], dados.celulas || []);
       if (r.celulas) {
         SpreadsheetApp.flush();
         if (DriveApp.getFileById(ARQUIVO_ID).getLastUpdated().getTime() !== editadoEm) { r = { adiado: true, motivo: 'alguém editou a planilha durante a gravação; tento de novo depois' }; }
@@ -98,7 +114,7 @@ function doPost(e) {
   } finally { lock.releaseLock(); }
 }
 
-function aplicar(ss, itens) {
+function aplicar(ss, itens, celulasPedidas) {
   const sem = (s) => String(s == null ? '' : s).normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').toLowerCase().replace(/[º°]/g, 'o').replace(/\\s+/g, ' ').trim();
   let aba = null, cab = null, linhaCab = 0;
   for (const sh of ss.getSheets()) {
@@ -116,17 +132,36 @@ function aplicar(ss, itens) {
   const porCod = {};
   vals.forEach((r, i) => { const k = chave(r[cCod]); if (k) (porCod[k] = porCod[k] || []).push(i); });
   const vazio = (v) => v === '' || v === null || v === 0;
-  let celulas = 0; const feitos = [];
+  let celulas = 0; const feitos = [], pulados = [];
   itens.forEach((it) => {
-    const rows = porCod[chave(it.codigo)]; if (!rows) return;
+    const rows = porCod[chave(it.codigo)]; if (!rows) { pulados.push({ codigo: it.codigo, motivo: 'código não encontrado na aba' }); return; }
     const r0 = rows[0]; let mexeu = false;
-    // nunca escreve por cima de fórmula
-    const grava = (c, v, nota) => { if (c < 0 || v == null || v === '' || !vazio(vals[r0][c]) || formulas[r0][c]) return; const cel = aba.getRange(linhaCab + 1 + r0, c + 1); cel.setValue(v); if (nota) cel.setNote(nota); celulas++; mexeu = true; };
-    grava(c1, it.pag1, it.nota1); grava(c2, it.pag2, it.nota2); grava(cFp, it.forma, '');
+    // nunca escreve por cima de fórmula nem de valor já digitado (e conta o motivo, para o painel mostrar)
+    const grava = (c, v, nota, rot) => { if (c < 0 || v == null || v === '') return;
+      if (formulas[r0][c]) { pulados.push({ codigo: it.codigo, linha: linhaCab + 1 + r0, campo: rot, motivo: 'célula com fórmula' }); return; }
+      if (!vazio(vals[r0][c])) { pulados.push({ codigo: it.codigo, linha: linhaCab + 1 + r0, campo: rot, motivo: 'já tem valor' }); return; }
+      const cel = aba.getRange(linhaCab + 1 + r0, c + 1); cel.setValue(v); if (nota) cel.setNote(nota); celulas++; mexeu = true; };
+    grava(c1, it.pag1, it.nota1, '1º pagamento'); grava(c2, it.pag2, it.nota2, '2º pagamento'); grava(cFp, it.forma, '', 'forma de pagamento');
     if (it.pago100 && c100 >= 0) rows.forEach((i) => { const a = sem(vals[i][c100]); if ((a === '' || a === 'nao') && !formulas[i][c100]) { const cel = aba.getRange(linhaCab + 1 + i, c100 + 1); cel.setValue('SIM'); if (i === r0 && it.nota100) cel.setNote(it.nota100); celulas++; mexeu = true; } });
     if (mexeu) feitos.push(it.codigo);
   });
-  return { celulas: celulas, pedidos: feitos.length, codigos: feitos, aba: aba.getName() };
+  // campos em branco preenchidos no painel (Qualidade dos dados): confere o cliente da linha antes de escrever
+  const COLS = { data: 'data da venda', codigo: 'cod interno', vendedor: 'vendedor', tipo_venda: 'tipo de venda', novo_recompra: 'cliente novo', tipo_produto: 'tipo de produto', material: 'material', cor: 'cor', quantidade: 'quantidade', forma_pagamento: 'forma de pagamento', prazo_entrega: 'prazo de entrega' };
+  const cCli = col('cliente'), celFeitas = [];
+  (celulasPedidas || []).forEach((c) => {
+    const i = Number(c.linha) - linhaCab - 1, cc = COLS[c.campo] ? col(COLS[c.campo]) : -1;
+    if (i < 0 || i >= n || cc < 0) { pulados.push({ id: c.id, linha: c.linha, campo: c.campo, motivo: 'linha ou coluna não encontrada' }); return; }
+    const a = sem(vals[i][cCli]).slice(0, 14), b = sem(c.cliente).slice(0, 14);
+    if (!a || (a.indexOf(b) !== 0 && b.indexOf(a) !== 0)) { pulados.push({ id: c.id, linha: c.linha, campo: c.campo, motivo: 'o cliente dessa linha mudou (' + vals[i][cCli] + ')' }); return; }
+    if (formulas[i][cc] || !vazio(vals[i][cc])) { pulados.push({ id: c.id, linha: c.linha, campo: c.campo, motivo: 'a célula já foi preenchida' }); celFeitas.push(c.id); return; }
+    const cel = aba.getRange(linhaCab + 1 + i, cc + 1);
+    let v = c.valor;
+    if ((c.campo === 'data' || c.campo === 'prazo_entrega') && /^\\d{4}-\\d{2}-\\d{2}$/.test(v)) v = new Date(v + 'T12:00:00');
+    else if (c.campo === 'quantidade') v = Number(v);
+    else { const dv = cel.getDataValidation(); if (dv && dv.getCriteriaType() === SpreadsheetApp.DataValidationCriteria.VALUE_IN_LIST) { const ok = (dv.getCriteriaValues()[0] || []).filter((o) => sem(o) === sem(v))[0]; if (ok) v = ok; } }
+    cel.setValue(v); celulas++; celFeitas.push(c.id);
+  });
+  return { versao: 44, celulas: celulas, pedidos: feitos.length, codigos: feitos, celulas_feitas: celFeitas, pulados: pulados.slice(0, 200), aba: aba.getName() };
 }
 
 function saida(o) {
@@ -153,7 +188,7 @@ export async function baixarPorScript(url = memo?.url, chave = memo?.chave) {
 
 export async function enviarParaPlanilha(itens, forcar = false) {
   if (!scriptConfigurado()) throw new Error('A planilha ainda não foi ligada pelo e-mail.');
-  const r = await fetch(memo.url, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ chave: memo.chave, itens, forcar }), redirect: 'follow' });
+  const r = await fetch(memo.url, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ chave: memo.chave, itens, celulas: filaCelulas(), forcar }), redirect: 'follow' });
   const txt = await r.text();
   let j; try { j = JSON.parse(txt); } catch { throw new Error(/doPost|função|function/i.test(txt) ? 'O script na sua conta ainda é o antigo (só lê). Copie o script novo pelo painel, cole no Apps Script, rode "autorizar" e faça Implantar → Gerenciar implantações → lápis → Nova versão.' : 'O Google devolveu uma página em vez da resposta do script. Rode "autorizar" no editor e faça uma nova versão da implantação.'); }
   if (j.erro) throw new Error(j.erro === 'chave inválida' ? 'A chave do script não confere com a do painel. Copie o script de novo pelo painel e reimplante.' : j.erro);
@@ -169,4 +204,5 @@ export async function ligarScript(url, usuario) {
   await salvarKV(CHAVE_KV, memo);
   return arq;
 }
-export async function desligarScript() { memo = { chave: memo?.chave }; await salvarKV(CHAVE_KV, memo); }
+// desligar não apaga as escolhas (gravar sozinho, até qual mês, arquivo): antes, religar a planilha desligava a gravação
+export async function desligarScript() { memo = { chave: memo?.chave, gravar: memo?.gravar, celulas_fila: memo?.celulas_fila, celulas_hist: memo?.celulas_hist, gravar_ate: memo?.gravar_ate, arquivo_id: memo?.arquivo_id, ultima_gravacao: memo?.ultima_gravacao }; await salvarKV(CHAVE_KV, memo); }

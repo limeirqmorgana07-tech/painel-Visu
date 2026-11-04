@@ -254,15 +254,32 @@ async function gravarRecebimentosNaPlanilha(u, forcar = false) {
   const plan = await lerPlanilha();
   const pg = await pedidos.pagamentosPorPedido(vendasContaAzulEmCache() || (await dadosDeVendas().catch(() => null), vendasContaAzulEmCache()));
   const itens = pedidos.itensParaPlanilha(pg, plan.linhas, pscript.ateScript());
-  if (!itens.length) { await pscript.marcarGravacao({ celulas: 0, pedidos: 0 }); return { celulas: 0, pedidos: 0, buscando_baixas: pg.buscando_baixas || 0 }; }
+  const fila = pscript.filaCelulas();
+  if (!itens.length && !fila.length) { await pscript.marcarGravacao({ celulas: 0, pedidos: 0, enviados: 0, buscando_baixas: pg.buscando_baixas || 0 }); return { celulas: 0, pedidos: 0, buscando_baixas: pg.buscando_baixas || 0 }; }
   const r = await pscript.enviarParaPlanilha(itens, forcar);
   if (r.adiado) { await pscript.marcarGravacao({ adiado: true, motivo: r.motivo, pendentes: itens.length }); return { ...r, pendentes: itens.length }; }
-  await pedidos.logPlanilha(u, itens, r); await pscript.marcarGravacao({ celulas: r.celulas, pedidos: r.pedidos, aba: r.aba });
+  if (fila.length && r.versao == null) { await pscript.marcarGravacao({ erro: 'script antigo: copie o script novo pelo painel para gravar os campos em branco' }); throw new Error('Para gravar os campos em branco na planilha, o script precisa ser atualizado: em Controle → Planilha × sistema (mês) → Ligar pelo meu e-mail, copie o script novo, cole no Apps Script, salve e faça Implantar → Gerenciar implantações → Editar → Nova versão.'); }
+  if (fila.length) await pscript.concluirCelulas(r.celulas_feitas, r.pulados);
+  await pedidos.logPlanilha(u, itens, r); await pscript.marcarGravacao({ celulas: r.celulas, pedidos: r.pedidos, aba: r.aba, enviados: itens.length, pulados: r.pulados || null, codigos: r.codigos || [] });
   if (r.celulas) dadosDeVendas(true).catch(() => {});
   return { ...r, buscando_baixas: pg.buscando_baixas || 0 };
 }
-app.post('/api/planilha-script/gravar', exigeAdm, async (req, res) => { try { if (req.body?.ativo !== undefined) await pscript.definirGravar(req.body.ativo); if (req.body?.ate) await pscript.definirAte(req.body.ate); res.json({ ...pscript.statusScript(), ...(req.body?.agora ? await gravarRecebimentosNaPlanilha(req.usuario, !!req.body.forcar) : {}) }); } catch (e) { res.status(400).json({ erro: e.message }); } });
-setInterval(() => { if (pscript.scriptConfigurado() && pscript.statusScript().gravar) gravarRecebimentosNaPlanilha(null).catch((e) => console.warn('[planilha] gravação:', e.message)); }, 10 * 60e3);
+app.post('/api/planilha-script/gravar', exigeAdm, async (req, res) => { try { if (req.body?.ativo !== undefined) await pscript.definirGravar(req.body.ativo); if (req.body?.ate) await pscript.definirAte(req.body.ate); res.json({ ...pscript.statusScript(), ...(req.body?.agora ? await gravarRecebimentosNaPlanilha(req.usuario, !!req.body.forcar) : {}) }); } catch (e) { if (req.body?.agora) await pscript.marcarGravacao({ erro: e.message }).catch(() => {}); res.status(400).json({ erro: e.message }); } });
+// campos em branco preenchidos no painel (Qualidade dos dados) → planilha do Google
+app.get('/api/planilha-script/celulas', exigeLogin, async (req, res) => res.json({ fila: pscript.filaCelulas(), historico: pscript.historicoCelulas().slice(0, 100) }));
+app.post('/api/planilha-script/celulas', exigeLogin, async (req, res) => {
+  try {
+    if (!['adm', 'diretor', 'financeiro'].includes(req.usuario?.perfil)) return res.status(403).json({ erro: 'só ADM, diretoria e financeiro preenchem a planilha pelo painel' });
+    if (!pscript.scriptConfigurado()) throw new Error('Ligue a planilha pelo seu e-mail primeiro (Controle → Planilha × sistema (mês)).');
+    const lista = (req.body?.itens || []).filter((x) => x && Number(x.linha) > 0 && x.campo && String(x.valor ?? '').trim() !== '').slice(0, 300);
+    if (!lista.length) throw new Error('Nada para gravar.');
+    await pscript.adicionarCelulas(lista, req.usuario);
+    let r = null;
+    try { r = await gravarRecebimentosNaPlanilha(req.usuario, false); } catch (e) { return res.json({ ok: true, na_fila: pscript.filaCelulas().length, aviso: e.message }); }
+    res.json({ ok: true, ...r, na_fila: pscript.filaCelulas().length });
+  } catch (e) { res.status(400).json({ erro: e.message }); }
+});
+setInterval(() => { if (pscript.scriptConfigurado() && pscript.statusScript().gravar) gravarRecebimentosNaPlanilha(null).catch((e) => { console.warn('[planilha] gravação:', e.message); pscript.marcarGravacao({ erro: e.message }).catch(() => {}); }); }, 10 * 60e3);
 app.post('/api/planilha-script', exigeAdm, async (req, res) => {
   try { const arq = await pscript.ligarScript(req.body?.url, req.usuario); dadosDeVendas(true).catch(() => {}); res.json({ ok: true, nome: arq.nome, alterado_em: arq.alterado_em, ...pscript.statusScript() }); }
   catch (e) { res.status(400).json({ erro: e.message }); }

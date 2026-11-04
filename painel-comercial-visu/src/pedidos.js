@@ -35,8 +35,12 @@ export const codigoBase = (c) => String(c || '').trim().split(/[-/ ]/)[0];
 export const chaveCodigo = (c) => String(c || '').replace(/\D/g, '').replace(/^0+/, '');
 const RX_COD = /^(\d{4})(\d{2})(\d{4})$/;
 
+// vendedor num padrão só (maiúsculas só na inicial): "DANIEL" e "daniel" viram "Daniel"
+const MINUSC_NOME = new Set(['da', 'de', 'do', 'das', 'dos', 'e']);
+export const tituloNome = (t) => String(t ?? '').trim().replace(/\s+/g, ' ').toLowerCase().split(' ').map((w, i) => (i > 0 && MINUSC_NOME.has(w) ? w : w.replace(/^(\p{L})/u, (m) => m.toUpperCase()))).join(' ');
 function limpar(campo, v) {
   const t = CAMPOS[campo];
+  if (campo === 'vendedor') return tituloNome(String(v ?? '').slice(0, 120));
   if (t === 'num') { const n = typeof v === 'number' ? v : Number(String(v ?? '').replace(/[R$\s.]/g, '').replace(',', '.')); return Number.isFinite(n) ? r2(n) : 0; }
   if (t === 'bool') return v === true || ['sim', 's', 'true', '1', 'x'].includes(sem(v));
   if (t === 'data') { const s = String(v ?? '').trim(); const m = s.match(/^(\d{4})-(\d{2})-(\d{2})/) || s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/); if (!m) return ''; return m[1].length === 4 ? `${m[1]}-${m[2]}-${m[3]}` : `${m[3]}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}`; }
@@ -138,13 +142,13 @@ export const fonteMista = () => (cfgMem?.fonte === 'misto' ? cfgMem.corte || '20
 export async function prepararFonte() { await configPedidos(); await carregar().catch(() => {}); }
 export function linhasDoPainel() {
   return [...(mem?.values() || [])].filter((r) => !r.excluido && (r.total || r.quantidade)).map((r) => ({
-    linha: r.linha_planilha || null, data: r.data, mes: r.mes || (r.data || '').slice(0, 7), cliente: r.cliente || 'Sem cliente',
+    linha: r.linha_planilha || null, do_painel: true, data: r.data, mes: r.mes || (r.data || '').slice(0, 7), cliente: r.cliente || 'Sem cliente',
     cliente_original: r.cliente_lancado || [r.cliente, r.lote].filter(Boolean).join(' '),
     // o complementar conta no mesmo pedido (não infla a quantidade de pedidos nem derruba o ticket)
     // linhas importadas seguem a regra da base tratada (pedido = cliente + data), para os números baterem com a planilha;
     // pedidos lançados no painel usam o código (o complementar "-1" conta no mesmo pedido)
     pedido: r.codigo && r.origem !== 'planilha' ? codigoBase(r.codigo) : `${r.cliente}|${r.data || r.mes}`, codigo_pedido: r.codigo || '', pedido_informado: !!r.codigo,
-    vendedor: r.vendedor || 'Sem vendedor', tipo_venda: (r.tipo_venda || '—').toUpperCase(), novo_recompra: r.novo_recompra || '',
+    vendedor: r.vendedor ? tituloNome(r.vendedor) : 'Sem vendedor', tipo_venda: (r.tipo_venda || '—').toUpperCase(), novo_recompra: r.novo_recompra || '',
     tipo_produto: r.tipo_produto, material: r.material, especificacao: r.especificacao, cor: r.cor, quantidade: r.quantidade || 0, total: r.total || 0,
     pag1: r.pag1 || 0, pag2: r.pag2 || 0, pago_100: !!r.pago_100, forma_pagamento: r.forma_pagamento || '', prazo_entrega: r.prazo_entrega || '', frete: r.frete || '', segmento: r.segmento || '',
   }));
@@ -170,7 +174,7 @@ const quem = (u) => ({ usuario: u?.nome || 'Sistema', usuario_id: u?.id || '' })
 // ---------- leitura ----------
 export async function listar() {
   const m = await carregar();
-  return [...m.values()].filter((r) => !r.excluido).sort((a, b) => (a.data || a.mes || '').localeCompare(b.data || b.mes || '') || String(a.codigo).localeCompare(String(b.codigo)) || (a.ordem || 0) - (b.ordem || 0));
+  return [...m.values()].filter((r) => !r.excluido).map((r) => (r.vendedor && r.vendedor !== tituloNome(r.vendedor) ? { ...r, vendedor: tituloNome(r.vendedor) } : r)).sort((a, b) => (a.data || a.mes || '').localeCompare(b.data || b.mes || '') || String(a.codigo).localeCompare(String(b.codigo)) || (a.ordem || 0) - (b.ordem || 0));
 }
 // códigos usados fora do painel (planilha ligada e números de venda da Conta Azul), para a sequência continuar de onde a planilha parou
 let codigosExternos = [];
@@ -422,7 +426,7 @@ export function itensParaPlanilha(pagamentos, linhasPlanilha, ate = '9999-12') {
     // a nota fica igual ao balão do painel: só deste pedido, deste cliente e desta parcela
     const brl = (v) => 'R$ ' + Number(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     const cli = (g.ls.find((l) => l.cliente_original || l.cliente) || {}), nomeCli = cli.cliente_original || cli.cliente || '';
-    const cabNota = `Pedido ${g.codigo}${nomeCli ? ' · ' + nomeCli : ''}`;
+    const cabNota = `Pedido ${g.codigo}${nomeCli ? ' · ' + nomeCli : ''}` + (g.ls.length > 1 ? `\n${g.ls.length} itens neste pedido (linhas da planilha): o valor é do pedido inteiro` : '');
     const nota = (p, i) => { const b = p.baixas?.[0]; return [`${i + 1}º pagamento · recebido`, cabNota, '', `Parcela ${i + 1} de ${ps.length}: ${brl(p.valor)}`, `Vencimento: ${dataBR(p.venc)}`, `Recebido: ${brl(p.pago)}${b?.data ? ' em ' + dataBR(b.data) : ''}`, b?.conta ? `Banco: ${b.conta}` : '', b?.forma ? `Forma: ${b.forma}` : '', '', '(Conta Azul · Painel de Gestão)'].filter((x, k, a) => x !== '' || (a[k - 1] && a[k - 1] !== '')).join('\n'); };
     const nota100 = () => { const rec = ps.reduce((s2, p) => s2 + (+p.pago || 0), 0); return ['Pagamentos do pedido · quitado', cabNota, '', `Total do pedido: ${brl(g.ls.reduce((s2, l) => s2 + (+l.total || 0), 0))}`, `Recebido: ${brl(rec)}`, '', ...ps.map((p, i) => { const b = p.baixas?.[0]; return `${i + 1}ª parcela · vence ${dataBR(p.venc)} · ${brl(p.valor)} · pago${b?.data ? ' ' + dataBR(b.data) : ''}${b?.conta ? ' · ' + b.conta : ''}${b?.forma ? ' · ' + b.forma : ''}`; }), '', '(Conta Azul · Painel de Gestão)'].join('\n'); };
     const temP1 = g.ls.some((l) => +l.pag1 > 1), temP2 = g.ls.some((l) => +l.pag2 > 1);

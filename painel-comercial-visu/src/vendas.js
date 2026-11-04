@@ -10,6 +10,9 @@ import { lerKV, salvarKV } from './tokenStore.js';
 import { fontePainel, fonteMista, linhasDoPainel, prepararFonte, chaveCodigo } from './pedidos.js';
 
 const chave = (s) => sem(s).replace(/[^a-z0-9]+/g, ' ').trim();
+// nome de vendedor num padrão só: "DANIEL SILVA", "daniel silva" e "Daniel Silva" viram "Daniel Silva"
+const MINUSC_NOME = new Set(['da', 'de', 'do', 'das', 'dos', 'e']);
+export const tituloNome = (t) => String(t ?? '').trim().replace(/\s+/g, ' ').toLowerCase().split(' ').map((w, i) => (i > 0 && MINUSC_NOME.has(w) ? w : w.replace(/^(\p{L})/u, (m) => m.toUpperCase()))).join(' ');
 const iso = (d) => d.toISOString().slice(0, 10);
 const hojeBR = () => new Date(Date.now() - 3 * 3600e3);
 
@@ -38,7 +41,7 @@ function padronizar(linhas, campo) {
   const variacoes = [];
   for (const [k, g] of grupos) {
     const ord = [...g.entries()].sort((a, b) => b[1] - a[1]);
-    canonico.set(k, ord[0][0].trim());
+    canonico.set(k, campo === 'vendedor' && !/^(sem vendedor|nao vendedores)$/.test(k) ? tituloNome(ord[0][0]) : ord[0][0].trim());
     if (ord.length > 1) variacoes.push({ valor: ord[0][0].trim(), grafias: ord.map(([t, n]) => ({ texto: t, linhas: n })) });
   }
   for (const l of linhas) if (l[campo]) l[campo] = canonico.get(chave(l[campo]));
@@ -76,7 +79,8 @@ function qualidade(linhas, mapa) {
     },
     faltando: {
       data: linhas.filter((l) => !l.data && !l.mes).length,
-      pedido: linhas.filter((l) => !l.pedido_informado).length,
+      // o cód. interno só passou a existir em setembro/2026
+      pedido: linhas.filter((l) => !l.pedido_informado && (l.mes || '') >= '2026-09').length,
       vendedor: linhas.filter((l) => !l.vendedor || l.vendedor === 'Sem vendedor').length,
       novo_recompra: vazio('novo_recompra'),
       tipo_produto: vazio('tipo_produto'),
@@ -287,6 +291,8 @@ async function montar(bruto) {
       ...(l.codigo_pedido || (l.pedido_informado && !String(l.pedido).includes('|')) ? { cd: l.codigo_pedido || l.pedido } : {}),
       p1: l.pag1, p2: l.pag2, ok: l.pago_100, fp: l.forma_pagamento, pz: l.prazo_entrega, sg: l.segmento,
       ...(l.consolidado ? { cs: 1 } : {}),
+      // linha da planilha do Google (para preencher campo em branco pelo painel) ou lançada no painel
+      ...(l.do_painel ? { sp: 1 } : l.linha ? { ln: l.linha } : {}),
       // para a página Inconsistências: nome como foi lançado (quando difere do padronizado) e possível duplicidade
       ...(l.cliente_original && l.cliente_original !== l.cliente ? { co: l.cliente_original } : {}),
       ...(l.duplicado ? { du: 1 } : {}),
