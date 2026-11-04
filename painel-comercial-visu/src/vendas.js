@@ -7,7 +7,7 @@ import { planilhaConfigurada, lerPlanilha, sem, clienteBase } from './planilha.j
 import { gerarDemoPlanilha, gerarDemoContaAzul } from './demo.js';
 import { lerAtributos } from './produtos.js';
 import { lerKV, salvarKV } from './tokenStore.js';
-import { fontePainel, linhasDoPainel, prepararFonte } from './pedidos.js';
+import { fontePainel, fonteMista, linhasDoPainel, prepararFonte, chaveCodigo } from './pedidos.js';
 
 const chave = (s) => sem(s).replace(/[^a-z0-9]+/g, ' ').trim();
 const iso = (d) => d.toISOString().slice(0, 10);
@@ -232,6 +232,16 @@ async function montar(bruto) {
   if (origem !== 'planilha' && origem !== 'demo') base = null;
   // fonte "Pedidos do painel" (ADM escolhe em Pedidos de venda): os indicadores leem os pedidos registrados no painel
   if (fontePainel()) { origem = 'painel'; base = { linhas: linhasDoPainel(), mapa: null }; }
+  let soPlanilha = null;
+  const corte = fonteMista();
+  if (corte && (origem === 'planilha' || (origem === 'demo' && config.demo)) && base) {
+    const doPainel = linhasDoPainel().filter((l) => (l.mes || '') >= corte), codPainel = new Set(doPainel.map((l) => chaveCodigo(l.codigo_pedido)).filter(Boolean));
+    const plan = base.linhas, depois = plan.filter((l) => (l.mes || '') >= corte);
+    soPlanilha = depois.filter((l) => { const c = chaveCodigo(l.codigo_pedido || l.codigo || ''); return !c || !codPainel.has(c); });
+    base = { ...base, linhas: [...plan.filter((l) => (l.mes || '') < corte), ...doPainel] };
+    origem = 'misto';
+    if (soPlanilha.length) avisos.push(`${soPlanilha.length} ${soPlanilha.length === 1 ? 'linha de venda' : 'linhas de venda'} a partir de ${corte.split('-').reverse().join('/')} ${soPlanilha.length === 1 ? 'está' : 'estão'} só na planilha (R$ ${soPlanilha.reduce((s2, l) => s2 + (l.total || 0), 0).toLocaleString('pt-BR', { maximumFractionDigits: 0 })}). Desde novembro as vendas são lançadas no sistema: veja em Inconsistências.`);
+  }
   // sem Conta Azul conectada não existe "lado do sistema": nunca usar as vendas fictícias da demonstração junto com dados reais
   if (bruto.origem === 'demo' && !config.demo) vendasCA = null;
   if (!base && vendasCA) {
@@ -251,7 +261,9 @@ async function montar(bruto) {
 
   return {
     fonte: origem,
-    planilha_arquivo: origem === 'planilha' ? base.arquivo || null : null,
+    planilha_arquivo: origem === 'planilha' || origem === 'misto' ? base.arquivo || null : null,
+    corte_sistema: corte || null,
+    so_planilha: soPlanilha ? soPlanilha.map((l) => ({ d: l.data, m: l.mes, c: l.cliente, v: l.vendedor, t: Math.round((l.total || 0) * 100) / 100, cd: l.codigo_pedido || l.codigo || '', tp: l.tipo_produto, q: l.quantidade })) : undefined,
     detalhe_desde: detalheCaDesde(),
     nr_fonte: origem === 'planilha' && base.mapa?.nr_tratado ? (base.mapa?.tratamento === 'painel' ? 'painel' : 'tratada') : undefined,
     de_para: origem === 'planilha' ? base.mapa?.de_para || null : null,

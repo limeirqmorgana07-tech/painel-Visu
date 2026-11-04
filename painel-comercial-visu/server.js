@@ -246,19 +246,20 @@ app.post('/google/desconectar', exigeAdm, async (req, res) => { await google.des
 app.get('/api/planilha-script', exigeAdm, async (req, res) => { const chave = await pscript.chaveScript(); const id = pscript.arquivoScript() || google.idPlanilha() || 'COLE_AQUI_O_ID_DA_PLANILHA'; res.json({ ...pscript.statusScript(), arquivo_id: id, script: pscript.modeloScript(chave, id), planilha_link: pscript.arquivoScript() ? `https://docs.google.com/spreadsheets/d/${id}/edit` : config.planilhaLink, conta: config.planilhaConta }); });
 app.post('/api/planilha-script/arquivo', exigeAdm, async (req, res) => { try { res.json({ arquivo_id: await pscript.definirArquivo(req.body?.link) }); } catch (e) { res.status(400).json({ erro: e.message }); } });
 // grava na planilha do Google os recebimentos já baixados na Conta Azul (só células vazias)
-async function gravarRecebimentosNaPlanilha(u) {
+async function gravarRecebimentosNaPlanilha(u, forcar = false) {
   if (!pscript.scriptConfigurado()) throw new Error('Ligue a planilha pelo seu e-mail primeiro.');
   const { lerPlanilha } = await import('./src/planilha.js');
   const plan = await lerPlanilha();
   const pg = await pedidos.pagamentosPorPedido(vendasContaAzulEmCache() || (await dadosDeVendas().catch(() => null), vendasContaAzulEmCache()));
-  const itens = pedidos.itensParaPlanilha(pg, plan.linhas);
+  const itens = pedidos.itensParaPlanilha(pg, plan.linhas, pscript.ateScript());
   if (!itens.length) { await pscript.marcarGravacao({ celulas: 0, pedidos: 0 }); return { celulas: 0, pedidos: 0, buscando_baixas: pg.buscando_baixas || 0 }; }
-  const r = await pscript.enviarParaPlanilha(itens);
+  const r = await pscript.enviarParaPlanilha(itens, forcar);
+  if (r.adiado) { await pscript.marcarGravacao({ adiado: true, motivo: r.motivo, pendentes: itens.length }); return { ...r, pendentes: itens.length }; }
   await pedidos.logPlanilha(u, itens, r); await pscript.marcarGravacao({ celulas: r.celulas, pedidos: r.pedidos, aba: r.aba });
   if (r.celulas) dadosDeVendas(true).catch(() => {});
   return { ...r, buscando_baixas: pg.buscando_baixas || 0 };
 }
-app.post('/api/planilha-script/gravar', exigeAdm, async (req, res) => { try { if (req.body?.ativo !== undefined) await pscript.definirGravar(req.body.ativo); res.json({ ...pscript.statusScript(), ...(req.body?.agora ? await gravarRecebimentosNaPlanilha(req.usuario) : {}) }); } catch (e) { res.status(400).json({ erro: e.message }); } });
+app.post('/api/planilha-script/gravar', exigeAdm, async (req, res) => { try { if (req.body?.ativo !== undefined) await pscript.definirGravar(req.body.ativo); if (req.body?.ate) await pscript.definirAte(req.body.ate); res.json({ ...pscript.statusScript(), ...(req.body?.agora ? await gravarRecebimentosNaPlanilha(req.usuario, !!req.body.forcar) : {}) }); } catch (e) { res.status(400).json({ erro: e.message }); } });
 setInterval(() => { if (pscript.scriptConfigurado() && pscript.statusScript().gravar) gravarRecebimentosNaPlanilha(null).catch((e) => console.warn('[planilha] gravação:', e.message)); }, 10 * 60e3);
 app.post('/api/planilha-script', exigeAdm, async (req, res) => {
   try { const arq = await pscript.ligarScript(req.body?.url, req.usuario); dadosDeVendas(true).catch(() => {}); res.json({ ok: true, nome: arq.nome, alterado_em: arq.alterado_em, ...pscript.statusScript() }); }
@@ -365,7 +366,7 @@ app.post('/api/pedidos/importar', exigeLogin, exigePedidos, express.raw({ type: 
   if (!r.simular && r.importadas !== undefined) depoisDeMudar();
   return r;
 }));
-app.post('/api/pedidos/config', exigeAdm, resp(async (req) => { const r = await pedidos.salvarConfigPedidos({ fonte: req.body?.fonte === 'painel' ? 'painel' : 'planilha' }, req.usuario); depoisDeMudar(); return r; }));
+app.post('/api/pedidos/config', exigeAdm, resp(async (req) => { const f = ['painel', 'misto'].includes(req.body?.fonte) ? req.body.fonte : 'planilha'; const r = await pedidos.salvarConfigPedidos({ fonte: f, corte: f === 'misto' ? (/^\d{4}-\d{2}$/.test(req.body?.corte || '') ? req.body.corte : '2026-11') : undefined }, req.usuario); depoisDeMudar(); return r; }));
 app.get('/api/pedidos/historico', exigeLogin, (req, res, next) => (veHistorico(req.usuario) ? next() : res.status(403).json({ erro: 'o histórico de alterações é só para a gestão' })), resp(async (req) => ({ itens: await pedidos.historico({ codigo: req.query.codigo, usuario: req.query.usuario, acao: req.query.acao, dias: req.query.dias || 90 }) })));
 
 // Mapeamento de colunas e inconsistências da planilha, sem as linhas

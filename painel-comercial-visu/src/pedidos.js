@@ -133,6 +133,8 @@ export async function salvarConfigPedidos(c, usuario) {
 }
 // usado pelo vendas.js: com a fonte "painel", os indicadores passam a ler os pedidos registrados aqui
 export const fontePainel = () => cfgMem?.fonte === 'painel' && !!mem && [...mem.values()].some((r) => !r.excluido);
+// planilha até o mês anterior ao corte, pedidos do painel a partir dele (reunião: novembro todo no sistema)
+export const fonteMista = () => (cfgMem?.fonte === 'misto' ? cfgMem.corte || '2026-11' : null);
 export async function prepararFonte() { await configPedidos(); await carregar().catch(() => {}); }
 export function linhasDoPainel() {
   return [...(mem?.values() || [])].filter((r) => !r.excluido && (r.total || r.quantidade)).map((r) => ({
@@ -397,9 +399,9 @@ export async function preencherPagamentos(pagamentos, u, { auto = false } = {}) 
 
 // ---------- recebimentos para gravar na planilha do Google (só onde a planilha está em branco) ----------
 const dataBR = (d) => (d ? String(d).slice(0, 10).split('-').reverse().join('/') : '');
-export function itensParaPlanilha(pagamentos, linhasPlanilha) {
+export function itensParaPlanilha(pagamentos, linhasPlanilha, ate = '9999-12') {
   const por = pagamentos?.por_codigo || {}, grupos = new Map();
-  for (const l of linhasPlanilha || []) { const c = l.codigo_pedido || l.codigo || (l.pedido_informado && !String(l.pedido).includes('|') ? l.pedido : ''); if (!c) continue; const k = chaveCodigo(c); (grupos.get(k) || grupos.set(k, { codigo: c, ls: [] }).get(k)).ls.push(l); }
+  for (const l of linhasPlanilha || []) { if ((l.mes || '') > ate) continue; const c = l.codigo_pedido || l.codigo || (l.pedido_informado && !String(l.pedido).includes('|') ? l.pedido : ''); if (!c) continue; const k = chaveCodigo(c); (grupos.get(k) || grupos.set(k, { codigo: c, ls: [] }).get(k)).ls.push(l); }
   const itens = [];
   for (const [k, g] of grupos) {
     const ps = por[k]; if (!ps?.length) continue;
@@ -408,9 +410,10 @@ export function itensParaPlanilha(pagamentos, linhasPlanilha) {
     const it = { codigo: g.codigo };
     if (!temP1 && ps[0]?.pago > 0) { it.pag1 = r2(ps[0].pago); it.nota1 = nota(ps[0], 0); }
     if (!temP2 && ps[1]?.pago > 0) { it.pag2 = r2(ps[1].pago); it.nota2 = nota(ps[1], 1); }
+    const fb = ps.find((p) => p.baixas?.[0]?.forma)?.baixas[0].forma; if (fb && !g.ls.some((l) => l.forma_pagamento)) it.forma = fb;
     const total = g.ls.reduce((s2, l) => s2 + (+l.total || 0), 0), rec = ps.reduce((s2, p) => s2 + (+p.pago || 0), 0);
     if (!g.ls.every((l) => l.pago_100) && ps.every((p) => !(p.aberto > 0.01)) && Math.abs(rec - total) <= 1) it.pago100 = true;
-    if (it.pag1 || it.pag2 || it.pago100) itens.push(it);
+    if (it.pag1 || it.pag2 || it.pago100 || it.forma) itens.push(it);
   }
   return itens;
 }

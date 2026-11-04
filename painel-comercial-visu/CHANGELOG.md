@@ -2,6 +2,11 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v37 — 03/11/2026 — Planilha até outubro, sistema a partir de novembro
+- Script grava no próprio .xlsx (cópia temporária convertida → preenche → `files.update` no mesmo arquivo), com bloqueio, regra de 15 min sem edição, conferência de alteração durante a gravação e versão anterior marcada para guardar.
+- Gravação limitada às vendas até o mês escolhido (padrão out/2026); preenche também FORMA DE PAGAMENTO vazia.
+- Fonte `misto`: planilha antes do corte (2026-11) + pedidos do painel a partir dele; `so_planilha` alimenta a inconsistência "Venda a partir de novembro só na planilha".
+
 ## v36 — 03/11/2026 — Recebimentos gravados na planilha do Google
 - Script do Google com `doPost`: grava valor em 1º/2º PAGAMENTO (com nota: data, banco, forma) e SIM em PEDIDO 100% PAGO, só em células vazias e só em Planilha Google.
 - `/api/planilha-script/gravar` (ativar a cada 10 min e gravar agora) e `/api/planilha-script/arquivo` (trocar o ID quando o .xlsx for convertido).

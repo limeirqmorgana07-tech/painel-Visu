@@ -15,7 +15,9 @@ export async function chaveScript() {
   if (!memo.chave) { memo = { ...memo, chave: crypto.randomBytes(18).toString('base64url') }; await salvarKV(CHAVE_KV, memo); }
   return memo.chave;
 }
-export const statusScript = () => ({ configurado: scriptConfigurado(), url: memo?.url || '', ligado_em: memo?.ligado_em || null, por: memo?.por || '', nome: memo?.nome || '',
+export const ateScript = () => memo?.gravar_ate || '2026-10';
+export async function definirAte(m) { await carregarScript(); if (/^\d{4}-\d{2}$/.test(String(m))) { memo = { ...memo, gravar_ate: m }; await salvarKV(CHAVE_KV, memo); } return ateScript(); }
+export const statusScript = () => ({ gravar_ate: ateScript(), configurado: scriptConfigurado(), url: memo?.url || '', ligado_em: memo?.ligado_em || null, por: memo?.por || '', nome: memo?.nome || '',
   arquivo_id: memo?.arquivo_id || '', gravar: !!memo?.gravar, ultima_gravacao: memo?.ultima_gravacao || null });
 export const arquivoScript = () => memo?.arquivo_id || '';
 // a planilha mudou de endereço (ex.: o .xlsx foi convertido para Planilha Google): o script novo leva o novo ID
@@ -50,46 +52,80 @@ function doGet(e) {
 function autorizar() {
   const arquivo = DriveApp.getFileById(ARQUIVO_ID);
   UrlFetchApp.fetch('https://www.google.com', { muteHttpExceptions: true });
-  try { SpreadsheetApp.openById(ARQUIVO_ID).getName(); } catch (e) { Logger.log('Atenção: o arquivo é .xlsx. Para o painel gravar os recebimentos, converta para Planilha Google (Arquivo > Salvar como Planilhas Google).'); }
+  try { SpreadsheetApp.openById(ARQUIVO_ID).getName(); } catch (e) { /* .xlsx: o painel grava por uma cópia temporária */ }
+  LockService.getScriptLock();
+  ScriptApp.getOAuthToken();
   Logger.log('Autorizado. Planilha: ' + arquivo.getName() + ' (' + arquivo.getMimeType() + ')');
 }
 
-// Grava os recebimentos baixados na Conta Azul: valor em 1º/2º PAGAMENTO (com nota: data, banco e forma)
-// e SIM em PEDIDO 100% PAGO. Só escreve em célula vazia. Precisa ser Planilha Google (não .xlsx).
+// Grava os recebimentos baixados na Conta Azul: valor em 1º/2º PAGAMENTO (com nota: data, banco e forma),
+// FORMA DE PAGAMENTO vazia e SIM em PEDIDO 100% PAGO. Só escreve em célula vazia.
+// Se o arquivo for .xlsx: faz uma cópia temporária em Planilha Google, preenche, e salva por cima do mesmo arquivo
+// (mesmo nome e link). Só grava se ninguém mexeu na planilha nos últimos 15 minutos e guarda a versão anterior.
+const MINUTOS_SEM_USO = 15;
 function doPost(e) {
   let dados;
   try { dados = JSON.parse(e.postData.contents); } catch (x) { return saida({ erro: 'pedido inválido' }); }
   if (dados.chave !== CHAVE) return saida({ erro: 'chave inválida' });
-  const arquivo = DriveApp.getFileById(ARQUIVO_ID);
-  if (arquivo.getMimeType() !== MimeType.GOOGLE_SHEETS) return saida({ erro: 'xlsx', nome: arquivo.getName() });
-  const ss = SpreadsheetApp.openById(ARQUIVO_ID);
-  const sem = (s) => String(s == null ? '' : s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[º°]/g, 'o').replace(/\s+/g, ' ').trim();
+  const lock = LockService.getScriptLock();
+  if (!lock.tryLock(30000)) return saida({ adiado: true, motivo: 'outra gravação em andamento' });
+  try {
+    const arquivo = DriveApp.getFileById(ARQUIVO_ID);
+    const editadoEm = arquivo.getLastUpdated().getTime(), parado = (Date.now() - editadoEm) / 60000;
+    if (!dados.forcar && parado < MINUTOS_SEM_USO) return saida({ adiado: true, motivo: 'a planilha foi editada há ' + Math.floor(parado) + ' min', editado_em: new Date(editadoEm).toISOString() });
+    if (arquivo.getMimeType() === MimeType.GOOGLE_SHEETS) return saida(aplicar(SpreadsheetApp.openById(ARQUIVO_ID), dados.itens || []));
+    // .xlsx: cópia temporária convertida → preenche → volta a ser .xlsx no mesmo arquivo
+    const token = ScriptApp.getOAuthToken(), h = { Authorization: 'Bearer ' + token };
+    const meta = JSON.parse(UrlFetchApp.fetch('https://www.googleapis.com/drive/v3/files/' + ARQUIVO_ID + '?fields=headRevisionId,mimeType&supportsAllDrives=true', { headers: h }).getContentText());
+    const copia = JSON.parse(UrlFetchApp.fetch('https://www.googleapis.com/drive/v3/files/' + ARQUIVO_ID + '/copy?supportsAllDrives=true', { method: 'post', headers: h, contentType: 'application/json',
+      payload: JSON.stringify({ name: 'temporário painel Visu (pode apagar)', mimeType: 'application/vnd.google-apps.spreadsheet' }) }).getContentText());
+    let r;
+    try {
+      r = aplicar(SpreadsheetApp.openById(copia.id), dados.itens || []);
+      if (r.celulas) {
+        SpreadsheetApp.flush();
+        if (DriveApp.getFileById(ARQUIVO_ID).getLastUpdated().getTime() !== editadoEm) { r = { adiado: true, motivo: 'alguém editou a planilha durante a gravação; tento de novo depois' }; }
+        else {
+          const xlsx = UrlFetchApp.fetch('https://docs.google.com/spreadsheets/d/' + copia.id + '/export?format=xlsx', { headers: h }).getBlob();
+          // guarda para sempre a versão anterior (Arquivo > Histórico de versões > Gerenciar versões)
+          if (meta.headRevisionId) UrlFetchApp.fetch('https://www.googleapis.com/drive/v3/files/' + ARQUIVO_ID + '/revisions/' + meta.headRevisionId, { method: 'patch', headers: h, contentType: 'application/json', payload: JSON.stringify({ keepForever: true }), muteHttpExceptions: true });
+          UrlFetchApp.fetch('https://www.googleapis.com/upload/drive/v3/files/' + ARQUIVO_ID + '?uploadType=media&supportsAllDrives=true', { method: 'patch', headers: h, contentType: meta.mimeType || 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', payload: xlsx.getBytes() });
+          r.versao_anterior = meta.headRevisionId || '';
+        }
+      }
+    } finally { DriveApp.getFileById(copia.id).setTrashed(true); }
+    return saida(r);
+  } finally { lock.releaseLock(); }
+}
+
+function aplicar(ss, itens) {
+  const sem = (s) => String(s == null ? '' : s).normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').toLowerCase().replace(/[º°]/g, 'o').replace(/\\s+/g, ' ').trim();
   let aba = null, cab = null, linhaCab = 0;
   for (const sh of ss.getSheets()) {
     if (/tratada|resultado|de.?para|^clientes$/.test(sem(sh.getName()))) continue;
     const ult = Math.max(1, sh.getLastColumn()), vals = sh.getRange(1, 1, Math.min(10, Math.max(1, sh.getLastRow())), ult).getValues();
-    for (let i = 0; i < vals.length && !aba; i++) { const h = vals[i].map(sem); if (h.some((x) => x.indexOf('cod interno') === 0) && h.some((x) => x.indexOf('1o pagamento') === 0)) { aba = sh; cab = h; linhaCab = i + 1; } }
+    for (let i = 0; i < vals.length && !aba; i++) { const hh = vals[i].map(sem); if (hh.some((x) => x.indexOf('cod interno') === 0) && hh.some((x) => x.indexOf('1o pagamento') === 0)) { aba = sh; cab = hh; linhaCab = i + 1; } }
     if (aba) break;
   }
-  if (!aba) return saida({ erro: 'Não achei a aba de vendas (colunas COD INTERNO e 1º PAGAMENTO).' });
+  if (!aba) return { erro: 'Não achei a aba de vendas (colunas COD INTERNO e 1º PAGAMENTO).' };
   const col = (p) => cab.findIndex((x) => x.indexOf(p) === 0);
-  const cCod = col('cod interno'), c1 = col('1o pagamento'), c2 = col('2o pagamento'), c100 = col('pedido 100% pago');
-  const n = aba.getLastRow() - linhaCab; if (n < 1) return saida({ celulas: 0, pedidos: 0, aba: aba.getName() });
+  const cCod = col('cod interno'), c1 = col('1o pagamento'), c2 = col('2o pagamento'), c100 = col('pedido 100% pago'), cFp = col('forma de pagamento');
+  const n = aba.getLastRow() - linhaCab; if (n < 1) return { celulas: 0, pedidos: 0, aba: aba.getName() };
   const vals = aba.getRange(linhaCab + 1, 1, n, cab.length).getValues();
-  const chave = (c) => String(c).replace(/\D/g, '').replace(/^0+/, '');
+  const chave = (c) => String(c).replace(/\\D/g, '').replace(/^0+/, '');
   const porCod = {};
   vals.forEach((r, i) => { const k = chave(r[cCod]); if (k) (porCod[k] = porCod[k] || []).push(i); });
   const vazio = (v) => v === '' || v === null || v === 0;
   let celulas = 0; const feitos = [];
-  (dados.itens || []).forEach((it) => {
+  itens.forEach((it) => {
     const rows = porCod[chave(it.codigo)]; if (!rows) return;
     const r0 = rows[0]; let mexeu = false;
     const grava = (c, v, nota) => { if (c < 0 || v == null || v === '' || !vazio(vals[r0][c])) return; const cel = aba.getRange(linhaCab + 1 + r0, c + 1); cel.setValue(v); if (nota) cel.setNote(nota); celulas++; mexeu = true; };
-    grava(c1, it.pag1, it.nota1); grava(c2, it.pag2, it.nota2);
+    grava(c1, it.pag1, it.nota1); grava(c2, it.pag2, it.nota2); grava(cFp, it.forma, '');
     if (it.pago100 && c100 >= 0) rows.forEach((i) => { const a = sem(vals[i][c100]); if (a === '' || a === 'nao') { aba.getRange(linhaCab + 1 + i, c100 + 1).setValue('SIM'); celulas++; mexeu = true; } });
     if (mexeu) feitos.push(it.codigo);
   });
-  return saida({ celulas: celulas, pedidos: feitos.length, codigos: feitos, aba: aba.getName() });
+  return { celulas: celulas, pedidos: feitos.length, codigos: feitos, aba: aba.getName() };
 }
 
 function saida(o) {
@@ -114,12 +150,11 @@ export async function baixarPorScript(url = memo?.url, chave = memo?.chave) {
   return { nome: j.nome, alterado_em: j.alterado_em, bytes: Buffer.from(j.base64, 'base64') };
 }
 
-export async function enviarParaPlanilha(itens) {
+export async function enviarParaPlanilha(itens, forcar = false) {
   if (!scriptConfigurado()) throw new Error('A planilha ainda não foi ligada pelo e-mail.');
-  const r = await fetch(memo.url, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ chave: memo.chave, itens }), redirect: 'follow' });
+  const r = await fetch(memo.url, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ chave: memo.chave, itens, forcar }), redirect: 'follow' });
   const txt = await r.text();
   let j; try { j = JSON.parse(txt); } catch { throw new Error(/doPost|função|function/i.test(txt) ? 'O script na sua conta ainda é o antigo (só lê). Copie o script novo pelo painel, cole no Apps Script, rode "autorizar" e faça Implantar → Gerenciar implantações → lápis → Nova versão.' : 'O Google devolveu uma página em vez da resposta do script. Rode "autorizar" no editor e faça uma nova versão da implantação.'); }
-  if (j.erro === 'xlsx') throw new Error(`O arquivo "${j.nome}" é .xlsx e o Google não deixa gravar nele. Abra a planilha → Arquivo → Salvar como Planilhas Google, passe a usar a nova planilha e cole o link dela em "Ligar pelo meu e-mail".`);
   if (j.erro) throw new Error(j.erro === 'chave inválida' ? 'A chave do script não confere com a do painel. Copie o script de novo pelo painel e reimplante.' : j.erro);
   return j;
 }
