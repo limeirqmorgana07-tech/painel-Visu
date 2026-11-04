@@ -915,7 +915,10 @@ table.matriz td.vz{color:var(--line2)}
 
   <section data-pagina="inconsistencias" hidden>
     <div class="ped-bar">
-      <div class="f"><label for="inMes">Mês</label><select id="inMes"></select></div>
+      <div class="f"><label for="inMes">Período</label><select id="inMes"></select></div>
+      <div class="f in-fx" hidden><label for="inDe">De</label><input id="inDe" type="date"></div>
+      <div class="f in-fx" hidden><label for="inAte">Até</label><input id="inAte" type="date"></div>
+      <button class="bt2 in-fx" type="button" id="inFiltrar" hidden style="align-self:flex-end">Filtrar</button>
       <div class="f"><label for="inVend">Vendedor</label><select id="inVend"></select></div>
       <div class="seg" role="group" aria-label="Base" id="inBase"><button type="button" data-inb="planilha" aria-pressed="true">Planilha</button><button type="button" data-inb="painel" aria-pressed="false">Planilha de vendas do painel</button></div>
       <span style="flex:1"></span>
@@ -1068,8 +1071,9 @@ const nomeMes=(m)=>{const[a,b]=m.split('-');return MES_L[+b-1]+' de '+a};
 const somaMes=(m,n)=>{const[a,b]=m.split('-').map(Number);const d=new Date(Date.UTC(a,b-1+n,1));return d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0')};
 function delta(a,b,inv){ if(!b) return '<span class="delta eq">sem base</span>'; const d=(a-b)/b; const c=Math.abs(d)<.005?'eq':(d>0)!==!!inv?'up':'down'; return `<span class="delta ${c}">${d>0?'▲':d<0?'▼':'■'} ${pct(Math.abs(d))}</span>`; }
 
-const VERSAO='v41';
+const VERSAO='v42';
 const VERSOES=[
+ {v:'v42',data:'03/11/2026',tit:'Filtro de período nas Inconsistências',arq:'painel-visu-v42.zip',itens:['Inconsistências ganhou o filtro Período: um mês, o ano inteiro, todos os meses ou Período personalizado (de/até, pela data da venda). Vale para a lista, o resumo por tipo, a tabela por vendedor e a exportação.']},
  {v:'v41',data:'03/11/2026',tit:'Nota na planilha igual ao balão do painel',arq:'painel-visu-v41.zip',itens:['A nota que o painel grava na planilha do Google ficou igual ao balão do painel e só com aquele pedido, cliente e parcela: pedido e cliente, parcela, vencimento, valor recebido e data, banco e forma.','Em PEDIDO 100% PAGO, a nota mostra todas as parcelas do pedido, como o balão do painel (precisa do script novo no Apps Script).']},
  {v:'v40',data:'03/11/2026',tit:'Proteção de fórmulas na planilha',arq:'painel-visu-v40.zip',itens:['Na gravação dos recebimentos, o painel não escreve em célula que tenha fórmula (1º/2º PAGAMENTO, PEDIDO 100% PAGO e FORMA DE PAGAMENTO), só em célula vazia ou com zero digitado.']},
  {v:'v39',data:'03/11/2026',tit:'Importar só as linhas novas',arq:'painel-visu-v39.zip',itens:['Importar base ganhou a opção Só as linhas novas (padrão): traz da planilha apenas as linhas que ainda não estão no sistema, comparando código, data, cliente, produto, cor, quantidade e total. Não duplica nem apaga correções.','O aviso de vendas de novembro só na planilha indica esse caminho.']},
@@ -2303,9 +2307,9 @@ function linhasInconsistencias(ls,b,ca,desde,noMes,vendSel){
       else if(['so_painel','cancelado','nao_aprov'].includes(st[0])) push('soP',base,{sis:v?v.t:'',dif:v?v.t-x.t:'',falta:v?SIT_CA[v.s]||v.s:'não existe na Conta Azul'});
       if(x.mes>=desde){ const ps=parcelasDe(x.codigo); if(ps.length){ const p1=x.regs.reduce((a,r)=>a+(+r.pag1||0),0), p2=x.regs.reduce((a,r)=>a+(+r.pag2||0),0); [[p1,ps[0]],[p2,ps[1]]].forEach(([vp,pc],i)=>{ if(vp>0&&pc&&Math.abs(vp-(pc.pago||pc.valor))>1) push('pag',base,{plan:vp,sis:pc.pago||pc.valor,dif:(pc.pago||pc.valor)-vp,falta:(i?'2º':'1º')+' pagamento'}); }); } } }
     const usados=new Set(g.keys());
-    if(ls.length) for(const v of E.dados.conta_azul.vendas||[]){ const m=(v.d||'').slice(0,7); if(m<desde||!noMes(m)||v.n==null||usados.has(ckey(v.n))||!['APROVADO','FATURADO'].includes(v.s)) continue; if(vendSel&&nv(v.v)!==nv(vendSel)) continue; out.push({tipo:'soS',data:v.d,codigo:String(v.n),cliente:v.c,vendedor:v.v||'',plan:'',sis:v.t,dif:v.t,falta:SIT_CA[v.s]||v.s}); }
+    if(ls.length) for(const v of E.dados.conta_azul.vendas||[]){ const m=(v.d||'').slice(0,7); if(m<desde||!noMes({data:v.d,mes:m})||v.n==null||usados.has(ckey(v.n))||!['APROVADO','FATURADO'].includes(v.s)) continue; if(vendSel&&nv(v.v)!==nv(vendSel)) continue; out.push({tipo:'soS',data:v.d,codigo:String(v.n),cliente:v.c,vendedor:v.v||'',plan:'',sis:v.t,dif:v.t,falta:SIT_CA[v.s]||v.s}); }
   }
-  (E.dados?.so_planilha||[]).forEach(l=>{ if(noMes(l.m)&&(!vendSel||l.v===vendSel)) out.push({tipo:'novPl',data:l.d,codigo:l.cd||'',cliente:l.c,vendedor:l.v||'',plan:l.t,sis:'',dif:'',falta:[l.q?int(l.q)+' ×':'',l.tp||''].filter(Boolean).join(' ')+' · está na planilha e não no sistema'}); });
+  (E.dados?.so_planilha||[]).forEach(l=>{ if(noMes({data:l.d,mes:l.m})&&(!vendSel||l.v===vendSel)) out.push({tipo:'novPl',data:l.d,codigo:l.cd||'',cliente:l.c,vendedor:l.v||'',plan:l.t,sis:'',dif:'',falta:[l.q?int(l.q)+' ×':'',l.tp||''].filter(Boolean).join(' ')+' · está na planilha e não no sistema'}); });
   const OBR=[['cliente','cliente'],['vendedor','vendedor'],['tipo_venda','tipo de venda'],['tipo_produto','tipo de produto'],['material','material'],['cor','cor'],['quantidade','quantidade'],['total','total']].concat(b==='painel'?[['valor_unit','valor/und']]:[]);
   const visto=new Map(), cd=new Map();
   for(const r of ls){
@@ -2340,15 +2344,21 @@ function pgInconsistencias(){
   if(!base.length){ av.className='aviso erro'; av.innerHTML=`<span><b>Ainda não há planilha para conferir.</b> A planilha do comercial não está ligada ao painel e a base não foi importada, por isso não dá para comparar com a Conta Azul (se comparasse, tudo apareceria como "só no sistema"). ${E.eu?.perfil==='adm'?'Ligue a planilha em <b>Controle → Planilha × sistema (mês)</b> (botão <b>Ligar pelo meu e-mail</b>) ou importe o arquivo em <b>Planilha de vendas → Importar base</b>.':'Peça ao administrador para ligar a planilha.'}</span>`;
     ['inKpis','inResumo','inTabela','inVendT'].forEach(id=>$(id).innerHTML=''); $('inMes').innerHTML=''; $('inVend').innerHTML=''; PED.inRows=[]; return; }
   const hoje=hojeISO().slice(0,7), meses=[...new Set(base.map(r=>r.mes).filter(m=>m&&m<=hoje))].sort().reverse();
-  if(!PED.inMes||(PED.inMes!=='todos'&&!meses.includes(PED.inMes))) PED.inMes=meses[0]||'todos';
-  $('inMes').innerHTML=meses.map(m=>`<option value="${m}">${nomeMes(m)}</option>`).join('')+'<option value="todos">Todos os meses</option>'; $('inMes').value=PED.inMes;
-  const noMes=(m)=>PED.inMes==='todos'||m===PED.inMes;
-  const vends=[...new Set(base.filter(r=>noMes(r.mes)).map(r=>r.vendedor).filter(Boolean))].sort();
+  const anos=[...new Set(meses.map(m=>m.slice(0,4)))];
+  if(!PED.inMes||(!['todos','faixa'].includes(PED.inMes)&&!PED.inMes.startsWith('ano:')&&!meses.includes(PED.inMes))) PED.inMes=meses[0]||'todos';
+  $('inMes').innerHTML=meses.map(m=>`<option value="${m}">${nomeMes(m)}</option>`).join('')+anos.map(a=>`<option value="ano:${a}">Ano de ${a}</option>`).join('')+'<option value="todos">Todos os meses</option><option value="faixa">Período personalizado…</option>'; $('inMes').value=PED.inMes;
+  document.querySelectorAll('.in-fx').forEach(x=>x.hidden=PED.inMes!=='faixa');
+  if(PED.inMes==='faixa'){ if(!PED.inDe) PED.inDe=(meses[0]||hojeISO().slice(0,7))+'-01'; if(!PED.inAte) PED.inAte=hojeISO(); $('inDe').value=PED.inDe; $('inAte').value=PED.inAte; }
+  // período: um mês, um ano, todos ou de/até (pela data da venda; sem data, pelo mês)
+  const noPer=(o)=>{ const P=PED.inMes, m=o.mes||(o.data||'').slice(0,7); if(P==='todos') return true; if(P.startsWith('ano:')) return m.startsWith(P.slice(4)); if(P==='faixa'){ const de=PED.inDe||'0000-00-00', ate=PED.inAte||'9999-12-31'; return o.data?(o.data>=de&&o.data<=ate):(m>=de.slice(0,7)&&m<=ate.slice(0,7)); } return m===P; };
+  const noMes=(m)=>noPer({mes:m});
+  PED.inPerRot=PED.inMes==='todos'?'todos os meses':PED.inMes==='faixa'?`${dataBR(PED.inDe)} a ${dataBR(PED.inAte)}`:PED.inMes.startsWith('ano:')?'ano de '+PED.inMes.slice(4):nomeMes(PED.inMes);
+  const vends=[...new Set(base.filter(r=>noPer(r)).map(r=>r.vendedor).filter(Boolean))].sort();
   if(PED.inVend==null&&meuVend()) PED.inVend=vends.find(v=>semA(v)===semA(meuVend()))||'';
   if(!vends.includes(PED.inVend)) PED.inVend=''; $('inVend').innerHTML='<option value="">Todos</option>'+vends.map(v=>`<option>${esc(v)}</option>`).join(''); $('inVend').value=PED.inVend||'';
-  const ls=base.filter(r=>noMes(r.mes)&&(!PED.inVend||r.vendedor===PED.inVend)), desde=DESDE(), temCA=!!E.dados?.conta_azul;
+  const ls=base.filter(r=>noPer(r)&&(!PED.inVend||r.vendedor===PED.inVend)), desde=DESDE(), temCA=!!E.dados?.conta_azul;
   av.className='aviso'; av.innerHTML=`<span>Base: <b>${rot}</b>${b==='planilha'?' (a referência das vendas, como combinado na reunião de 03/11)':''}. Uma lista só com tudo que precisa de correção: sistema × planilha pedido a pedido${temCA?` (a partir de ${nomeMes(desde)})`:' (<b>Conta Azul não conectada</b>)'}, colunas vazias, código do pedido e cadastro de clientes. Clique num tipo para filtrar.</span>`;
-  const todas=linhasInconsistencias(ls,b,mapaCA(),desde,noMes,PED.inVend);
+  const todas=linhasInconsistencias(ls,b,mapaCA(),desde,noPer,PED.inVend);
   const rotT=(t)=>t==='soS'?'Venda no sistema sem pedido '+(b==='painel'?'no painel':'na planilha'):TIPOS_INC.find(x=>x[0]===t)[1];
   const porT=new Map(TIPOS_INC.map(t=>[t[0],[]])); todas.forEach(x=>porT.get(x.tipo).push(x));
   if(PED.inTipo&&!porT.get(PED.inTipo)?.length) PED.inTipo='';
@@ -2357,7 +2367,7 @@ function pgInconsistencias(){
   const linhasProb=new Set(todas.filter(x=>!['soS'].includes(x.tipo)).map(x=>x.codigo+'|'+x.cliente+'|'+x.data+'|'+x.plan));
   const graves=todas.filter(x=>TIPOS_INC.find(t=>t[0]===x.tipo)[2]);
   $('inKpis').innerHTML=kpiHtml([
-    ['Inconsistências',int(todas.length),`<span>${pl([...porT.values()].filter(v=>v.length).length,'tipo','tipos')} · ${PED.inMes==='todos'?'todos os meses':nomeMes(PED.inMes)}${PED.inVend?' · '+esc(PED.inVend):''}</span>`,todas.length?'alerta':'dest',''],
+    ['Inconsistências',int(todas.length),`<span>${pl([...porT.values()].filter(v=>v.length).length,'tipo','tipos')} · ${esc(PED.inPerRot)}${PED.inVend?' · '+esc(PED.inVend):''}</span>`,todas.length?'alerta':'dest',''],
     ['Graves',int(graves.length),'<span>afetam valor, código ou a conferência com o sistema</span>',graves.length?'alerta':'',''],
     ['Linhas conferidas',int(ls.length),`<span>${brl(ls.reduce((a,r)=>a+(+r.total||0),0))} na ${b==='painel'?'base do painel':'planilha'}</span>`,'',''],
     ['Sistema × planilha',temCA?int([...porT.get('dif'),...porT.get('soP'),...porT.get('soS')].length):'—',temCA?`<span>${int(porT.get('dif').length)} valor diferente · ${int(porT.get('soP').length)} só ${b==='painel'?'no painel':'na planilha'} · ${int(porT.get('soS').length)} só no sistema</span>`:'<span>conecte a Conta Azul</span>','',''],
@@ -2408,7 +2418,9 @@ $('pdGrade').addEventListener('mouseover',e=>{ if(PED.editando) return; const ta
 $('pdGrade').addEventListener('mouseout',e=>{ const td=e.target.closest('[data-pg],[data-pgall]'); if(td&&!td.contains(e.relatedTarget)&&!$('balao').contains(e.relatedTarget)) esconderBalao(); });
 $('pdGrade').addEventListener('scroll',()=>esconderBalao(true),{passive:true}); addEventListener('scroll',()=>esconderBalao(true),{passive:true});
 $('balao').addEventListener('mouseenter',()=>clearTimeout(BAL.t)); $('balao').addEventListener('mouseleave',()=>esconderBalao());
-$('inMes').onchange=()=>{ PED.inMes=$('inMes').value; pgInconsistencias(); }; $('inVend').onchange=()=>{ PED.inVend=$('inVend').value; pgInconsistencias(); };
+$('inMes').onchange=()=>{ PED.inMes=$('inMes').value; pgInconsistencias(); };
+$('inFiltrar').onclick=()=>{ PED.inDe=$('inDe').value; PED.inAte=$('inAte').value; if(PED.inDe&&PED.inAte&&PED.inDe>PED.inAte){ toast('A data inicial precisa ser antes da final.',true); return; } pgInconsistencias(); };
+['inDe','inAte'].forEach(id=>$(id).addEventListener('keydown',e=>{ if(e.key==='Enter') $('inFiltrar').click(); })); $('inVend').onchange=()=>{ PED.inVend=$('inVend').value; pgInconsistencias(); };
 document.querySelectorAll('[data-inb]').forEach(x=>x.onclick=()=>{ PED.inBase=x.dataset.inb; pgInconsistencias(); });
 $('inResumo').addEventListener('click',e=>{ const b2=e.target.closest('[data-int]'); if(!b2||b2.disabled) return; PED.inTipo=b2.dataset.int; pgInconsistencias(); });
 $('inVendT').addEventListener('click',e=>{ const a2=e.target.closest('[data-incv]'); if(!a2) return; e.preventDefault(); PED.inVend=a2.dataset.v; PED.inTipo=a2.dataset.incv; pgInconsistencias(); $('inTabela').scrollIntoView({behavior:'smooth',block:'start'}); });
@@ -2490,7 +2502,7 @@ const FONTES_EXP={
   cf:()=>({nome:'conciliacao-pedidos-'+PED.cfMes,titulo:'Conciliação de pedidos · '+(PED.cfMes==='todos'?'todos os meses':nomeMes(PED.cfMes)),sub:`${PED.cfBase==='painel'?'Pedidos do painel':'Planilha conectada'} × Conta Azul, pelo código do pedido${PED.cfVend?' · '+PED.cfVend:''}`,
     cols:[{rot:'Situação'},{rot:'Código'},{rot:'Data',t:'data'},{rot:'Cliente'},{rot:'Vendedor'},{rot:PED.cfBase==='painel'?'Painel':'Planilha',t:'brl',total:1},{rot:'Sistema',t:'brl',total:1},{rot:'Divergência',t:'brl',total:1},{rot:'Situação na Conta Azul'}],
     rows:(PED.cfRows||[]).map(r=>[r.st[1],r.cod,r.data,r.cliente||r.sisCli||'',r.vend||'',r.painel??'',r.sis??'',r.dif==null||Math.abs(r.dif)<=1?'':r.dif,SIT_CA[r.sit]||r.sit||''])}),
-  in:()=>({nome:'inconsistencias-'+(PED.inMes||''),titulo:'Inconsistências · '+(PED.inMes==='todos'?'todos os meses':nomeMes(PED.inMes||hojeISO().slice(0,7))),sub:(PED.inVend?'Vendedor: '+PED.inVend+' · ':'')+(PED.inTipo?TIPOS_INC.find(t=>t[0]===PED.inTipo)[1]:'todos os tipos'),
+  in:()=>({nome:'inconsistencias-'+String(PED.inPerRot||'').replace(/[^\w]+/g,'-'),titulo:'Inconsistências · '+(PED.inPerRot||''),sub:(PED.inVend?'Vendedor: '+PED.inVend+' · ':'')+(PED.inTipo?TIPOS_INC.find(t=>t[0]===PED.inTipo)[1]:'todos os tipos'),
     cols:[{rot:'Inconsistência'},{rot:'Data',t:'data'},{rot:'Código'},{rot:'Cliente'},{rot:'Vendedor'},{rot:'Planilha',t:'brl'},{rot:'Sistema',t:'brl'},{rot:'Diferença',t:'brl',total:1},{rot:'O que falta / detalhe'}],
     rows:(PED.inRows||[]).map(x=>[TIPOS_INC.find(t=>t[0]===x.tipo)[1],x.data,x.codigo,x.cliente,x.vendedor,x.plan,x.sis,x.dif===''||Math.abs(x.dif)<=1?'':x.dif,x.falta])}),
   hs:()=>({nome:'historico-pedidos',titulo:'Histórico de alterações dos pedidos',sub:$('hsDias').selectedOptions[0].textContent,
