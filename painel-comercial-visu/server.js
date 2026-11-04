@@ -12,6 +12,8 @@ import { dadosFinanceiros } from './src/financeiro.js';
 import { planilhaConfigurada } from './src/planilha.js';
 import * as google from './src/google.js';
 import * as pscript from './src/planilhaScript.js';
+import * as extrato from './src/extrato.js';
+import { gerarDemoParcelas, gerarDemoContaAzul, gerarDemoPlanilha } from './src/demo.js';
 import * as usuarios from './src/usuarios.js';
 import { paginasDe, veFinanceiro, veVendas, definirPerfis, padraoDe, perfisPersonalizados, padroesOriginais, BLOCOS, blocosDe, definirBlocos, blocosPersonalizados, blocosPadrao, vePedidos, veHistorico } from './src/paginas.js';
 import { statusBanco, lerKV, salvarKV } from './src/tokenStore.js';
@@ -368,6 +370,39 @@ app.post('/api/pedidos/importar', exigeLogin, exigePedidos, express.raw({ type: 
 }));
 app.post('/api/pedidos/config', exigeAdm, resp(async (req) => { const f = ['painel', 'misto'].includes(req.body?.fonte) ? req.body.fonte : 'planilha'; const r = await pedidos.salvarConfigPedidos({ fonte: f, corte: f === 'misto' ? (/^\d{4}-\d{2}$/.test(req.body?.corte || '') ? req.body.corte : '2026-11') : undefined }, req.usuario); depoisDeMudar(); return r; }));
 app.get('/api/pedidos/historico', exigeLogin, (req, res, next) => (veHistorico(req.usuario) ? next() : res.status(403).json({ erro: 'o histórico de alterações é só para a gestão' })), resp(async (req) => ({ itens: await pedidos.historico({ codigo: req.query.codigo, usuario: req.query.usuario, acao: req.query.acao, dias: req.query.dias || 90 }) })));
+
+// ---------- Conciliação bancária: extrato do banco × baixas na Conta Azul ----------
+const exigeExtrato = (req, res, next) => (paginasDe(req.usuario).includes('extrato') ? next() : res.status(403).json({ erro: 'seu perfil não tem acesso à conciliação bancária' }));
+const cacheBaixasExtrato = new Map();
+async function baixasDoSistema(de, ate) {
+  const k = de + '|' + ate, c = cacheBaixasExtrato.get(k);
+  if (c && Date.now() - c.t < 10 * 60e3) return c.d;
+  let lista = [];
+  if (config.demo) {
+    const base = gerarDemoPlanilha(), vendas = gerarDemoContaAzul(base.linhas);
+    lista = gerarDemoParcelas(vendas).filter((p) => p.pago > 0).map((p) => ({ tipo: 'r', data: p.data_pagamento, valor: p.pago, pessoa: p.descricao.replace(/ - parcela.*/, ''), desc: p.descricao, conta: p.baixas?.[0]?.conta || '', aprox: false }));
+    const r = (x) => ((Math.sin(x) * 10000) % 1 + 1) % 1; // despesas fictícias
+    for (let i = 0; i < 120; i++) { const d = new Date(Date.UTC(2026, 6, 1) + Math.floor(r(i) * 125) * 864e5).toISOString().slice(0, 10); lista.push({ tipo: 'p', data: d, valor: -Math.round(200 + r(i + 7) * 4800), pessoa: ['Fornecedor de tecido', 'Energia', 'Aluguel', 'Transportadora', 'Folha'][i % 5], desc: 'Pagamento', conta: ['Banco do Brasil', 'Sicredi', 'Banco Inter', 'Caixa'][i % 4], aprox: false }); }
+  } else if ((await ca.statusConexao()).conectado) {
+    const [rec, pag] = await Promise.all([ca.buscarParcelas('receber', { pagamento_de: de, pagamento_ate: ate }), ca.buscarParcelas('pagar', { pagamento_de: de, pagamento_ate: ate })]);
+    const m = (p, sinal) => ({ tipo: sinal > 0 ? 'r' : 'p', data: p.data_pagamento || p.vencimento, aprox: !p.data_pagamento, valor: Math.round(sinal * (p.pago || p.total) * 100) / 100, pessoa: p.pessoa, desc: p.descricao, conta: p.conta || '', categoria: p.categorias?.[0]?.nome || '' });
+    lista = [...rec.filter((p) => p.pago > 0).map((p) => m(p, 1)), ...pag.filter((p) => p.pago > 0).map((p) => m(p, -1))];
+  }
+  lista = lista.filter((x) => x.data >= de && x.data <= ate);
+  cacheBaixasExtrato.set(k, { t: Date.now(), d: lista });
+  return lista;
+}
+app.get('/api/extrato', exigeLogin, exigeExtrato, resp(async (req) => {
+  const de = /^\d{4}-\d{2}-\d{2}$/.test(req.query.de || '') ? req.query.de : new Date(Date.now() - 62 * 864e5).toISOString().slice(0, 10);
+  const ate = /^\d{4}-\d{2}-\d{2}$/.test(req.query.ate || '') ? req.query.ate : new Date().toISOString().slice(0, 10);
+  const [contas, sistema] = await Promise.all([extrato.lancamentosExtrato(de, ate), baixasDoSistema(de, ate).catch((e) => ({ erro: e.message }))]);
+  return { de, ate, contas, sistema: Array.isArray(sistema) ? sistema : [], erro_sistema: sistema?.erro || null, conta_azul: config.demo || (await ca.statusConexao()).conectado };
+}));
+app.post('/api/extrato/importar', exigeLogin, exigeExtrato, express.raw({ type: () => true, limit: '20mb' }), resp(async (req) => {
+  if (!Buffer.isBuffer(req.body) || !req.body.length) throw new Error('Envie o arquivo do extrato (OFX, CSV ou Excel).');
+  return extrato.importarExtrato({ bytes: req.body, nome: String(req.query.nome || ''), conta: String(req.query.conta || ''), simular: req.query.simular !== 'false' }, req.usuario);
+}));
+app.delete('/api/extrato/conta', exigeAdm, resp(async (req) => { await extrato.apagarConta(String(req.query.conta || '')); return { ok: true }; }));
 
 // Mapeamento de colunas e inconsistências da planilha, sem as linhas
 app.get('/api/planilha', exigeLogin, async (req, res) => {

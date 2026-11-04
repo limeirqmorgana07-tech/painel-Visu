@@ -2,6 +2,11 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v43 — 03/11/2026 — Conciliação bancária e Planilha de vendas completa
+- `src/extrato.js` e `/api/extrato`: importa OFX/CSV/Excel por conta (sem duplicar) e cruza com as baixas de receber/pagar da Conta Azul (valor exato, ±3 dias).
+- Página Financeiro → Conciliação bancária (permissão `extrato`, incluída para Financeiro e Diretor).
+- Planilha de vendas mostra os meses da planilha em modo consulta com os balões; pesquisa rápida em Inconsistências; contador de clientes no + Novo pedido.
+
 ## v42 — 03/11/2026 — Filtro de período nas Inconsistências
 - Período: mês, ano, todos ou de/até pela data da venda.
 
