@@ -2,6 +2,11 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v47 — 04/11/2026 — Correção da lista vazia e aviso do script antigo
+
+- Corrigido o erro "vazio is not defined", que quebrava Inconsistências (e outras listas) quando um filtro não tinha nenhuma linha.
+- Ao ligar a planilha pelo e-mail, o painel avisa na hora se o endereço ainda roda o código antigo do script (lê, mas não grava).
+
 ## v46 — 04/11/2026 — Mês a mês clicável e endereço do script
 
 - Planilha × sistema (mês): clicar num mês da tabela Mês a mês abre a conta daquele mês (ponte, motivos e pedidos) no alto da página. O resumo explica o que é "achado pelo código" e "achado pelo cliente e data".
