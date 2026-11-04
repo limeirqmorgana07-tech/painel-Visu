@@ -1068,8 +1068,9 @@ const nomeMes=(m)=>{const[a,b]=m.split('-');return MES_L[+b-1]+' de '+a};
 const somaMes=(m,n)=>{const[a,b]=m.split('-').map(Number);const d=new Date(Date.UTC(a,b-1+n,1));return d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0')};
 function delta(a,b,inv){ if(!b) return '<span class="delta eq">sem base</span>'; const d=(a-b)/b; const c=Math.abs(d)<.005?'eq':(d>0)!==!!inv?'up':'down'; return `<span class="delta ${c}">${d>0?'▲':d<0?'▼':'■'} ${pct(Math.abs(d))}</span>`; }
 
-const VERSAO='v37';
+const VERSAO='v38';
 const VERSOES=[
+ {v:'v38',data:'03/11/2026',tit:'Correção: fonte "planilha até outubro + sistema"',arq:'painel-visu-v38.zip',itens:['Com a fonte "Planilha até outubro + sistema a partir de novembro", Planilha × sistema (mês) mostrava "a leitura falhou" e "a planilha não está ligada" mesmo com a planilha sendo lida. Agora reconhece a fonte, mostra o total da planilha no mês e compara com o sistema.','O faturamento em Vendas volta a mostrar a conferência com a Conta Azul nessa fonte, e a lista de clientes do + Novo pedido inclui os clientes da planilha.']},
  {v:'v37',data:'03/11/2026',tit:'Planilha até outubro, sistema a partir de novembro',arq:'painel-visu-v37.zip',itens:['O painel grava os recebimentos já baixados na Conta Azul na própria planilha .xlsx (mesmo arquivo e link), para as vendas até outubro: valor em 1º/2º PAGAMENTO com nota (data, banco e forma), FORMA DE PAGAMENTO vazia e SIM em PEDIDO 100% PAGO. Só em células vazias.','Proteções: só grava quando a planilha está sem edição há 15 minutos, cancela se alguém editar durante a gravação e guarda a versão anterior no histórico de versões do Drive.','Nova fonte dos indicadores: planilha até outubro e pedidos do sistema a partir de novembro. Venda de novembro lançada só na planilha aparece em Inconsistências e no aviso do topo.']},
  {v:'v36',data:'03/11/2026',tit:'Recebimentos gravados na planilha do Google',arq:'painel-visu-v36.zip',itens:['O painel grava na planilha do Google os recebimentos já baixados na Conta Azul: valor em 1º/2º PAGAMENTO com nota na célula (data, banco e forma, que aparece como balão no Google Planilhas) e SIM em PEDIDO 100% PAGO quando quitado. Só escreve em célula vazia, a cada 10 minutos ou no botão Gravar agora / Preencher pagamentos. Cada gravação fica no Histórico.','Precisa ser Planilha Google (o .xlsx não aceita gravação) e do script novo: a janela Ligar pelo meu e-mail explica e aceita o link da planilha convertida.','Inconsistências separa "Pagamento em branco, já baixado na Conta Azul" (com valor, data e banco) de "Pagamento ou entrega em branco" ainda não recebido.']},
  {v:'v35',data:'03/11/2026',tit:'Detalhe do pagamento no balão',arq:'painel-visu-v35.zip',itens:['A Planilha de vendas volta a ter só as colunas da planilha: o valor do 1º e do 2º pagamento fica na célula (com o selo CA quando veio da Conta Azul) e o detalhe aparece no balão ao passar o mouse: data do pagamento, banco, forma, vencimento e situação.','Novo balão em Pedido 100% pago: todas as parcelas do pedido na Conta Azul, com o que foi recebido, quando, em qual banco, o que está em aberto e a diferença para o total do pedido.','Data e banco dos pagamentos continuam guardados e saem na exportação em Excel, PDF e CSV.']},
@@ -1263,7 +1264,7 @@ function pgGeral(j){
   const peV=E.periodo==='mes'?peRef().valor:0, lsK=linhas(j.atual);
   $('kpis').innerHTML=kpiHtml([
     (()=>{ // reunião de 03/11/2026: as vendas seguem a planilha (ou os pedidos do painel); a Conta Azul aparece só como conferência
-      const pm=E.dados.conta_azul?.por_mes, desde=E.dados.detalhe_desde||'2026-08', fcF=(E.dados.fonte==='planilha'||E.dados.fonte==='painel')&&E.periodo==='mes'&&!Object.values(E.filtros).some(Boolean)&&pm&&E.mes>=desde&&pm[E.mes];
+      const pm=E.dados.conta_azul?.por_mes, desde=E.dados.detalhe_desde||'2026-08', fcF=(E.dados.fonte==='planilha'||E.dados.fonte==='painel'||E.dados.fonte==='misto')&&E.periodo==='mes'&&!Object.values(E.filtros).some(Boolean)&&pm&&E.mes>=desde&&pm[E.mes];
       const caM=(m)=>pm&&pm[m]?(pm[m].APROVADO?.t||0)+(pm[m].FATURADO?.t||0):null, va=fcF?caM(E.mes):null, vb=fcF?caM(somaMes(E.mes,-1)):null;
       if(va==null) return ['Faturamento',brl(a.fat),`${delta(a.fat,b.fat)}<span>${j.comp}: ${brl(b.fat)}</span>`,'dest','',()=>detPedidos('Faturamento',lsK)];
       return ['Faturamento',brl(a.fat),`${delta(a.fat,b.fat)}<span>${j.comp}: ${brl(b.fat)} · Conta Azul: ${brl(va)}${Math.abs(va-a.fat)>1?` (<b>${a.fat>va?'+':'−'}${brl(Math.abs(va-a.fat))}</b>, ver Conferência)`:' (batendo)'}</span>`,'dest','',()=>detPedidos('Faturamento',lsK)]; })(),
@@ -1801,7 +1802,7 @@ async function desligarPlanilha(){ if(!confirmar('Desligar a leitura da planilha
 const kc=(s)=>String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/\s*[-–(]?\s*\blote\s*\d+\)?\s*$/,'').replace(/[^a-z0-9]+/g,' ').trim();
 let totalInformado={}; try{ totalInformado=JSON.parse(localStorage.getItem('visu-total-planilha')||'{}'); }catch(e){}
 function pgConciliacao(){
-  const conta=E.eu?.email||E.dados.planilha_conta||'morgana.limeira@sejaexpertgestao.com', base=E.dados.planilha_link||'https://docs.google.com/spreadsheets/d/1mWgFszLWSMepXLA4FMlOtRJ6jayKgODU/edit?gid=247671240', link=base+(base.includes('?')?'&':'?')+'authuser='+encodeURIComponent(conta), ligada=E.dados.fonte==='planilha';
+  const conta=E.eu?.email||E.dados.planilha_conta||'morgana.limeira@sejaexpertgestao.com', base=E.dados.planilha_link||'https://docs.google.com/spreadsheets/d/1mWgFszLWSMepXLA4FMlOtRJ6jayKgODU/edit?gid=247671240', link=base+(base.includes('?')?'&':'?')+'authuser='+encodeURIComponent(conta), ligada=E.dados.fonte==='planilha'||E.dados.fonte==='misto';
   const G=E.dados.google||{}, arq=E.dados.planilha_arquivo, admG=E.eu?.perfil==='adm', PS=E.dados.planilha_script||{};
   const quando=(iso)=>iso?new Date(iso).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'';
   const txt=ligada&&PS.configurado
@@ -1824,7 +1825,7 @@ function pgConciliacao(){
   $('concPlan').querySelectorAll('[data-ps]').forEach(b=>b.onclick=()=>b.dataset.ps==='abrir'?abrirLigarPlanilha():desligarPlanilha());
   const d=E.dados, m=E.mes, caD=d.conta_azul;
   if(!caD){ $('ponte').innerHTML='<div class="vazio">A Conta Azul ainda não está conectada. A conciliação compara a planilha com as vendas do sistema.</div>'; $('motivos').innerHTML=''; $('concMeses').innerHTML=''; $('concClientes').innerHTML=''; return; }
-  const temPlanilha=d.fonte==='planilha'||d.fonte==='demo';
+  const temPlanilha=d.fonte==='planilha'||d.fonte==='misto'||d.fonte==='demo';
   const pl_=temPlanilha?d.linhas:[];
   const plMes=(mm)=>pl_.filter(l=>l.m===mm);
   const caMes=(mm,sits)=>caD.vendas.filter(v=>v.d.slice(0,7)===mm&&(!sits||sits.includes(v.s)));

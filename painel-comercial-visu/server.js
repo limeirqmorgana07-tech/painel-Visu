@@ -331,7 +331,7 @@ app.get('/api/pedidos/clientes', exigeLogin, exigePedidos, resp(async () => {
   const d = await dadosDeVendas().catch(() => null), m = new Map();
   const add = (nome, origem, data, doc) => { nome = String(nome || '').trim(); if (!nome || nome === 'Vendas consolidadas do mês' || nome === 'Sem cliente') return; const k = nome.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/\s+/g, ' '); const x = m.get(k) || { nome, origens: [], ultima: '', vezes: 0, documento: '' }; if (!x.origens.includes(origem)) x.origens.push(origem); if (data && data > x.ultima) x.ultima = data; if (doc) x.documento = doc; x.vezes++; m.set(k, x); };
   (await pedidos.listar()).forEach((r) => add(r.cliente, 'painel', r.data));
-  if (d?.fonte === 'planilha' || d?.fonte === 'painel') d.linhas.forEach((l) => add(l.c, 'planilha', l.d));
+  if (['planilha', 'painel', 'misto'].includes(d?.fonte)) d.linhas.forEach((l) => add(l.c, 'planilha', l.d));
   (d?.conta_azul?.vendas || []).forEach((v) => add(v.c, 'conta_azul', v.d));
   if (!config.demo && (await ca.statusConexao().catch(() => ({}))).conectado) {
     if (Date.now() - cacheClientes.quando > 3600e3) { cacheClientes.lista = await ca.buscarClientes().catch(() => []); cacheClientes.quando = Date.now(); }

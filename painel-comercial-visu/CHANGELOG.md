@@ -2,6 +2,9 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v38 — 03/11/2026 — Correção da fonte mista
+- Planilha × sistema (mês), faturamento em Vendas e lista de clientes reconhecem a fonte `misto` (antes mostravam "a leitura falhou" / "planilha não ligada").
+
 ## v37 — 03/11/2026 — Planilha até outubro, sistema a partir de novembro
 - Script grava no próprio .xlsx (cópia temporária convertida → preenche → `files.update` no mesmo arquivo), com bloqueio, regra de 15 min sem edição, conferência de alteração durante a gravação e versão anterior marcada para guardar.
 - Gravação limitada às vendas até o mês escolhido (padrão out/2026); preenche também FORMA DE PAGAMENTO vazia.
