@@ -2,6 +2,9 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v41 — 03/11/2026 — Nota na planilha igual ao balão
+- Notas de 1º/2º PAGAMENTO no formato do balão do painel; nota com todas as parcelas em PEDIDO 100% PAGO (script atualizado).
+
 ## v40 — 03/11/2026 — Proteção de fórmulas
 - Script do Google não escreve em célula com fórmula.
 

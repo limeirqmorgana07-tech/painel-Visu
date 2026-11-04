@@ -419,14 +419,19 @@ export function itensParaPlanilha(pagamentos, linhasPlanilha, ate = '9999-12') {
   const itens = [];
   for (const [k, g] of grupos) {
     const ps = por[k]; if (!ps?.length) continue;
-    const nota = (p, i) => { const b = p.baixas?.[0]; return `Conta Azul: ${i + 1}ª parcela de ${ps.length}, recebido ${b?.data ? 'em ' + dataBR(b.data) : ''}${b?.conta ? ' · ' + b.conta : ''}${b?.forma ? ' · ' + b.forma : ''} (valor R$ ${Number(p.pago).toFixed(2).replace('.', ',')}). Preenchido pelo Painel de Gestão.`; };
+    // a nota fica igual ao balão do painel: só deste pedido, deste cliente e desta parcela
+    const brl = (v) => 'R$ ' + Number(v || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    const cli = (g.ls.find((l) => l.cliente_original || l.cliente) || {}), nomeCli = cli.cliente_original || cli.cliente || '';
+    const cabNota = `Pedido ${g.codigo}${nomeCli ? ' · ' + nomeCli : ''}`;
+    const nota = (p, i) => { const b = p.baixas?.[0]; return [`${i + 1}º pagamento · recebido`, cabNota, '', `Parcela ${i + 1} de ${ps.length}: ${brl(p.valor)}`, `Vencimento: ${dataBR(p.venc)}`, `Recebido: ${brl(p.pago)}${b?.data ? ' em ' + dataBR(b.data) : ''}`, b?.conta ? `Banco: ${b.conta}` : '', b?.forma ? `Forma: ${b.forma}` : '', '', '(Conta Azul · Painel de Gestão)'].filter((x, k, a) => x !== '' || (a[k - 1] && a[k - 1] !== '')).join('\n'); };
+    const nota100 = () => { const rec = ps.reduce((s2, p) => s2 + (+p.pago || 0), 0); return ['Pagamentos do pedido · quitado', cabNota, '', `Total do pedido: ${brl(g.ls.reduce((s2, l) => s2 + (+l.total || 0), 0))}`, `Recebido: ${brl(rec)}`, '', ...ps.map((p, i) => { const b = p.baixas?.[0]; return `${i + 1}ª parcela · vence ${dataBR(p.venc)} · ${brl(p.valor)} · pago${b?.data ? ' ' + dataBR(b.data) : ''}${b?.conta ? ' · ' + b.conta : ''}${b?.forma ? ' · ' + b.forma : ''}`; }), '', '(Conta Azul · Painel de Gestão)'].join('\n'); };
     const temP1 = g.ls.some((l) => +l.pag1 > 1), temP2 = g.ls.some((l) => +l.pag2 > 1);
     const it = { codigo: g.codigo };
     if (!temP1 && ps[0]?.pago > 0) { it.pag1 = r2(ps[0].pago); it.nota1 = nota(ps[0], 0); }
     if (!temP2 && ps[1]?.pago > 0) { it.pag2 = r2(ps[1].pago); it.nota2 = nota(ps[1], 1); }
     const fb = ps.find((p) => p.baixas?.[0]?.forma)?.baixas[0].forma; if (fb && !g.ls.some((l) => l.forma_pagamento)) it.forma = fb;
     const total = g.ls.reduce((s2, l) => s2 + (+l.total || 0), 0), rec = ps.reduce((s2, p) => s2 + (+p.pago || 0), 0);
-    if (!g.ls.every((l) => l.pago_100) && ps.every((p) => !(p.aberto > 0.01)) && Math.abs(rec - total) <= 1) it.pago100 = true;
+    if (!g.ls.every((l) => l.pago_100) && ps.every((p) => !(p.aberto > 0.01)) && Math.abs(rec - total) <= 1) { it.pago100 = true; it.nota100 = nota100(); }
     if (it.pag1 || it.pag2 || it.pago100 || it.forma) itens.push(it);
   }
   return itens;

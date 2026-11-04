@@ -123,7 +123,7 @@ function aplicar(ss, itens) {
     // nunca escreve por cima de fórmula
     const grava = (c, v, nota) => { if (c < 0 || v == null || v === '' || !vazio(vals[r0][c]) || formulas[r0][c]) return; const cel = aba.getRange(linhaCab + 1 + r0, c + 1); cel.setValue(v); if (nota) cel.setNote(nota); celulas++; mexeu = true; };
     grava(c1, it.pag1, it.nota1); grava(c2, it.pag2, it.nota2); grava(cFp, it.forma, '');
-    if (it.pago100 && c100 >= 0) rows.forEach((i) => { const a = sem(vals[i][c100]); if ((a === '' || a === 'nao') && !formulas[i][c100]) { aba.getRange(linhaCab + 1 + i, c100 + 1).setValue('SIM'); celulas++; mexeu = true; } });
+    if (it.pago100 && c100 >= 0) rows.forEach((i) => { const a = sem(vals[i][c100]); if ((a === '' || a === 'nao') && !formulas[i][c100]) { const cel = aba.getRange(linhaCab + 1 + i, c100 + 1); cel.setValue('SIM'); if (i === r0 && it.nota100) cel.setNote(it.nota100); celulas++; mexeu = true; } });
     if (mexeu) feitos.push(it.codigo);
   });
   return { celulas: celulas, pedidos: feitos.length, codigos: feitos, aba: aba.getName() };
