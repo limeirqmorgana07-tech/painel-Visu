@@ -2,6 +2,17 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v45 — 04/11/2026 — Conciliação do mês pedido a pedido e quanto falta receber
+
+- Planilha × sistema (mês) refeito pedido a pedido: o painel casa cada pedido da planilha com a venda da Conta Azul pelo código (cód. interno = número da venda) e, só quando não há código, pelo cliente e a data (até 20 dias). Antes a comparação era por nome de cliente, e nomes escritos de jeitos diferentes viravam "só no sistema" e "sem lançamento" ao mesmo tempo.
+- Itens do mesmo pedido (mesmo código, variação de produto, lote ou observação) contam como um pedido só. A conta mostra quantos pedidos batem e quantos foram casados pelo código.
+- "Lançadas com data de outro mês" virou "Mesma venda, data de outro mês no sistema": mostra a venda, as duas datas e quantos dias de diferença. O pedido está certo; só muda em qual mês o valor entra. Novo motivo para o caso contrário (venda do mês no sistema que está em outro mês na planilha).
+- Cada motivo abre a lista com o pedido da planilha e a venda do sistema lado a lado (código, cliente, datas, dias, valores e como casou).
+- Inconsistências: nova coluna Falta receber (recebido × total do pedido, ou "quitado"), também na exportação e no texto de "Pagamento em branco, já baixado".
+- "Valor do pedido diferente na Conta Azul" (total da venda) e "Valor recebido diferente do anotado na planilha" (1º/2º pagamento) ficaram com nomes e explicações claros. O de pagamento não aparece mais quando o pedido já está em valor diferente, e em pedido com vários itens vale a soma das linhas ou o valor repetido em cada linha.
+- "Mesmo cliente com nomes diferentes" passou a ser "Mesmo cliente escrito de jeitos diferentes": só maiúscula, acento ou pontuação. Complementos do nome (destino, setor, classificação interna) não são mais inconsistência.
+- Gravação na planilha: a mensagem "o script na sua conta ainda é o antigo" aparecia para qualquer erro do Google. Agora o painel mostra o erro de verdade, e o script novo (versão 45) devolve o motivo do erro e informa a própria versão, que aparece no quadro de gravação.
+
 ## v44 — 04/11/2026 — Gravação na planilha, inconsistências numa base só e campos em branco clicáveis
 
 - Gravação na planilha do Google: religar a planilha desligava sem avisar a gravação automática dos pagamentos (por isso os pagamentos baixados pararam de ir para a planilha). Agora religar mantém a gravação, o horário e o mês-limite, e a gravação vem ligada por padrão.

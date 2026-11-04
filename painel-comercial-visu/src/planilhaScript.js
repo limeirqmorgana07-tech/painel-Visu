@@ -18,7 +18,7 @@ export async function chaveScript() {
 export const ateScript = () => memo?.gravar_ate || '2026-10';
 export async function definirAte(m) { await carregarScript(); if (/^\d{4}-\d{2}$/.test(String(m))) { memo = { ...memo, gravar_ate: m }; await salvarKV(CHAVE_KV, memo); } return ateScript(); }
 export const statusScript = () => ({ gravar_ate: ateScript(), configurado: scriptConfigurado(), url: memo?.url || '', ligado_em: memo?.ligado_em || null, por: memo?.por || '', nome: memo?.nome || '',
-  arquivo_id: memo?.arquivo_id || '', gravar: memo?.gravar !== false, ultima_gravacao: memo?.ultima_gravacao || null, celulas_fila: (memo?.celulas_fila || []).length });
+  arquivo_id: memo?.arquivo_id || '', versao_script: memo?.versao_script || null, versao_atual: 45, gravar: memo?.gravar !== false, ultima_gravacao: memo?.ultima_gravacao || null, celulas_fila: (memo?.celulas_fila || []).length });
 export const arquivoScript = () => memo?.arquivo_id || '';
 // a planilha mudou de endereço (ex.: o .xlsx foi convertido para Planilha Google): o script novo leva o novo ID
 export async function definirArquivo(link) {
@@ -51,9 +51,11 @@ export function modeloScript(chave, arquivoId) {
 const ARQUIVO_ID = '${arquivoId}';
 const CHAVE = '${chave}';
 
+const VERSAO_SCRIPT = 45;
 function doGet(e) {
   if (!e || !e.parameter || e.parameter.chave !== CHAVE) return saida({ erro: 'chave inválida' });
   const arquivo = DriveApp.getFileById(ARQUIVO_ID);
+  if (e.parameter.info) return saida({ versao: VERSAO_SCRIPT, nome: arquivo.getName(), tipo: arquivo.getMimeType() });
   let blob;
   if (arquivo.getMimeType() === MimeType.GOOGLE_SHEETS) {
     const url = 'https://docs.google.com/spreadsheets/d/' + ARQUIVO_ID + '/export?format=xlsx';
@@ -61,7 +63,7 @@ function doGet(e) {
   } else {
     blob = arquivo.getBlob();
   }
-  return saida({ nome: arquivo.getName(), alterado_em: arquivo.getLastUpdated().toISOString(), base64: Utilities.base64Encode(blob.getBytes()) });
+  return saida({ versao: VERSAO_SCRIPT, nome: arquivo.getName(), alterado_em: arquivo.getLastUpdated().toISOString(), base64: Utilities.base64Encode(blob.getBytes()) });
 }
 
 // Rode esta função uma vez no editor (▶ Executar) para o Google pedir a autorização de leitura do Drive.
@@ -80,6 +82,10 @@ function autorizar() {
 // (mesmo nome e link). Só grava se ninguém mexeu na planilha nos últimos 15 minutos e guarda a versão anterior.
 const MINUTOS_SEM_USO = 15;
 function doPost(e) {
+  // qualquer erro volta como texto para o painel mostrar (antes o Google devolvia uma página de erro)
+  try { return gravar(e); } catch (x) { return saida({ erro: 'Erro no script do Google: ' + (x && x.message ? x.message : String(x)) + (x && x.stack ? ' · ' + String(x.stack).split('\\n').slice(0, 2).join(' ') : ''), versao: VERSAO_SCRIPT }); }
+}
+function gravar(e) {
   let dados;
   try { dados = JSON.parse(e.postData.contents); } catch (x) { return saida({ erro: 'pedido inválido' }); }
   if (dados.chave !== CHAVE) return saida({ erro: 'chave inválida' });
@@ -161,7 +167,7 @@ function aplicar(ss, itens, celulasPedidas) {
     else { const dv = cel.getDataValidation(); if (dv && dv.getCriteriaType() === SpreadsheetApp.DataValidationCriteria.VALUE_IN_LIST) { const ok = (dv.getCriteriaValues()[0] || []).filter((o) => sem(o) === sem(v))[0]; if (ok) v = ok; } }
     cel.setValue(v); celulas++; celFeitas.push(c.id);
   });
-  return { versao: 44, celulas: celulas, pedidos: feitos.length, codigos: feitos, celulas_feitas: celFeitas, pulados: pulados.slice(0, 200), aba: aba.getName() };
+  return { versao: VERSAO_SCRIPT, celulas: celulas, pedidos: feitos.length, codigos: feitos, celulas_feitas: celFeitas, pulados: pulados.slice(0, 200), aba: aba.getName() };
 }
 
 function saida(o) {
@@ -183,6 +189,7 @@ export async function baixarPorScript(url = memo?.url, chave = memo?.chave) {
   }
   if (j.erro) throw new Error(j.erro === 'chave inválida' ? 'A chave do script não confere com a do painel. Copie o script de novo pelo painel e reimplante.' : `Script: ${j.erro}`);
   if (!j.base64) throw new Error('O script não devolveu a planilha.');
+  if (memo && url === memo.url) memo.versao_script = j.versao || null;
   return { nome: j.nome, alterado_em: j.alterado_em, bytes: Buffer.from(j.base64, 'base64') };
 }
 
@@ -190,7 +197,14 @@ export async function enviarParaPlanilha(itens, forcar = false) {
   if (!scriptConfigurado()) throw new Error('A planilha ainda não foi ligada pelo e-mail.');
   const r = await fetch(memo.url, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ chave: memo.chave, itens, celulas: filaCelulas(), forcar }), redirect: 'follow' });
   const txt = await r.text();
-  let j; try { j = JSON.parse(txt); } catch { throw new Error(/doPost|função|function/i.test(txt) ? 'O script na sua conta ainda é o antigo (só lê). Copie o script novo pelo painel, cole no Apps Script, rode "autorizar" e faça Implantar → Gerenciar implantações → lápis → Nova versão.' : 'O Google devolveu uma página em vez da resposta do script. Rode "autorizar" no editor e faça uma nova versão da implantação.'); }
+  let j; try { j = JSON.parse(txt); } catch {
+    // página de erro do Google: mostra o que ela diz (antes qualquer página era tratada como "script antigo")
+    const t = txt.replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/gi, ' ').replace(/<[^>]+>/g, ' ').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, '&').replace(/\s+/g, ' ').trim();
+    if (/(function|função)[^.]{0,40}(not found|não encontrada)[^.]{0,20}doPost|doPost[^.]{0,40}(not found|não encontrad)/i.test(t)) throw new Error('A implantação no Google ainda é a antiga (sem gravação). No Apps Script: Implantar → Gerenciar implantações → lápis → Versão: Nova versão → Implantar. Só salvar o código não basta.');
+    if (/autoriza|authoriz|permiss/i.test(t)) throw new Error('O Google pede autorização de novo: no editor do Apps Script, escolha a função "autorizar", clique ▶ Executar e permita. Depois Implantar → Gerenciar implantações → lápis → Nova versão.');
+    throw new Error('O Google devolveu um erro em vez da resposta do script: "' + t.slice(0, 260) + '". Se o script foi atualizado, confira se foi feita uma Nova versão da implantação.');
+  }
+  if (j.versao) memo.versao_script = j.versao;
   if (j.erro) throw new Error(j.erro === 'chave inválida' ? 'A chave do script não confere com a do painel. Copie o script de novo pelo painel e reimplante.' : j.erro);
   return j;
 }
