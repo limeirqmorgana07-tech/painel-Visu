@@ -2,6 +2,11 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v46 — 04/11/2026 — Mês a mês clicável e endereço do script
+
+- Planilha × sistema (mês): clicar num mês da tabela Mês a mês abre a conta daquele mês (ponte, motivos e pedidos) no alto da página. O resumo explica o que é "achado pelo código" e "achado pelo cliente e data".
+- Gravação na planilha: quando o endereço ligado no painel ainda é o da implantação antiga, a mensagem explica que uma implantação nova muda o endereço e que é preciso colar a URL do App da Web no painel. Ao religar, o painel já mostra a versão do script.
+
 ## v45 — 04/11/2026 — Conciliação do mês pedido a pedido e quanto falta receber
 
 - Planilha × sistema (mês) refeito pedido a pedido: o painel casa cada pedido da planilha com a venda da Conta Azul pelo código (cód. interno = número da venda) e, só quando não há código, pelo cliente e a data (até 20 dias). Antes a comparação era por nome de cliente, e nomes escritos de jeitos diferentes viravam "só no sistema" e "sem lançamento" ao mesmo tempo.

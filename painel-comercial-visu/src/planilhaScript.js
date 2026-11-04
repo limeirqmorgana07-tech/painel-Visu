@@ -190,7 +190,7 @@ export async function baixarPorScript(url = memo?.url, chave = memo?.chave) {
   if (j.erro) throw new Error(j.erro === 'chave inválida' ? 'A chave do script não confere com a do painel. Copie o script de novo pelo painel e reimplante.' : `Script: ${j.erro}`);
   if (!j.base64) throw new Error('O script não devolveu a planilha.');
   if (memo && url === memo.url) memo.versao_script = j.versao || null;
-  return { nome: j.nome, alterado_em: j.alterado_em, bytes: Buffer.from(j.base64, 'base64') };
+  return { nome: j.nome, alterado_em: j.alterado_em, versao: j.versao || null, bytes: Buffer.from(j.base64, 'base64') };
 }
 
 export async function enviarParaPlanilha(itens, forcar = false) {
@@ -200,7 +200,7 @@ export async function enviarParaPlanilha(itens, forcar = false) {
   let j; try { j = JSON.parse(txt); } catch {
     // página de erro do Google: mostra o que ela diz (antes qualquer página era tratada como "script antigo")
     const t = txt.replace(/<script[\s\S]*?<\/script>|<style[\s\S]*?<\/style>/gi, ' ').replace(/<[^>]+>/g, ' ').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, '&').replace(/\s+/g, ' ').trim();
-    if (/(function|função)[^.]{0,40}(not found|não encontrada)[^.]{0,20}doPost|doPost[^.]{0,40}(not found|não encontrad)/i.test(t)) throw new Error('A implantação no Google ainda é a antiga (sem gravação). No Apps Script: Implantar → Gerenciar implantações → lápis → Versão: Nova versão → Implantar. Só salvar o código não basta.');
+    if (/(function|função)[^.]{0,40}(not found|não encontrada)[^.]{0,20}doPost|doPost[^.]{0,40}(not found|não encontrad)/i.test(t)) throw new Error('O endereço ligado no painel ainda aponta para a implantação antiga (sem gravação). Se você criou uma implantação nova, o endereço mudou: copie a URL do "App da Web" (não a de Biblioteca) e cole no painel em Controle → Planilha × sistema (mês) → Ligar pelo meu e-mail → Ligar. Se editou a implantação existente, confira se escolheu Versão: Nova versão.');
     if (/autoriza|authoriz|permiss/i.test(t)) throw new Error('O Google pede autorização de novo: no editor do Apps Script, escolha a função "autorizar", clique ▶ Executar e permita. Depois Implantar → Gerenciar implantações → lápis → Nova versão.');
     throw new Error('O Google devolveu um erro em vez da resposta do script: "' + t.slice(0, 260) + '". Se o script foi atualizado, confira se foi feita uma Nova versão da implantação.');
   }
@@ -214,7 +214,7 @@ export async function ligarScript(url, usuario) {
   if (!/^https:\/\/script\.google(usercontent)?\.com\//.test(url)) throw new Error('Cole o endereço do App da Web (começa com https://script.google.com/macros/s/ e termina com /exec).');
   const chave = await chaveScript();
   const arq = await baixarPorScript(url, chave); // testa antes de salvar
-  memo = { ...memo, url, chave, ligado_em: new Date().toISOString(), por: usuario?.nome || '', nome: arq.nome };
+  memo = { ...memo, url, chave, ligado_em: new Date().toISOString(), por: usuario?.nome || '', nome: arq.nome, versao_script: arq.versao };
   await salvarKV(CHAVE_KV, memo);
   return arq;
 }
