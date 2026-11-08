@@ -2,6 +2,11 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v50 — 08/11/2026 — Subtotais na Planilha de vendas
+
+- Subtotal das linhas visíveis na Planilha de vendas (quantidade e total, com a contagem de linhas).
+- Vendedores e premiação: a premiação de cada venda usa o percentual manual quando informado.
+
 ## v49 — 08/11/2026 — Corte de novembro, horários de sincronização e premiação por venda
 
 - Pedidos de novembro voltam a entrar: a gravação automática na planilha e a importação tinham o corte fixado em outubro. Agora vão até dezembro.
