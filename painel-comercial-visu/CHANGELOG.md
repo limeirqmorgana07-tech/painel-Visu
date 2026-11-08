@@ -2,6 +2,15 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v55 — 08/11/2026 — Unificar todos os clientes
+
+- Botão "Unificar todos os clientes" em Qualidade dos dados: junta as grafias de cada cliente com o nome sugerido, e o lote continua na coluna de observação.
+
+## v54 — 08/11/2026 — Ligação da planilha de volta e inclusão de cliente novo
+
+- Planilha × sistema (mês) voltou para Controle, com a ligação da planilha do Google.
+- Botão "+ Incluir cliente" no lançamento quando o nome não existe na lista.
+
 ## v53 — 08/11/2026 — Prazo aberto para os pedidos
 
 - Prazo final da importação e da gravação automática em aberto: vale tudo a partir de janeiro de 2026, sem data limite (antes estava em outubro e depois em dezembro).

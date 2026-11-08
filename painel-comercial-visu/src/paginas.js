@@ -6,7 +6,7 @@ export const MENU = [
   // reunião de 03/11/2026: conferência sistema × planilha num grupo próprio (a planilha é a referência das vendas)
   { grupo: 'Conferência', itens: [['inconsistencias', 'Inconsistências'], ['conciliacao', 'Divergências por mês'], ['historico', 'Histórico de alterações']] },
   { grupo: 'Financeiro', itens: [['dre', 'DRE gerencial'], ['equilibrio', 'Margem e ponto de equilíbrio'], ['caixa', 'Fluxo de caixa'], ['receber', 'Contas a receber'], ['pagar', 'Contas a pagar'], ['extrato', 'Conciliação bancária']] },
-  { grupo: 'Controle', itens: [['dados', 'Qualidade dos dados'], ['versoes', 'Versões do painel'], ] },
+  { grupo: 'Controle', itens: [['conciliacao', 'Planilha × sistema (mês)'], ['dados', 'Qualidade dos dados'], ['versoes', 'Versões do painel'], ] },
   { grupo: 'Administração', itens: [['usuarios', 'Usuários e permissões']] },
 ];
 export const TODAS = MENU.flatMap((g) => g.itens.map((i) => i[0]));
