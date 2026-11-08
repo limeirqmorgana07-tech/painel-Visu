@@ -15,7 +15,7 @@ export async function chaveScript() {
   if (!memo.chave) { memo = { ...memo, chave: crypto.randomBytes(18).toString('base64url') }; await salvarKV(CHAVE_KV, memo); }
   return memo.chave;
 }
-export const ateScript = () => memo?.gravar_ate || '2026-12';
+export const ateScript = () => memo?.gravar_ate || '9999-12';
 export async function definirAte(m) { await carregarScript(); if (/^\d{4}-\d{2}$/.test(String(m))) { memo = { ...memo, gravar_ate: m }; await salvarKV(CHAVE_KV, memo); } return ateScript(); }
 export const statusScript = () => ({ gravar_ate: ateScript(), configurado: scriptConfigurado(), url: memo?.url || '', ligado_em: memo?.ligado_em || null, por: memo?.por || '', nome: memo?.nome || '',
   arquivo_id: memo?.arquivo_id || '', versao_script: memo?.versao_script || null, versao_atual: 45, gravar: memo?.gravar !== false, ultima_gravacao: memo?.ultima_gravacao || null, celulas_fila: (memo?.celulas_fila || []).length });

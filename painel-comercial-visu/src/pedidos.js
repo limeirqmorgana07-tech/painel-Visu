@@ -281,7 +281,7 @@ async function linhasDaFonte(bytes) {
   return { linhas: (await lerPlanilha()).linhas, origem: 'planilha conectada' };
 }
 const chaveLinhaImport = (o) => [chaveCodigo(o.codigo_pedido || o.codigo || ''), o.data || '', sem(clienteBase(o.cliente_original || o.cliente || '')), sem(o.tipo_produto), sem(o.cor), Number(o.quantidade) || 0, Math.round((Number(o.total) || 0) * 100)].join('|');
-export async function importar({ de = '2026-01', ate = '2026-12', modo = 'novas', simular = true, bytes = null, nomeArquivo = '' }, u) {
+export async function importar({ de = '2026-01', ate = '9999-12', modo = 'novas', simular = true, bytes = null, nomeArquivo = '' }, u) {
   if (!podeEditarTudo(u)) throw new Error('Só a gestão importa a base.');
   await carregar();
   const fonte = await linhasDaFonte(bytes);

@@ -751,7 +751,7 @@ table.matriz td.vz{color:var(--line2)}
       <p>Para cada pedido com o pagamento em branco que já foi baixado na Conta Azul, o painel escreve o valor em <b>1º/2º PAGAMENTO</b>, coloca uma <b>nota na célula</b> com data, banco e forma (no Google Planilhas aparece como balão ao passar o mouse) e marca <b>SIM</b> em <b>PEDIDO 100% PAGO</b> quando quitado. Só escreve em célula vazia.</p>
       <p>Funciona no seu arquivo <b>.xlsx</b>, o mesmo de sempre (mesmo nome e link): o script faz uma cópia temporária, preenche e salva por cima. <b>Proteções:</b> só grava se ninguém mexeu na planilha nos últimos 15 minutos, cancela se alguém editar durante a gravação e guarda a versão anterior (Arquivo → Histórico de versões).</p>
       <p><b>Antes da primeira vez:</b> copie o <b>script novo</b> (acima), cole no Apps Script no lugar do antigo, salve, rode <b>autorizar</b> e faça <b>Implantar → Gerenciar implantações → lápis → Nova versão → Implantar</b>.</p>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0"><label for="psAte" style="font-size:13px">Preencher vendas até</label><input id="psAte" type="month" value="2026-12"><span class="nota" style="margin:0">a partir de novembro tudo é lançado no sistema</span></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0"><label for="psAte" style="font-size:13px">Preencher vendas até</label><input id="psAte" type="month" value=""><span class="nota" style="margin:0">a partir de novembro tudo é lançado no sistema</span></div>
       <div style="display:none"><input id="psArq"><button type="button" id="psArqSalvar"></button></div>
       <label style="display:flex;gap:8px;align-items:center;font-size:13px"><input type="checkbox" id="psGravar"> Gravar sozinho a cada 10 minutos</label>
       <div style="display:flex;gap:8px;margin-top:8px;align-items:center;flex-wrap:wrap"><button class="bt2 pri" type="button" id="psGravarAgora">Gravar agora</button><button class="bt2" type="button" id="psForcar" hidden title="Grava mesmo que a planilha tenha sido editada há menos de 15 minutos">Gravar mesmo assim</button><span class="nota" id="psGravaMsg" style="margin:0"></span></div>
@@ -780,7 +780,7 @@ table.matriz td.vz{color:var(--line2)}
       <div class="f f2"><label>Origem</label><div class="seg" role="group" id="imOrig"><button type="button" data-imo="planilha" aria-pressed="true">Planilha conectada</button><button type="button" data-imo="arquivo" aria-pressed="false">Arquivo .xlsx</button></div></div>
       <div class="f f2" id="imArqF" hidden><label for="imArq">Arquivo da planilha (.xlsx)</label><input id="imArq" type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"></div>
       <div class="f"><label for="imDe">De</label><input id="imDe" type="month" value="2026-01"></div>
-      <div class="f"><label for="imAte">Até</label><input id="imAte" type="month" value="2026-12"></div>
+      <div class="f"><label for="imAte">Até</label><input id="imAte" type="month" value=""></div>
       <div class="f f2"><label for="imModo">Meses que já estão no painel</label><select id="imModo"><option value="novas">Só as linhas novas (não duplica nem apaga nada)</option><option value="faltam">Pular os meses que já estão no painel</option><option value="substituir">Substituir pelos da planilha (apaga as correções feitas nesses meses)</option></select></div>
     </div>
     <div id="imRes" style="margin-top:12px"></div>
@@ -1123,8 +1123,9 @@ const nomeMes=(m)=>{const[a,b]=m.split('-');return MES_L[+b-1]+' de '+a};
 const somaMes=(m,n)=>{const[a,b]=m.split('-').map(Number);const d=new Date(Date.UTC(a,b-1+n,1));return d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0')};
 function delta(a,b,inv){ if(!b) return '<span class="delta eq">sem base</span>'; const d=(a-b)/b; const c=Math.abs(d)<.005?'eq':(d>0)!==!!inv?'up':'down'; return `<span class="delta ${c}">${d>0?'▲':d<0?'▼':'■'} ${pct(Math.abs(d))}</span>`; }
 
-const VERSAO='v52';
+const VERSAO='v53';
 const VERSOES=[
+ {v:'v53',data:'08/11/2026',tit:'Prazo aberto para os pedidos',arq:'painel-visu-v53.zip',itens:["Prazo final da importação e da gravação automática em aberto: vale tudo a partir de janeiro de 2026, sem data limite (antes estava em outubro e depois em dezembro).","Pedidos de novembro e os lançamentos feitos no painel entram nos horários automáticos e no botão Enviar pedidos agora."]},
  {v:'v52',data:'08/11/2026',tit:'Envio sob demanda, filtro de período e divergências em Conferência',arq:'painel-visu-v52.zip',itens:["Botão \"Enviar pedidos agora\" na Planilha de vendas (só gestão): atualiza a Conta Azul e grava os pedidos na planilha na hora, para grandes volumes. Os horários automáticos continuam: 09:30, 12:00, 14:00 e 18:00.","Divergências por mês movida para o grupo Conferência. Treinamento movido para o grupo Comercial, com aviso de vídeo em breve.","Filtro de período (De / Até) na Planilha de vendas.","Aviso de cliente novo ao digitar um nome que ainda não existe no lançamento de pedido."]},
  {v:'v51',data:'08/11/2026',tit:'Treinamento no painel',arq:'painel-visu-v51.zip',itens:["Novo item Treinamento no menu Controle: passo a passo para lançar pedidos, corrigir nas primeiras 24 horas, acrescentar peças com pedido complementar e entender os horários de atualização.","Perfis Comercial, Financeiro e Vendedor passam a ver o Treinamento."]},
  {v:'v50',data:'08/11/2026',tit:'Subtotais na Planilha de vendas',arq:'painel-visu-v50.zip',itens:["Subtotal das linhas visíveis na Planilha de vendas (quantidade e total, com a contagem de linhas).","Vendedores e premiação: a premiação de cada venda usa o percentual manual quando informado."]},

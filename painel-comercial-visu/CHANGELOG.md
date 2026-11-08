@@ -2,6 +2,11 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v53 — 08/11/2026 — Prazo aberto para os pedidos
+
+- Prazo final da importação e da gravação automática em aberto: vale tudo a partir de janeiro de 2026, sem data limite (antes estava em outubro e depois em dezembro).
+- Pedidos de novembro e os lançamentos feitos no painel entram nos horários automáticos e no botão Enviar pedidos agora.
+
 ## v52 — 08/11/2026 — Envio sob demanda, filtro de período e divergências em Conferência
 
 - Botão "Enviar pedidos agora" na Planilha de vendas (só gestão): atualiza a Conta Azul e grava os pedidos na planilha na hora, para grandes volumes. Os horários automáticos continuam: 09:30, 12:00, 14:00 e 18:00.
