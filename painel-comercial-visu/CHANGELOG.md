@@ -2,6 +2,13 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v52 — 08/11/2026 — Envio sob demanda, filtro de período e divergências em Conferência
+
+- Botão "Enviar pedidos agora" na Planilha de vendas (só gestão): atualiza a Conta Azul e grava os pedidos na planilha na hora, para grandes volumes. Os horários automáticos continuam: 09:30, 12:00, 14:00 e 18:00.
+- Divergências por mês movida para o grupo Conferência. Treinamento movido para o grupo Comercial, com aviso de vídeo em breve.
+- Filtro de período (De / Até) na Planilha de vendas.
+- Aviso de cliente novo ao digitar um nome que ainda não existe no lançamento de pedido.
+
 ## v51 — 08/11/2026 — Treinamento no painel
 
 - Novo item Treinamento no menu Controle: passo a passo para lançar pedidos, corrigir nas primeiras 24 horas, acrescentar peças com pedido complementar e entender os horários de atualização.

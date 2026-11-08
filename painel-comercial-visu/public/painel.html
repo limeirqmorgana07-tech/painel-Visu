@@ -714,7 +714,7 @@ table.matriz td.vz{color:var(--line2)}
     <div class="ped-form">
       <div class="f"><label for="pmData">Data da venda *</label><input id="pmData" name="data" type="date" required></div>
       <div class="f"><label for="pmCodigo">Cód. interno</label><input id="pmCodigo" name="codigo" placeholder="gerado pelo painel"></div>
-      <div class="f f2"><label for="pmCliente">Cliente * <span class="dica-c">só o nome do cliente, sem lote</span></label><input id="pmCliente" name="cliente" list="dlCliente" required><div class="dica-c" id="pmCliInfo"></div></div>
+      <div class="f f2"><label for="pmCliente">Cliente * <span class="dica-c">só o nome do cliente, sem lote</span></label><input id="pmCliente" name="cliente" list="dlCliente" required><div class="dica-c" id="pmCliInfo"></div><div class="dica-c" id="pmCliNovo" style="color:var(--orange,#EA780C)"></div></div>
       <div class="f"><label for="pmLote">Lote / obs. do cliente</label><input id="pmLote" name="lote" placeholder="ex.: Lote 2"></div>
       <div class="f f2"><label for="pmNome">Nome do pedido (Trello)</label><input id="pmNome" name="nome_pedido"></div>
       <div class="f"><label for="pmVend">Vendedor *</label><input id="pmVend" name="vendedor" list="dlVendedor" required></div>
@@ -893,14 +893,14 @@ table.matriz td.vz{color:var(--line2)}
 
   <section data-pagina="registro" hidden>
     <div class="ped-bar">
-      <div class="f"><label for="pdMes">Mês</label><select id="pdMes"></select></div>
+      <div class="f"><label for="pdMes">Mês</label><select id="pdMes"></select></div><div class="f"><label for="pdDe">De</label><input type="date" id="pdDe"></div><div class="f"><label for="pdAte">Até</label><input type="date" id="pdAte"></div>
       <div class="f"><label for="pdVend">Vendedor</label><select id="pdVend"></select></div>
       <div class="f" style="flex:1;min-width:180px"><label for="pdBusca">Buscar</label><input id="pdBusca" type="search" placeholder="Código, cliente, produto…"></div>
       <div class="seg" role="group" aria-label="Mostrar"><button type="button" data-pdf="" aria-pressed="true">Todas as linhas</button><button type="button" data-pdf="pend" aria-pressed="false">A revisar</button><button type="button" data-pdf="div" aria-pressed="false">Com divergência</button></div>
       <span style="flex:1"></span>
       <div class="exp" data-exp="pd"><button class="bt2" type="button" aria-haspopup="true" aria-expanded="false">Exportar ▾</button><div class="exp-m" hidden><button type="button" data-fmt="xlsx">Excel (.xlsx)</button><button type="button" data-fmt="pdf">PDF</button><button type="button" data-fmt="csv">CSV</button></div></div>
       <button class="bt2" type="button" id="pdPagar" hidden title="Completa 1º/2º pagamento, data, banco, forma e 100% pago com o que já foi baixado na Conta Azul">Preencher pagamentos</button>
-      <button class="bt2" type="button" id="pdImportar" hidden>Importar base</button>
+      <button class="bt2" type="button" id="pdImportar" hidden>Importar base</button><button class="bt2" type="button" id="pdEnviarAgora" hidden title="Atualiza a Conta Azul e grava os pedidos na planilha agora">Enviar pedidos agora</button>
       <button class="bt2 pri" type="button" id="pdNovo">+ Novo pedido</button>
     </div>
     <div class="aviso" id="pdAviso" hidden></div>
@@ -1123,8 +1123,9 @@ const nomeMes=(m)=>{const[a,b]=m.split('-');return MES_L[+b-1]+' de '+a};
 const somaMes=(m,n)=>{const[a,b]=m.split('-').map(Number);const d=new Date(Date.UTC(a,b-1+n,1));return d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0')};
 function delta(a,b,inv){ if(!b) return '<span class="delta eq">sem base</span>'; const d=(a-b)/b; const c=Math.abs(d)<.005?'eq':(d>0)!==!!inv?'up':'down'; return `<span class="delta ${c}">${d>0?'▲':d<0?'▼':'■'} ${pct(Math.abs(d))}</span>`; }
 
-const VERSAO='v51';
+const VERSAO='v52';
 const VERSOES=[
+ {v:'v52',data:'08/11/2026',tit:'Envio sob demanda, filtro de período e divergências em Conferência',arq:'painel-visu-v52.zip',itens:["Botão \"Enviar pedidos agora\" na Planilha de vendas (só gestão): atualiza a Conta Azul e grava os pedidos na planilha na hora, para grandes volumes. Os horários automáticos continuam: 09:30, 12:00, 14:00 e 18:00.","Divergências por mês movida para o grupo Conferência. Treinamento movido para o grupo Comercial, com aviso de vídeo em breve.","Filtro de período (De / Até) na Planilha de vendas.","Aviso de cliente novo ao digitar um nome que ainda não existe no lançamento de pedido."]},
  {v:'v51',data:'08/11/2026',tit:'Treinamento no painel',arq:'painel-visu-v51.zip',itens:["Novo item Treinamento no menu Controle: passo a passo para lançar pedidos, corrigir nas primeiras 24 horas, acrescentar peças com pedido complementar e entender os horários de atualização.","Perfis Comercial, Financeiro e Vendedor passam a ver o Treinamento."]},
  {v:'v50',data:'08/11/2026',tit:'Subtotais na Planilha de vendas',arq:'painel-visu-v50.zip',itens:["Subtotal das linhas visíveis na Planilha de vendas (quantidade e total, com a contagem de linhas).","Vendedores e premiação: a premiação de cada venda usa o percentual manual quando informado."]},
  {v:'v49',data:'08/11/2026',tit:'Corte de novembro, horários de sincronização e premiação por venda',arq:'painel-visu-v49.zip',itens:["Pedidos de novembro voltam a entrar: a gravação automática na planilha e a importação tinham o corte fixado em outubro. Agora vão até dezembro.","Gravação e atualização da Conta Azul em horários fixos (Fortaleza): 09:30, 12:00, 14:00 e 18:00. Entre um horário e outro o painel usa o que já está salvo, para consumir menos a API e o Render.","Premiação: coluna \"Premiação % (manual)\" na Planilha de vendas. Uma venda com percentual informado paga esse percentual e o restante do mês segue a faixa, com a coluna \"Motivo do % diferente\".","Premiação: os pontos da política a ajustar (margem, redução por venda e faixas intermediárias) estão descritos na página Vendedores e premiação.","Aba Versões do painel oculta para o perfil Vendedor."]},
@@ -2192,7 +2193,7 @@ function pgRegistro(){
   $('pdVend').innerHTML='<option value="">Todos</option>'+[...new Set(regs.map(r=>r.vendedor).filter(Boolean))].sort().map(v=>`<option>${esc(v)}</option>`).join(''); $('pdVend').value=PED.vend;
   $('pdBusca').value=PED.busca;
   document.querySelectorAll('[data-pdf]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.pdf===PED.fil)));
-  $('pdNovo').hidden=!P.lancar; $('pdImportar').hidden=!P.importar; $('pdPagar').hidden=!P.lancar||!(regs.length||(E.eu?.perfil==='adm'&&E.dados?.planilha_script?.configurado))||!E.dados?.conta_azul;
+  $('pdNovo').hidden=!P.lancar; $('pdImportar').hidden=!P.importar; $('pdEnviarAgora').hidden=!P.importar; $('pdPagar').hidden=!P.lancar||!(regs.length||(E.eu?.perfil==='adm'&&E.dados?.planilha_script?.configurado))||!E.dados?.conta_azul;
   // aviso
   const av=$('pdAviso'); av.hidden=false; av.className='aviso';
   if(regs.some(r=>r.mes===PED.mes&&r.origem==='planilha_viva')) av.innerHTML=`<span><b>${nomeMes(PED.mes)} vem da planilha do Google</b> (somente consulta): até outubro as correções são feitas na própria planilha. Passe o mouse em <b>1º/2º pagamento</b> ou <b>Pedido 100% pago</b> para ver o que já foi baixado na Conta Azul. ${E.dados.corte_sistema?`A partir de ${nomeMes(E.dados.corte_sistema)} as vendas são lançadas aqui no sistema.`:''}</span>`;
@@ -2200,7 +2201,7 @@ function pgRegistro(){
   else av.innerHTML=`<span>Clique numa célula para corrigir. <b>Amarelo</b> = campo a preencher ou revisar (novo × recompra, cliente com "lote" no nome, campos vazios). 🔒 = quantidade e valores travados ${d.horas_edicao} h depois do lançamento: para acrescentar peças use <b>Acréscimo</b>, que cria o pedido complementar com o mesmo código + "-1". Pagamentos em branco que já foram baixados na Conta Azul são preenchidos sozinhos; passe o mouse em <b>1º/2º pagamento</b> ou em <b>Pedido 100% pago</b> para ver data, banco e forma no balão.${d.config?.fonte==='painel'?' <b>Os indicadores do painel leem estes pedidos.</b>':''}</span>`;
   // filtro das linhas
   const q=semA(PED.busca);
-  const ls=regs.filter(r=>(PED.mes==='todos'||r.mes===PED.mes)&&(!PED.vend||r.vendedor===PED.vend)&&(!q||semA([r.codigo,r.cliente,r.lote,r.nome_pedido,r.tipo_produto,r.material,r.cor,r.vendedor].join(' ')).includes(q)));
+  const ls=regs.filter(r=>(PED.mes==='todos'||r.mes===PED.mes)&&(!PED.de||(r.data||'')>=PED.de)&&(!PED.ate||(r.data||'')<=PED.ate)&&(!PED.vend||r.vendedor===PED.vend)&&(!q||semA([r.codigo,r.cliente,r.lote,r.nome_pedido,r.tipo_produto,r.material,r.cor,r.vendedor].join(' ')).includes(q)));
   const stG=new Map(); for(const [k,g] of grupos) stG.set(k,statusCod(g.codigo,g.t,g.mes,ca));
   const divDe=(r)=>{ const s=r.codigo?stG.get(ckey(r.codigo))?.[0]:''; return ['dif','so_painel','cancelado','nao_aprov'].includes(s); };
   const vis=ls.filter(r=>!PED.fil||(PED.fil==='pend'?pendPed(r).length:divDe(r)));
@@ -2677,6 +2678,10 @@ $('exBusca').addEventListener('input',()=>{ clearTimeout(tBusca); tBusca=setTime
 
 // ---------- eventos ----------
 $('pdMes').onchange=()=>{ PED.mes=$('pdMes').value; pgRegistro(); };
+$('pmCliente').addEventListener('input',()=>{ const v=$('pmCliente').value.trim(); const ok=[...document.querySelectorAll('#dlCliente option')].some(o=>o.value===v); $('pmCliNovo').textContent=v&&!ok?'Cliente novo: será cadastrado ao salvar.':''; });
+$('pdEnviarAgora').onclick=async()=>{ const b=$('pdEnviarAgora'); b.disabled=true; b.textContent='Enviando…'; try{ const r=await api('/api/sincronizar-agora',{method:'POST',body:'{}'}); toast(r.aviso||`Enviado: ${r.pedidos??0} pedidos e ${r.celulas??0} células gravados.`); pgRegistro(); }catch(e){ toast('Não foi possível enviar: '+e.message); } finally{ b.disabled=false; b.textContent='Enviar pedidos agora'; } };
+$('pdDe').onchange=()=>{ PED.de=$('pdDe').value; pgRegistro(); };
+$('pdAte').onchange=()=>{ PED.ate=$('pdAte').value; pgRegistro(); };
 $('pdVend').onchange=()=>{ PED.vend=$('pdVend').value; PED.vendEscolhido=true; pgRegistro(); };
 let tBusca=null; $('pdBusca').oninput=()=>{ clearTimeout(tBusca); tBusca=setTimeout(()=>{ PED.busca=$('pdBusca').value; pgRegistro(); },250); };
 document.querySelectorAll('[data-pdf]').forEach(b=>b.onclick=()=>{ PED.fil=b.dataset.pdf; pgRegistro(); });
@@ -2883,10 +2888,10 @@ function previaPedidos(url,op){
 // ---------- menu lateral e permissões por perfil ----------
 const MENU=[
   {grupo:'Gestão',ico:'<path d="M3 3h8v8H3zM13 3h8v5h-8zM13 10h8v11h-8zM3 13h8v8H3z"/>',itens:[['painel','Painel executivo','Vendas, resultado, caixa e o que pede decisão'],['indicadores','Quadro de indicadores','Comercial, resultado e caixa com tendência de 6 meses']]},
-  {grupo:'Comercial',ico:'<path d="M3 4h2l2.4 11h11.2L21 7H7" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="9" cy="19" r="1.6"/><circle cx="17" cy="19" r="1.6"/>',itens:[['registro','Planilha de vendas','As mesmas colunas da planilha do comercial: os vendedores lançam e revisam as vendas aqui'],['vendas','Vendas','Pedidos, ticket médio e novas vendas × recompra (R1, R2, R3)'],['produtos','Produtos e mix','Tipo de produto, tecido e cor em peças ou R$ (R4) e curva ABC'],['clientes','Clientes','Curva ABC, faixas de valor, segmento e quem parou de comprar (C3, C5, C6)'],['vendedores','Vendedores e premiação','Faturamento, clientes novos, régua e apuração da premiação (C7, C8)'],['pedidos','Pedidos e entregas','Ciclo de pagamento e entregas das próximas semanas (C4)']]},
-  {grupo:'Conferência',ico:'<path d="M4 5h7v14H4zM13 5h7v14h-7z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M6.5 9h2M6.5 12h2M15.5 9h2M15.5 12h2" stroke="currentColor" stroke-width="1.8"/>',itens:[['inconsistencias','Inconsistências','Num lugar só: sistema × planilha pedido a pedido, colunas vazias, códigos e cadastro de clientes'],['historico','Histórico de alterações','Quem lançou, alterou ou excluiu pedidos, e quando']]},
+  {grupo:'Comercial',ico:'<path d="M3 4h2l2.4 11h11.2L21 7H7" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="9" cy="19" r="1.6"/><circle cx="17" cy="19" r="1.6"/>',itens:[['registro','Planilha de vendas','As mesmas colunas da planilha do comercial: os vendedores lançam e revisam as vendas aqui'],['vendas','Vendas','Pedidos, ticket médio e novas vendas × recompra (R1, R2, R3)'],['produtos','Produtos e mix','Tipo de produto, tecido e cor em peças ou R$ (R4) e curva ABC'],['clientes','Clientes','Curva ABC, faixas de valor, segmento e quem parou de comprar (C3, C5, C6)'],['vendedores','Vendedores e premiação','Faturamento, clientes novos, régua e apuração da premiação (C7, C8)'],['pedidos','Pedidos e entregas','Ciclo de pagamento e entregas das próximas semanas (C4)'],['treinamento','Treinamento','Passo a passo para lançar pedidos, usar o complementar e tirar dúvidas (vídeo em breve)']]},
+  {grupo:'Conferência',ico:'<path d="M4 5h7v14H4zM13 5h7v14h-7z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M6.5 9h2M6.5 12h2M15.5 9h2M15.5 12h2" stroke="currentColor" stroke-width="1.8"/>',itens:[['inconsistencias','Inconsistências','Num lugar só: sistema × planilha pedido a pedido, colunas vazias, códigos e cadastro de clientes'],['conciliacao','Divergências por mês','Planilha × Conta Azul por mês, com observações e ações por responsável, e saldo por conta'],['historico','Histórico de alterações','Quem lançou, alterou ou excluiu pedidos, e quando']]},
   {grupo:'Financeiro',ico:'<circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 6v12M15 9c0-1.2-1.3-2-3-2s-3 .8-3 2 1.3 2 3 2 3 .8 3 2-1.3 2-3 2-3-.8-3-2" fill="none" stroke="currentColor" stroke-width="1.8"/>',itens:[['dre','DRE gerencial','Receita, custos, despesas e resultado por competência ou caixa'],['equilibrio','Margem e ponto de equilíbrio','Custos fixos × variáveis, margem de contribuição e ponto de equilíbrio (C1)'],['caixa','Fluxo de caixa','Saldo nos bancos, realizado e projeção de 13 semanas'],['receber','Contas a receber','Inadimplência por idade e por cliente'],['pagar','Contas a pagar','Despesas por categoria, centro de custo e fornecedor'],['extrato','Conciliação bancária','Extrato do banco × recebimentos e pagamentos baixados na Conta Azul']]},
-  {grupo:'Controle',ico:'<path d="M6 2h9l4 4v16H6z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 11l2 2 4-4" fill="none" stroke="currentColor" stroke-width="2"/>',itens:[['conciliacao','Planilha × sistema (mês)','Total do mês planilha × Conta Azul e ligação da planilha'],['dados','Qualidade dos dados','Colunas reconhecidas, campos em branco e grafias diferentes'],['versoes','Versões do painel','O que mudou em cada entrega'],['treinamento','Treinamento','Passo a passo para lançar pedidos, usar o complementar e tirar dúvidas']]},
+  {grupo:'Controle',ico:'<path d="M6 2h9l4 4v16H6z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 11l2 2 4-4" fill="none" stroke="currentColor" stroke-width="2"/>',itens:[['dados','Qualidade dos dados','Colunas reconhecidas, campos em branco e grafias diferentes'],['versoes','Versões do painel','O que mudou em cada entrega'],]},
   {grupo:'Administração',ico:'<circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.6 2.7-6 6-6s6 2.4 6 6z"/><circle cx="17" cy="9" r="2.4"/><path d="M15.5 14.2c2.9.3 5.5 2.4 5.5 5.8h-4.5"/>',itens:[['usuarios','Usuários e permissões','Perfis, senhas temporárias e o que cada pessoa vê']]},
 ];
 const TODAS=MENU.flatMap(g=>g.itens.map(i=>i[0]));

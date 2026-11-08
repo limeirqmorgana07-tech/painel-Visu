@@ -395,6 +395,13 @@ app.post('/api/pedidos/importar', exigeLogin, exigePedidos, express.raw({ type: 
   if (!r.simular && r.importadas !== undefined) depoisDeMudar();
   return r;
 }));
+// envio sob demanda (gestão): atualiza a Conta Azul e grava os pedidos na planilha agora, para grandes volumes
+app.post('/api/sincronizar-agora', exigeLogin, exigePedidos, resp(async (req) => {
+  if (!pedidos.podeEditarTudo(req.usuario)) throw new Error('Só a gestão envia os pedidos manualmente.');
+  await dadosDeVendas(true);
+  const r = pscript.scriptConfigurado() ? await gravarRecebimentosNaPlanilha(req.usuario, true) : { aviso: 'Planilha não ligada: só a Conta Azul foi atualizada.' };
+  return { ok: true, ...r, quando: new Date().toISOString() };
+}));
 app.post('/api/pedidos/config', exigeAdm, resp(async (req) => { const f = ['painel', 'misto'].includes(req.body?.fonte) ? req.body.fonte : 'planilha'; const r = await pedidos.salvarConfigPedidos({ fonte: f, corte: f === 'misto' ? (/^\d{4}-\d{2}$/.test(req.body?.corte || '') ? req.body.corte : '2026-11') : undefined }, req.usuario); depoisDeMudar(); return r; }));
 app.get('/api/pedidos/historico', exigeLogin, (req, res, next) => (veHistorico(req.usuario) ? next() : res.status(403).json({ erro: 'o histórico de alterações é só para a gestão' })), resp(async (req) => ({ itens: await pedidos.historico({ codigo: req.query.codigo, usuario: req.query.usuario, acao: req.query.acao, dias: req.query.dias || 90 }) })));
 
