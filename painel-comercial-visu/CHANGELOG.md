@@ -2,6 +2,14 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v49 — 08/11/2026 — Corte de novembro, horários de sincronização e premiação por venda
+
+- Pedidos de novembro voltam a entrar: a gravação automática na planilha e a importação tinham o corte fixado em outubro. Agora vão até dezembro.
+- Gravação e atualização da Conta Azul em horários fixos (Fortaleza): 09:30, 12:00, 14:00 e 18:00. Entre um horário e outro o painel usa o que já está salvo, para consumir menos a API e o Render.
+- Premiação: coluna "Premiação % (manual)" na Planilha de vendas. Uma venda com percentual informado paga esse percentual e o restante do mês segue a faixa, com a coluna "Motivo do % diferente".
+- Premiação: os pontos da política a ajustar (margem, redução por venda e faixas intermediárias) estão descritos na página Vendedores e premiação.
+- Aba Versões do painel oculta para o perfil Vendedor.
+
 ## v48 — 04/11/2026 — Novo pedido em linha, igual à planilha, com vários itens
 
 - + Novo pedido agora abre uma linha em cima da grade, nas mesmas colunas e na mesma ordem da planilha (data, mês, código, cliente, lote, nome do pedido, vendedor… observação), em vez do card. O formulário (card) continua em "Abrir no formulário".

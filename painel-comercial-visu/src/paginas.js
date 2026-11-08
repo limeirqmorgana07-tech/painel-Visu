@@ -21,7 +21,7 @@ const PADRAO_BASE = {
   // consultor externo liberado pela diretoria: só o módulo de vendas (em homologação); o ADM pode ampliar
   consultor: [...COM],
   // perfil Vendedor (v32): lança e revisa as próprias vendas na Planilha de vendas e vê as inconsistências dele
-  vendedor: ['registro', ...COM, 'inconsistencias', 'versoes'],
+  vendedor: ['registro', ...COM, 'inconsistencias'],
 };
 // O ADM pode mudar o que cada perfil vê (vale para todas as pessoas daquele perfil). Guardado na chave perfis_paginas.
 let personalizado = {};

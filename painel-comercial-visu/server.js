@@ -279,7 +279,17 @@ app.post('/api/planilha-script/celulas', exigeLogin, async (req, res) => {
     res.json({ ok: true, ...r, na_fila: pscript.filaCelulas().length });
   } catch (e) { res.status(400).json({ erro: e.message }); }
 });
-setInterval(() => { if (pscript.scriptConfigurado() && pscript.statusScript().gravar) gravarRecebimentosNaPlanilha(null).catch((e) => { console.warn('[planilha] gravação:', e.message); pscript.marcarGravacao({ erro: e.message }).catch(() => {}); }); }, 10 * 60e3);
+// horários fixos (Fortaleza): gravação na planilha e atualização da Conta Azul, para não consumir a API e o Render o tempo todo
+const HORARIOS_SINCRONIZA = ['09:30', '12:00', '14:00', '18:00'];
+let ultimoHorarioSincronizado = '';
+const horaFortaleza = () => new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Fortaleza', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(new Date());
+setInterval(() => {
+  const agora = horaFortaleza();
+  if (!HORARIOS_SINCRONIZA.includes(agora) || agora === ultimoHorarioSincronizado) return;
+  ultimoHorarioSincronizado = agora;
+  dadosDeVendas(true).catch((e) => console.warn('[conta azul] atualização:', e.message));
+  if (pscript.scriptConfigurado() && pscript.statusScript().gravar) gravarRecebimentosNaPlanilha(null).catch((e) => { console.warn('[planilha] gravação:', e.message); pscript.marcarGravacao({ erro: e.message }).catch(() => {}); });
+}, 60e3);
 app.post('/api/planilha-script', exigeAdm, async (req, res) => {
   try { const arq = await pscript.ligarScript(req.body?.url, req.usuario); dadosDeVendas(true).catch(() => {}); res.json({ ok: true, nome: arq.nome, alterado_em: arq.alterado_em, ...pscript.statusScript() }); }
   catch (e) { res.status(400).json({ erro: e.message }); }
@@ -381,7 +391,7 @@ app.post('/api/pedidos/unificar-cliente', exigeLogin, exigePedidos, resp(async (
 app.post('/api/pedidos/importar', exigeLogin, exigePedidos, express.raw({ type: ['application/octet-stream', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'], limit: '25mb' }), resp(async (req) => {
   const arquivo = Buffer.isBuffer(req.body) && req.body.length ? req.body : null;
   const o = arquivo ? req.query : req.body || {};
-  const r = await pedidos.importar({ de: String(o.de || '2026-01'), ate: String(o.ate || '2026-10'), modo: ['substituir', 'faltam'].includes(o.modo) ? o.modo : 'novas', simular: String(o.simular) !== 'false' && o.simular !== false, bytes: arquivo, nomeArquivo: String(req.query.arquivo || '') }, req.usuario);
+  const r = await pedidos.importar({ de: String(o.de || '2026-01'), ate: String(o.ate || '2026-12'), modo: ['substituir', 'faltam'].includes(o.modo) ? o.modo : 'novas', simular: String(o.simular) !== 'false' && o.simular !== false, bytes: arquivo, nomeArquivo: String(req.query.arquivo || '') }, req.usuario);
   if (!r.simular && r.importadas !== undefined) depoisDeMudar();
   return r;
 }));

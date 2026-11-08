@@ -30,7 +30,7 @@ export const config = {
   // Comissão sobre faturamento: começa a pagar a partir de R$ 15 mil vendidos no mês e chega a 5% a partir de R$ 50 mil
   comissaoInicio: Number(env.COMISSAO_INICIO || 15000),
   comissaoTeto: Number(env.COMISSAO_TETO || 50000),
-  cacheSegundos: Number(env.CACHE_SEGUNDOS || 300),
+  cacheSegundos: Number(env.CACHE_SEGUNDOS || 14400),
   mesesHistorico: Number(env.MESES_HISTORICO || 12),
   maxVendasComItens: Number(env.MAX_VENDAS_COM_ITENS || 2500),
   intervaloMs: Number(env.INTERVALO_ENTRE_CHAMADAS_MS || 1250), // ~48 chamadas/min (limite da API: 50/min)

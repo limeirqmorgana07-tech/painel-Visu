@@ -296,6 +296,7 @@ async function montar(bruto) {
       // para a página Inconsistências: nome como foi lançado (quando difere do padronizado) e possível duplicidade
       ...(l.cliente_original && l.cliente_original !== l.cliente ? { co: l.cliente_original } : {}),
       ...(l.duplicado ? { du: 1 } : {}),
+      ...(l.pct_premiacao != null ? { pp: l.pct_premiacao, op: l.obs_premiacao || '' } : {}),
     })),
     // vendas do sistema, para a conciliação (data da venda, situação, cliente, valor)
     conta_azul: vendasCA
