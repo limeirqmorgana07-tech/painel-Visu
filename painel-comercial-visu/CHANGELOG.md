@@ -2,6 +2,11 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v51 — 08/11/2026 — Treinamento no painel
+
+- Novo item Treinamento no menu Controle: passo a passo para lançar pedidos, corrigir nas primeiras 24 horas, acrescentar peças com pedido complementar e entender os horários de atualização.
+- Perfis Comercial, Financeiro e Vendedor passam a ver o Treinamento.
+
 ## v50 — 08/11/2026 — Subtotais na Planilha de vendas
 
 - Subtotal das linhas visíveis na Planilha de vendas (quantidade e total, com a contagem de linhas).

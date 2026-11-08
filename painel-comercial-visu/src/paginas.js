@@ -6,7 +6,7 @@ export const MENU = [
   // reunião de 03/11/2026: conferência sistema × planilha num grupo próprio (a planilha é a referência das vendas)
   { grupo: 'Conferência', itens: [['inconsistencias', 'Inconsistências'], ['historico', 'Histórico de alterações']] },
   { grupo: 'Financeiro', itens: [['dre', 'DRE gerencial'], ['equilibrio', 'Margem e ponto de equilíbrio'], ['caixa', 'Fluxo de caixa'], ['receber', 'Contas a receber'], ['pagar', 'Contas a pagar'], ['extrato', 'Conciliação bancária']] },
-  { grupo: 'Controle', itens: [['conciliacao', 'Planilha × sistema (mês)'], ['dados', 'Qualidade dos dados'], ['versoes', 'Versões do painel']] },
+  { grupo: 'Controle', itens: [['conciliacao', 'Planilha × sistema (mês)'], ['dados', 'Qualidade dos dados'], ['versoes', 'Versões do painel'], ['treinamento', 'Treinamento']] },
   { grupo: 'Administração', itens: [['usuarios', 'Usuários e permissões']] },
 ];
 export const TODAS = MENU.flatMap((g) => g.itens.map((i) => i[0]));
@@ -16,12 +16,12 @@ const PADRAO_BASE = {
   adm: TODAS,
   diretor: TODAS.filter((p) => p !== 'usuarios'),
   // reunião de 03/11/2026: vendedores lançam os pedidos no painel e veem a conciliação; o histórico fica com a gestão
-  comercial: ['registro', ...COM, 'inconsistencias', 'conciliacao', 'versoes'],
-  financeiro: ['painel', 'indicadores', 'registro', ...FIN, 'inconsistencias', 'historico', 'conciliacao', 'dados', 'versoes'],
+  comercial: ['registro', ...COM, 'inconsistencias', 'conciliacao', 'versoes', 'treinamento'],
+  financeiro: ['painel', 'indicadores', 'registro', ...FIN, 'inconsistencias', 'historico', 'conciliacao', 'dados', 'versoes', 'treinamento'],
   // consultor externo liberado pela diretoria: só o módulo de vendas (em homologação); o ADM pode ampliar
   consultor: [...COM],
   // perfil Vendedor (v32): lança e revisa as próprias vendas na Planilha de vendas e vê as inconsistências dele
-  vendedor: ['registro', ...COM, 'inconsistencias'],
+  vendedor: ['registro', ...COM, 'inconsistencias', 'treinamento'],
 };
 // O ADM pode mudar o que cada perfil vê (vale para todas as pessoas daquele perfil). Guardado na chave perfis_paginas.
 let personalizado = {};
