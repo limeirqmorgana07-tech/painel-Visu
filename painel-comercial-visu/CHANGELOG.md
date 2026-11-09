@@ -2,6 +2,10 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v65 — 09/11/2026 — Vídeo do treinamento com parcelas e aprovação de preço
+
+- Vídeo do treinamento atualizado (4 minutos): mostra o campo Parcelas (à vista, 2x ou mais), o pedido de alteração de preço em pedido fechado e a aprovação pela gestão, além do cliente da carteira com recompra automática, o Enter, o cadeado e os pedidos da planilha.
+
 ## v64 — 09/11/2026 — Parcelas no pedido e aprovação de alteração de preço
 
 - Campo Parcelas no pedido: 2x (50% + 50%) como padrão, À vista, ou 3x a 12x (parcelas iguais a cada 30 dias). Vale na linha do Novo pedido, no formulário e na célula da Planilha de vendas, e a venda vai para a Conta Azul com essas parcelas.
