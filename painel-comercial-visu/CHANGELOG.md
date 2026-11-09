@@ -2,6 +2,10 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v60 — 09/11/2026 — Vídeo do treinamento com narração
+
+- Vídeo do treinamento com narração em voz feminina (Camila, português do Brasil), no tempo de cada tela, dentro de Comercial → Treinamento. As legendas acompanham a fala.
+
 ## v59 — 09/11/2026 — Alterar e complementar pedidos da planilha e + Ação nas divergências
 
 - Pedidos que vieram da planilha (marca "planilha") agora também têm o ＋ (novo item) e o ⊕ (pedido complementar), e podem ser alterados clicando na célula (dois cliques para confirmar). O pedido passa para o painel com todas as linhas do mesmo código e a versão do painel passa a valer; as correções seguem a regra das 24 horas a partir desse momento. Vale até a planilha ser encerrada.
