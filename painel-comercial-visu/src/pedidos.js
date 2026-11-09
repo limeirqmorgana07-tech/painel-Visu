@@ -51,6 +51,17 @@ function limpar(campo, v) {
   if (t === 'nr') { const s = sem(v); return s.startsWith('rec') ? 'recompra' : s.startsWith('nov') ? 'novo' : ''; }
   return String(v ?? '').replace(/\s+/g, ' ').trim().slice(0, 300);
 }
+// O que vem depois do nome do cliente ("Giba - Clube Cabo Branco (Dental Center)" → "Dental Center") é o que diferencia
+// a venda para o cliente, os vendedores e a produção: ao unificar o nome, esse texto vai para a coluna Lote / obs. do cliente.
+export function restoDoNome(original, para) {
+  const tk = String(original || '').trim().split(/\s+/), pw = String(para || '').trim().split(/\s+/).map((w) => sem(w).replace(/[^a-z0-9]/g, '')).filter(Boolean);
+  let j = 0, i = 0;
+  for (; i < tk.length && j < pw.length; i++) { const k = sem(tk[i]).replace(/[^a-z0-9]/g, ''); if (!k) continue; if (k === pw[j]) j++; else break; }
+  if (j < pw.length) return '';
+  const r = tk.slice(i).join(' ').replace(/^[\s\-–—(\[:,.;/]+|[\s\-–—)\]:,.;/]+$/g, '').replace(/^\((.*)\)$/, '$1').trim();
+  return /^lote\s*\d+$/i.test(r) ? r.replace(/^l/i, 'L') : r;
+}
+const juntarObs = (lote, resto) => !resto || sem(lote || '').includes(sem(resto)) ? (lote || '') : (lote ? `${lote} · ${resto}` : resto);
 // "Contour Inglesa lote 2" → cliente "Contour Inglesa" e lote "Lote 2"
 export function separarLote(nome) {
   const m = String(nome || '').match(/\s*[-–(]?\s*\b(lote\s*\d+)\)?\s*$/i);
@@ -81,7 +92,23 @@ async function carregar() {
   mem = m;
   await consolidarClientes().catch((e) => console.warn('[pedidos] consolidar clientes:', e.message));
   await limparPct0().catch((e) => console.warn('[pedidos] premiação 0%:', e.message));
+  await recuperarObsCliente().catch((e) => console.warn('[pedidos] obs. do cliente:', e.message));
   return mem;
+}
+// Clientes unificados antes da v66 perderam o texto que diferenciava a venda (ex.: "(Dental Center)"):
+// volta para a coluna Lote / obs. do cliente, a partir do nome como foi lançado. Só completa; não apaga nada.
+async function recuperarObsCliente() {
+  const novos = [];
+  for (const r of mem.values()) {
+    if (r.excluido || !r.cliente_lancado || r.cliente_lancado === r.cliente) continue;
+    const resto = restoDoNome(r.cliente_lancado, r.cliente); const lote = juntarObs(r.lote, resto);
+    if (lote !== (r.lote || '')) { const n = { ...r, lote }; mem.set(r.id, n); novos.push([r, n]); }
+  }
+  if (!novos.length) return 0;
+  await gravar(novos.map((x) => x[1]));
+  await registrarLog(novos.map(([r, n]) => ({ ...quem(null), usuario: 'Unificação de clientes', acao: 'alterou', registro: r.id, codigo: r.codigo || null, cliente: r.cliente, mudancas: [{ campo: 'lote', antes: r.lote || '', depois: n.lote }], detalhe: `Obs. do cliente recuperada do nome lançado: ${r.cliente_lancado}` }))).catch(() => {});
+  console.log('[pedidos] obs. do cliente recuperada em', novos.length, 'linhas');
+  return novos.length;
 }
 // Até a v60, salvar o campo Premiação % (manual) em branco gravava 0% (ex.: Cabo Branco, Milena, out/2026),
 // e o pedido deixava de pagar premiação. Uma vez só: volta esses 0% para em branco (segue a faixa do mês).
@@ -420,7 +447,7 @@ export async function unificarCliente(de, para, u) {
   if (!para || !nomes.size) throw new Error('Informe os nomes a unificar e o nome certo.');
   await carregar();
   const mudados = [];
-  for (const r of mem.values()) if (!r.excluido && nomes.has(sem(r.cliente)) && r.cliente !== para && ehDoVendedor(u, r)) { const n = { ...r, cliente: para, cliente_lancado: r.cliente_lancado || r.cliente, alterado_em: agoraISO(), alterado_por: u?.nome || '' }; mem.set(r.id, n); mudados.push([r, n]); }
+  for (const r of mem.values()) if (!r.excluido && nomes.has(sem(r.cliente)) && r.cliente !== para && ehDoVendedor(u, r)) { const n = { ...r, cliente: para, cliente_lancado: r.cliente_lancado || r.cliente, lote: juntarObs(r.lote, restoDoNome(r.cliente, para)), alterado_em: agoraISO(), alterado_por: u?.nome || '' }; mem.set(r.id, n); mudados.push([r, n]); }
   await gravar(mudados.map((x) => x[1]));
   await registrarLog([{ ...quem(u), acao: 'unificou', codigo: null, cliente: para, mudancas: [{ campo: 'cliente', antes: [...new Set(mudados.map((x) => x[0].cliente))].join(' · '), depois: para }], detalhe: `${mudados.length} linhas` }]);
   return { linhas: mudados.length };

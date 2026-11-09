@@ -7,7 +7,7 @@ import { planilhaConfigurada, lerPlanilha, sem, clienteBase } from './planilha.j
 import { gerarDemoPlanilha, gerarDemoContaAzul } from './demo.js';
 import { lerAtributos } from './produtos.js';
 import { lerKV, salvarKV } from './tokenStore.js';
-import { fontePainel, fonteMista, planilhaEmUso, linhasDoPainel, prepararFonte, chaveCodigo } from './pedidos.js';
+import { fontePainel, fonteMista, planilhaEmUso, linhasDoPainel, prepararFonte, chaveCodigo, restoDoNome } from './pedidos.js';
 
 const chave = (s) => sem(s).replace(/[^a-z0-9]+/g, ' ').trim();
 // nome de vendedor num padrão só: "DANIEL SILVA", "daniel silva" e "Daniel Silva" viram "Daniel Silva"
@@ -69,6 +69,8 @@ function qualidade(linhas, mapa) {
     // o lote que estava no nome vai para a coluna Lote / obs. do cliente
     const lt = String(l.cliente_original || '').match(/\b(lote\s*\d+)\)?\s*$/i);
     if (lt && !l.lote) l.lote = lt[1].replace(/\s+/g, ' ').replace(/^l/, 'L');
+    // e o que diferencia a venda depois do nome (ex.: "(Dental Center)") também
+    if (!l.lote && l.cliente_original && l.cliente_original !== l.cliente) { const r = restoDoNome(l.cliente_original, l.cliente); if (r) l.lote = r; }
   }
   const vazio = (c) => linhas.filter((l) => !l[c]).length;
   return {

@@ -4,6 +4,9 @@ O mesmo histórico aparece no painel, na página **Controle → Versões**, e a 
 
 ## v65 — 09/11/2026 — Vídeo do treinamento com parcelas e aprovação de preço
 
+- Cadeado 🔒 também nos pedidos lidos da planilha do Google (de 04/11 em diante estavam sem cadeado) e nos trazidos para o painel: contam as 24 horas pela data da venda.
+- Unificar clientes: o que vem depois do nome (ex.: Giba - Clube Cabo Branco (Dental Center) → Dental Center; Lote 2) vai para a coluna Lote / obs. do cliente. As linhas já unificadas recuperam esse texto sozinhas. As vendas continuam separadas: só o nome do cliente fica igual.
+- Alteração de preço: o 💲 aparece também nos pedidos lidos da planilha. Em Ver o painel como (perfil Vendedor ou Comercial), a Planilha de vendas fica como o vendedor vê, com cadeado e 💲, para a gestão conferir.
 - Vídeo do treinamento atualizado (4 minutos): mostra o campo Parcelas (à vista, 2x ou mais), o pedido de alteração de preço em pedido fechado e a aprovação pela gestão, além do cliente da carteira com recompra automática, o Enter, o cadeado e os pedidos da planilha.
 
 ## v64 — 09/11/2026 — Parcelas no pedido e aprovação de alteração de preço
