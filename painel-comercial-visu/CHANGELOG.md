@@ -2,6 +2,14 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v62 — 09/11/2026 — Vídeo do treinamento narrado, cadeado, marca planilha e recompra automática
+
+- Treinamento: o vídeo narrado pela Eva (3 minutos, com voz e legendas) está em Comercial → Treinamento. O navegador não guarda mais a versão antiga do vídeo.
+- Pedidos que vieram da planilha aparecem com a marca planilha.
+- Pedido fechado (mais de 24 horas) mostra o cadeado 🔒 na linha; complementares (-1, -2…) aparecem com a marca ajuste.
+- Novo × recompra: cliente que já comprou antes é marcado como Recompra automaticamente, mesmo nos pedidos da planilha que estavam em branco. O preenchimento também roda quando o painel é publicado.
+- Inconsistências: enquanto a planilha estiver em uso, os pedidos de novembro que estão só na planilha não aparecem mais como erro.
+
 ## v61 — 09/11/2026 — Correção da Planilha de vendas, premiação por pedido, Enter, cliente da carteira e horários
 
 - Correção: ao alterar um pedido que veio da planilha num mês antes de novembro (ex.: % de premiação da Cabo Branco em outubro), as outras vendas do mês sumiam da Planilha de vendas. Agora só aquele pedido passa a valer pela versão do painel; as demais continuam vindo da planilha. O pedido vem junto com os complementares (-1, -2…).

@@ -287,14 +287,30 @@ async function montar(bruto) {
   }
 
   const linhas = base.linhas.filter((l) => l.total || l.quantidade);
+  // novo × recompra em branco: o painel preenche pela carteira (cliente que já comprou antes = recompra; 1ª compra = novo).
+  // A planilha do Google recebe o mesmo valor pelo botão "Preencher novo × recompra" e nos horários automáticos.
+  {
+    const kc = (n) => chave(clienteBase(n || ''));
+    const datas = new Map();
+    const add = (n, d) => { const c = kc(n); if (!c || !d) return; const v = datas.get(c); if (!v || d < v) datas.set(c, d); };
+    linhas.forEach((l) => add(l.cliente_original || l.cliente, l.data));
+    (vendasCA || []).forEach((v) => { if (EFETIVAS.has(v.situacao)) add(v.cliente, v.data); });
+    for (const l of linhas) {
+      if (l.novo_recompra || !l.data) continue;
+      const p = datas.get(kc(l.cliente_original || l.cliente));
+      l.novo_recompra = p && p < l.data ? 'recompra' : 'novo'; l.nr_auto = true;
+    }
+  }
   const q = qualidade(linhas, base.mapa);
+  q.faltando.novo_recompra_auto = linhas.filter((l) => l.nr_auto).length;
   if (base.mapa?.obrigatorias_faltando?.length) avisos.push(`A planilha não tem as colunas: ${base.mapa.obrigatorias_faltando.join(', ')}.`);
 
   return {
     fonte: origem,
     planilha_arquivo: origem === 'planilha' || origem === 'misto' ? base.arquivo || null : null,
     corte_sistema: corte || null,
-    so_planilha: soPlanilha ? soPlanilha.map((l) => ({ d: l.data, m: l.mes, c: l.cliente, v: l.vendedor, t: Math.round((l.total || 0) * 100) / 100, cd: l.codigo_pedido || l.codigo || '', tp: l.tipo_produto, q: l.quantidade })) : undefined,
+    // enquanto a planilha está em uso, essas vendas já entram no painel (e são comparadas com a Conta Azul): não são inconsistência
+    so_planilha: soPlanilha && !planilhaEmUso() ? soPlanilha.map((l) => ({ d: l.data, m: l.mes, c: l.cliente, v: l.vendedor, t: Math.round((l.total || 0) * 100) / 100, cd: l.codigo_pedido || l.codigo || '', tp: l.tipo_produto, q: l.quantidade })) : undefined,
     detalhe_desde: detalheCaDesde(),
     nr_fonte: origem === 'planilha' && base.mapa?.nr_tratado ? (base.mapa?.tratamento === 'painel' ? 'painel' : 'tratada') : undefined,
     de_para: origem === 'planilha' ? base.mapa?.de_para || null : null,
@@ -313,7 +329,7 @@ async function montar(bruto) {
     },
     vendedores_cadastrados: vendedoresCA.map((v) => v.nome),
     linhas: linhas.map((l) => ({
-      m: l.mes, d: l.data, c: l.cliente, p: l.pedido, v: l.vendedor, tv: l.tipo_venda, nr: l.novo_recompra,
+      m: l.mes, d: l.data, c: l.cliente, p: l.pedido, v: l.vendedor, tv: l.tipo_venda, nr: l.novo_recompra, ...(l.nr_auto ? { nra: 1 } : {}),
       tp: l.tipo_produto, mt: l.material, es: l.especificacao, cr: l.cor, pr: l.produto || '', q: l.quantidade, t: Math.round(l.total * 100) / 100, cu: Math.round((l.custo || 0) * 100) / 100,
       ...(l.codigo_pedido || (l.pedido_informado && !String(l.pedido).includes('|')) ? { cd: l.codigo_pedido || l.pedido } : {}),
       p1: l.pag1, p2: l.pag2, ok: l.pago_100, fp: l.forma_pagamento, pz: l.prazo_entrega, sg: l.segmento,

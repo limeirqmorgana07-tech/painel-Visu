@@ -206,7 +206,7 @@ app.post('/api/usuarios/:id/convite', exigeAdm, async (req, res) => {
 
 app.get('/saude', (req, res) => res.json({ ok: true }));
 app.get('/saude/banco', async (req, res) => res.json(await statusBanco().catch((e) => ({ erro: e.message }))));
-app.get(['/treinamento.mp4', '/treinamento.vtt'], exigeLogin, (req, res) => res.sendFile(path.join(raiz, 'public', req.path.slice(1)), { maxAge: '1d' }));
+app.get(['/treinamento.mp4', '/treinamento.vtt'], exigeLogin, (req, res) => res.sendFile(path.join(raiz, 'public', req.path.slice(1)), { maxAge: 0, etag: true, lastModified: true }));
 app.get('/politica-premiacao.pdf', exigeLogin, (req, res) => res.sendFile(path.join(raiz, 'public', 'politica-premiacao.pdf')));
 app.get(['/logo.png', '/logo-visu.png', '/logo-visu-azul.png'], (req, res) => res.sendFile(path.join(raiz, 'public', req.path.slice(1))));
 // bibliotecas de exportação (Excel e PDF), servidas pelo próprio painel para não depender de CDN
@@ -292,6 +292,8 @@ app.post('/api/planilha-script/celulas', exigeLogin, async (req, res) => {
 });
 // horários fixos (Fortaleza): gravação na planilha e atualização da Conta Azul, para não consumir a API e o Render o tempo todo
 const HORARIOS_SINCRONIZA = ['09:30', '14:00', '17:30'];
+// ao subir o servidor: preenche novo × recompra em branco (painel e fila da planilha) uma vez, sem esperar o próximo horário
+setTimeout(() => { preencherNovoRecompra(null).then((r) => { if (r.planilha && pscript.scriptConfigurado() && pscript.statusScript().gravar) return gravarRecebimentosNaPlanilha(null); }).catch((e) => console.warn('[pedidos] novo × recompra:', e.message)); }, 90e3);
 let ultimoHorarioSincronizado = '';
 const horaFortaleza = () => new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Fortaleza', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(new Date());
 setInterval(() => {
