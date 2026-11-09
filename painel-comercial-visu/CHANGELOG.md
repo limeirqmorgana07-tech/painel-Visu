@@ -2,6 +2,10 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v67 — 09/11/2026 — Diretores criam o acesso dos vendedores
+
+- Diretores criam e cuidam do acesso dos vendedores: o menu Administração → Usuários e permissões passa a aparecer para o perfil Diretor. O diretor cadastra, edita, gera senha temporária ou link e remove usuários Vendedor, Comercial e Consultor externo. ADMs, diretores e financeiro, e as tabelas do que cada perfil vê, continuam só com o ADM.
+
 ## v66 — 09/11/2026 — Pedido da planilha abre mais rápido para alterar
 
 - Alterar ou complementar um pedido da planilha ficou mais rápido: o painel lê a planilha do Google uma vez só (antes eram três leituras seguidas) e aproveita a leitura dos últimos 10 minutos; a tela não espera mais o recálculo dos indicadores, que é feito em seguida.

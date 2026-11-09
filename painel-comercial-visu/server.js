@@ -189,18 +189,41 @@ app.post('/api/visual', exigeAdm, async (req, res) => {
   await salvarKV('visual_padrao', { t, d, m, atualizado_em: new Date().toISOString(), por: req.usuario.nome });
   res.json({ ok: true, t, d, m });
 });
-app.get('/api/usuarios', exigeAdm, async (req, res) => res.json({ usuarios: await usuarios.listar(), perfis: usuarios.PERFIS, banco: await usuarios.bancoConfigurado(), banco_status: await statusBanco().catch((e) => ({ erro: e.message })) }));
-app.post('/api/usuarios', exigeAdm, async (req, res) => {
-  try { res.json(await usuarios.salvar(req.body || {})); } catch (e) { res.status(400).json({ erro: e.message }); }
+// Usuários: o ADM gerencia todos; os diretores criam e cuidam do acesso dos vendedores (e do Comercial e consultores externos)
+const PERFIS_DIRETOR = ['vendedor', 'comercial', 'consultor'];
+function exigeGestorUsuarios(req, res, next) {
+  exigeLogin(req, res, () => {
+    if (['adm', 'diretor'].includes(req.usuario.perfil)) return next();
+    return res.status(403).json({ erro: 'apenas para ADM e diretores' });
+  });
+}
+async function podeGerirUsuario(eu, id, perfilNovo) {
+  if (eu.perfil === 'adm') return true;
+  const alvo = id ? await usuarios.porId(id) : null;
+  if (alvo && !PERFIS_DIRETOR.includes(alvo.perfil)) return false;
+  if (perfilNovo !== undefined && !PERFIS_DIRETOR.includes(perfilNovo)) return false;
+  return true;
+}
+const SO_ADM_USU = 'Diretores cadastram e cuidam só do acesso de Vendedor, Comercial e Consultor externo. Para os outros perfis, fale com o ADM.';
+app.get('/api/usuarios', exigeGestorUsuarios, async (req, res) => res.json({ usuarios: await usuarios.listar(), perfis: usuarios.PERFIS, perfis_permitidos: req.usuario.perfil === 'adm' ? Object.keys(usuarios.PERFIS) : PERFIS_DIRETOR, banco: await usuarios.bancoConfigurado(), banco_status: await statusBanco().catch((e) => ({ erro: e.message })) }));
+app.post('/api/usuarios', exigeGestorUsuarios, async (req, res) => {
+  try {
+    const b = req.body || {};
+    if (!(await podeGerirUsuario(req.usuario, b.id, b.perfil))) return res.status(403).json({ erro: SO_ADM_USU });
+    res.json(await usuarios.salvar(b));
+  } catch (e) { res.status(400).json({ erro: e.message }); }
 });
-app.delete('/api/usuarios/:id', exigeAdm, async (req, res) => {
+app.delete('/api/usuarios/:id', exigeGestorUsuarios, async (req, res) => {
   if (req.params.id === req.usuario.id) return res.status(400).json({ erro: 'Você não pode remover o próprio acesso.' });
+  if (!(await podeGerirUsuario(req.usuario, req.params.id))) return res.status(403).json({ erro: SO_ADM_USU });
   await usuarios.remover(req.params.id); res.json({ ok: true });
 });
-app.post('/api/usuarios/:id/senha-temporaria', exigeAdm, async (req, res) => {
+app.post('/api/usuarios/:id/senha-temporaria', exigeGestorUsuarios, async (req, res) => {
+  if (!(await podeGerirUsuario(req.usuario, req.params.id))) return res.status(403).json({ erro: SO_ADM_USU });
   try { res.json(await usuarios.gerarSenhaTemporaria(req.params.id)); } catch (e) { res.status(400).json({ erro: e.message }); }
 });
-app.post('/api/usuarios/:id/convite', exigeAdm, async (req, res) => {
+app.post('/api/usuarios/:id/convite', exigeGestorUsuarios, async (req, res) => {
+  if (!(await podeGerirUsuario(req.usuario, req.params.id))) return res.status(403).json({ erro: SO_ADM_USU });
   try { res.json(await usuarios.gerarConvite(req.params.id)); } catch (e) { res.status(400).json({ erro: e.message }); }
 });
 

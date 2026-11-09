@@ -14,7 +14,8 @@ const COM = ['vendas', 'produtos', 'clientes', 'vendedores', 'pedidos'];
 const FIN = ['dre', 'equilibrio', 'caixa', 'receber', 'pagar', 'extrato'];
 const PADRAO_BASE = {
   adm: TODAS,
-  diretor: TODAS.filter((p) => p !== 'usuarios'),
+  // diretores criam o acesso dos vendedores (09/11/2026)
+  diretor: TODAS,
   // reunião de 03/11/2026: vendedores lançam os pedidos no painel e veem a conciliação; o histórico fica com a gestão
   comercial: ['registro', ...COM, 'inconsistencias', 'conciliacao', 'versoes', 'treinamento'],
   financeiro: ['painel', 'indicadores', 'registro', ...FIN, 'inconsistencias', 'divergencias', 'historico', 'conciliacao', 'dados', 'versoes', 'treinamento'],
@@ -37,7 +38,7 @@ export function definirPerfis(o) {
   for (const [k, v] of Object.entries(o || {})) if (k !== 'adm' && PADRAO_BASE[k] && Array.isArray(v)) personalizado[k] = [...new Set([...v, ...(antiga ? NOVAS_V31.filter((p) => PADRAO_BASE[k].includes(p) && !v.includes(p)) : []), ...(antes43 ? NOVAS_V43.filter((p) => PADRAO_BASE[k].includes(p)) : []), ...(antes56 ? NOVAS_V56.filter((p) => PADRAO_BASE[k].includes(p)) : [])])].filter((p) => LIBERAVEIS.includes(p));
 }
 export const perfisPersonalizados = () => ({ ...personalizado, _v31: true, _v43: true, _v56: true });
-export const padraoDe = (perfil) => (perfil === 'adm' ? TODAS : personalizado[perfil]?.length ? personalizado[perfil] : PADRAO_BASE[perfil] || []);
+export const padraoDe = (perfil) => (perfil === 'adm' ? TODAS : perfil === 'diretor' && personalizado.diretor?.length ? [...personalizado.diretor, 'usuarios'] : personalizado[perfil]?.length ? personalizado[perfil] : PADRAO_BASE[perfil] || []);
 export const PADRAO = new Proxy({}, { get: (_, k) => padraoDe(k), ownKeys: () => Object.keys(PADRAO_BASE), getOwnPropertyDescriptor: () => ({ enumerable: true, configurable: true }) });
 export const padroesOriginais = () => ({ ...PADRAO_BASE });
 
@@ -46,7 +47,7 @@ export function paginasDe(u) {
   if (!u) return [];
   const base = padraoDe(u.perfil);
   if (u.perfil === 'adm' || !Array.isArray(u.paginas)) return base;
-  const r = base.filter((p) => u.paginas.includes(p));
+  const r = base.filter((p) => u.paginas.includes(p) || (u.perfil === 'diretor' && p === 'usuarios'));
   return r.length ? r : base.slice(0, 1);
 }
 // Blocos das páginas de Gestão (Painel executivo e Quadro de indicadores): o ADM escolhe o que cada perfil enxerga.
