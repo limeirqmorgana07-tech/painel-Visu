@@ -78,7 +78,24 @@ async function carregar() {
   else { try { for (const x of JSON.parse(await fs.readFile(path.join(pasta(), 'pedidos.json'), 'utf8'))) m.set(x.id, x); } catch { /* ainda não há pedidos */ } }
   mem = m;
   await consolidarClientes().catch((e) => console.warn('[pedidos] consolidar clientes:', e.message));
+  await limparPct0().catch((e) => console.warn('[pedidos] premiação 0%:', e.message));
   return mem;
+}
+// Até a v60, salvar o campo Premiação % (manual) em branco gravava 0% (ex.: Cabo Branco, Milena, out/2026),
+// e o pedido deixava de pagar premiação. Uma vez só: volta esses 0% para em branco (segue a faixa do mês).
+// Depois disso, um 0% gravado de propósito é mantido.
+async function limparPct0() {
+  if (await lerKV('migr_pct0_v63').catch(() => null)) return 0;
+  const alvo = [...mem.values()].filter((r) => r.pct_premiacao === 0);
+  const novos = alvo.map((r) => ({ ...r, pct_premiacao: null, alterado_em: agoraISO(), alterado_por: 'Correção premiação 0%' }));
+  for (const n of novos) mem.set(n.id, n);
+  if (novos.length) {
+    await gravar(novos);
+    await registrarLog(novos.map((n) => ({ ...quem(null), usuario: 'Correção premiação 0%', acao: 'alterou', registro: n.id, codigo: n.codigo || null, cliente: n.cliente || '', mudancas: [{ campo: 'pct_premiacao', antes: '0%', depois: 'em branco (segue a faixa)' }], detalhe: 'Premiação % gravada como 0% por engano' }))).catch(() => {});
+  }
+  await salvarKV('migr_pct0_v63', { em: agoraISO(), n: novos.length, codigos: novos.map((n) => n.codigo) });
+  console.log('[pedidos] premiação 0% voltou para em branco em', novos.length, 'pedidos');
+  return novos.length;
 }
 // Cadastro único por cliente (validado pela Visu em 08/11/2026): o mesmo cliente escrito de jeitos diferentes
 // (maiúsculas, acento, pontuação ou "lote N" no nome) vira um nome só; o lote vai para a coluna Lote / obs. do cliente.

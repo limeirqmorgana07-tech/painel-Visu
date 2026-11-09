@@ -2,6 +2,10 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v63 — 09/11/2026 — Premiação da Milena volta ao cálculo anterior
+
+- Premiação: o pedido da Cabo Branco (Milena, outubro) estava com Premiação % gravada como 0%, por um erro das versões até a v60 (salvar o campo em branco virava 0%). Por isso a premiação da Milena caiu para R$ 2.987,25. Esses 0% voltam para em branco e o pedido segue a faixa do mês (Milena volta a R$ 3.179,15 em outubro). O % devido é ajustado pela gestão na coluna Premiação % (manual). A correção roda uma vez só e fica no Histórico de alterações.
+
 ## v62 — 09/11/2026 — Vídeo do treinamento narrado, cadeado, marca planilha e recompra automática
 
 - Treinamento: o vídeo narrado pela Eva (3 minutos, com voz e legendas) está em Comercial → Treinamento. O navegador não guarda mais a versão antiga do vídeo.
