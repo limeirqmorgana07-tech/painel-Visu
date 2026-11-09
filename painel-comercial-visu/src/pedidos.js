@@ -23,7 +23,7 @@ export const CAMPOS = {
   data: 'data', codigo: 'texto', cliente: 'texto', lote: 'texto', nome_pedido: 'texto', vendedor: 'texto', tipo_venda: 'texto',
   novo_recompra: 'nr', segmento: 'texto', tipo_produto: 'texto', material: 'texto', especificacao: 'texto', cor: 'texto',
   quantidade: 'num', valor_unit: 'num', total: 'num', pag1: 'num', data_pag1: 'data', pag2: 'num', data_pag2: 'data', banco_pag: 'texto', pago_100: 'bool', prazo_entrega: 'data',
-  forma_pagamento: 'texto', frete: 'texto', pagador: 'texto', observacao: 'texto', pct_premiacao: 'num', obs_premiacao: 'texto',
+  forma_pagamento: 'texto', frete: 'texto', pagador: 'texto', observacao: 'texto', pct_premiacao: 'pct', obs_premiacao: 'texto',
 };
 // travados para o vendedor 24 h depois do lançamento (o resto, como cliente e novo × recompra, ele revisa sempre)
 export const CAMPOS_VALOR = ['data', 'codigo', 'tipo_produto', 'material', 'especificacao', 'cor', 'quantidade', 'valor_unit', 'total'];
@@ -41,6 +41,8 @@ export const tituloNome = (t) => String(t ?? '').trim().replace(/\s+/g, ' ').toL
 function limpar(campo, v) {
   const t = CAMPOS[campo];
   if (campo === 'vendedor') return tituloNome(String(v ?? '').slice(0, 120));
+  // % de premiação manual: em branco = segue a faixa do mês (não é 0%)
+  if (t === 'pct') { if (v === '' || v == null) return null; const n = Number(String(v).replace(/[%\s]/g, '').replace(',', '.')); return Number.isFinite(n) ? r2(n) : null; }
   if (t === 'num') { const n = typeof v === 'number' ? v : Number(String(v ?? '').replace(/[R$\s.]/g, '').replace(',', '.')); return Number.isFinite(n) ? r2(n) : 0; }
   if (t === 'bool') return v === true || ['sim', 's', 'true', '1', 'x'].includes(sem(v));
   if (t === 'data') { const s = String(v ?? '').trim(); const m = s.match(/^(\d{4})-(\d{2})-(\d{2})/) || s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/); if (!m) return ''; return m[1].length === 4 ? `${m[1]}-${m[2]}-${m[3]}` : `${m[3]}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}`; }
@@ -305,15 +307,50 @@ export async function assumirDaPlanilha(codigo, u) {
   const k = chaveCodigo(codigo); if (!k) throw new Error('Linha sem código: corrija na planilha.');
   await carregar();
   const ja = [...mem.values()].filter((r) => !r.excluido && chaveCodigo(r.codigo) === k);
-  if (ja.length) return ja;
+  if (ja.length) { await completarComplementares(codigo, u).catch(() => {}); return ja; }
   if (u?.perfil === 'vendedor') {
     const fonte = await linhasDaFonte(null);
     const ls = fonte.linhas.filter((l) => chaveCodigo(l.codigo_pedido || l.codigo || '') === k);
     if (ls.length && !ls.some((l) => ehDoVendedor(u, { vendedor: l.vendedor }))) throw new Error('Este pedido é de outro vendedor.');
   }
-  const r = await importar({ de: '2026-01', ate: '9999-12', modo: 'novas', simular: false, codigos: new Set([k]), interno: true }, u);
+  const base = chaveCodigo(codigoBase(codigo));
+  const fonteP = await linhasDaFonte(null);
+  const doPedido = new Set(fonteP.linhas.map((l) => l.codigo_pedido || l.codigo || '').filter((c) => chaveCodigo(codigoBase(c)) === base).map((c) => chaveCodigo(c)));
+  doPedido.add(k);
+  const r = await importar({ de: '2026-01', ate: '9999-12', modo: 'novas', simular: false, codigos: doPedido, interno: true }, u);
   if (!r.linhas) throw new Error('O pedido não foi encontrado na planilha.');
-  return [...mem.values()].filter((x) => !x.excluido && chaveCodigo(x.codigo) === k);
+  return [...mem.values()].filter((x) => !x.excluido && doPedido.has(chaveCodigo(x.codigo)));
+}
+// Novo × recompra em branco: cliente que já comprou antes (planilha, painel ou Conta Azul) = Recompra; a 1ª compra = Novo.
+// Devolve as células da planilha do Google a preencher e preenche também os pedidos do painel.
+export async function preencherNovoRecompra(vendasCA = [], u = null) {
+  await carregar();
+  const k = (n) => sem(clienteBase(n || '')).replace(/[^a-z0-9]+/g, ' ').trim();
+  const fonte = await linhasDaFonte(null).catch(() => ({ linhas: [] }));
+  const compras = new Map(); // cliente → datas de compra
+  const add = (n, d) => { const c = k(n); if (!c || !d) return; (compras.get(c) || compras.set(c, []).get(c)).push(d); };
+  fonte.linhas.forEach((l) => add(l.cliente_original || l.cliente, l.data));
+  [...mem.values()].filter((r) => !r.excluido).forEach((r) => add(r.cliente, r.data));
+  (vendasCA || []).forEach((v) => add(v.c || v.cliente, v.d || v.data));
+  const tipo = (n, d) => ((compras.get(k(n)) || []).some((x) => x < d) ? 'recompra' : 'novo');
+  const celulas = fonte.linhas.filter((l) => l.linha && l.data && !l.novo_recompra && (l.cliente_original || l.cliente))
+    .map((l) => ({ linha: l.linha, campo: 'novo_recompra', valor: tipo(l.cliente_original || l.cliente, l.data) === 'novo' ? 'Novo' : 'Recompra', cliente: l.cliente_original || l.cliente }));
+  const mudados = [];
+  for (const r of mem.values()) {
+    if (r.excluido || r.novo_recompra || !r.cliente || !r.data) continue;
+    const n = { ...r, novo_recompra: tipo(r.cliente, r.data), alterado_em: agoraISO(), alterado_por: 'Preenchimento novo × recompra' };
+    mem.set(r.id, n); mudados.push(n);
+  }
+  if (mudados.length) await gravar(mudados);
+  return { celulas, painel: mudados.length };
+}
+// pedido trazido antes desta correção: traz também os complementares que ficaram só na planilha
+async function completarComplementares(codigo, u) {
+  const base = chaveCodigo(codigoBase(codigo));
+  const fonteP = await linhasDaFonte(null);
+  const noPainel = new Set([...mem.values()].filter((r) => !r.excluido).map((r) => chaveCodigo(r.codigo)));
+  const faltam = new Set(fonteP.linhas.map((l) => l.codigo_pedido || l.codigo || '').filter((c) => chaveCodigo(codigoBase(c)) === base && !noPainel.has(chaveCodigo(c))).map((c) => chaveCodigo(c)));
+  if (faltam.size) await importar({ de: '2026-01', ate: '9999-12', modo: 'novas', simular: false, codigos: faltam, interno: true }, u);
 }
 // envio à Conta Azul: guarda o resultado em cada linha do pedido (sem mexer em "alterado_em", que é edição de quem lança)
 export async function marcarEnvioCA(ids, campos, u) {

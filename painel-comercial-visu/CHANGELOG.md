@@ -2,6 +2,18 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v61 — 09/11/2026 — Correção da Planilha de vendas, premiação por pedido, Enter, cliente da carteira e horários
+
+- Correção: ao alterar um pedido que veio da planilha num mês antes de novembro (ex.: % de premiação da Cabo Branco em outubro), as outras vendas do mês sumiam da Planilha de vendas. Agora só aquele pedido passa a valer pela versão do painel; as demais continuam vindo da planilha. O pedido vem junto com os complementares (-1, -2…).
+- Premiação % (manual): botão Salvar ao lado do campo em edição; em branco volta a seguir a faixa do mês (não vira 0%). O % salvo já entra em Vendedores e premiação.
+- Lançamento: Enter passa para o próximo campo, como o Tab, na linha do pedido e no formulário.
+- Cliente da carteira: ao digitar um cliente que já comprou, o painel marca Recompra e trava o campo. Cliente sem compra anterior mostra os nomes parecidos já cadastrados (Já existe na carteira?) e o + avisa antes de cadastrar um cliente que já existe.
+- Botão Preencher novo × recompra (gestão): preenche os campos em branco no painel e envia para a planilha do Google (Novo na 1ª compra, Recompra depois). Roda também nos horários automáticos.
+- Pedidos que vieram da planilha não têm mais o ✕ (excluir) enquanto a planilha estiver em uso; o ⏱ mostra o histórico de alterações.
+- Divergências: botão Importar fatura do cartão (OFX, CSV ou Excel da fatura).
+- Filtros: o período De/Até vale sobre o mês escolhido; botão Limpar filtros; Atualizar agora e Atualizar recarregam a tela sem precisar de F5.
+- Horários automáticos: 09:30, 14:00 e 17:30. A Conta Azul é lida por completo uma vez por dia; nas outras atualizações só do mês anterior em diante.
+
 ## v60 — 09/11/2026 — Vídeo do treinamento com narração
 
 - Vídeo do treinamento com narração em voz feminina (Camila, português do Brasil), no tempo de cada tela, dentro de Comercial → Treinamento. As legendas acompanham a fala.

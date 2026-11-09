@@ -291,7 +291,7 @@ app.post('/api/planilha-script/celulas', exigeLogin, async (req, res) => {
   } catch (e) { res.status(400).json({ erro: e.message }); }
 });
 // horários fixos (Fortaleza): gravação na planilha e atualização da Conta Azul, para não consumir a API e o Render o tempo todo
-const HORARIOS_SINCRONIZA = ['09:30', '12:00', '14:00', '18:00'];
+const HORARIOS_SINCRONIZA = ['09:30', '14:00', '17:30'];
 let ultimoHorarioSincronizado = '';
 const horaFortaleza = () => new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Fortaleza', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).format(new Date());
 setInterval(() => {
@@ -300,7 +300,8 @@ setInterval(() => {
   ultimoHorarioSincronizado = agora;
   pedidos.configPedidos().then((c) => (c.enviar_ca ? enviarPedidosCA(null) : null)).catch((e) => console.warn('[conta azul] envio de pedidos:', e.message))
     .finally(() => dadosDeVendas(true).catch((e) => console.warn('[conta azul] atualização:', e.message)));
-  if (pscript.scriptConfigurado() && pscript.statusScript().gravar) gravarRecebimentosNaPlanilha(null).catch((e) => { console.warn('[planilha] gravação:', e.message); pscript.marcarGravacao({ erro: e.message }).catch(() => {}); });
+  preencherNovoRecompra(null).catch((e) => console.warn('[pedidos] novo × recompra:', e.message))
+    .finally(() => { if (pscript.scriptConfigurado() && pscript.statusScript().gravar) gravarRecebimentosNaPlanilha(null).catch((e) => { console.warn('[planilha] gravação:', e.message); pscript.marcarGravacao({ erro: e.message }).catch(() => {}); }); });
 }, 60e3);
 app.post('/api/planilha-script', exigeAdm, async (req, res) => {
   try { const arq = await pscript.ligarScript(req.body?.url, req.usuario); dadosDeVendas(true).catch(() => {}); res.json({ ok: true, nome: arq.nome, alterado_em: arq.alterado_em, ...pscript.statusScript() }); }
@@ -423,6 +424,20 @@ app.post('/api/sincronizar-agora', exigeLogin, exigePedidos, resp(async (req) =>
   await dadosDeVendas(true);
   const r = pscript.scriptConfigurado() ? await gravarRecebimentosNaPlanilha(req.usuario, true) : { aviso: 'Planilha não ligada: só a Conta Azul foi atualizada.' };
   return { ok: true, ...r, envio, quando: new Date().toISOString() };
+}));
+async function preencherNovoRecompra(u) {
+  const d = await dadosDeVendas().catch(() => null);
+  const r = await pedidos.preencherNovoRecompra(d?.conta_azul?.vendas || [], u);
+  let fila = 0;
+  if (r.celulas.length && pscript.scriptConfigurado()) { await pscript.adicionarCelulas(r.celulas, u); fila = r.celulas.length; }
+  if (r.painel) depoisDeMudar();
+  return { planilha: fila, sem_ligacao: !pscript.scriptConfigurado() ? r.celulas.length : 0, painel: r.painel };
+}
+app.post('/api/pedidos/novo-recompra', exigeLogin, exigePedidos, resp(async (req) => {
+  if (!pedidos.podeEditarTudo(req.usuario)) throw new Error('Só a gestão preenche novo × recompra em lote.');
+  const r = await preencherNovoRecompra(req.usuario);
+  if (r.planilha && pscript.statusScript().gravar) gravarRecebimentosNaPlanilha(req.usuario, true).catch(() => {});
+  return r;
 }));
 app.post('/api/pedidos/assumir', exigeLogin, exigePedidos, resp(async (req) => {
   const registros = await pedidos.assumirDaPlanilha(String(req.body?.codigo || ''), req.usuario);

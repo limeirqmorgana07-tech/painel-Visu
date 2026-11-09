@@ -132,10 +132,23 @@ function agendarItens(vendas) {
   }
 }
 
-async function vendasContaAzul() {
+// Leitura incremental (09/11/2026): o histórico completo da Conta Azul é lido uma vez por dia (ou quando o servidor reinicia);
+// nas outras atualizações só lê do mês anterior em diante e junta com o que já estava em memória.
+let completoEm = 0;
+async function vendasContaAzul(anterior = null) {
   const agora = hojeBR();
-  const inicio = iso(new Date(Date.UTC(agora.getUTCFullYear(), agora.getUTCMonth() - (config.mesesHistorico + 12), 1)));
+  const inicioTotal = iso(new Date(Date.UTC(agora.getUTCFullYear(), agora.getUTCMonth() - (config.mesesHistorico + 12), 1)));
   const fim = iso(agora);
+  const hojeStr = fim;
+  const parcial = anterior?.length && completoEm && iso(new Date(completoEm)) === hojeStr;
+  const inicio = parcial ? iso(new Date(Date.UTC(agora.getUTCFullYear(), agora.getUTCMonth() - 1, 1))) : inicioTotal;
+  if (parcial) {
+    const novas = await ca.buscarVendas(inicio, fim);
+    try { const r = await ca.vendedorPorVenda(inicio, fim); novas.forEach((v) => { if (r.mapa.has(v.id)) v.vendedor = r.mapa.get(v.id); }); } catch (e) { console.warn('[vendedores]', e.message); }
+    const vendas = [...anterior.filter((v) => (v.data || '') < inicio), ...novas];
+    return { vendas, vendedores: cache.bruto?.vendedoresCA || [], parcial: true };
+  }
+  completoEm = Date.now();
   const vendas = await ca.buscarVendas(inicio, fim);
   let vendedores = [];
   try {
@@ -210,7 +223,7 @@ async function buscarFontes() {
   let vendasCA = null, vendedoresCA = [];
 
   if (conectadoCA) {
-    try { ({ vendas: vendasCA, vendedores: vendedoresCA } = await vendasContaAzul()); }
+    try { ({ vendas: vendasCA, vendedores: vendedoresCA } = await vendasContaAzul(cache.bruto?.vendasCA || null)); }
     catch (e) { avisos.push(`Não consegui ler as vendas da Conta Azul: ${e.message}`); }
   }
   const usarPlanilha = planilhaConfigurada() && fonteCfg !== 'conta_azul';
@@ -242,15 +255,20 @@ async function montar(bruto) {
   let soPlanilha = null;
   const corte = fonteMista();
   if (corte && (origem === 'planilha' || (origem === 'demo' && config.demo)) && base) {
-    const doPainel = linhasDoPainel().filter((l) => (l.mes || '') >= corte), codPainel = new Set(doPainel.map((l) => chaveCodigo(l.codigo_pedido)).filter(Boolean));
-    const plan = base.linhas, depois = plan.filter((l) => (l.mes || '') >= corte);
-    soPlanilha = depois.filter((l) => { const c = chaveCodigo(l.codigo_pedido || l.codigo || ''); return !c || !codPainel.has(c); });
     // linhas sem código: a mesma venda pode estar no painel (cliente + data + total)
     const kSem = (l) => [chave(clienteBase(l.cliente_original || l.cliente || '')), l.data || '', Math.round((Number(l.total) || 0) * 100)].join('|');
+    const painelTodos = linhasDoPainel();
+    const doPainel = painelTodos.filter((l) => (l.mes || '') >= corte), codPainel = new Set(doPainel.map((l) => chaveCodigo(l.codigo_pedido)).filter(Boolean));
+    // antes do corte vale a planilha; o pedido que foi trazido para o painel (alteração, % de premiação, complementar) vale a versão do painel, só para aquele código
+    const painelAntes = painelTodos.filter((l) => (l.mes || '') < corte);
+    const codAntes = new Set(painelAntes.map((l) => chaveCodigo(l.codigo_pedido)).filter(Boolean)), semCodAntes = new Set(painelAntes.map(kSem));
+    const plan = base.linhas, depois = plan.filter((l) => (l.mes || '') >= corte);
+    const antes = plan.filter((l) => (l.mes || '') < corte).filter((l) => { const c = chaveCodigo(l.codigo_pedido || l.codigo || ''); return c ? !codAntes.has(c) : !semCodAntes.has(kSem(l)); });
+    soPlanilha = depois.filter((l) => { const c = chaveCodigo(l.codigo_pedido || l.codigo || ''); return !c || !codPainel.has(c); });
     const semCodPainel = new Set(doPainel.map(kSem));
     soPlanilha = soPlanilha.filter((l) => chaveCodigo(l.codigo_pedido || l.codigo || '') || !semCodPainel.has(kSem(l)));
     const emUso = planilhaEmUso();
-    base = { ...base, linhas: [...plan.filter((l) => (l.mes || '') < corte), ...doPainel, ...(emUso ? soPlanilha.map((l) => ({ ...l, pos_corte: true })) : [])] };
+    base = { ...base, linhas: [...antes, ...painelAntes, ...doPainel, ...(emUso ? soPlanilha.map((l) => ({ ...l, pos_corte: true })) : [])] };
     origem = 'misto';
     if (soPlanilha.length && emUso) avisos.push(`${soPlanilha.length} ${soPlanilha.length === 1 ? 'venda lançada' : 'vendas lançadas'} na planilha a partir de ${corte.split('-').reverse().join('/')} ${soPlanilha.length === 1 ? 'entrou' : 'entraram'} no painel (a planilha ainda está em uso). Quando o painel for a única ferramenta, encerre a planilha em Planilha de vendas → Fonte dos indicadores.`);
     else if (soPlanilha.length) avisos.push(`${soPlanilha.length} ${soPlanilha.length === 1 ? 'linha de venda' : 'linhas de venda'} a partir de ${corte.split('-').reverse().join('/')} ${soPlanilha.length === 1 ? 'está' : 'estão'} só na planilha (R$ ${soPlanilha.reduce((s2, l) => s2 + (l.total || 0), 0).toLocaleString('pt-BR', { maximumFractionDigits: 0 })}). Desde novembro as vendas são lançadas no sistema: traga com Planilha de vendas → Importar base → Só as linhas novas, ou veja em Inconsistências.`);
