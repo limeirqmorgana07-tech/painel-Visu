@@ -1202,8 +1202,9 @@ const nomeMes=(m)=>{const[a,b]=m.split('-');return MES_L[+b-1]+' de '+a};
 const somaMes=(m,n)=>{const[a,b]=m.split('-').map(Number);const d=new Date(Date.UTC(a,b-1+n,1));return d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0')};
 function delta(a,b,inv){ if(!b) return '<span class="delta eq">sem base</span>'; const d=(a-b)/b; const c=Math.abs(d)<.005?'eq':(d>0)!==!!inv?'up':'down'; return `<span class="delta ${c}">${d>0?'▲':d<0?'▼':'■'} ${pct(Math.abs(d))}</span>`; }
 
-const VERSAO='v71';
+const VERSAO='v72';
 const VERSOES=[
+ {v:'v72',data:'09/11/2026',tit:'Mesmo pedido numa linha só nas Inconsistências de pagamento',arq:'painel-visu-v72.zip',itens:["Inconsistências · Valor recebido diferente do anotado na planilha: o mesmo pedido aparece numa linha só, com o 1º e o 2º pagamento juntos (ex.: Geraldo Costa 0021112026). A conferência continua a mesma."]},
  {v:'v71',data:'09/11/2026',tit:'Mês da premiação manual por venda',arq:'painel-visu-v71.zip',itens:["Premiação: nova coluna Mês da premiação (manual) na Planilha de vendas, ao lado de Premiação % (manual). A venda com o mês preenchido sai do mês da venda e entra no faturamento e na premiação do mês escolhido, sem mudar a data da venda nem os outros relatórios. Ex.: Raíra Sicoob, venda de 01/10 premiada em setembro (autorização do Egberto); use o Motivo do % diferente para registrar a autorização."]},
  {v:'v70',data:'09/11/2026',tit:'Conferência de pagamentos volta como estava',arq:'painel-visu-v70.zip',itens:["Inconsistências: Valor recebido diferente do anotado na planilha volta exatamente como estava até a v68 (1º e 2º pagamento comparados com cada parcela da Conta Azul). A mudança da v69 marcava como diferença os pedidos com pagamento anotado na planilha e ainda não baixado na Conta Azul."]},
  {v:'v69',data:'09/11/2026',tit:'Diretores ligados ao nome de vendedor',arq:'painel-visu-v69.zip',itens:["Diretores e Comercial também vendem: no cadastro deles (Usuários e permissões → Editar) há o campo Nome dele na planilha (coluna Vendedor). Com ele preenchido, o + Novo pedido já vem com o nome dele como vendedor, e as vendas e a premiação ficam ligadas ao login.","Inconsistências: a conferência de Valor recebido diferente do anotado na planilha volta a ser a de antes da v69 (parcela por parcela)."]},
@@ -2675,9 +2676,11 @@ function linhasInconsistencias(ls,b,ca,desde,noMes,vendSel){
     for(const [k,x] of g){ const st=statusCod(x.codigo,x.t,x.mes,ca), v=ca.get(k), base={data:x.data,codigo:x.codigo,cliente:x.cliente,vendedor:x.vendedor||'',total:x.t,_sp:x.regs[0]?._sp};
       if(st[0]==='dif') push('dif',base,{sis:v.t,dif:v.t-x.t,falta:'Conta Azul '+brl2(v.t)});
       else if(['so_painel','cancelado','nao_aprov'].includes(st[0])) push('soP',base,{sis:v?v.t:'',dif:v?v.t-x.t:'',falta:v?SIT_CA[v.s]||v.s:'não existe na Conta Azul'});
-      if(x.mes>=desde&&st[0]!=='dif'){ const ps=parcelasDe(x.codigo); if(ps.length){ ['pag1','pag2'].forEach((c,i)=>{ const pc=ps[i]; if(!pc) return; const vs=x.regs.map(r=>+r[c]||0).filter(v=>v>0); if(!vs.length) return; const soma=vs.reduce((a,v)=>a+v,0), alvo=pc.pago||pc.valor;
+      if(x.mes>=desde&&st[0]!=='dif'){ const ps=parcelasDe(x.codigo); if(ps.length){ const difs=[]; ['pag1','pag2'].forEach((c,i)=>{ const pc=ps[i]; if(!pc) return; const vs=x.regs.map(r=>+r[c]||0).filter(v=>v>0); if(!vs.length) return; const soma=vs.reduce((a,v)=>a+v,0), alvo=pc.pago||pc.valor;
         // pedido com vários itens: vale a soma das linhas ou o valor repetido em cada linha
-        if([soma,Math.max(...vs)].some(v=>Math.abs(v-alvo)<=1)) return; push('pag',base,{plan:soma,sis:alvo,dif:alvo-soma,falta:`${i?'2º':'1º'} pagamento: planilha ${brl2(soma)}${vs.length>1?` (${vs.length} linhas)`:''} × Conta Azul ${brl2(alvo)}${pc.pago>0?' recebido':' a receber'}`}); }); } } }
+        if([soma,Math.max(...vs)].some(v=>Math.abs(v-alvo)<=1)) return; difs.push({soma,alvo,txt:`${i?'2º':'1º'} pagamento: planilha ${brl2(soma)}${vs.length>1?` (${vs.length} linhas)`:''} × Conta Azul ${brl2(alvo)}${pc.pago>0?' recebido':' a receber'}`}); });
+        // mesmo pedido: uma linha só, com o 1º e o 2º pagamento juntos
+        if(difs.length){ const pl0=difs.reduce((a,d)=>a+d.soma,0), si0=difs.reduce((a,d)=>a+d.alvo,0); push('pag',base,{plan:pl0,sis:si0,dif:si0-pl0,falta:difs.map(d=>d.txt).join(' · ')}); } } } }
     const usados=new Set(g.keys());
     if(ls.length) for(const v of E.dados.conta_azul.vendas||[]){ const m=(v.d||'').slice(0,7); if(m<desde||!noMes({data:v.d,mes:m})||v.n==null||usados.has(ckey(v.n))||!['APROVADO','FATURADO'].includes(v.s)) continue; if(vendSel&&nv(v.v)!==nv(vendSel)) continue; out.push({tipo:'soS',data:v.d,codigo:codDoNumero(v.n),cliente:v.c,vendedor:v.v||'',plan:'',sis:v.t,dif:v.t,falta:SIT_CA[v.s]||v.s}); }
   }

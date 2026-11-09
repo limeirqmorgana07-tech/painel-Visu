@@ -2,6 +2,10 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v72 — 09/11/2026 — Mesmo pedido numa linha só nas Inconsistências de pagamento
+
+- Inconsistências · Valor recebido diferente do anotado na planilha: o mesmo pedido aparece numa linha só, com o 1º e o 2º pagamento juntos (ex.: Geraldo Costa 0021112026). A conferência continua a mesma.
+
 ## v71 — 09/11/2026 — Mês da premiação manual por venda
 
 - Premiação: nova coluna Mês da premiação (manual) na Planilha de vendas, ao lado de Premiação % (manual). A venda com o mês preenchido sai do mês da venda e entra no faturamento e na premiação do mês escolhido, sem mudar a data da venda nem os outros relatórios. Ex.: Raíra Sicoob, venda de 01/10 premiada em setembro (autorização do Egberto); use o Motivo do % diferente para registrar a autorização.
