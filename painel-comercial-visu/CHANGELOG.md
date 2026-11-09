@@ -2,6 +2,10 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v70 — 09/11/2026 — Conferência de pagamentos volta como estava
+
+- Inconsistências: Valor recebido diferente do anotado na planilha volta exatamente como estava até a v68 (1º e 2º pagamento comparados com cada parcela da Conta Azul). A mudança da v69 marcava como diferença os pedidos com pagamento anotado na planilha e ainda não baixado na Conta Azul.
+
 ## v69 — 09/11/2026 — Pagamentos conferidos pelo total recebido do pedido
 
 - Diretores e Comercial também vendem: no cadastro deles (Usuários e permissões → Editar) há o campo Nome dele na planilha (coluna Vendedor). Com ele preenchido, o + Novo pedido já vem com o nome dele como vendedor, e as vendas e a premiação ficam ligadas ao login.
