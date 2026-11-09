@@ -4,6 +4,7 @@ O mesmo histórico aparece no painel, na página **Controle → Versões**, e a 
 
 ## v67 — 09/11/2026 — Diretores criam o acesso dos vendedores
 
+- Pedido fechado (mais de 24 h): o vendedor não inclui mais item no mesmo pedido. O ＋ some da linha e o painel recusa; peças a mais entram pelo ⊕ (pedido complementar). A gestão continua podendo incluir.
 - Diretores criam e cuidam do acesso dos vendedores: o menu Administração → Usuários e permissões passa a aparecer para o perfil Diretor. O diretor cadastra, edita, gera senha temporária ou link e remove usuários Vendedor, Comercial e Consultor externo. ADMs, diretores e financeiro, e as tabelas do que cada perfil vê, continuam só com o ADM.
 
 ## v66 — 09/11/2026 — Pedido da planilha abre mais rápido para alterar

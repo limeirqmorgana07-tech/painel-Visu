@@ -301,6 +301,13 @@ export async function criarPedido(corpo, u) {
   const complementoDe = corpo?.complemento_de ? codigoBase(corpo.complemento_de) : '';
   if (complementoDe) codigo = proximoComplemento(complementoDe);
   if (!codigo) codigo = proximoCodigo(cab.data);
+  // novo item no mesmo pedido: só nas primeiras 24 h (e só no pedido do próprio vendedor); depois, é pedido complementar
+  if (!complementoDe && corpo?.mesmo_pedido && !podeEditarTudo(u)) {
+    const doPedido = [...mem.values()].filter((r) => !r.excluido && r.codigo === codigo);
+    if (doPedido.some((r) => !ehDoVendedor(u, r))) throw new Error('Este pedido é de outro vendedor: só ele ou a gestão altera.');
+    const fechado = (r) => (r.origem === 'planilha' && r.data ? Date.now() - Date.parse(r.data + 'T23:59:59-03:00') > HORAS_EDICAO * 3600e3 : !dentroDoPrazo(r));
+    if (doPedido.some(fechado)) throw new Error(`O pedido ${codigo} está fechado (passaram ${HORAS_EDICAO} h). Para acrescentar peças, use o ⊕ (pedido complementar).`);
+  }
   if (!complementoDe && !corpo?.mesmo_pedido && [...mem.values()].some((r) => !r.excluido && r.codigo === codigo)) throw new Error(`O código ${codigo} já existe. Para acrescentar peças a ele use "Acréscimo"; para um pedido novo deixe o código em branco (o painel gera o próximo).`);
   const regs = itens.filter((i) => i && (i.tipo_produto || i.quantidade || i.total || i.valor_unit)).map((i, k) => novoRegistro({ ...cab, ...i, codigo }, u, { ordem: k, ...(complementoDe ? { complemento_de: complementoDe } : {}) }));
   if (!regs.length) throw new Error('Inclua pelo menos um item (tipo de produto, quantidade e valor).');
