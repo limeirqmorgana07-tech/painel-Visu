@@ -13,6 +13,9 @@ import { planilhaConfigurada } from './src/planilha.js';
 import * as google from './src/google.js';
 import * as pscript from './src/planilhaScript.js';
 import * as extrato from './src/extrato.js';
+import * as divergencias from './src/divergencias.js';
+import * as cadastros from './src/cadastros.js';
+import * as envioCA from './src/envioContaAzul.js';
 import { gerarDemoParcelas, gerarDemoContaAzul, gerarDemoPlanilha } from './src/demo.js';
 import * as usuarios from './src/usuarios.js';
 import { paginasDe, veFinanceiro, veVendas, definirPerfis, padraoDe, perfisPersonalizados, padroesOriginais, BLOCOS, blocosDe, definirBlocos, blocosPersonalizados, blocosPadrao, vePedidos, veHistorico } from './src/paginas.js';
@@ -203,6 +206,7 @@ app.post('/api/usuarios/:id/convite', exigeAdm, async (req, res) => {
 
 app.get('/saude', (req, res) => res.json({ ok: true }));
 app.get('/saude/banco', async (req, res) => res.json(await statusBanco().catch((e) => ({ erro: e.message }))));
+app.get(['/treinamento.mp4', '/treinamento.vtt'], exigeLogin, (req, res) => res.sendFile(path.join(raiz, 'public', req.path.slice(1)), { maxAge: '1d' }));
 app.get('/politica-premiacao.pdf', exigeLogin, (req, res) => res.sendFile(path.join(raiz, 'public', 'politica-premiacao.pdf')));
 app.get(['/logo.png', '/logo-visu.png', '/logo-visu-azul.png'], (req, res) => res.sendFile(path.join(raiz, 'public', req.path.slice(1))));
 // bibliotecas de exportação (Excel e PDF), servidas pelo próprio painel para não depender de CDN
@@ -248,6 +252,13 @@ app.post('/google/desconectar', exigeAdm, async (req, res) => { await google.des
 app.get('/api/planilha-script', exigeAdm, async (req, res) => { const chave = await pscript.chaveScript(); const id = pscript.arquivoScript() || google.idPlanilha() || 'COLE_AQUI_O_ID_DA_PLANILHA'; res.json({ ...pscript.statusScript(), arquivo_id: id, script: pscript.modeloScript(chave, id), planilha_link: pscript.arquivoScript() ? `https://docs.google.com/spreadsheets/d/${id}/edit` : config.planilhaLink, conta: config.planilhaConta }); });
 app.post('/api/planilha-script/arquivo', exigeAdm, async (req, res) => { try { res.json({ arquivo_id: await pscript.definirArquivo(req.body?.link) }); } catch (e) { res.status(400).json({ erro: e.message }); } });
 // grava na planilha do Google os recebimentos já baixados na Conta Azul (só células vazias)
+// pedidos do painel → vendas na Conta Azul (quando a gestão liga o envio)
+async function enviarPedidosCA(u, opcoes = {}) {
+  const r = await envioCA.enviarPedidos(u, opcoes);
+  await pedidos.salvarConfigPedidos({ ultimo_envio_ca: { em: new Date().toISOString(), por: u?.nome || 'Horário automático', enviados: r.enviados.length, ja_existiam: r.ja_existiam.length, erros: r.erros.slice(0, 20), complementares: r.complementares } }, u);
+  if (r.enviados.length) dadosDeVendas(true).catch(() => {});
+  return r;
+}
 async function gravarRecebimentosNaPlanilha(u, forcar = false) {
   if (!pscript.scriptConfigurado()) throw new Error('Ligue a planilha pelo seu e-mail primeiro.');
   const { lerPlanilha } = await import('./src/planilha.js');
@@ -287,7 +298,8 @@ setInterval(() => {
   const agora = horaFortaleza();
   if (!HORARIOS_SINCRONIZA.includes(agora) || agora === ultimoHorarioSincronizado) return;
   ultimoHorarioSincronizado = agora;
-  dadosDeVendas(true).catch((e) => console.warn('[conta azul] atualização:', e.message));
+  pedidos.configPedidos().then((c) => (c.enviar_ca ? enviarPedidosCA(null) : null)).catch((e) => console.warn('[conta azul] envio de pedidos:', e.message))
+    .finally(() => dadosDeVendas(true).catch((e) => console.warn('[conta azul] atualização:', e.message)));
   if (pscript.scriptConfigurado() && pscript.statusScript().gravar) gravarRecebimentosNaPlanilha(null).catch((e) => { console.warn('[planilha] gravação:', e.message); pscript.marcarGravacao({ erro: e.message }).catch(() => {}); });
 }, 60e3);
 app.post('/api/planilha-script', exigeAdm, async (req, res) => {
@@ -366,7 +378,15 @@ app.get('/api/pedidos/clientes', exigeLogin, exigePedidos, resp(async () => {
     if (Date.now() - cacheClientes.quando > 3600e3) { cacheClientes.lista = await ca.buscarClientes().catch(() => []); cacheClientes.quando = Date.now(); }
     cacheClientes.lista.forEach((c) => add(c.nome, 'cadastro', '', c.documento));
   }
+  (await cadastros.listarCadastros()).cliente.forEach((c) => add(c.nome, c.ca_id ? 'cadastro' : 'novo', '', c.documento));
   return { clientes: [...m.values()].sort((a, b) => b.vezes - a.vezes), cadastro_conta_azul: cacheClientes.lista.length };
+}));
+// botão + no lançamento: cliente, tipo de produto, material ou cor novos (o cliente também vai para a Conta Azul)
+app.post('/api/cadastros', exigeLogin, exigePedidos, resp(async (req) => {
+  if (!pedidos.podeLancar(req.usuario)) throw new Error('Seu perfil só consulta os pedidos.');
+  const r = await cadastros.incluirCadastro(req.body || {}, req.usuario);
+  if (r.campo === 'cliente' && r.conta_azul?.ok) cacheClientes.quando = 0;
+  return r;
 }));
 app.post('/api/pedidos/preencher-pagamentos', exigeLogin, exigePedidos, resp(async (req) => {
   if (!pedidos.podeLancar(req.usuario)) throw new Error('Seu perfil só consulta os pedidos.');
@@ -377,8 +397,8 @@ app.get('/api/pedidos', exigeLogin, exigePedidos, resp(async (req) => {
   await codigosExternos();
   let pagamentos = null;
   try { pagamentos = await pedidos.pagamentosPorPedido(vendasContaAzulEmCache(), req.query.forcar === '1'); if (pagamentos?.conectado && (await pedidos.preencherPagamentos(pagamentos, null, { auto: true })).linhas) depoisDeMudar(); } catch (e) { pagamentos = { erro: e.message }; }
-  const [registros, cfg] = await Promise.all([pedidos.listar(), pedidos.configPedidos()]);
-  return { registros, config: cfg, pagamentos, campos_valor: pedidos.CAMPOS_VALOR, proximo_codigo: pedidos.proximoCodigo(new Date(Date.now() - 3 * 3600e3).toISOString().slice(0, 10)), codigos_externos: pedidos.codigosExternosLista(), horas_edicao: Number(process.env.HORAS_EDICAO_PEDIDO || 24),
+  const [registros, cfg, cads] = await Promise.all([pedidos.listar(), pedidos.configPedidos(), cadastros.listarCadastros()]);
+  return { registros, config: cfg, cadastros: cads, pagamentos, campos_valor: pedidos.CAMPOS_VALOR, proximo_codigo: pedidos.proximoCodigo(new Date(Date.now() - 3 * 3600e3).toISOString().slice(0, 10)), codigos_externos: pedidos.codigosExternosLista(), horas_edicao: Number(process.env.HORAS_EDICAO_PEDIDO || 24),
     vendedor: req.usuario.perfil === 'vendedor' ? req.usuario.vendedor || '' : '', pode: { lancar: pedidos.podeLancar(req.usuario), gestao: pedidos.podeEditarTudo(req.usuario), importar: pedidos.podeEditarTudo(req.usuario), fonte: req.usuario.perfil === 'adm' },
     planilha_conectada: planilhaConfigurada() || config.demo, eu: { id: req.usuario.id, nome: req.usuario.nome, perfil: req.usuario.perfil, vendedor: req.usuario.vendedor || '' } };
 }));
@@ -398,9 +418,30 @@ app.post('/api/pedidos/importar', exigeLogin, exigePedidos, express.raw({ type: 
 // envio sob demanda (gestão): atualiza a Conta Azul e grava os pedidos na planilha agora, para grandes volumes
 app.post('/api/sincronizar-agora', exigeLogin, exigePedidos, resp(async (req) => {
   if (!pedidos.podeEditarTudo(req.usuario)) throw new Error('Só a gestão envia os pedidos manualmente.');
+  const cfg = await pedidos.configPedidos();
+  const envio = cfg.enviar_ca ? await enviarPedidosCA(req.usuario).catch((e) => ({ erro_envio: e.message })) : null;
   await dadosDeVendas(true);
   const r = pscript.scriptConfigurado() ? await gravarRecebimentosNaPlanilha(req.usuario, true) : { aviso: 'Planilha não ligada: só a Conta Azul foi atualizada.' };
-  return { ok: true, ...r, quando: new Date().toISOString() };
+  return { ok: true, ...r, envio, quando: new Date().toISOString() };
+}));
+app.post('/api/pedidos/conta-azul', exigeAdm, resp(async (req) => {
+  const c = await pedidos.salvarConfigPedidos({ enviar_ca: !!req.body?.ativo }, req.usuario);
+  return c;
+}));
+app.post('/api/pedidos/enviar-ca', exigeLogin, exigePedidos, resp(async (req) => {
+  if (!pedidos.podeEditarTudo(req.usuario)) throw new Error('Só a gestão envia os pedidos para a Conta Azul.');
+  const codigos = Array.isArray(req.body?.codigos) && req.body.codigos.length ? req.body.codigos.map(String) : null;
+  const r = await enviarPedidosCA(req.usuario, { codigos });
+  return { ...r, config: await pedidos.configPedidos() };
+}));
+app.post('/api/pedidos/planilha-uso', exigeAdm, resp(async (req) => {
+  // encerrar: o painel vira a única ferramenta; as vendas que só estão na planilha (a partir do corte) entram como pedidos do painel
+  const encerrar = !!req.body?.encerrar;
+  let importadas = null;
+  if (encerrar) { const cfg = await pedidos.configPedidos(); const r = await pedidos.importar({ de: cfg.corte || '2026-11', ate: '9999-12', modo: 'novas', simular: false }, req.usuario); importadas = r.linhas; }
+  const c = await pedidos.salvarConfigPedidos({ planilha_encerrada: encerrar, planilha_encerrada_em: encerrar ? new Date().toISOString() : null }, req.usuario);
+  depoisDeMudar(); await dadosDeVendas(true).catch(() => {});
+  return { ...c, importadas };
 }));
 app.post('/api/pedidos/config', exigeAdm, resp(async (req) => { const f = ['painel', 'misto'].includes(req.body?.fonte) ? req.body.fonte : 'planilha'; const r = await pedidos.salvarConfigPedidos({ fonte: f, corte: f === 'misto' ? (/^\d{4}-\d{2}$/.test(req.body?.corte || '') ? req.body.corte : '2026-11') : undefined }, req.usuario); depoisDeMudar(); return r; }));
 app.get('/api/pedidos/historico', exigeLogin, (req, res, next) => (veHistorico(req.usuario) ? next() : res.status(403).json({ erro: 'o histórico de alterações é só para a gestão' })), resp(async (req) => ({ itens: await pedidos.historico({ codigo: req.query.codigo, usuario: req.query.usuario, acao: req.query.acao, dias: req.query.dias || 90 }) })));
@@ -435,6 +476,22 @@ app.get('/api/extrato', exigeLogin, exigeExtrato, resp(async (req) => {
 app.post('/api/extrato/importar', exigeLogin, exigeExtrato, express.raw({ type: () => true, limit: '20mb' }), resp(async (req) => {
   if (!Buffer.isBuffer(req.body) || !req.body.length) throw new Error('Envie o arquivo do extrato (OFX, CSV ou Excel).');
   return extrato.importarExtrato({ bytes: req.body, nome: String(req.query.nome || ''), conta: String(req.query.conta || ''), simular: req.query.simular !== 'false' }, req.usuario);
+}));
+// Divergências (Conferência): fechamento mensal comercial e financeiro, com observações e ações
+const exigeDiv = (req, res, next) => (paginasDe(req.usuario).includes('divergencias') ? next() : res.status(403).json({ erro: 'seu perfil não tem acesso às divergências' }));
+const editaDiv = (u) => ['adm', 'diretor', 'financeiro'].includes(u?.perfil);
+let cacheSaldosCA = { t: 0, d: [] };
+async function saldosContaAzul() {
+  if (config.demo) return [{ nome: 'Bradesco', saldo: 18240.55 }, { nome: 'Itaú', saldo: 9310.2 }, { nome: 'Sicoob', saldo: 4120.08 }, { nome: 'InfinitePay', saldo: 1388.4 }];
+  if (Date.now() - cacheSaldosCA.t < 4 * 3600e3) return cacheSaldosCA.d;
+  const d = await ca.buscarSaldos().catch(() => []);
+  cacheSaldosCA = { t: Date.now(), d };
+  return d;
+}
+app.get('/api/divergencias', exigeLogin, exigeDiv, resp(async (req) => ({ ...(await divergencias.lerDivergencias()), saldos_ca: await saldosContaAzul(), pode_editar: editaDiv(req.usuario) })));
+app.post('/api/divergencias', exigeLogin, exigeDiv, resp(async (req) => {
+  if (!editaDiv(req.usuario)) throw new Error('Só a gestão e o financeiro alteram as divergências.');
+  return { ...(await divergencias.salvarDivergencias(req.body || {}, req.usuario)), saldos_ca: await saldosContaAzul(), pode_editar: true };
 }));
 app.delete('/api/extrato/conta', exigeAdm, resp(async (req) => { await extrato.apagarConta(String(req.query.conta || '')); return { ok: true }; }));
 

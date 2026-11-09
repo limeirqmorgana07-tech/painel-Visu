@@ -139,6 +139,50 @@ td.el{max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 tr.tot td{font-weight:700;border-top:1px solid var(--line2)}
 .pill{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;white-space:nowrap}
 .p-ok{background:var(--greenSoft);color:var(--green)} .p-mid{background:var(--amberSoft);color:var(--amber)} .p-no{background:var(--line);color:var(--ink2)}
+/* Divergências (Conferência): mesmo formato do fechamento validado */
+.dv-card{margin-bottom:16px}
+.pl-in{display:flex;gap:4px;align-items:center}.pl-in input{flex:1;min-width:0}
+.pl-add{flex:none;width:24px;height:24px;border-radius:6px;border:1px solid var(--orange);background:var(--orangeSoft);color:var(--orange);font-weight:800;font-size:15px;line-height:1;padding:0;cursor:pointer}
+.pl-add:hover{background:var(--orange);color:#fff}
+.ca-bd{display:inline-block;font-size:9.5px;font-weight:800;letter-spacing:.03em;padding:1px 5px;border-radius:4px;background:var(--line);color:var(--ink2);margin-left:2px;vertical-align:middle;cursor:help}
+.ca-bd.ok{background:var(--greenSoft);color:var(--green)} .ca-bd.erro{background:var(--redSoft);color:var(--red)}
+#cadModal .f,#dvModal .f{margin-top:10px;display:flex;flex-direction:column;gap:4px}
+#cadModal .f label,#dvModal .f label{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2)}
+#cadModal input:not([type=checkbox]),#cadModal select,#dvModal input:not([type=checkbox]),#dvModal select,#dvModal textarea{width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid var(--line2);border-radius:8px;font:inherit;font-size:13px;background:var(--panel);color:var(--ink)}
+#dvModal textarea{resize:vertical;line-height:1.45}
+.dv-h{font-size:17px;margin:0;display:inline-block;padding-bottom:4px;border-bottom:3px solid var(--orange)}
+.dv-cab .sub{margin-top:6px}
+.dv-tab{width:100%;border-collapse:collapse;font-size:13px;margin-top:10px}
+.dv-tab th{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink2);font-weight:700;text-align:center;padding:8px 10px;border-bottom:1px solid var(--line2);white-space:nowrap}
+.dv-tab td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:center;vertical-align:top}
+.dv-tab th:first-child,.dv-tab td:first-child{text-align:left;white-space:nowrap}
+.dv-tab td.v{font-variant-numeric:tabular-nums;white-space:nowrap}
+.dv-tab td.acum{font-weight:800}
+.dv-b{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:2px 9px;border-radius:5px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.dv-ok{background:var(--greenSoft);color:var(--green)} .dv-in{background:var(--amberSoft);color:var(--amber)} .dv-di{background:var(--redSoft);color:var(--red)}
+.dv-vz{color:var(--ink3)}
+.dv-fech{display:block;font-size:10.5px;color:var(--ink3);margin-top:2px}
+.dv-rot{font-weight:700}
+.dv-obs{text-align:left!important;font-size:12px;line-height:1.5;color:var(--ink2);min-width:210px;max-width:330px}
+.dv-txt{white-space:pre-line}
+.dv-ac{margin-top:8px;background:var(--amberSoft);border:1px solid color-mix(in srgb,var(--orange) 35%,transparent);border-radius:6px;padding:8px 10px;color:var(--ink);font-size:12px;line-height:1.45}
+.dv-ac.feito{background:var(--greenSoft);border-color:color-mix(in srgb,var(--green) 35%,transparent)}
+.dv-ac .r{display:block;margin-top:4px;font-weight:700}
+.dv-ed{margin-top:8px}
+.dv-lk{background:none;border:0;padding:0;color:var(--orange);font:inherit;font-size:12px;font-weight:600;cursor:pointer;text-decoration:underline}
+.dv-tg{background:none;border:0;padding:0;font:inherit;font-weight:700;color:var(--ink);cursor:pointer;text-align:left}
+.dv-tg::before{content:'▸';display:inline-block;margin-right:8px;color:var(--ink3);transition:transform .15s}
+tr.aberto .dv-tg::before{transform:rotate(90deg)}
+.dv-det td{background:color-mix(in srgb,var(--line) 35%,transparent);text-align:left}
+.dv-dgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px}
+.dv-dm{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:12px;line-height:1.6}
+.dv-dmt{display:flex;justify-content:space-between;gap:6px;align-items:center;font-weight:700;margin-bottom:2px}
+.dv-dobs{margin-top:4px;color:var(--ink2);white-space:pre-line}
+.dv-acl{display:grid;grid-template-columns:1fr 180px auto auto;gap:6px;align-items:start;margin-top:6px}
+.dv-acl textarea{min-height:44px}
+.dv-chk{display:inline-flex;gap:6px;align-items:center;font-size:12.5px;white-space:nowrap}
+.dv-f2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:640px){ .dv-acl{grid-template-columns:1fr} .dv-f2{grid-template-columns:1fr} }
 .p-A{background:var(--s1);color:#fff} .p-B{background:var(--barSoft);color:var(--ink)} .p-C{background:var(--line);color:var(--ink2)}
 .mini{height:6px;border-radius:0 3px 3px 0;background:var(--barSoft);min-width:60px;position:relative}
 .mini i{position:absolute;inset:0 auto 0 0;background:var(--bar);border-radius:0 3px 3px 0}
@@ -714,7 +758,7 @@ table.matriz td.vz{color:var(--line2)}
     <div class="ped-form">
       <div class="f"><label for="pmData">Data da venda *</label><input id="pmData" name="data" type="date" required></div>
       <div class="f"><label for="pmCodigo">Cód. interno</label><input id="pmCodigo" name="codigo" placeholder="gerado pelo painel"></div>
-      <div class="f f2"><label for="pmCliente">Cliente * <span class="dica-c">só o nome do cliente, sem lote</span></label><input id="pmCliente" name="cliente" list="dlCliente" required><div class="dica-c" id="pmCliInfo"></div><div class="dica-c" id="pmCliNovo" style="color:var(--orange,#EA780C)"></div><button class="bt2" type="button" id="pmCliIncluir" hidden>+ Incluir cliente</button></div>
+      <div class="f f2"><label for="pmCliente">Cliente * <span class="dica-c">só o nome do cliente, sem lote</span></label><div class="pl-in"><input id="pmCliente" name="cliente" list="dlCliente" required><button type="button" class="pl-add" data-add="cliente" title="Incluir cliente novo" aria-label="Incluir cliente novo">+</button></div><div class="dica-c" id="pmCliInfo"></div></div>
       <div class="f"><label for="pmLote">Lote / obs. do cliente</label><input id="pmLote" name="lote" placeholder="ex.: Lote 2"></div>
       <div class="f f2"><label for="pmNome">Nome do pedido (Trello)</label><input id="pmNome" name="nome_pedido"></div>
       <div class="f"><label for="pmVend">Vendedor *</label><input id="pmVend" name="vendedor" list="dlVendedor" required></div>
@@ -765,6 +809,16 @@ table.matriz td.vz{color:var(--line2)}
     <div class="f f2"><label for="ixConta">Conta (banco)</label><input id="ixConta" list="dlContas" placeholder="ex.: Sicredi"></div>
   </div><datalist id="dlContas"></datalist><div id="ixRes" style="margin-top:10px"></div><div class="e" id="ixErro"></div>
   <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px"><button class="bt2" type="button" id="ixConferir">Conferir</button><button class="bt2 pri" type="button" id="ixOk" disabled>Importar</button></div></div>
+</div>
+<div id="cadModal" class="pol" role="dialog" aria-modal="true" aria-labelledby="cadTit" hidden style="width:min(560px,96vw);z-index:1001">
+  <div class="pol-hd"><div><div class="eyebrow">Lançamento · Cadastro novo</div><h3 id="cadTit">Incluir</h3><div class="sub" id="cadSub"></div></div><button class="bt2" type="button" id="cadFechar" aria-label="Fechar">✕</button></div>
+  <div class="pol-corpo"><div id="cadCorpo"></div><div class="e" id="cadErro"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px"><button class="bt2" type="button" id="cadCancelar">Cancelar</button><button class="bt2 pri" type="button" id="cadSalvar">Incluir</button></div></div>
+</div>
+<div id="dvModal" class="pol" role="dialog" aria-modal="true" aria-labelledby="dvTit" hidden style="width:min(760px,96vw)">
+  <div class="pol-hd"><div><div class="eyebrow">Conferência · Divergências</div><h3 id="dvTit">Editar</h3><div class="sub" id="dvSub"></div></div><button class="bt2" type="button" id="dvFecharBt" aria-label="Fechar">✕</button></div>
+  <div class="pol-corpo"><div id="dvCorpo"></div><div class="e" id="dvErro"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px"><button class="bt2" type="button" id="dvCancelar">Cancelar</button><button class="bt2 pri" type="button" id="dvSalvar">Salvar</button></div></div>
 </div>
 <div id="vzModal" class="pol" role="dialog" aria-modal="true" aria-labelledby="vzTit" hidden style="width:min(1100px,96vw)">
   <div class="pol-hd"><div><div class="eyebrow">Controle · Qualidade dos dados</div><h3 id="vzTit">Campos em branco</h3><div class="sub" id="vzSub"></div></div><button class="bt2" type="button" id="vzFechar" aria-label="Fechar">✕</button></div>
@@ -900,7 +954,7 @@ table.matriz td.vz{color:var(--line2)}
       <span style="flex:1"></span>
       <div class="exp" data-exp="pd"><button class="bt2" type="button" aria-haspopup="true" aria-expanded="false">Exportar ▾</button><div class="exp-m" hidden><button type="button" data-fmt="xlsx">Excel (.xlsx)</button><button type="button" data-fmt="pdf">PDF</button><button type="button" data-fmt="csv">CSV</button></div></div>
       <button class="bt2" type="button" id="pdPagar" hidden title="Completa 1º/2º pagamento, data, banco, forma e 100% pago com o que já foi baixado na Conta Azul">Preencher pagamentos</button>
-      <button class="bt2" type="button" id="pdImportar" hidden>Importar base</button><button class="bt2" type="button" id="pdEnviarAgora" hidden title="Atualiza a Conta Azul e grava os pedidos na planilha agora">Enviar pedidos agora</button>
+      <button class="bt2" type="button" id="pdImportar" hidden>Importar base</button><button class="bt2" type="button" id="pdEnviarAgora" hidden title="Busca agora as vendas e baixas da Conta Azul e grava os pagamentos na planilha, sem esperar o próximo horário">Atualizar agora</button>
       <button class="bt2 pri" type="button" id="pdNovo">+ Novo pedido</button>
     </div>
     <div class="aviso" id="pdAviso" hidden></div>
@@ -1031,6 +1085,10 @@ table.matriz td.vz{color:var(--line2)}
     </div>
   </section>
 
+  <section data-pagina="divergencias" hidden>
+    <div class="card dv-card" id="dvCom"></div>
+    <div class="card dv-card" id="dvFin"></div>
+  </section>
   <section data-pagina="conciliacao" hidden>
     <div class="aviso" id="concPlan"></div>
     
@@ -1057,16 +1115,18 @@ table.matriz td.vz{color:var(--line2)}
 <section data-pagina="treinamento" hidden>
     <div class="card" id="treino">
       <h3>Treinamento: como usar o painel de gestão Visu</h3>
-      <p class="sub">Este é o novo painel de gestão da Visu, uma ferramenta para otimizar o trabalho dos vendedores, da gestão e do financeiro. Os vendedores lançam os pedidos aqui, e os valores vão para a Conta Azul.</p>
+      <p class="sub">Este é o novo painel de gestão da Visu, uma ferramenta para otimizar o trabalho dos vendedores, da gestão e do financeiro. Os vendedores lançam os pedidos aqui.</p>
+      <div style="margin:14px 0 6px;max-width:960px"><video controls preload="metadata" playsinline style="width:100%;border-radius:12px;background:#0b1f66;display:block" src="/treinamento.mp4"><track kind="subtitles" srclang="pt" label="Português" src="/treinamento.vtt"></video><div class="nota" style="margin-top:6px">Vídeo do treinamento com a Eva (3 minutos): lançar o pedido, cliente novo, vários itens, regra das 24 horas e pedido complementar.</div></div>
       <h4>1. Entrar</h4><p>Abra o endereço do painel, digite seu e-mail e sua senha e clique em <b>Entrar</b>. Se esquecer a senha, peça à gestão.</p>
       <h4>2. Abrir a Planilha de vendas</h4><p>No menu lateral, em <b>Comercial</b>, clique em <b>Planilha de vendas</b>. Ela tem as mesmas colunas da planilha de vendas de sempre. Você só vê e altera os pedidos que lançou.</p>
-      <h4>3. Lançar um pedido</h4><p>Clique em <b>+ Novo pedido</b>. O código do pedido é gerado sozinho, no padrão <b>sequência + mês + ano</b> (ex.: 0005112026). Preencha cliente, tipo de venda, cliente novo ou recompra, tipo de produto, material, cor, quantidade, valor, pagamento e prazo. Campos obrigatórios aparecem marcados.</p>
-      <h4>4. Lançar mais de um item no mesmo pedido</h4><p>Dentro do pedido, clique em <b>+ Item</b> e preencha a linha seguinte. Todos os itens ficam com o mesmo código e cliente.</p>
-      <h4>5. Cliente ou produto novo</h4><p>Se o cliente, o produto, o material ou a cor não existir na lista, digite o nome novo mesmo. Ele é cadastrado no painel e na Conta Azul.</p>
+      <h4>3. Lançar um pedido</h4><p>Clique em <b>+ Novo pedido</b>: abre uma linha igual à da planilha. O código do pedido é gerado sozinho, no padrão <b>sequência + mês + ano</b> (ex.: 0005112026). Preencha data, cliente, vendedor, tipo de venda, cliente novo ou recompra, tipo de produto, material, cor, quantidade e valor/und. Os campos obrigatórios têm *. Clique em <b>Salvar pedido</b>.</p>
+      <h4>4. Lançar mais de um item no mesmo pedido</h4><p>Antes de salvar, clique em <b>+ Item do mesmo pedido</b> e preencha a linha de baixo. Todos os itens ficam com o mesmo código, cliente e vendedor.</p>
+      <h4>5. Cliente, produto, material ou cor novos</h4><p>Se não estiver na lista, clique no <b>+</b> laranja ao lado do campo. No cliente, informe o nome (sem lote), se é pessoa jurídica ou física e, se tiver, CNPJ/CPF, e-mail e telefone: ele entra na lista do painel e é cadastrado também na Conta Azul. Produto, material e cor novos passam a aparecer na lista para todos. O lote ou detalhe do cliente vai na coluna <b>Lote / obs. do cliente</b>, nunca no nome.</p>
       <h4>6. Corrigir um pedido nas primeiras 24 horas</h4><p>Nas primeiras <b>24 horas</b> depois do lançamento você pode alterar a quantidade e os valores, clicando na célula. Depois disso o campo fica com cadeado 🔒.</p>
-      <h4>7. Acrescentar peças depois de 24 horas: pedido complementar</h4><p>Depois de 24 horas, a quantidade e os valores ficam travados. Para acrescentar peças, use <b>Acréscimo (pedido complementar)</b>. Ele recebe o mesmo cliente e o mesmo número, com sufixo <b>-1</b>, <b>-2</b>, <b>-3</b> e assim por diante, e gera um título complementar na Conta Azul.</p>
+      <h4>7. Acrescentar peças depois de 24 horas: pedido complementar</h4><p>Nas primeiras 24 horas, para acrescentar outro item ao mesmo pedido, use o <b>＋</b> no começo da linha do pedido. Depois de 24 horas, quantidade e valores ficam com cadeado 🔒. Para acrescentar peças, clique no <b>⊕</b> no começo da linha do pedido (ao passar o mouse aparece "Acréscimo: pedido complementar"). Abre o pedido com o mesmo cliente e o mesmo número, com sufixo <b>-1</b> (o próximo será -2, -3…). Preencha só os itens acrescentados e salve. Na Conta Azul, o título do acréscimo é lançado com esse mesmo número.</p>
+      <h4>7b. O pedido na Conta Azul</h4><p>Depois de salvo, o pedido vai para a Conta Azul no próximo horário como venda <b>em andamento</b>, com o mesmo número. O pedido complementar também vai, com o sufixo colado no número (0021112026-1 aparece na Conta Azul como 211120261). Na linha aparece <b>CA ✓</b> quando a venda foi criada. Se precisar corrigir um pedido que já foi para a Conta Azul, avise o financeiro (a linha mostra <b>CA !</b>).</p>
       <h4>8. Conferir pagamentos</h4><p>Os campos de 1º e 2º pagamento são preenchidos pela Conta Azul. Passe o mouse para ver a data da baixa, o banco e a forma de pagamento.</p>
-      <h4>9. Atualizações</h4><p>O painel atualiza com a Conta Azul e a planilha <b>às 09:30, 12:00, 14:00 e 18:00</b>. Se você lançou algo agora e não aparece na Conta Azul, espere o próximo horário ou avise a gestão.</p>
+      <h4>9. Atualizações</h4><p>O painel atualiza com a Conta Azul e a planilha <b>às 09:30, 12:00, 14:00 e 18:00</b>. Quando houver muitos pedidos de uma vez, a gestão pode usar <b>Atualizar agora</b>, na Planilha de vendas, sem esperar o próximo horário. Enquanto a planilha do Google estiver em uso, o que for lançado nela também aparece no painel; quando o painel virar a única ferramenta, a gestão encerra a planilha.</p>
       <h4>10. Dúvidas</h4><p>Fale com a gestão antes de alterar um pedido que já passou de 24 horas, porque depois disso só a gestão altera.</p>
     </div>
   </section>
@@ -1123,8 +1183,11 @@ const nomeMes=(m)=>{const[a,b]=m.split('-');return MES_L[+b-1]+' de '+a};
 const somaMes=(m,n)=>{const[a,b]=m.split('-').map(Number);const d=new Date(Date.UTC(a,b-1+n,1));return d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0')};
 function delta(a,b,inv){ if(!b) return '<span class="delta eq">sem base</span>'; const d=(a-b)/b; const c=Math.abs(d)<.005?'eq':(d>0)!==!!inv?'up':'down'; return `<span class="delta ${c}">${d>0?'▲':d<0?'▼':'■'} ${pct(Math.abs(d))}</span>`; }
 
-const VERSAO='v55';
+const VERSAO='v58';
 const VERSOES=[
+ {v:'v58',data:'08/11/2026',tit:'De-para do número da Conta Azul e pedido complementar no envio',arq:'painel-visu-v58.zip',itens:["De-para do número da Conta Azul (que não tem os zeros do começo) com o código do painel: 21112026 = 0021112026. O pedido complementar vai para a Conta Azul como venda própria, com o sufixo colado no número (0021112026-1 → 211120261), e volta para o painel como 0021112026-1, sem diferença na conferência.","Na conciliação do mês, o pedido e os complementares são somados juntos dos dois lados. Nas listas, as vendas só no sistema aparecem com o código no formato do painel.","Treinamento: vídeo com a Eva (3 minutos) dentro da página Comercial → Treinamento, com legendas: lançar o pedido, cliente novo, vários itens, regra das 24 horas, pedido complementar e Conta Azul."]},
+ {v:'v57',data:'08/11/2026',tit:'Pedidos do painel viram vendas na Conta Azul',arq:'painel-visu-v57.zip',itens:["Pedidos do painel viram vendas na Conta Azul: em Planilha de vendas → De onde os indicadores leem as vendas, o ADM liga o envio. Nos horários (09:30, 12:00, 14:00 e 18:00), no Atualizar agora e no botão Enviar agora, cada pedido lançado no painel vira uma venda em andamento na Conta Azul, com o mesmo número, o tipo de produto como item (se o produto não existir na Conta Azul, é criado), pagamento 50% + 50% (1ª parcela na data da venda, 2ª no prazo de entrega ou 30 dias depois) e a forma de pagamento informada. Cliente que não existe na Conta Azul é cadastrado.","Na linha do pedido aparece CA ✓ (venda criada), CA ✕ (erro, com o motivo ao passar o mouse) ou CA ! (pedido alterado depois do envio: corrigir na Conta Azul). Pedido que já existia com o mesmo número na Conta Azul não é enviado de novo.","Pedido complementar (-1, -2…) não vai sozinho: a Conta Azul só aceita número inteiro na venda."]},
+ {v:'v56',data:'08/11/2026',tit:'Divergências no formato do fechamento, novembro da planilha, botão + e cadastro único',arq:'painel-visu-v56.zip',itens:["Conferência → Divergências: tela nova no formato do fechamento validado. Comercial mês a mês (planilha de vendas × Conta Azul, divergência e observações e ações por responsável, com o que já foi concluído em verde) e Financeiro por conta (extrato × Conta Azul, conferido, incompleto ou diferença, com saldos e observações ao abrir cada conta). Os totais do comercial são recalculados a cada atualização; o fechamento validado de 08/11 já vem preenchido. Gestão e financeiro editam observações, ações, saldos e contas; o botão Importar extrato leva à conciliação bancária.","Planilha × sistema (mês) fica só em Controle (ligação da planilha do Google).","Pedidos de novembro: enquanto a planilha do Google estiver em uso, as vendas lançadas nela a partir de novembro também entram no painel, sem data final. Na Planilha de vendas → Fonte dos indicadores, o botão Encerrar a planilha transforma essas vendas em pedidos do painel e a planilha deixa de ser lida.","Botão + ao lado de Cliente, Tipo de produto, Material e Cor no lançamento (linha do pedido e formulário). O cliente novo entra na lista do painel e é cadastrado também na Conta Azul (nome, tipo de pessoa e, se tiver, CNPJ/CPF, e-mail e telefone).","Cadastro único por cliente: o mesmo cliente escrito de jeitos diferentes vira um nome só em todo o painel e nos pedidos gravados; o lote vai para a coluna Lote / obs. do cliente. Sai da lista de Inconsistências.","Subtotais: linha de total em todas as tabelas com valores que ainda não tinham (Produtos, Clientes, Vendedores, Pedidos, Contas a receber e outras).","Botão Enviar pedidos agora renomeado para Atualizar agora: ele lê a Conta Azul e grava os pagamentos na planilha na hora. O painel ainda não cria a venda na Conta Azul (só o cliente novo).","Treinamento atualizado com o botão +, o ⊕ do pedido complementar, o Atualizar agora e a planilha em uso."]},
  {v:'v55',data:'08/11/2026',tit:'Unificar todos os clientes',arq:'painel-visu-v55.zip',itens:["Botão \"Unificar todos os clientes\" em Qualidade dos dados: junta as grafias de cada cliente com o nome sugerido, e o lote continua na coluna de observação."]},
  {v:'v54',data:'08/11/2026',tit:'Ligação da planilha de volta e inclusão de cliente novo',arq:'painel-visu-v54.zip',itens:["Planilha × sistema (mês) voltou para Controle, com a ligação da planilha do Google.","Botão \"+ Incluir cliente\" no lançamento quando o nome não existe na lista."]},
  {v:'v53',data:'08/11/2026',tit:'Prazo aberto para os pedidos',arq:'painel-visu-v53.zip',itens:["Prazo final da importação e da gravação automática em aberto: vale tudo a partir de janeiro de 2026, sem data limite (antes estava em outubro e depois em dezembro).","Pedidos de novembro e os lançamentos feitos no painel entram nos horários automáticos e no botão Enviar pedidos agora."]},
@@ -1312,10 +1375,10 @@ function desenhar(){
   const it=ITEM[E.pagina], grupo=it.grupo, comercial=grupo==='Comercial';
   const perSalvo=E.periodo; if(!comercial) E.periodo='mes'; const j=janela(); E.periodo=perSalvo;
   $('pgTit').textContent=E.pagina==='vendedores'&&!vb('vendedores.premiacao')?'Vendedores':it.rot;
-  const per=['usuarios','versoes','treinamento','dados','registro','conferencia','inconsistencias','historico','extrato'].includes(E.pagina)?'':grupo==='Comercial'?j.rot:nomeMes(E.mes);
+  const per=['usuarios','versoes','treinamento','dados','registro','conferencia','inconsistencias','divergencias','historico','extrato'].includes(E.pagina)?'':grupo==='Comercial'?j.rot:nomeMes(E.mes);
   $('pgCtx').innerHTML=`<b>${grupo}</b>${esc(it.ctx)}${per?' · '+esc(per):''}`;
   document.title=it.rot+' · Painel de Gestão Visu';
-  $('barraFiltros').hidden=['usuarios','versoes','treinamento','dados','registro','conferencia','inconsistencias','historico','extrato'].includes(E.pagina);
+  $('barraFiltros').hidden=['usuarios','versoes','treinamento','dados','registro','conferencia','inconsistencias','divergencias','historico','extrato'].includes(E.pagina);
   document.querySelectorAll('.f.com').forEach(f=>f.hidden=!comercial);
   document.querySelectorAll('.f.per')[0].hidden=!comercial;
   const fx=comercial&&E.periodo==='faixa'; document.querySelectorAll('.f.per2').forEach(f=>f.hidden=!fx); document.querySelectorAll('.f.per')[1].hidden=fx;
@@ -1325,7 +1388,7 @@ function desenhar(){
   const S=$('simula'); if(E.verComo){ S.hidden=false; S.innerHTML=`<span>Visualizando o painel como <b>${esc(E.verComo.nome||PERF[E.verComo.perfil])}</b>. O menu mostra exatamente o que esse perfil vê.</span><button class="bt2" type="button" id="simSair">Voltar para ADM</button>`; $('simSair').onclick=()=>{ E.verComo=null; $('verComo').value=''; desenhar(); }; } else S.hidden=true;
   // se um quadro der erro com os dados reais, a página continua e o erro aparece no topo (em vez de sumir em silêncio)
   const errBox=$('erroPagina'); if(errBox) errBox.hidden=true;
-  try{ ({painel:pgVisao,indicadores:pgIndicadores,vendas:pgGeral,produtos:pgProdutos,clientes:pgClientes,vendedores:pgVendedores,pedidos:pgPedidos,registro:pgRegistro,conferencia:pgConferencia,inconsistencias:pgInconsistencias,extrato:pgExtrato,historico:pgHistorico,dre:pgDRE,equilibrio:pgEquilibrio,caixa:pgCx,receber:pgRc,pagar:pgPg,conciliacao:pgConciliacao,dados:pgDados,versoes:pgVersoes,treinamento:()=>{},usuarios:pgUsuarios})[E.pagina](j); }
+  try{ ({painel:pgVisao,indicadores:pgIndicadores,vendas:pgGeral,produtos:pgProdutos,clientes:pgClientes,vendedores:pgVendedores,pedidos:pgPedidos,registro:pgRegistro,conferencia:pgConferencia,inconsistencias:pgInconsistencias,extrato:pgExtrato,historico:pgHistorico,dre:pgDRE,equilibrio:pgEquilibrio,caixa:pgCx,receber:pgRc,pagar:pgPg,conciliacao:pgConciliacao,dados:pgDados,versoes:pgVersoes,divergencias:pgDivergencias,treinamento:()=>{},usuarios:pgUsuarios})[E.pagina](j); try{ subtotalTabelas(document.querySelector(`section[data-pagina="${E.pagina}"]`)); }catch(e2){ console.warn('subtotais',e2); } }
   catch(e){ console.error(e); if(errBox){ errBox.hidden=false; errBox.innerHTML=`<span><b>Parte desta página não pôde ser montada.</b> Mande um print desta mensagem para a Seja Expert: <code>${esc(String(e&&e.message||e))}</code> (${esc(VERSAO)})</span>`; } }
 }
 
@@ -1647,7 +1710,7 @@ function pgDados(){
   $('tbVazios').innerHTML=VZ_CAMPOS.map(([k,r,f,obs])=>{ const n=ls.filter(f).length; return `<tr${n?` data-vz="${k}" style="cursor:pointer" title="Ver as linhas"`:''}><td>${r}${obs?`<div class="dica-c">${obs}</div>`:''}</td><td class="v">${n?`<span class="status at">${int(n)} em branco</span> <span class="lk">ver ›</span>`:'<span class="status ok">✓ completo</span>'}</td></tr>`; }).join('')
     +`<tr><td colspan="2" class="nota">Sem código do pedido, o painel junta as linhas do mesmo cliente no mesmo dia como um pedido só. O código só passou a ser usado em setembro/2026 e a Conta Azul começou em agosto/2026: antes disso o código em branco não é cobrado.</td></tr>`;
   const gr=(lista)=>lista.map(g=>`<span>${esc(g.texto)}<em>${int(g.linhas)} ${g.linhas===1?'linha':'linhas'}</em></span>`).join('');
-  $('qClientes').innerHTML=q.clientes_duplicados.length?q.clientes_duplicados.slice(0,20).map(c=>`<div class="q-item"><b>${esc(c.cliente)}</b><div class="gr">${gr(c.grafias)}</div></div>`).join(''):'<div class="vazio">Nenhum cliente com nomes diferentes.</div>';
+  $('qClientes').innerHTML=q.clientes_duplicados.length?`<div class="aviso ok" style="margin:0 0 10px"><span><b>Consolidado:</b> cada cliente abaixo tem um cadastro único no painel (gráficos, filtros, comissões, Planilha de vendas e conferências). O lote que estava no nome foi para a coluna <b>Lote / obs. do cliente</b>. Os nomes como foram digitados continuam no histórico.</span></div>`+q.clientes_duplicados.slice(0,60).map(c=>`<div class="q-item"><span class="status ok">✓</span> <b>${esc(c.cliente)}</b> <span class="dica-c">${int(c.grafias.length)} grafias juntadas</span><div class="gr">${gr(c.grafias)}</div></div>`).join(''):'<div class="vazio">Nenhum cliente com nomes diferentes.</div>';
   const blocos=[['tipo_produto','Tipo de produto'],['material','Material'],['cor','Cor'],['vendedor','Vendedor']].flatMap(([k,r])=>(q.variacoes[k]||[]).map(v=>({...v,campo:r})));
   $('qGrafias').innerHTML=(blocos.length?'<div class="nota" style="margin:0 0 8px">O painel já consolida cada grupo num valor só (é o que aparece nos gráficos, filtros e comissões). Para a planilha ficar igual, use a lista suspensa com o valor consolidado.</div>':'')+(blocos.length?blocos.slice(0,40).map(v=>`<div class="q-item"><span class="campo">${v.campo}</span><b>${esc(nomeBonito(v.valor))}</b> <span class="pill st-ok" title="Como aparece no painel">consolidado</span><div class="gr">${gr(v.grafias)}</div></div>`).join(''):'<div class="vazio">Nenhuma grafia diferente encontrada.</div>');
 }
@@ -1955,7 +2018,7 @@ function pgConciliacao(){
   // v45: pedido a pedido pelo código (cód. interno = número da venda na Conta Azul); sem código, pelo cliente e data
   const mesmoCli=(x,y)=>{ x=kc(x); y=kc(y); if(!x||!y) return false; if(x===y||x.startsWith(y+' ')||y.startsWith(x+' ')) return true; const wa=x.split(' '), wb=y.split(' '); return wa.length>1&&wb.length>1&&wa[0]===wb[0]&&wa[1]===wb[1]; };
   const dias=(x,y)=>Math.round((Date.parse(x)-Date.parse(y))/864e5);
-  const porNum=new Map(); caD.vendas.forEach(v=>{ if(v.n!=null) porNum.set(ckey(v.n),v); });
+  const porNum=new Map(); caD.vendas.forEach(v=>{ if(v.n==null) return; const k=ckey(cbase(codDoNumero(v.n))), j=porNum.get(k); if(!j) porNum.set(k,v); else if(EF.includes(v.s)&&v.d.slice(0,7)===j.d.slice(0,7)) porNum.set(k,{...j,t:j.t+v.t}); });
   const pedPl=new Map(); plMes(m).forEach(l=>{ const cod=l.cd?cbase(l.cd):''; const k=cod?'c'+ckey(cod):'n'+kc(l.c)+'|'+(l.d||l.m); const g=pedPl.get(k)||{cod,cli:l.c,d:l.d||'',v:l.v,t:0,n:0}; if(l.d&&(!g.d||l.d<g.d)) g.d=l.d; g.t+=l.t; g.n++; pedPl.set(k,g); });
   const codsPlMes=new Set([...pedPl.values()].filter(g=>g.cod).map(g=>ckey(g.cod)));
   const janela3=[somaMes(m,-1),m,somaMes(m,1)].flatMap(mm=>caMes(mm));
@@ -2104,6 +2167,9 @@ const diasAtr=(v)=>Math.round((Date.parse(hojeISO())-Date.parse(v))/864e5);
 // Registro de vendas igual à planilha, histórico de alterações e conciliação pedido a pedido com a Conta Azul.
 const ckey=(c)=>String(c||'').replace(/\D/g,'').replace(/^0+/,'');
 const cbase=(c)=>String(c||'').trim().split(/[-/ ]/)[0];
+// de-para do número da Conta Azul (sem zeros no começo) para o código do painel: 21112026 → 0021112026 · 211120261 → 0021112026-1
+const RX_BASE_CA=/^(\d{1,4})(0[1-9]|1[0-2])(20[2-3]\d)$/;
+function codDoNumero(n){ const s=String(n??'').replace(/\D/g,'').replace(/^0+/,''); if(!s) return ''; if(RX_BASE_CA.test(s)) return s.padStart(10,'0'); for(const k of [1,2]){ const b=s.slice(0,-k), suf=s.slice(-k); if(b&&RX_BASE_CA.test(b)&&!suf.startsWith('0')) return b.padStart(10,'0')+'-'+suf; } return s; }
 const semA=(s)=>String(s??'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/\s+/g,' ').trim();
 const dataBR=(d)=>d?String(d).slice(0,10).split('-').reverse().join('/'):'';
 const PED={d:null,carr:null,mes:null,vend:'',inVend:null,inTipo:'',busca:'',fil:'',cfMes:null,cfVend:'',cfBase:null,cfSit:'',hs:null,hsDias:null,editando:null};
@@ -2148,6 +2214,7 @@ function proxComp(cod){ const b=cbase(cod); let k=0; regsPed().forEach(r=>{ cons
 function valoresConhecidos(){ const S={cliente:new Map(),vendedor:new Map(),segmento:new Map(),forma_pagamento:new Map(),tipo_produto:new Map(),material:new Map(),cor:new Map(),especificacao:new Map()};
   regsPed().forEach(r=>Object.keys(S).forEach(k=>{ if(r[k]) S[k].set(r[k],(S[k].get(r[k])||0)+1); }));
   (E.dados?.linhas||[]).forEach(l=>{ [['v','vendedor'],['tp','tipo_produto'],['mt','material'],['cr','cor']].forEach(([a,b])=>{ if(l[a]&&l[a]!==NAO_VEND&&!S[b].has(l[a])) S[b].set(l[a],1); }); });
+  ['cliente','tipo_produto','material','cor'].forEach(k=>(PED.d?.cadastros?.[k]||[]).forEach(x=>{ if(x.nome&&!S[k].has(x.nome)) S[k].set(x.nome,0.5); }));
   const ina=new Set((E.vcfg?.inativos||[]).map(nv)); for(const k of S.vendedor.keys()) if(ina.has(nv(k))) S.vendedor.delete(k);
   const ord=(m)=>[...m.entries()].sort((a,b)=>b[1]-a[1]).map(x=>x[0]);
   [...(PED.cli?.l?.length?[]:[['dlCliente','cliente']]),['dlVendedor','vendedor'],['dlSegmento','segmento'],['dlForma','forma_pagamento'],['dlProduto','tipo_produto'],['dlMaterial','material'],['dlCor','cor'],['dlEspec','especificacao']].forEach(([id,k])=>{ $(id).innerHTML=ord(S[k]).slice(0,800).map(v=>`<option value="${esc(v)}">`).join(''); });
@@ -2181,7 +2248,7 @@ function cardPag(cod,i,valorPlanilha,rid){
 function linhasPlanilhaViva(){
   const f=E.dados?.fonte; if(!['planilha','misto'].includes(f)) return [];
   const corte=E.dados.corte_sistema, noPainel=new Set(regsPed().map(r=>r.mes));
-  return (E.dados.linhas||[]).filter(l=>!l.cs&&l.m&&(!corte||l.m<corte)&&!noPainel.has(l.m)).map((l,i)=>({id:'pl'+i,origem:'planilha_viva',data:l.d,mes:l.m,codigo:l.cd||'',cliente:l.c,cliente_lancado:l.co||'',lote:'',nome_pedido:'',vendedor:l.vo||l.v,tipo_venda:l.tv==='—'?'':l.tv,novo_recompra:l.nr||'',segmento:l.sg||'',tipo_produto:l.tp,material:l.mt,especificacao:l.es||'',cor:l.cr,quantidade:l.q,valor_unit:l.q?Math.round(l.t/l.q*100)/100:0,total:l.t,pag1:l.p1>1?l.p1:0,pag2:l.p2>1?l.p2:0,pago_100:!!l.ok,prazo_entrega:l.pz||'',forma_pagamento:l.fp||'',pagador:'',observacao:'',possivel_duplicado:!!l.du,ordem:i}));
+  return (E.dados.linhas||[]).filter(l=>!l.cs&&l.m&&(l.pv||((!corte||l.m<corte)&&!noPainel.has(l.m)))).map((l,i)=>({id:'pl'+i,origem:'planilha_viva',data:l.d,mes:l.m,codigo:l.cd||'',cliente:l.c,cliente_lancado:l.co||'',lote:l.lo||'',nome_pedido:'',vendedor:l.vo||l.v,tipo_venda:l.tv==='—'?'':l.tv,novo_recompra:l.nr||'',segmento:l.sg||'',tipo_produto:l.tp,material:l.mt,especificacao:l.es||'',cor:l.cr,quantidade:l.q,valor_unit:l.q?Math.round(l.t/l.q*100)/100:0,total:l.t,pag1:l.p1>1?l.p1:0,pag2:l.p2>1?l.p2:0,pago_100:!!l.ok,prazo_entrega:l.pz||'',forma_pagamento:l.fp||'',pagador:'',observacao:'',possivel_duplicado:!!l.du,ordem:i}));
 }
 // ---------- menu "Pedidos de venda" ----------
 function pgRegistro(){
@@ -2199,7 +2266,7 @@ function pgRegistro(){
   $('pdNovo').hidden=!P.lancar; $('pdImportar').hidden=!P.importar; $('pdEnviarAgora').hidden=!P.importar; $('pdPagar').hidden=!P.lancar||!(regs.length||(E.eu?.perfil==='adm'&&E.dados?.planilha_script?.configurado))||!E.dados?.conta_azul;
   // aviso
   const av=$('pdAviso'); av.hidden=false; av.className='aviso';
-  if(regs.some(r=>r.mes===PED.mes&&r.origem==='planilha_viva')) av.innerHTML=`<span><b>${nomeMes(PED.mes)} vem da planilha do Google</b> (somente consulta): até outubro as correções são feitas na própria planilha. Passe o mouse em <b>1º/2º pagamento</b> ou <b>Pedido 100% pago</b> para ver o que já foi baixado na Conta Azul. ${E.dados.corte_sistema?`A partir de ${nomeMes(E.dados.corte_sistema)} as vendas são lançadas aqui no sistema.`:''}</span>`;
+  if(regs.some(r=>r.mes===PED.mes&&r.origem==='planilha_viva')) av.innerHTML=`<span><b>${nomeMes(PED.mes)} vem da planilha do Google</b> (somente consulta): enquanto a planilha estiver em uso, as correções dessas linhas são feitas na própria planilha. Passe o mouse em <b>1º/2º pagamento</b> ou <b>Pedido 100% pago</b> para ver o que já foi baixado na Conta Azul. ${E.dados.corte_sistema?`A partir de ${nomeMes(E.dados.corte_sistema)} as vendas são lançadas aqui no sistema.`:''}</span>`;
   else if(!regs.length) av.innerHTML=P.importar?`<span><b>Ainda não há pedidos no painel.</b> Clique em <b>Importar base</b> para trazer as vendas de janeiro a outubro da planilha conectada (ou de um arquivo .xlsx). Depois disso os vendedores revisam os campos marcados em amarelo e, a partir de novembro, lançam os pedidos aqui.</span>`:'<span><b>Ainda não há pedidos no painel.</b> A gestão vai importar a base de janeiro a outubro da planilha; a partir de novembro os pedidos são lançados aqui, em <b>+ Novo pedido</b>.</span>';
   else av.innerHTML=`<span>Clique numa célula para corrigir. <b>Amarelo</b> = campo a preencher ou revisar (novo × recompra, cliente com "lote" no nome, campos vazios). 🔒 = quantidade e valores travados ${d.horas_edicao} h depois do lançamento: para acrescentar peças use <b>Acréscimo</b>, que cria o pedido complementar com o mesmo código + "-1". Pagamentos em branco que já foram baixados na Conta Azul são preenchidos sozinhos; passe o mouse em <b>1º/2º pagamento</b> ou em <b>Pedido 100% pago</b> para ver data, banco e forma no balão.${d.config?.fonte==='painel'?' <b>Os indicadores do painel leem estes pedidos.</b>':''}</span>`;
   // filtro das linhas
@@ -2245,9 +2312,10 @@ function pgRegistro(){
     }
     const st=prim&&g?stG.get(k):null, v=k?ca.get(k):null;
     const sys=prim&&g?`<td class="v sys">${brl2(g.t)}</td><td class="v sys">${v?brl2(v.t):'—'}</td><td class="sys"><span class="pill ${ST_CL[st[0]]}">${st[1]}${st[0]==='dif'?' · '+brl2((v?.t||0)-g.t):''}</span></td>`:prim&&!r.codigo?'<td class="sys"></td><td class="sys"></td><td class="sys"><span class="pill st-na">Sem código</span></td>':'<td class="sys"></td><td class="sys"></td><td class="sys"></td>';
-    const ac=r.origem==='planilha_viva'?(prim?'<span class="pd-bd" style="background:var(--line);color:var(--ink2)" title="Linha da planilha do Google (somente leitura): até outubro as correções são feitas na planilha">planilha</span>':''):(P.lancar&&prim&&r.codigo?`<button type="button" class="acb" data-ac="item" title="Novo item neste pedido">＋</button><button type="button" class="acb" data-ac="comp" title="Acréscimo: pedido complementar ${esc(proxComp(r.codigo))}">⊕</button>`:'')
+    const ac=r.origem==='planilha_viva'?(prim?'<span class="pd-bd" style="background:var(--line);color:var(--ink2)" title="Linha da planilha do Google (somente leitura): enquanto a planilha estiver em uso, as correções são feitas nela">planilha</span>':''):(P.lancar&&prim&&r.codigo?`<button type="button" class="acb" data-ac="item" title="Novo item neste pedido">＋</button><button type="button" class="acb" data-ac="comp" title="Acréscimo: pedido complementar ${esc(proxComp(r.codigo))}">⊕</button>`:'')
       +(podeExcluir(r)?`<button type="button" class="acb" data-ac="del" title="Excluir esta linha">✕</button>`:'')
       +(paginasAtivas().includes('historico')&&r.codigo&&prim?`<button type="button" class="acb" data-ac="hist" title="Histórico deste pedido">🕘</button>`:'')
+      +(prim&&r.origem==='painel'?(r.ca_venda_id?`<span class="ca-bd ok" title="${r.ca_venda_id==='ja-existia'?'Já existia venda com este número na Conta Azul':'Venda criada na Conta Azul (em andamento)'+(r.ca_enviado_em?' em '+new Date(r.ca_enviado_em).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'')}${r.alterado_em&&r.ca_enviado_em&&r.alterado_em>r.ca_enviado_em?' · ALTERADO DEPOIS DO ENVIO: corrigir na Conta Azul':''}">CA${r.alterado_em&&r.ca_enviado_em&&r.alterado_em>r.ca_enviado_em?' !':' ✓'}</span>`:r.ca_erro?`<span class="ca-bd erro" title="Não foi para a Conta Azul: ${esc(r.ca_erro)}">CA ✕</span>`:/-\d+$/.test(r.codigo||'')?`<span class="ca-bd" title="Pedido complementar: lançar o título na Conta Azul">CA</span>`:''):'')
       +(pd.size&&r.origem!=='planilha_viva'||pd.size&&prim?`<span class="pd-bd" title="A revisar: ${esc([...pd].map(x=>ROT_PED[x]||(x==='duplicado'?'possível lançamento duplicado':x)).join(', '))}">${pd.size}</span>`:'');
     html+=`<tr data-id="${r.id}" class="${prim?'g1':''}${r.id===PED.flash?' novo-flash':''}"><td class="ac">${ac}</td>${cel}${sys}</tr>`;
   }
@@ -2305,14 +2373,22 @@ function revisaoClientes(){
 function fontePed(){
   const P=PED.d.pode, f=PED.d.config?.fonte||'planilha'; $('pdFonteCard').hidden=!P.fonte; if(!P.fonte) return;
   $('pdFonte').innerHTML=`<div class="seg" role="group" aria-label="Fonte" style="flex-wrap:wrap"><button type="button" data-fp="planilha" aria-pressed="${f==='planilha'}">Planilha conectada</button><button type="button" data-fp="misto" aria-pressed="${f==='misto'}">Planilha até outubro + sistema a partir de novembro</button><button type="button" data-fp="painel" aria-pressed="${f==='painel'}">Só pedidos do painel</button></div>
-    <div class="nota">${f==='misto'?'<b>Agora:</b> janeiro a outubro vêm da planilha conectada e, a partir de novembro, dos pedidos lançados aqui no sistema. Vendas de novembro lançadas só na planilha aparecem em Inconsistências.':f==='painel'?`<b>Agora:</b> os indicadores leem os ${int(regsPed().length)} pedidos registrados aqui (inclusive os lançados pelos vendedores). A planilha deixa de ser usada pelo painel.`:'<b>Agora:</b> os indicadores leem a planilha conectada. Quando a base estiver revisada e os vendedores começarem a lançar aqui (meta: vendas de novembro), troque para <b>Pedidos do painel</b> para extinguir o controle paralelo.'}${PED.d.config?.por?` Alterado por ${esc(PED.d.config.por)} em ${new Date(PED.d.config.atualizado_em).toLocaleString('pt-BR')}.`:''}</div>`;
+    <div class="nota">${f==='misto'?'<b>Agora:</b> janeiro a outubro vêm da planilha conectada e, a partir de novembro, dos pedidos lançados aqui no sistema. Vendas de novembro lançadas na planilha continuam entrando enquanto ela estiver em uso.':f==='painel'?`<b>Agora:</b> os indicadores leem os ${int(regsPed().length)} pedidos registrados aqui (inclusive os lançados pelos vendedores). A planilha deixa de ser usada pelo painel.`:'<b>Agora:</b> os indicadores leem a planilha conectada. Quando a base estiver revisada e os vendedores começarem a lançar aqui (meta: vendas de novembro), troque para <b>Pedidos do painel</b> para extinguir o controle paralelo.'}${PED.d.config?.por?` Alterado por ${esc(PED.d.config.por)} em ${new Date(PED.d.config.atualizado_em).toLocaleString('pt-BR')}.`:''}</div>`;
+  if(f==='misto'){ const c=PED.d.config||{}, enc=!!c.planilha_encerrada;
+    $('pdFonte').insertAdjacentHTML('beforeend',`<div class="aviso${enc?' ok':''}" style="margin-top:10px"><span style="flex:1;min-width:240px">${enc?`<b>Planilha do Google encerrada${c.planilha_encerrada_em?' em '+new Date(c.planilha_encerrada_em).toLocaleDateString('pt-BR'):''}.</b> O painel é a única ferramenta: as vendas entram só pelo + Novo pedido.`:'<b>Planilha do Google ainda em uso.</b> As vendas de novembro em diante lançadas na planilha também entram no painel (sem data final), junto com os pedidos lançados aqui. Quando o painel estiver funcionando 100%, clique em <b>Encerrar a planilha</b>: as vendas que só estão na planilha viram pedidos do painel e a planilha deixa de ser lida.'}</span><button class="bt2${enc?'':' pri'}" type="button" id="pdEncerrar">${enc?'Voltar a ler a planilha':'Encerrar a planilha'}</button></div>`);
+    $('pdEncerrar').onclick=async()=>{ const enc2=!enc; if(enc2&&!confirmar('Encerrar a planilha? As vendas que só estão nela entram como pedidos do painel.')) return;
+      try{ const r=await api('/api/pedidos/planilha-uso',{method:'POST',body:JSON.stringify({encerrar:enc2})}); PED.d.config=r; toast(enc2?`Planilha encerrada${r.importadas?`: ${int(r.importadas)} vendas entraram como pedidos do painel`:''}.`:'O painel volta a ler a planilha.'); await carregarPedidos(); await carregar(true); }catch(e){ toast(e.message,true); } }; }
+  { const c=PED.d.config||{}, on=!!c.enviar_ca, u=c.ultimo_envio_ca, pend=regsPed().filter(r=>r.origem==='painel'&&r.codigo&&!r.ca_venda_id&&!/-\d+$/.test(r.codigo)), nPend=new Set(pend.map(r=>r.codigo)).size;
+    $('pdFonte').insertAdjacentHTML('beforeend',`<div class="aviso${on?' ok':''}" style="margin-top:10px"><span style="flex:1;min-width:240px"><b>Pedidos do painel → Conta Azul: ${on?'envio ligado':'envio desligado'}.</b> ${on?'Nos horários (09:30, 12:00, 14:00 e 18:00) e no Atualizar agora, cada pedido lançado aqui vira uma venda <b>em andamento</b> na Conta Azul, com o mesmo número, o tipo de produto como item e pagamento 50% + 50%.':'Ligue para que os pedidos lançados aqui virem vendas em andamento na Conta Azul (mesmo número, tipo de produto como item, 50% + 50%).'} ${int(nPend)} ${nPend===1?'pedido aguardando':'pedidos aguardando'} envio.${u?`<br>Último envio: ${new Date(u.em).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})} · ${int(u.enviados)} enviados${u.ja_existiam?` · ${int(u.ja_existiam)} já existiam`:''}${u.erros?.length?` · <b style="color:var(--red)">${int(u.erros.length)} com erro</b> (${esc(u.erros.slice(0,3).map(e=>e.codigo+': '+e.erro).join(' | '))})`:''}${u.complementares?` · ${pl(u.complementares,'item','itens')} de pedido complementar para lançar à mão`:''}`:''}</span><span style="display:flex;gap:8px;flex-wrap:wrap"><button class="bt2" type="button" id="pdCaLiga">${on?'Desligar envio':'Ligar envio'}</button><button class="bt2${on?' pri':''}" type="button" id="pdCaEnvia"${nPend?'':' disabled'}>Enviar agora</button></span></div>`);
+    $('pdCaLiga').onclick=async()=>{ try{ PED.d.config=await api('/api/pedidos/conta-azul',{method:'POST',body:JSON.stringify({ativo:!on})}); toast(on?'Envio para a Conta Azul desligado.':'Envio para a Conta Azul ligado.'); fontePed(); }catch(e){ toast(e.message,true); } };
+    $('pdCaEnvia').onclick=async()=>{ const b=$('pdCaEnvia'); b.disabled=true; b.textContent='Enviando…'; try{ const r=await api('/api/pedidos/enviar-ca',{method:'POST',body:'{}'}); PED.d.config=r.config; await carregarPedidos(true); toast(`${int(r.enviados.length)} ${r.enviados.length===1?'pedido enviado':'pedidos enviados'} para a Conta Azul${r.ja_existiam.length?` · ${int(r.ja_existiam.length)} já existiam`:''}${r.erros.length?` · ${int(r.erros.length)} com erro: ${r.erros[0].erro}`:''}.`,!!r.erros.length); pgRegistro(); }catch(e){ toast(e.message,true); } finally{ b.textContent='Enviar agora'; } }; }
   $('pdFonte').querySelectorAll('[data-fp]').forEach(b=>b.onclick=async()=>{ if(b.dataset.fp===f) return; if(b.dataset.fp==='painel'&&!regsPed().length){ toast('Importe a base antes de trocar a fonte.',true); return; }
     try{ PED.d.config=await api('/api/pedidos/config',{method:'POST',body:JSON.stringify({fonte:b.dataset.fp,corte:'2026-11'})}); toast(b.dataset.fp==='misto'?'Até outubro pela planilha; a partir de novembro pelos pedidos do sistema.':b.dataset.fp==='painel'?'Os indicadores passam a ler só os pedidos do painel.':'Os indicadores voltam a ler a planilha.'); await carregar(true); }catch(e){ toast(e.message,true); } });
 }
 
 // ---------- formulário: novo pedido, novo item e acréscimo (pedido complementar) ----------
 const PM={modo:'novo',base:null};
-function linhaItem(i={}){ return `<tr><td><input data-k="tipo_produto" list="dlProduto" value="${esc(i.tipo_produto||'')}" aria-label="Tipo de produto"></td><td><input data-k="material" list="dlMaterial" value="${esc(i.material||'')}" aria-label="Material"></td><td><input data-k="especificacao" list="dlEspec" value="${esc(i.especificacao||'')}" aria-label="Especificação"></td><td><input data-k="cor" list="dlCor" value="${esc(i.cor||'')}" aria-label="Cor"></td><td class="v"><input data-k="quantidade" type="number" min="0" step="1" value="${i.quantidade||''}" aria-label="Quantidade"></td><td class="v"><input data-k="valor_unit" type="number" min="0" step="0.01" value="${i.valor_unit||''}" aria-label="Valor por unidade"></td><td class="v"><b class="itTot">—</b></td><td><button type="button" class="bt2 del itDel" aria-label="Remover item">✕</button></td></tr>`; }
+function linhaItem(i={}){ return `<tr><td><div class="pl-in"><input data-k="tipo_produto" list="dlProduto" value="${esc(i.tipo_produto||'')}" aria-label="Tipo de produto"><button type="button" class="pl-add" data-add="tipo_produto" title="Incluir tipo de produto novo" aria-label="Incluir tipo de produto novo">+</button></div></td><td><div class="pl-in"><input data-k="material" list="dlMaterial" value="${esc(i.material||'')}" aria-label="Material"><button type="button" class="pl-add" data-add="material" title="Incluir material novo" aria-label="Incluir material novo">+</button></div></td><td><input data-k="especificacao" list="dlEspec" value="${esc(i.especificacao||'')}" aria-label="Especificação"></td><td><div class="pl-in"><input data-k="cor" list="dlCor" value="${esc(i.cor||'')}" aria-label="Cor"><button type="button" class="pl-add" data-add="cor" title="Incluir cor novo" aria-label="Incluir cor novo">+</button></div></td><td class="v"><input data-k="quantidade" type="number" min="0" step="1" value="${i.quantidade||''}" aria-label="Quantidade"></td><td class="v"><input data-k="valor_unit" type="number" min="0" step="0.01" value="${i.valor_unit||''}" aria-label="Valor por unidade"></td><td class="v"><b class="itTot">—</b></td><td><button type="button" class="bt2 del itDel" aria-label="Remover item">✕</button></td></tr>`; }
 function totaisItens(){ let s=0; $('pmItens').querySelectorAll('tr').forEach(tr=>{ const q=+tr.querySelector('[data-k="quantidade"]').value||0, u=+tr.querySelector('[data-k="valor_unit"]').value||0; tr.querySelector('.itTot').textContent=q&&u?brl2(q*u):'—'; s+=q*u; }); $('pmTotal').textContent='Total do pedido: '+brl2(s); }
 function sugerirNR(){ const c=semA($('pmCliente').value), d=$('pmData').value||hojeISO(); if(!c){ $('pmNRdica').textContent=''; return; }
   const ant=regsPed().filter(r=>semA(r.cliente)===c&&(r.data||'')<d).sort((a,b)=>(b.data||'').localeCompare(a.data||''))[0], ant2=!ant&&(E.dados?.linhas||[]).find(l=>semA(l.c)===c&&(l.d||'')<d);
@@ -2332,7 +2408,7 @@ function abrirPedido(modo,base){
   $('pmCodigo').readOnly=modo!=='novo';
   $('pmCodigo').value=modo==='item'?cab.codigo:modo==='comp'?proxComp(cab.codigo):''; $('pmCodigo').placeholder=modo==='novo'?'automático: '+proxCod($('pmData').value):'';
   $('pdmTit').textContent=modo==='novo'?'Novo pedido':modo==='item'?`Novo item no pedido ${cab.codigo}`:`Acréscimo ao pedido ${cab.codigo}`;
-  $('pdmSub').textContent=modo==='comp'?`Pedido complementar ${proxComp(cab.codigo)}: mesmo cliente e mesmo número, com sufixo. Gera um título complementar na Conta Azul e facilita a conciliação.`:modo==='item'?'O item entra com o mesmo código, dentro do prazo de edição do pedido.':'Mesmas colunas da planilha. Um pedido pode ter vários itens (tipo de produto, tecido e cor).';
+  $('pdmSub').textContent=modo==='comp'?`Pedido complementar ${proxComp(cab.codigo)}: mesmo cliente e mesmo número, com sufixo. Na Conta Azul, o título complementar é lançado com esse mesmo número, o que facilita a conciliação.`:modo==='item'?'O item entra com o mesmo código, dentro do prazo de edição do pedido.':'Mesmas colunas da planilha. Um pedido pode ter vários itens (tipo de produto, tecido e cor).';
   $('pmItens').innerHTML=linhaItem(); totaisItens();
   $('pdFundo').hidden=false; $('pdModal').hidden=false; setTimeout(()=>(modo==='novo'?$('pmCliente'):$('pmItens').querySelector('input')).focus(),30);
   $('pmCliInfo').textContent=''; carregarClientes().then(()=>{ infoCliente(); if(modo==='novo') $('pmCodigo').placeholder='automático: '+proxCod($('pmData').value); });
@@ -2392,7 +2468,7 @@ function pgConferencia(){
   const g=gruposCod(ls), rows=[];
   for(const [k,x] of g){ let st=statusCod(x.codigo,x.t,x.mes,ca); const v=ca.get(k); if(st[0]==='so_painel') st=['so_painel',SP]; rows.push({st,cod:x.codigo,data:x.data,cliente:x.cliente,vend:x.vendedor,painel:x.t,sis:v?v.t:null,sit:v?v.s:'',dif:v?(v.t-x.t):null,itens:x.n,sisData:v?.d||'',sisCli:v?.c||''}); }
   const usados=new Set(g.keys());
-  if(E.dados?.conta_azul) for(const v of E.dados.conta_azul.vendas){ const m=(v.d||'').slice(0,7); if(!noMes(m)||v.n==null||usados.has(ckey(v.n))||!['APROVADO','FATURADO'].includes(v.s)) continue; if(PED.cfVend&&nv(v.v)!==nv(PED.cfVend)) continue; rows.push({st:['so_sistema','Só no sistema'],cod:String(v.n),data:v.d,cliente:v.c,vend:v.v,painel:null,sis:v.t,sit:v.s,dif:v.t,itens:0}); }
+  if(E.dados?.conta_azul) for(const v of E.dados.conta_azul.vendas){ const m=(v.d||'').slice(0,7); if(!noMes(m)||v.n==null||usados.has(ckey(v.n))||!['APROVADO','FATURADO'].includes(v.s)) continue; if(PED.cfVend&&nv(v.v)!==nv(PED.cfVend)) continue; rows.push({st:['so_sistema','Só no sistema'],cod:codDoNumero(v.n),data:v.d,cliente:v.c,vend:v.v,painel:null,sis:v.t,sit:v.s,dif:v.t,itens:0}); }
   const semCod=ls.filter(r=>!r.codigo);
   const cnt=(s)=>rows.filter(r=>r.st[0]===s);
   const ok=cnt('ok'), dif=cnt('dif'), soP=rows.filter(r=>['so_painel','cancelado','nao_aprov'].includes(r.st[0])), soS=cnt('so_sistema');
@@ -2465,7 +2541,6 @@ const TIPOS_INC=[
   ['dup','Possível lançamento duplicado',1,'Confirmar se são dois itens; se não, excluir a linha repetida.'],
   ['conta','Total diferente de qtd × valor/und',0,'Corrigir quantidade, valor/und ou total.'],
   ['lote','Cliente com "lote" no nome',0,'Deixar só o nome do cliente; o lote vai na coluna Lote / obs.'],
-  ['graf','Mesmo cliente escrito de jeitos diferentes',0,'Só aparece quando o nome muda em maiúscula, acento ou pontuação. Complementos do nome (destino, setor, classificação interna) não são inconsistência.'],
 ];
 // quanto do pedido já entrou na Conta Azul e quanto falta (pelo total da venda no sistema; sem venda, pelo total da planilha)
 function faltaReceber(x){ if(!x.codigo||!E.dados?.conta_azul) return null; const ps=parcelasDe(x.codigo); if(!ps.length) return null; const v=(FR.m||(FR.m=mapaCA())).get(ckey(x.codigo)); const total=v?.t||(+x.plan||0), rec=ps.reduce((a,p)=>a+(+p.pago||0),0); return {total,rec,falta:Math.max(0,total-rec)}; }
@@ -2510,7 +2585,7 @@ function linhasInconsistencias(ls,b,ca,desde,noMes,vendSel){
         // pedido com vários itens: vale a soma das linhas ou o valor repetido em cada linha
         if([soma,Math.max(...vs)].some(v=>Math.abs(v-alvo)<=1)) return; push('pag',base,{plan:soma,sis:alvo,dif:alvo-soma,falta:`${i?'2º':'1º'} pagamento: planilha ${brl2(soma)}${vs.length>1?` (${vs.length} linhas)`:''} × Conta Azul ${brl2(alvo)}${pc.pago>0?' recebido':' a receber'}`}); }); } } }
     const usados=new Set(g.keys());
-    if(ls.length) for(const v of E.dados.conta_azul.vendas||[]){ const m=(v.d||'').slice(0,7); if(m<desde||!noMes({data:v.d,mes:m})||v.n==null||usados.has(ckey(v.n))||!['APROVADO','FATURADO'].includes(v.s)) continue; if(vendSel&&nv(v.v)!==nv(vendSel)) continue; out.push({tipo:'soS',data:v.d,codigo:String(v.n),cliente:v.c,vendedor:v.v||'',plan:'',sis:v.t,dif:v.t,falta:SIT_CA[v.s]||v.s}); }
+    if(ls.length) for(const v of E.dados.conta_azul.vendas||[]){ const m=(v.d||'').slice(0,7); if(m<desde||!noMes({data:v.d,mes:m})||v.n==null||usados.has(ckey(v.n))||!['APROVADO','FATURADO'].includes(v.s)) continue; if(vendSel&&nv(v.v)!==nv(vendSel)) continue; out.push({tipo:'soS',data:v.d,codigo:codDoNumero(v.n),cliente:v.c,vendedor:v.v||'',plan:'',sis:v.t,dif:v.t,falta:SIT_CA[v.s]||v.s}); }
   }
   (E.dados?.so_planilha||[]).forEach(l=>{ if(noMes({data:l.d,mes:l.m})&&(!vendSel||l.v===vendSel)) out.push({tipo:'novPl',data:l.d,codigo:l.cd||'',cliente:l.c,vendedor:l.v||'',plan:l.t,sis:'',dif:'',falta:[l.q?int(l.q)+' ×':'',l.tp||''].filter(Boolean).join(' ')+' · está na planilha e não no sistema'}); });
   const OBR=[['cliente','cliente'],['vendedor','vendedor'],['tipo_venda','tipo de venda'],['tipo_produto','tipo de produto'],['material','material'],['cor','cor'],['quantidade','quantidade'],['total','total']].concat(b==='painel'?[['valor_unit','valor/und']]:[]);
@@ -2537,10 +2612,7 @@ function linhasInconsistencias(ls,b,ca,desde,noMes,vendSel){
     const mesmo=ns.every(a=>ns.every(c=>a===c||a.startsWith(c)||c.startsWith(a)||a.split(' ')[0]===c.split(' ')[0])); if(mesmo) continue;
     x.regs.forEach(r=>push('multi',r,{falta:'mesmo código em: '+[...new Set(x.regs.map(r2=>r2.cliente))].join(' · ')})); }
   const dupS=new Set([...ls.filter(r=>r.possivel_duplicado),...[...visto.values()].filter(x=>x.length>1).flat()]); dupS.forEach(r=>push('dup',r,{falta:r.possivel_duplicado?'marcado na base tratada':'linha igual repetida'}));
-  const cont=new Map(); ls.forEach(r=>{ const n=r._pl?(r.cliente_lancado||r.cliente):r.cliente; if(n) cont.set(n,(cont.get(n)||0)+1); });
-  const nomes=[...cont.keys()].map(n=>({n,k:semA(n).replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim()})).filter(x=>x.k.length>=3).sort((a,c)=>a.k.length-c.k.length);
-  const usN=new Set(); for(const a of nomes){ if(usN.has(a.n)) continue; const gg=nomes.filter(c=>c.n!==a.n&&!usN.has(c.n)&&c.k===a.k); if(!gg.length) continue; [a,...gg].forEach(x=>usN.add(x.n)); const todos=[a.n,...gg.map(x=>x.n)];
-    ls.filter(r=>todos.includes(r._pl?(r.cliente_lancado||r.cliente):r.cliente)).forEach(r=>push('graf',r,{falta:'grafias: '+todos.join(' · ')})); }
+  // v56: o mesmo cliente escrito de jeitos diferentes é consolidado automaticamente (cadastro único), então não entra mais como inconsistência
   return out;
 }
 function pgInconsistencias(){
@@ -2631,6 +2703,143 @@ function conciliarExtrato(ext,sis,tol=3){
   return res;
 }
 const ST_EXT={ok:['st-ok','Conciliado'],soE:['st-dif','Só no extrato'],soS:['st-so','Só no sistema']};
+
+
+// ---------- subtotais (v56): linha de total nas tabelas com valores que ainda não têm ----------
+const SUB_SIM=/fatur|valor|peças|pecas|pedidos|total|quantidade|qtd|comprou|recebid|saldo|vendas|itens|em aberto|a receber|a pagar|premia|bônus|bonus|clientes|receita|despesa/i,
+      SUB_NAO=/ticket|%|part\.|médi|medi|dias|últim|ultim|data|classe|^#$|prazo|venc|entrega|^mês$|^mes$|faixa|régua|regua|situa/i;
+function numCel(t){ t=(t||'').replace(/\s+/g,' ').trim(); if(!t||t==='—'||t==='-') return null; const m=t.match(/^(−|-)?\s*(R\$\s*)?(\d{1,3}(?:\.\d{3})*|\d+)(,\d+)?\s*(mil|mi|bi)?(?:\s|$)/i); if(!m) return null;
+  let v=parseFloat(m[3].replace(/\./g,'')+(m[4]?'.'+m[4].slice(1):'')); v*=({mil:1e3,mi:1e6,bi:1e9}[(m[5]||'').toLowerCase()]||1); if(m[1]) v=-v; return {v,brl:!!m[2],dec:!!m[4]&&!m[5]}; }
+function subtotalTabelas(raiz){ if(!raiz) return;
+  raiz.querySelectorAll('table').forEach(tb=>{
+    tb.querySelectorAll('tfoot.sub-auto').forEach(x=>x.remove());
+    if(tb.closest('#pdGrade,.dv-tab,.pl-tab,.pol,#det')||tb.classList.contains('dv-tab')||tb.classList.contains('matriz')||tb.querySelector('tr.tot,tfoot')) return;
+    const ths=[...(tb.tHead?.rows[0]?.cells||[])]; if(ths.length<2||!tb.tBodies[0]) return;
+    const rows=[...tb.tBodies[0].rows].filter(r=>!r.querySelector('td[colspan]')&&r.cells.length===ths.length); if(rows.length<2) return;
+    let algum=false; const tot=ths.map((th,i)=>{ const rot=th.textContent.trim(); if(i===0||!SUB_SIM.test(rot)||SUB_NAO.test(rot)) return null;
+      let s=0,ehR=false,dec=false,n=0; for(const r of rows){ const x=numCel(r.cells[i].textContent); if(!x) continue; s+=x.v; ehR=ehR||x.brl; dec=dec||x.dec; n++; }
+      if(n<2) return null; algum=true; return ehR?(dec?brl2(s):brl(s)):(dec?s.toLocaleString('pt-BR',{maximumFractionDigits:2}):int(s)); });
+    if(!algum) return;
+    const tf=tb.createTFoot(); tf.className='sub-auto'; const tr=tf.insertRow(); tr.className='tot';
+    ths.forEach((th,i)=>{ const td=tr.insertCell(); if(i===0) td.textContent=`Total (${int(rows.length)} ${rows.length===1?'linha':'linhas'})`; else if(tot[i]!=null){ td.textContent=tot[i]; td.className='v'; } });
+  }); }
+// ---------- botão + no lançamento: cliente, tipo de produto, material e cor novos ----------
+const CAD_ADD={cliente:'cliente',tipo_produto:'tipo de produto',material:'material',cor:'cor'};
+const CAD_DL={cliente:'dlCliente',tipo_produto:'dlProduto',material:'dlMaterial',cor:'dlCor'};
+const CAD={campo:null,input:null,fundo:false};
+function abrirCadastro(campo,input){ CAD.campo=campo; CAD.input=input; const cli=campo==='cliente', nome=(input?.value||'').trim();
+  $('cadTit').textContent=`Incluir ${CAD_ADD[campo]} novo`;
+  $('cadSub').textContent=cli?'O cliente fica na lista do painel e é cadastrado também na Conta Azul.':`O ${CAD_ADD[campo]} passa a aparecer na lista para todos os vendedores.`;
+  $('cadCorpo').innerHTML=`<div class="f"><label for="cadNome">${cli?'Nome do cliente (sem lote)':'Nome'} *</label><input id="cadNome" value="${esc(nome)}" maxlength="200"></div>`+(cli?`
+    <div class="dv-f2"><div class="f"><label for="cadTipo">Tipo de pessoa</label><select id="cadTipo"><option>Jurídica</option><option>Física</option></select></div><div class="f"><label for="cadDoc">CNPJ ou CPF</label><input id="cadDoc" inputmode="numeric" placeholder="opcional"></div></div>
+    <div class="dv-f2"><div class="f"><label for="cadEmail">E-mail</label><input id="cadEmail" type="email" placeholder="opcional"></div><div class="f"><label for="cadTel">Telefone</label><input id="cadTel" inputmode="tel" placeholder="opcional"></div></div>
+    <label class="dv-chk" style="margin-top:10px;display:flex"><input type="checkbox" id="cadCA" checked> Cadastrar também na Conta Azul</label>`:'');
+  $('cadErro').textContent=''; CAD.fundo=$('pdFundo').hidden; $('cadModal').hidden=false; $('pdFundo').hidden=false; setTimeout(()=>{ const x=$('cadNome'); x.focus(); x.select(); },40); }
+function fecharCadastro(){ $('cadModal').hidden=true; if(CAD.fundo&&$('pdModal').hidden) $('pdFundo').hidden=true; }
+document.addEventListener('click',e=>{ const b=e.target.closest('[data-add]'); if(!b) return; e.preventDefault(); abrirCadastro(b.dataset.add,b.closest('.pl-in')?.querySelector('input')); });
+$('cadFechar').onclick=fecharCadastro; $('cadCancelar').onclick=fecharCadastro;
+$('cadSalvar').onclick=async()=>{ const campo=CAD.campo, cli=campo==='cliente'; const nome=$('cadNome').value.trim(); if(nome.length<2){ $('cadErro').textContent='Informe o nome.'; return; }
+  const corpo={campo,nome}; if(cli) Object.assign(corpo,{tipo:$('cadTipo').value,documento:$('cadDoc').value,email:$('cadEmail').value,telefone:$('cadTel').value,conta_azul:$('cadCA').checked});
+  $('cadSalvar').disabled=true; $('cadErro').textContent='';
+  try{ const r=await api('/api/cadastros',{method:'POST',body:JSON.stringify(corpo)});
+    if(PED.d){ PED.d.cadastros=PED.d.cadastros||{}; const l=PED.d.cadastros[campo]=PED.d.cadastros[campo]||[]; if(!l.some(x=>x.nome===r.item.nome)) l.push(r.item); }
+    if(cli&&PED.cli) PED.cli.t=0;
+    const dl=$(CAD_DL[campo]); if(dl&&![...dl.options].some(o=>o.value===r.item.nome)) dl.insertAdjacentHTML('afterbegin',`<option value="${esc(r.item.nome)}">`);
+    if(CAD.input){ CAD.input.value=r.item.nome; CAD.input.dispatchEvent(new Event('input',{bubbles:true})); CAD.input.dispatchEvent(new Event('change',{bubbles:true})); }
+    fecharCadastro();
+    if(cli&&r.conta_azul) toast(r.conta_azul.ok?`Cliente ${r.item.nome} incluído no painel e na Conta Azul.`:`Cliente ${r.item.nome} incluído no painel. Na Conta Azul não foi: ${r.conta_azul.erro}`,!r.conta_azul.ok);
+    else toast(`${CAD_ADD[campo][0].toUpperCase()+CAD_ADD[campo].slice(1)} ${r.item.nome} ${r.ja_existia?'já estava na lista':'incluído na lista'}.`);
+  }catch(e){ $('cadErro').textContent=e.message; } finally{ $('cadSalvar').disabled=false; } };
+// ---------- Divergências (Conferência): fechamento do mês, comercial e financeiro (formato validado em 08/11/2026) ----------
+const DV={d:null,carr:null,abertas:new Set(),tudo:false,ed:null};
+const DV_INI='2026-08';
+function dvMeses(){ const fim=hojeISO().slice(0,7), out=[]; let m=DV_INI; while(m<=fim&&out.length<24){ out.push(m); m=somaMes(m,1); } return out; }
+const dvNum=(v)=>(v<-0.004?'−':'')+Math.abs(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const dvIn=(v)=>v==null?'':Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const dvMesNome=(m)=>nomeMes(m).split(' ')[0];
+function dvBadge(st,dif){ if(st==='conferido') return '<span class="dv-b dv-ok">✓ Conferido</span>'; if(st==='incompleto') return '<span class="dv-b dv-in">Incompleto</span>'; if(st==='dif'&&dif!=null) return `<span class="dv-b dv-di">${dvNum(dif)}</span>`; return '<span class="dv-vz">—</span>'; }
+async function carregarDiv(){ DV.d=await api('/api/divergencias'); return DV.d; }
+function pgDivergencias(){
+  if(!DV.d){ $('dvCom').innerHTML='<div class="vazio">Carregando o fechamento…</div>'; $('dvFin').innerHTML='';
+    if(!DV.carr) DV.carr=carregarDiv().then(()=>{ if(E.pagina==='divergencias') pgDivergencias(); }).catch(e=>{ $('dvCom').innerHTML=`<div class="vazio">Não foi possível carregar as divergências: ${esc(e.message)}</div>`; }).finally(()=>{ DV.carr=null; });
+    return; }
+  dvComercial(); dvFinanceiro();
+}
+// totais de agora: planilha de vendas do painel (mesma base das outras telas) × vendas aprovadas no Conta Azul
+function dvTotaisVivos(){ const d=E.dados||{}, ca=d.conta_azul, EF=['APROVADO','FATURADO'], pl={}, si={};
+  const temPl=['planilha','misto','demo','painel'].includes(d.fonte);
+  if(temPl) (d.linhas||[]).forEach(l=>{ if(l.cs) return; pl[l.m]=(pl[l.m]||0)+l.t; });
+  if(ca) (ca.vendas||[]).forEach(v=>{ if(!EF.includes(v.s)||!v.d) return; const m=v.d.slice(0,7); si[m]=(si[m]||0)+v.t; });
+  return {pl:temPl?pl:null,si:ca?si:null}; }
+function dvComercial(){
+  const D=DV.d, ms=dvMeses(), V=dvTotaisVivos(), ed=D.pode_editar;
+  const val=(m,k)=>{ const viv=V[k==='planilha'?'pl':'si'], f=D.comercial?.[m]?.fechamento?.[k]; return {v:viv?Math.round((viv[m]||0)*100)/100:(f??null),f:f??null,vivo:!!viv}; };
+  const rows=ms.map(m=>({m,p:val(m,'planilha'),s:val(m,'sistema')}));
+  const acP=rows.reduce((a,r)=>a+(r.p.v||0),0), acS=rows.reduce((a,r)=>a+(r.s.v||0),0);
+  const cel=(x)=>x.v==null?'<span class="dv-vz">—</span>':`${dvNum(x.v)}${x.vivo&&x.f!=null&&Math.abs(x.f-x.v)>0.009?`<span class="dv-fech" title="Total registrado no fechamento validado do mês">fechamento: ${dvNum(x.f)}</span>`:''}`;
+  const dif=(p,s)=>p==null||s==null?'<span class="dv-vz">—</span>':Math.abs(p-s)<0.01?'<span class="dv-b dv-ok">✓ Conferido</span>':`<span class="dv-b dv-di">${dvNum(p-s)}</span>`;
+  const obsCel=(m)=>{ const c=D.comercial?.[m]||{}; const ac=(c.acoes||[]).map((a,i)=>`<div class="dv-ac${a.feito?' feito':''}"><b>${a.feito?'✓ ':''}Ação ${i+1}</b> ${esc(a.texto)}${a.resp?`<span class="r">Responsável: ${esc(a.resp)}</span>`:''}</div>`).join('');
+    return `<td class="dv-obs">${c.obs?`<div class="dv-txt">${esc(c.obs)}</div>`:'<span class="dv-vz">Sem observações.</span>'}${ac}${ed?`<div class="dv-ed"><button class="dv-lk" type="button" data-dvcom="${m}">Editar observações e ações</button></div>`:''}</td>`; };
+  const fonte=V.pl&&V.si?'Totais atualizados agora: planilha de vendas × vendas aprovadas no Conta Azul. Quando o total de agora é diferente do fechamento validado, o valor do fechamento aparece embaixo.'
+    :!V.si?'A Conta Azul não está conectada: o sistema mostra os valores do fechamento validado.':'A planilha não está ligada: a planilha mostra os valores do fechamento validado.';
+  $('dvCom').innerHTML=`<div class="dv-cab"><h3 class="dv-h">Comercial</h3><div class="sub">Total de vendas do mês na planilha de vendas × vendas lançadas no Conta Azul</div></div>
+   <div class="tw"><table class="dv-tab"><thead><tr><th></th>${ms.map(m=>`<th>${esc(dvMesNome(m))}</th>`).join('')}<th>Acumulado</th></tr></thead><tbody>
+   <tr><td>Planilha de vendas</td>${rows.map(r=>`<td class="v">${cel(r.p)}</td>`).join('')}<td class="v acum">${dvNum(acP)}</td></tr>
+   <tr><td>Sistema Conta Azul</td>${rows.map(r=>`<td class="v">${cel(r.s)}</td>`).join('')}<td class="v acum">${dvNum(acS)}</td></tr>
+   <tr><td><b>Divergências</b></td>${rows.map(r=>`<td>${dif(r.p.v,r.s.v)}</td>`).join('')}<td>${dif(acP,acS)}</td></tr>
+   <tr><td class="dv-rot">Observações e ações</td>${ms.map(obsCel).join('')}<td></td></tr>
+   </tbody></table></div><div class="nota">${fonte} Divergência = planilha − Conta Azul.</div>`;
+  $('dvCom').querySelectorAll('[data-dvcom]').forEach(b=>b.onclick=()=>dvEditarComercial(b.dataset.dvcom,val(b.dataset.dvcom,'planilha'),val(b.dataset.dvcom,'sistema')));
+}
+function dvFinanceiro(){
+  const D=DV.d, ms=dvMeses(), ed=D.pode_editar, contas=D.financeiro?.contas||[];
+  const ultimo=(c)=>{ for(let i=ms.length-1;i>=0;i--){ const x=c.meses?.[ms[i]]; if(x&&x.status) return x; } return null; };
+  const kn=(t)=>semA(t||'').replace(/[^a-z0-9 ]/g,' ').replace(/\s+/g,' ').trim();
+  const saldoHoje=(nome)=>{ const k=kn(nome); const s=(D.saldos_ca||[]).find(x=>{ const n=kn(x.nome); return n&&(n===k||n.includes(k)); }); return s&&s.saldo!=null?s.saldo:null; };
+  const linhas=contas.map((c,i)=>{ const aberto=DV.tudo||DV.abertas.has(c.nome), u=ultimo(c), h=saldoHoje(c.nome);
+    const det=aberto?`<tr class="dv-det"><td colspan="${ms.length+2}"><div class="dv-dgrid">${ms.map(m=>{ const x=c.meses?.[m]||{};
+      return `<div class="dv-dm"><div class="dv-dmt"><span>${esc(dvMesNome(m).replace(/^./,c=>c.toUpperCase()))}/${m.slice(2,4)}</span>${dvBadge(x.status,x.dif)}</div><div>Extrato: <b>${x.extrato!=null?dvNum(x.extrato):'—'}</b></div><div>Conta Azul: <b>${x.sistema!=null?dvNum(x.sistema):'—'}</b></div>${x.status==='dif'&&x.dif!=null?`<div>Diferença: <b>${dvNum(x.dif)}</b></div>`:''}${x.obs?`<div class="dv-dobs">${esc(x.obs)}</div>`:''}${ed?`<button class="dv-lk" type="button" data-dvconta="${i}" data-mes="${m}">Editar</button>`:''}</div>`; }).join('')}</div>${h!=null?`<div class="nota" style="margin-top:8px">Saldo de hoje na Conta Azul: <b>${brl2(h)}</b></div>`:''}${ed?`<div style="margin-top:8px"><button class="dv-lk" type="button" data-dvrem="${i}">Remover esta conta</button></div>`:''}</td></tr>`:'';
+    return `<tr class="${aberto?'aberto':''}"><td><button type="button" class="dv-tg" data-dvtg="${i}" aria-expanded="${aberto}">${esc(c.nome)}</button></td>${ms.map(m=>{ const x=c.meses?.[m]; return `<td>${x?dvBadge(x.status,x.dif):'<span class="dv-vz">—</span>'}</td>`; }).join('')}<td>${u?dvBadge(u.status,u.dif):'<span class="dv-vz">—</span>'}</td></tr>${det}`; }).join('');
+  const veExt=paginasAtivas().includes('extrato');
+  $('dvFin').innerHTML=`<div class="dv-cab"><h3 class="dv-h">Financeiro</h3><div class="sub">Saldo no fim do mês: extrato × Conta Azul, para cada conta. Nos cartões, o "extrato" é o valor em aberto depois do pagamento da fatura (zero quando a fatura foi paga e todas as despesas foram lançadas). Diferença zero = conferido. Clique em ▸ para ver saldos e observações. Acumulado mostra a posição do último mês revisado.</div></div>
+   <div style="display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 8px"><button class="bt2" type="button" id="dvTudo">${DV.tudo?'Fechar tudo':'Abrir tudo'}</button>${veExt?'<button class="bt2" type="button" id="dvExtrato">Importar extrato</button>':''}${ed?'<button class="bt2" type="button" id="dvNovaConta">+ Conta</button>':''}</div>
+   <div class="tw"><table class="dv-tab dv-fin"><thead><tr><th></th>${ms.map(m=>`<th>${esc(dvMesNome(m))}</th>`).join('')}<th>Acumulado</th></tr></thead><tbody>${linhas||`<tr><td colspan="${ms.length+2}"><div class="vazio">Nenhuma conta cadastrada.</div></td></tr>`}</tbody></table></div>`;
+  $('dvTudo').onclick=()=>{ DV.tudo=!DV.tudo; if(!DV.tudo) DV.abertas.clear(); dvFinanceiro(); };
+  if($('dvExtrato')) $('dvExtrato').onclick=()=>{ irPara('extrato'); setTimeout(()=>abrirImportExtrato(),300); };
+  if($('dvNovaConta')) $('dvNovaConta').onclick=dvNovaConta;
+  $('dvFin').querySelectorAll('[data-dvtg]').forEach(b=>b.onclick=()=>{ const n=contas[+b.dataset.dvtg].nome; if(DV.tudo){ DV.tudo=false; contas.forEach(c=>DV.abertas.add(c.nome)); } DV.abertas.has(n)?DV.abertas.delete(n):DV.abertas.add(n); dvFinanceiro(); });
+  $('dvFin').querySelectorAll('[data-dvconta]').forEach(b=>b.onclick=()=>dvEditarConta(contas[+b.dataset.dvconta],b.dataset.mes));
+  $('dvFin').querySelectorAll('[data-dvrem]').forEach(b=>b.onclick=async()=>{ const c=contas[+b.dataset.dvrem]; if(!confirmar(`Remover a conta ${c.nome} das divergências?`)) return; try{ DV.d=await api('/api/divergencias',{method:'POST',body:JSON.stringify({tipo:'remover_conta',nome:c.nome})}); toast('Conta removida.'); dvFinanceiro(); }catch(e){ toast(e.message,true); } });
+}
+function dvAbrir(tit,sub,corpo,salvar){ $('dvTit').textContent=tit; $('dvSub').textContent=sub||''; $('dvCorpo').innerHTML=corpo; $('dvErro').textContent=''; $('dvModal').hidden=false; $('pdFundo').hidden=false; DV.salvar=salvar; setTimeout(()=>$('dvCorpo').querySelector('textarea,input')?.focus(),50); }
+function dvFechar(){ $('dvModal').hidden=true; $('pdFundo').hidden=true; }
+const dvAcaoLinha=(a={})=>`<div class="dv-acl"><textarea data-a="texto" rows="2" placeholder="O que precisa ser feito">${esc(a.texto||'')}</textarea><input data-a="resp" placeholder="Responsável" value="${esc(a.resp||'')}"><label class="dv-chk"><input type="checkbox" data-a="feito"${a.feito?' checked':''}> Concluída</label><button type="button" class="bt2 del" data-arem aria-label="Remover ação">✕</button></div>`;
+function dvEditarComercial(m,p,s){ const c=DV.d.comercial?.[m]||{}; const podeFech=p.vivo&&s.vivo&&p.v!=null&&s.v!=null;
+  dvAbrir(`Comercial · ${nomeMes(m)}`,'Observações e ações que aparecem na coluna do mês',
+   `<div class="f"><label for="dvObs">Observações</label><textarea id="dvObs" rows="6">${esc(c.obs||'')}</textarea></div>
+    <div style="margin-top:12px;font-weight:700;font-size:13px">Ações</div><div id="dvAcoes">${(c.acoes||[]).map(dvAcaoLinha).join('')}</div>
+    <button type="button" class="bt2" id="dvMaisAcao" style="margin-top:8px">+ Ação</button>
+    ${podeFech?`<label class="dv-chk" style="margin-top:14px;display:flex"><input type="checkbox" id="dvGravaFech"> Gravar os totais de agora como fechamento validado deste mês (planilha ${dvNum(p.v)} · Conta Azul ${dvNum(s.v)})</label>`:''}`,
+   async()=>{ const acoes=[...$('dvAcoes').querySelectorAll('.dv-acl')].map(r=>({texto:r.querySelector('[data-a="texto"]').value.trim(),resp:r.querySelector('[data-a="resp"]').value.trim(),feito:r.querySelector('[data-a="feito"]').checked})).filter(a=>a.texto);
+     DV.d=await api('/api/divergencias',{method:'POST',body:JSON.stringify({tipo:'comercial',mes:m,obs:$('dvObs').value,acoes})});
+     if($('dvGravaFech')?.checked) DV.d=await api('/api/divergencias',{method:'POST',body:JSON.stringify({tipo:'fechamento',mes:m,planilha:p.v,sistema:s.v})});
+     dvComercial(); toast('Observações salvas.'); });
+  $('dvMaisAcao').onclick=()=>{ $('dvAcoes').insertAdjacentHTML('beforeend',dvAcaoLinha()); };
+  $('dvAcoes').onclick=(e)=>{ const b=e.target.closest('[data-arem]'); if(b) b.closest('.dv-acl').remove(); };
+}
+function dvEditarConta(c,m){ const x=c.meses?.[m]||{};
+  dvAbrir(`${c.nome} · ${nomeMes(m)}`,'Saldo no fim do mês. Com os dois saldos preenchidos, a diferença e a situação são calculadas sozinhas.',
+   `<div class="dv-f2"><div class="f"><label for="dvExt">Saldo do extrato</label><input id="dvExt" inputmode="decimal" placeholder="0,00" value="${dvIn(x.extrato)}"></div><div class="f"><label for="dvSis">Saldo na Conta Azul</label><input id="dvSis" inputmode="decimal" placeholder="0,00" value="${dvIn(x.sistema)}"></div></div>
+    <div class="dv-f2"><div class="f"><label for="dvSt">Situação</label><select id="dvSt"><option value="">Calcular pelos saldos</option><option value="conferido"${x.status==='conferido'?' selected':''}>Conferido</option><option value="incompleto"${x.status==='incompleto'?' selected':''}>Incompleto (falta extrato)</option><option value="dif"${x.status==='dif'?' selected':''}>Com diferença</option></select></div><div class="f"><label for="dvDif">Diferença (sem os saldos)</label><input id="dvDif" inputmode="decimal" placeholder="0,00" value="${x.status==='dif'?dvIn(x.dif):''}"></div></div>
+    <div class="f"><label for="dvObsC">Observação</label><textarea id="dvObsC" rows="4">${esc(x.obs||'')}</textarea></div>`,
+   async()=>{ DV.d=await api('/api/divergencias',{method:'POST',body:JSON.stringify({tipo:'conta',nome:c.nome,mes:m,extrato:$('dvExt').value,sistema:$('dvSis').value,status:$('dvSt').value,dif:$('dvDif').value,obs:$('dvObsC').value})}); DV.abertas.add(c.nome); dvFinanceiro(); toast('Saldo salvo.'); });
+}
+function dvNovaConta(){ dvAbrir('Nova conta','Banco, cartão, caixa ou aplicação que entra no fechamento',
+  `<div class="f"><label for="dvNome">Nome da conta</label><input id="dvNome" placeholder="Ex.: Cartão Itaú 1234"></div><div class="f"><label for="dvTipo">Tipo</label><select id="dvTipo"><option value="banco">Banco</option><option value="cartao">Cartão</option><option value="caixa">Caixa</option><option value="aplicacao">Aplicação</option></select></div>`,
+  async()=>{ DV.d=await api('/api/divergencias',{method:'POST',body:JSON.stringify({tipo:'nova_conta',nome:$('dvNome').value,tipo_conta:$('dvTipo').value})}); dvFinanceiro(); toast('Conta incluída.'); }); }
+$('dvFecharBt').onclick=dvFechar; $('dvCancelar').onclick=dvFechar;
+$('dvSalvar').onclick=async()=>{ if(!DV.salvar) return; $('dvSalvar').disabled=true; try{ await DV.salvar(); dvFechar(); }catch(e){ $('dvErro').textContent=e.message; } finally{ $('dvSalvar').disabled=false; } };
+
 function pgExtrato(){
   if(!EXT.d){ $('exTabela').innerHTML='<div class="vazio">Carregando o extrato e as baixas da Conta Azul…</div>'; carregarExtrato().then(()=>{ if(E.pagina==='extrato') pgExtrato(); }).catch(e=>{ $('exTabela').innerHTML=`<div class="aviso erro">${esc(e.message)}</div>`; }); return; }
   const d=EXT.d, contas=d.contas.map(c=>c.conta);
@@ -2682,9 +2891,7 @@ $('exBusca').addEventListener('input',()=>{ clearTimeout(tBusca); tBusca=setTime
 
 // ---------- eventos ----------
 $('pdMes').onchange=()=>{ PED.mes=$('pdMes').value; pgRegistro(); };
-$('pmCliente').addEventListener('input',()=>{ const v=$('pmCliente').value.trim(); const ok=[...document.querySelectorAll('#dlCliente option')].some(o=>o.value===v); $('pmCliNovo').textContent=v&&!ok?'Cliente novo (sem compra anterior): será cadastrado ao salvar.':''; $('pmCliIncluir').hidden=!(v&&!ok); });
-$('pmCliIncluir').onclick=()=>{ const v=$('pmCliente').value.trim(); if(!v) return; const o=document.createElement('option'); o.value=v; $('dlCliente').appendChild(o); $('pmCliNovo').textContent='Cliente incluído: será salvo junto com o pedido e enviado à Conta Azul no próximo envio.'; $('pmCliIncluir').hidden=true; };
-$('pdEnviarAgora').onclick=async()=>{ const b=$('pdEnviarAgora'); b.disabled=true; b.textContent='Enviando…'; try{ const r=await api('/api/sincronizar-agora',{method:'POST',body:'{}'}); toast(r.aviso||`Enviado: ${r.pedidos??0} pedidos e ${r.celulas??0} células gravados.`); pgRegistro(); }catch(e){ toast('Não foi possível enviar: '+e.message); } finally{ b.disabled=false; b.textContent='Enviar pedidos agora'; } };
+$('pdEnviarAgora').onclick=async()=>{ const b=$('pdEnviarAgora'); b.disabled=true; b.textContent='Atualizando…'; try{ const r=await api('/api/sincronizar-agora',{method:'POST',body:'{}'}); toast(r.aviso||`Atualizado: Conta Azul lida agora e ${int(r.celulas??0)} células de pagamento gravadas na planilha.`); pgRegistro(); }catch(e){ toast('Não foi possível atualizar: '+e.message,true); } finally{ b.disabled=false; b.textContent='Atualizar agora'; } };
 $('pdDe').onchange=()=>{ PED.de=$('pdDe').value; pgRegistro(); };
 $('pdAte').onchange=()=>{ PED.ate=$('pdAte').value; pgRegistro(); };
 $('pdVend').onchange=()=>{ PED.vend=$('pdVend').value; PED.vendEscolhido=true; pgRegistro(); };
@@ -2709,7 +2916,9 @@ function addLinhaPl(){
     if(PL_RO.has(k)) return `<td class="ro" title="Preenchido pela Conta Azul quando o pagamento for baixado">—</td>`;
     if(t&&t.startsWith('sel:')){ const ops=t.slice(4).split('|'); return `<td><select data-k="${k}" class="${cls}">${ops.map(o=>`<option value="${o}"${o===v(k)?' selected':''}>${o?esc(ROT_NR[o]||o):'—'}</option>`).join('')}</select></td>`; }
     const ty=t==='data'?'date':t==='num'||t==='brl'?'number':'text';
-    return `<td${ty==='number'?' class="v"':''}><input data-k="${k}" class="${cls}" type="${ty}" ${ty==='number'?`min="0" step="${t==='brl'?'0.01':'1'}"`:''} ${dl?`list="${dl}"`:''} value="${esc(v(k)||'')}" ${k==='vendedor'&&meuVend()?'readonly':''} aria-label="${esc(ROT_PED[k])}"></td>`; };
+    const inp=`<input data-k="${k}" class="${cls}" type="${ty}" ${ty==='number'?`min="0" step="${t==='brl'?'0.01':'1'}"`:''} ${dl?`list="${dl}"`:''} value="${esc(v(k)||'')}" ${k==='vendedor'&&meuVend()?'readonly':''} aria-label="${esc(ROT_PED[k])}">`;
+    if(CAD_ADD[k]&&!(k==='cliente'&&prim)) return `<td><div class="pl-in">${inp}<button type="button" class="pl-add" data-add="${k}" title="Incluir ${CAD_ADD[k]} novo" aria-label="Incluir ${CAD_ADD[k]} novo">+</button></div></td>`;
+    return `<td${ty==='number'?' class="v"':''}>${inp}</td>`; };
   const tr=document.createElement('tr'); if(prim) tr.className='it2';
   tr.innerHTML=COLS_PED.map(cel).join('')+`<td>${prim?'<button type="button" class="bt2 del" data-pldel aria-label="Remover item">✕</button>':''}</td>`;
   $('plCorpo').appendChild(tr); totLinhaPl(); if(prim) setTimeout(()=>tr.querySelector('[data-k="tipo_produto"]').focus(),20);
@@ -2894,7 +3103,7 @@ function previaPedidos(url,op){
 const MENU=[
   {grupo:'Gestão',ico:'<path d="M3 3h8v8H3zM13 3h8v5h-8zM13 10h8v11h-8zM3 13h8v8H3z"/>',itens:[['painel','Painel executivo','Vendas, resultado, caixa e o que pede decisão'],['indicadores','Quadro de indicadores','Comercial, resultado e caixa com tendência de 6 meses']]},
   {grupo:'Comercial',ico:'<path d="M3 4h2l2.4 11h11.2L21 7H7" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="9" cy="19" r="1.6"/><circle cx="17" cy="19" r="1.6"/>',itens:[['registro','Planilha de vendas','As mesmas colunas da planilha do comercial: os vendedores lançam e revisam as vendas aqui'],['vendas','Vendas','Pedidos, ticket médio e novas vendas × recompra (R1, R2, R3)'],['produtos','Produtos e mix','Tipo de produto, tecido e cor em peças ou R$ (R4) e curva ABC'],['clientes','Clientes','Curva ABC, faixas de valor, segmento e quem parou de comprar (C3, C5, C6)'],['vendedores','Vendedores e premiação','Faturamento, clientes novos, régua e apuração da premiação (C7, C8)'],['pedidos','Pedidos e entregas','Ciclo de pagamento e entregas das próximas semanas (C4)'],['treinamento','Treinamento','Passo a passo para lançar pedidos, usar o complementar e tirar dúvidas (vídeo em breve)']]},
-  {grupo:'Conferência',ico:'<path d="M4 5h7v14H4zM13 5h7v14h-7z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M6.5 9h2M6.5 12h2M15.5 9h2M15.5 12h2" stroke="currentColor" stroke-width="1.8"/>',itens:[['inconsistencias','Inconsistências','Num lugar só: sistema × planilha pedido a pedido, colunas vazias, códigos e cadastro de clientes'],['conciliacao','Divergências por mês','Planilha × Conta Azul por mês, com observações e ações por responsável, e saldo por conta'],['historico','Histórico de alterações','Quem lançou, alterou ou excluiu pedidos, e quando']]},
+  {grupo:'Conferência',ico:'<path d="M4 5h7v14H4zM13 5h7v14h-7z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M6.5 9h2M6.5 12h2M15.5 9h2M15.5 12h2" stroke="currentColor" stroke-width="1.8"/>',itens:[['inconsistencias','Inconsistências','Num lugar só: sistema × planilha pedido a pedido, colunas vazias, códigos e cadastro de clientes'],['divergencias','Divergências','Fechamento do mês: planilha × Conta Azul com observações e ações, e extrato × Conta Azul por conta'],['historico','Histórico de alterações','Quem lançou, alterou ou excluiu pedidos, e quando']]},
   {grupo:'Financeiro',ico:'<circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 6v12M15 9c0-1.2-1.3-2-3-2s-3 .8-3 2 1.3 2 3 2 3 .8 3 2-1.3 2-3 2-3-.8-3-2" fill="none" stroke="currentColor" stroke-width="1.8"/>',itens:[['dre','DRE gerencial','Receita, custos, despesas e resultado por competência ou caixa'],['equilibrio','Margem e ponto de equilíbrio','Custos fixos × variáveis, margem de contribuição e ponto de equilíbrio (C1)'],['caixa','Fluxo de caixa','Saldo nos bancos, realizado e projeção de 13 semanas'],['receber','Contas a receber','Inadimplência por idade e por cliente'],['pagar','Contas a pagar','Despesas por categoria, centro de custo e fornecedor'],['extrato','Conciliação bancária','Extrato do banco × recebimentos e pagamentos baixados na Conta Azul']]},
   {grupo:'Controle',ico:'<path d="M6 2h9l4 4v16H6z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 11l2 2 4-4" fill="none" stroke="currentColor" stroke-width="2"/>',itens:[['conciliacao','Planilha × sistema (mês)','Ligação da planilha do Google e gravação dos pagamentos'],['dados','Qualidade dos dados','Colunas reconhecidas, campos em branco e grafias diferentes'],['versoes','Versões do painel','O que mudou em cada entrega'],]},
   {grupo:'Administração',ico:'<circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.6 2.7-6 6-6s6 2.4 6 6z"/><circle cx="17" cy="9" r="2.4"/><path d="M15.5 14.2c2.9.3 5.5 2.4 5.5 5.8h-4.5"/>',itens:[['usuarios','Usuários e permissões','Perfis, senhas temporárias e o que cada pessoa vê']]},
@@ -2904,7 +3113,7 @@ const MESES_PAG=Object.fromEntries(TODAS.map(p=>[p,1]));
 const ITEM=Object.fromEntries(MENU.flatMap(g=>g.itens.map(i=>[i[0],{rot:i[1],ctx:i[2],grupo:g.grupo}])));
 const GRUPO_DE=Object.fromEntries(TODAS.map(p=>[p,ITEM[p].grupo]));
 const COMP=['vendas','produtos','clientes','vendedores','pedidos'], FINP=['dre','equilibrio','caixa','receber','pagar','extrato'];
-const PADRAO={adm:TODAS,diretor:TODAS.filter(p=>p!=='usuarios'),comercial:['registro',...COMP,'inconsistencias','conciliacao','versoes','treinamento'],financeiro:['painel','indicadores','registro',...FINP,'inconsistencias','historico','conciliacao','dados','versoes','treinamento'],consultor:[...COMP],vendedor:['registro',...COMP,'inconsistencias','treinamento']};
+const PADRAO={adm:TODAS,diretor:TODAS.filter(p=>p!=='usuarios'),comercial:['registro',...COMP,'inconsistencias','conciliacao','versoes','treinamento'],financeiro:['painel','indicadores','registro',...FINP,'inconsistencias','divergencias','historico','conciliacao','dados','versoes','treinamento'],consultor:[...COMP],vendedor:['registro',...COMP,'inconsistencias','treinamento']};
 function paginasDe(u){ if(!u) return []; const base=PADRAO[u.perfil]||[]; if(u.perfil==='adm'||!Array.isArray(u.paginas)) return base; const r=base.filter(p=>u.paginas.includes(p)); return r.length?r:base.slice(0,1); }
 // páginas que aparecem agora (com o "Ver o painel como" do ADM)
 function paginasAtivas(){ if(E.verComo) return paginasDe(E.verComo); return E.eu?.paginas||paginasDe(E.eu)||TODAS; }

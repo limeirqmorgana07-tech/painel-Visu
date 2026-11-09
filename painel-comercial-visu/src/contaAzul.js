@@ -133,6 +133,31 @@ export async function get(caminho, params = {}, tentativa = 0) {
   }).then((res) => (res?.__repetir ? get(caminho, params, tentativa + 1) : res));
 }
 
+// POST na API (cadastros feitos pelo painel, como cliente novo)
+export async function post(caminho, corpo, tentativa = 0) {
+  const url = `${config.urlApi}${caminho}`;
+  return naFila(async () => {
+    const token = await tokenValido();
+    const r = await fetch(url, { method: 'POST', headers: { Authorization: `Bearer ${token}`, Accept: 'application/json', 'Content-Type': 'application/json' }, body: JSON.stringify(corpo) });
+    if (r.status === 429 && tentativa < 4) { await esperar((Number(r.headers.get('retry-after')) || 2 ** (tentativa + 1)) * 1000); return { __repetir: true }; }
+    if (r.status === 401 && tentativa < 1) { const t = await lerToken(); if (t) await salvarToken({ ...t, expira_em: 0 }); return { __repetir: true }; }
+    const texto = await r.text();
+    if (!r.ok) { let msg = texto.slice(0, 300); try { const j = JSON.parse(texto); msg = j.error || j.message || j.mensagem || msg; } catch { /* texto puro */ } throw new Error(`Conta Azul (${r.status}): ${msg}`); }
+    return texto ? JSON.parse(texto) : {};
+  }).then((res) => (res?.__repetir ? post(caminho, corpo, tentativa + 1) : res));
+}
+// Cliente novo na Conta Azul (POST /v1/pessoas): nome e tipo de pessoa são obrigatórios; CPF/CNPJ, e-mail e telefone são opcionais
+export async function criarCliente({ nome, tipo, documento, email, telefone }) {
+  const tp = tipo === 'Física' ? 'Física' : 'Jurídica';
+  const doc = String(documento || '').replace(/\D/g, '');
+  const corpo = { nome: String(nome).trim().slice(0, 200), tipo_pessoa: tp, perfis: [{ tipo_perfil: 'Cliente' }], ativo: true };
+  if (doc) corpo[tp === 'Física' ? 'cpf' : 'cnpj'] = doc;
+  if (email) corpo.email = String(email).trim().slice(0, 100);
+  if (telefone) corpo.telefone_celular = String(telefone).trim();
+  const r = await post('/v1/pessoas', corpo);
+  return { id: r?.id || null, nome: r?.nome || corpo.nome };
+}
+
 // Lê todas as páginas de uma listagem
 const listaDe = (r) => (Array.isArray(r) ? r : r?.itens || r?.items || r?.data || r?.vendas || r?.content || []);
 
@@ -309,11 +334,26 @@ export async function buscarClientes() {
   for (const [caminho, params] of [['/v1/pessoas', { tipo_perfil: 'Cliente' }], ['/v1/pessoa', { tipo_perfil: 'Cliente' }], ['/v1/pessoas', {}]]) {
     try {
       const lista = await todasAsPaginas(caminho, params, 500, 20);
-      if (lista.length) return lista.map((p) => ({ nome: nomeDe(p) || p.nome || '', documento: p.documento || p.cpf || p.cnpj || '', perfis: p.perfis || p.tipo_perfil || '' }))
+      if (lista.length) return lista.map((p) => ({ id: p.id || p.uuid || null, nome: nomeDe(p) || p.nome || '', documento: p.documento || p.cpf || p.cnpj || '', perfis: p.perfis || p.tipo_perfil || '' }))
         .filter((p) => p.nome && (!p.perfis || /client/i.test(JSON.stringify(p.perfis))));
     } catch { /* tenta o próximo caminho */ }
   }
   return [];
+}
+
+// Produtos (GET /v1/produtos?busca=…; POST /v1/produtos com nome): usados como item da venda criada pelo painel
+export async function buscarProdutos(busca) {
+  const r = await get('/v1/produtos', { busca, pagina: 1, tamanho_pagina: 50 });
+  return (r?.items || r?.itens || listaDe(r)).map((p) => ({ id: p.id, nome: p.nome || '', codigo: p.codigo || '' }));
+}
+export async function criarProduto(nome) {
+  const r = await post('/v1/produtos', { nome: String(nome).trim().slice(0, 100) });
+  return { id: r?.id || null, nome: r?.nome || nome };
+}
+// Venda (POST /v1/venda): numero inteiro, situação EM_ANDAMENTO ou APROVADO, itens com id do produto e condição de pagamento
+export async function criarVenda(corpo) {
+  const r = await post('/v1/venda', corpo);
+  return { id: r?.id || null, numero: r?.numero ?? corpo.numero };
 }
 
 export async function buscarEstruturaDRE() {

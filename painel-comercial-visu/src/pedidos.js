@@ -75,7 +75,30 @@ async function carregar() {
   if (p) { const r = await p.query('SELECT dados FROM pedidos_venda'); for (const x of r.rows) m.set(x.dados.id, x.dados); }
   else { try { for (const x of JSON.parse(await fs.readFile(path.join(pasta(), 'pedidos.json'), 'utf8'))) m.set(x.id, x); } catch { /* ainda não há pedidos */ } }
   mem = m;
+  await consolidarClientes().catch((e) => console.warn('[pedidos] consolidar clientes:', e.message));
   return mem;
+}
+// Cadastro único por cliente (validado pela Visu em 08/11/2026): o mesmo cliente escrito de jeitos diferentes
+// (maiúsculas, acento, pontuação ou "lote N" no nome) vira um nome só; o lote vai para a coluna Lote / obs. do cliente.
+// Roda ao carregar os pedidos e é idempotente: só mexe em quem ainda está fora do padrão.
+const chaveCli = (s) => sem(clienteBase(s)).replace(/[^a-z0-9]+/g, ' ').trim();
+async function consolidarClientes() {
+  const vivos = [...mem.values()].filter((r) => !r.excluido && r.cliente);
+  const grupos = new Map();
+  for (const r of vivos) { const k = chaveCli(r.cliente); if (!k) continue; const g = grupos.get(k) || new Map(); const base = clienteBase(r.cliente); g.set(base, (g.get(base) || 0) + 1); grupos.set(k, g); }
+  const canon = new Map([...grupos].map(([k, g]) => [k, [...g.entries()].sort((a, b) => b[1] - a[1] || a[0].length - b[0].length)[0][0]]));
+  const mudados = [];
+  for (const r of vivos) {
+    const para = canon.get(chaveCli(r.cliente)); if (!para || r.cliente === para) continue;
+    const sl = separarLote(r.cliente);
+    const n = { ...r, cliente: para, cliente_lancado: r.cliente_lancado || r.cliente, lote: r.lote || sl.lote || '', alterado_em: agoraISO(), alterado_por: 'Consolidação de clientes' };
+    mudados.push([r, n]); mem.set(r.id, n);
+  }
+  if (!mudados.length) return 0;
+  await gravar(mudados.map((x) => x[1]));
+  const nomes = [...new Set(mudados.map((x) => x[1].cliente))];
+  await registrarLog([{ ...quem(null), usuario: 'Consolidação de clientes', acao: 'unificou', codigo: null, cliente: nomes.slice(0, 5).join(' · ') + (nomes.length > 5 ? ` e mais ${nomes.length - 5}` : ''), mudancas: [{ campo: 'cliente', antes: `${mudados.length} linhas com o nome escrito de outro jeito`, depois: `${nomes.length} ${nomes.length === 1 ? 'cliente' : 'clientes'} com cadastro único` }], detalhe: `${mudados.length} linhas` }]).catch(() => {});
+  return mudados.length;
 }
 async function gravar(regs) {
   if (!regs.length) return;
@@ -139,6 +162,8 @@ export async function salvarConfigPedidos(c, usuario) {
 export const fontePainel = () => cfgMem?.fonte === 'painel' && !!mem && [...mem.values()].some((r) => !r.excluido);
 // planilha até o mês anterior ao corte, pedidos do painel a partir dele (reunião: novembro todo no sistema)
 export const fonteMista = () => (cfgMem?.fonte === 'misto' ? cfgMem.corte || '2026-11' : null);
+// enquanto a planilha do Google estiver em uso (até a gestão encerrar), as vendas lançadas nela depois do corte também entram no painel
+export const planilhaEmUso = () => !cfgMem?.planilha_encerrada;
 export async function prepararFonte() { await configPedidos(); await carregar().catch(() => {}); }
 export function linhasDoPainel() {
   return [...(mem?.values() || [])].filter((r) => !r.excluido && (r.total || r.quantidade)).map((r) => ({
@@ -179,7 +204,19 @@ export async function listar() {
 // códigos usados fora do painel (planilha ligada e números de venda da Conta Azul), para a sequência continuar de onde a planilha parou
 let codigosExternos = [];
 export const codigosExternosLista = () => [...new Set(codigosExternos)];
-export const definirCodigosExternos = (lista) => { codigosExternos = (lista || []).map((c) => { const t = String(c ?? '').replace(/\D/g, ''); return t.length >= 7 && t.length <= 9 ? t.padStart(10, '0') : t; }).filter(Boolean); };
+// De-para do número da venda na Conta Azul (sem os zeros do começo) para o código do painel:
+// 21112026 → 0021112026 · 211120261 → 0021112026-1 (pedido complementar: o sufixo vai colado no fim, porque a Conta Azul só aceita número inteiro)
+const RX_BASE_CA = /^(\d{1,4})(0[1-9]|1[0-2])(20[2-3]\d)$/;
+export function codigoDeNumeroCA(n) {
+  const s = String(n ?? '').replace(/\D/g, '').replace(/^0+/, '');
+  if (!s) return '';
+  if (RX_BASE_CA.test(s)) return s.padStart(10, '0');
+  for (const k of [1, 2]) { const b = s.slice(0, -k), suf = s.slice(-k); if (b && RX_BASE_CA.test(b) && !suf.startsWith('0')) return `${b.padStart(10, '0')}-${suf}`; }
+  return s;
+}
+// código do painel → número da venda na Conta Azul (o inverso do de-para acima)
+export const numeroParaCA = (codigo) => Number(chaveCodigo(codigo));
+export const definirCodigosExternos = (lista) => { codigosExternos = (lista || []).map((c) => codigoDeNumeroCA(c)).filter(Boolean); };
 export function proximoCodigo(data, regs = [...(mem?.values() || [])]) {
   const d = limpar('data', data) || new Date(Date.now() - 3 * 3600e3).toISOString().slice(0, 10);
   const mm = d.slice(5, 7), aa = d.slice(0, 4);
@@ -261,6 +298,15 @@ export async function excluir(id, u) {
   return novo;
 }
 // unifica grafias de cliente (ex.: "Checkpoint 5 anos", "Checkpoint CT" → "Checkpoint")
+// envio à Conta Azul: guarda o resultado em cada linha do pedido (sem mexer em "alterado_em", que é edição de quem lança)
+export async function marcarEnvioCA(ids, campos, u) {
+  await carregar();
+  const mudados = [];
+  for (const id of ids) { const r = mem.get(id); if (!r) continue; const n = { ...r, ...campos }; mem.set(id, n); mudados.push(n); }
+  await gravar(mudados);
+  if (campos.ca_venda_id && campos.ca_venda_id !== 'ja-existia') await registrarLog([{ ...quem(u), acao: 'enviou', codigo: mudados[0]?.codigo || null, cliente: mudados[0]?.cliente || '', mudancas: [{ campo: 'conta_azul', antes: '', depois: 'venda criada na Conta Azul (em andamento)' }], detalhe: `${mudados.length} ${mudados.length === 1 ? 'item' : 'itens'}` }]).catch(() => {});
+  return mudados.length;
+}
 export async function unificarCliente(de, para, u) {
   if (!podeLancar(u)) throw new Error('Seu perfil só consulta os pedidos.');
   para = limpar('cliente', para); const nomes = new Set((Array.isArray(de) ? de : [de]).map((x) => sem(x)).filter(Boolean));

@@ -2,6 +2,29 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v58 — 08/11/2026 — De-para do número da Conta Azul e pedido complementar no envio
+
+- De-para do número da Conta Azul (que não tem os zeros do começo) com o código do painel: 21112026 = 0021112026. O pedido complementar vai para a Conta Azul como venda própria, com o sufixo colado no número (0021112026-1 → 211120261), e volta para o painel como 0021112026-1, sem diferença na conferência.
+- Na conciliação do mês, o pedido e os complementares são somados juntos dos dois lados. Nas listas, as vendas só no sistema aparecem com o código no formato do painel.
+- Treinamento: vídeo com a Eva (3 minutos) dentro da página Comercial → Treinamento, com legendas: lançar o pedido, cliente novo, vários itens, regra das 24 horas, pedido complementar e Conta Azul.
+
+## v57 — 08/11/2026 — Pedidos do painel viram vendas na Conta Azul
+
+- Pedidos do painel viram vendas na Conta Azul: em Planilha de vendas → De onde os indicadores leem as vendas, o ADM liga o envio. Nos horários (09:30, 12:00, 14:00 e 18:00), no Atualizar agora e no botão Enviar agora, cada pedido lançado no painel vira uma venda em andamento na Conta Azul, com o mesmo número, o tipo de produto como item (se o produto não existir na Conta Azul, é criado), pagamento 50% + 50% (1ª parcela na data da venda, 2ª no prazo de entrega ou 30 dias depois) e a forma de pagamento informada. Cliente que não existe na Conta Azul é cadastrado.
+- Na linha do pedido aparece CA ✓ (venda criada), CA ✕ (erro, com o motivo ao passar o mouse) ou CA ! (pedido alterado depois do envio: corrigir na Conta Azul). Pedido que já existia com o mesmo número na Conta Azul não é enviado de novo.
+- Pedido complementar (-1, -2…) não vai sozinho: a Conta Azul só aceita número inteiro na venda.
+
+## v56 — 08/11/2026 — Divergências no formato do fechamento, novembro da planilha, botão + e cadastro único
+
+- Conferência → Divergências: tela nova no formato do fechamento validado. Comercial mês a mês (planilha de vendas × Conta Azul, divergência e observações e ações por responsável, com o que já foi concluído em verde) e Financeiro por conta (extrato × Conta Azul, conferido, incompleto ou diferença, com saldos e observações ao abrir cada conta). Os totais do comercial são recalculados a cada atualização; o fechamento validado de 08/11 já vem preenchido. Gestão e financeiro editam observações, ações, saldos e contas; o botão Importar extrato leva à conciliação bancária.
+- Planilha × sistema (mês) fica só em Controle (ligação da planilha do Google).
+- Pedidos de novembro: enquanto a planilha do Google estiver em uso, as vendas lançadas nela a partir de novembro também entram no painel, sem data final. Na Planilha de vendas → Fonte dos indicadores, o botão Encerrar a planilha transforma essas vendas em pedidos do painel e a planilha deixa de ser lida.
+- Botão + ao lado de Cliente, Tipo de produto, Material e Cor no lançamento (linha do pedido e formulário). O cliente novo entra na lista do painel e é cadastrado também na Conta Azul (nome, tipo de pessoa e, se tiver, CNPJ/CPF, e-mail e telefone).
+- Cadastro único por cliente: o mesmo cliente escrito de jeitos diferentes vira um nome só em todo o painel e nos pedidos gravados; o lote vai para a coluna Lote / obs. do cliente. Sai da lista de Inconsistências.
+- Subtotais: linha de total em todas as tabelas com valores que ainda não tinham (Produtos, Clientes, Vendedores, Pedidos, Contas a receber e outras).
+- Botão Enviar pedidos agora renomeado para Atualizar agora: ele lê a Conta Azul e grava os pagamentos na planilha na hora. O painel ainda não cria a venda na Conta Azul (só o cliente novo).
+- Treinamento atualizado com o botão +, o ⊕ do pedido complementar, o Atualizar agora e a planilha em uso.
+
 ## v55 — 08/11/2026 — Unificar todos os clientes
 
 - Botão "Unificar todos os clientes" em Qualidade dos dados: junta as grafias de cada cliente com o nome sugerido, e o lote continua na coluna de observação.

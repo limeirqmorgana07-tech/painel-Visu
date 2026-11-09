@@ -7,7 +7,7 @@ import { planilhaConfigurada, lerPlanilha, sem, clienteBase } from './planilha.j
 import { gerarDemoPlanilha, gerarDemoContaAzul } from './demo.js';
 import { lerAtributos } from './produtos.js';
 import { lerKV, salvarKV } from './tokenStore.js';
-import { fontePainel, fonteMista, linhasDoPainel, prepararFonte, chaveCodigo } from './pedidos.js';
+import { fontePainel, fonteMista, planilhaEmUso, linhasDoPainel, prepararFonte, chaveCodigo } from './pedidos.js';
 
 const chave = (s) => sem(s).replace(/[^a-z0-9]+/g, ' ').trim();
 // nome de vendedor num padrão só: "DANIEL SILVA", "daniel silva" e "Daniel Silva" viram "Daniel Silva"
@@ -66,6 +66,9 @@ function qualidade(linhas, mapa) {
   for (const l of linhas) {
     const g = porChave.get(chave(l.cliente));
     if (g && g.size > 1) l.cliente = clienteBase([...g.entries()].sort((a, b) => b[1] - a[1])[0][0]);
+    // o lote que estava no nome vai para a coluna Lote / obs. do cliente
+    const lt = String(l.cliente_original || '').match(/\b(lote\s*\d+)\)?\s*$/i);
+    if (lt && !l.lote) l.lote = lt[1].replace(/\s+/g, ' ').replace(/^l/, 'L');
   }
   const vazio = (c) => linhas.filter((l) => !l[c]).length;
   return {
@@ -242,9 +245,15 @@ async function montar(bruto) {
     const doPainel = linhasDoPainel().filter((l) => (l.mes || '') >= corte), codPainel = new Set(doPainel.map((l) => chaveCodigo(l.codigo_pedido)).filter(Boolean));
     const plan = base.linhas, depois = plan.filter((l) => (l.mes || '') >= corte);
     soPlanilha = depois.filter((l) => { const c = chaveCodigo(l.codigo_pedido || l.codigo || ''); return !c || !codPainel.has(c); });
-    base = { ...base, linhas: [...plan.filter((l) => (l.mes || '') < corte), ...doPainel] };
+    // linhas sem código: a mesma venda pode estar no painel (cliente + data + total)
+    const kSem = (l) => [chave(clienteBase(l.cliente_original || l.cliente || '')), l.data || '', Math.round((Number(l.total) || 0) * 100)].join('|');
+    const semCodPainel = new Set(doPainel.map(kSem));
+    soPlanilha = soPlanilha.filter((l) => chaveCodigo(l.codigo_pedido || l.codigo || '') || !semCodPainel.has(kSem(l)));
+    const emUso = planilhaEmUso();
+    base = { ...base, linhas: [...plan.filter((l) => (l.mes || '') < corte), ...doPainel, ...(emUso ? soPlanilha.map((l) => ({ ...l, pos_corte: true })) : [])] };
     origem = 'misto';
-    if (soPlanilha.length) avisos.push(`${soPlanilha.length} ${soPlanilha.length === 1 ? 'linha de venda' : 'linhas de venda'} a partir de ${corte.split('-').reverse().join('/')} ${soPlanilha.length === 1 ? 'está' : 'estão'} só na planilha (R$ ${soPlanilha.reduce((s2, l) => s2 + (l.total || 0), 0).toLocaleString('pt-BR', { maximumFractionDigits: 0 })}). Desde novembro as vendas são lançadas no sistema: traga com Planilha de vendas → Importar base → Só as linhas novas, ou veja em Inconsistências.`);
+    if (soPlanilha.length && emUso) avisos.push(`${soPlanilha.length} ${soPlanilha.length === 1 ? 'venda lançada' : 'vendas lançadas'} na planilha a partir de ${corte.split('-').reverse().join('/')} ${soPlanilha.length === 1 ? 'entrou' : 'entraram'} no painel (a planilha ainda está em uso). Quando o painel for a única ferramenta, encerre a planilha em Planilha de vendas → Fonte dos indicadores.`);
+    else if (soPlanilha.length) avisos.push(`${soPlanilha.length} ${soPlanilha.length === 1 ? 'linha de venda' : 'linhas de venda'} a partir de ${corte.split('-').reverse().join('/')} ${soPlanilha.length === 1 ? 'está' : 'estão'} só na planilha (R$ ${soPlanilha.reduce((s2, l) => s2 + (l.total || 0), 0).toLocaleString('pt-BR', { maximumFractionDigits: 0 })}). Desde novembro as vendas são lançadas no sistema: traga com Planilha de vendas → Importar base → Só as linhas novas, ou veja em Inconsistências.`);
   }
   // sem Conta Azul conectada não existe "lado do sistema": nunca usar as vendas fictícias da demonstração junto com dados reais
   if (bruto.origem === 'demo' && !config.demo) vendasCA = null;
@@ -296,6 +305,8 @@ async function montar(bruto) {
       // para a página Inconsistências: nome como foi lançado (quando difere do padronizado) e possível duplicidade
       ...(l.cliente_original && l.cliente_original !== l.cliente ? { co: l.cliente_original } : {}),
       ...(l.duplicado ? { du: 1 } : {}),
+      ...(l.pos_corte ? { pv: 1 } : {}),
+      ...(l.lote ? { lo: l.lote } : {}),
       ...(l.pct_premiacao != null ? { pp: l.pct_premiacao, op: l.obs_premiacao || '' } : {}),
     })),
     // vendas do sistema, para a conciliação (data da venda, situação, cliente, valor)
