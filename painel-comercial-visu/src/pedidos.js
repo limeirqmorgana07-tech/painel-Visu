@@ -10,7 +10,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { config } from './config.js';
 import { banco, lerKV, salvarKV } from './tokenStore.js';
-import { lerPlanilha, lerXlsx, planilhaConfigurada, clienteBase, sem } from './planilha.js';
+import { lerPlanilha, lerPlanilhaRecente, lerXlsx, planilhaConfigurada, clienteBase, sem } from './planilha.js';
 import { gerarDemoPlanilha, gerarDemoParcelas } from './demo.js';
 import * as ca from './contaAzul.js';
 
@@ -388,16 +388,16 @@ export async function assumirDaPlanilha(codigo, u) {
   await carregar();
   const ja = [...mem.values()].filter((r) => !r.excluido && chaveCodigo(r.codigo) === k);
   if (ja.length) { await completarComplementares(codigo, u).catch(() => {}); return ja; }
+  let fonteP = await linhasDaFonte(null, true);
+  if (!fonteP.linhas.some((l) => chaveCodigo(l.codigo_pedido || l.codigo || '') === k)) fonteP = await linhasDaFonte(null);
   if (u?.perfil === 'vendedor') {
-    const fonte = await linhasDaFonte(null);
-    const ls = fonte.linhas.filter((l) => chaveCodigo(l.codigo_pedido || l.codigo || '') === k);
+    const ls = fonteP.linhas.filter((l) => chaveCodigo(l.codigo_pedido || l.codigo || '') === k);
     if (ls.length && !ls.some((l) => ehDoVendedor(u, { vendedor: l.vendedor }))) throw new Error('Este pedido é de outro vendedor.');
   }
   const base = chaveCodigo(codigoBase(codigo));
-  const fonteP = await linhasDaFonte(null);
   const doPedido = new Set(fonteP.linhas.map((l) => l.codigo_pedido || l.codigo || '').filter((c) => chaveCodigo(codigoBase(c)) === base).map((c) => chaveCodigo(c)));
   doPedido.add(k);
-  const r = await importar({ de: '2026-01', ate: '9999-12', modo: 'novas', simular: false, codigos: doPedido, interno: true }, u);
+  const r = await importar({ de: '2026-01', ate: '9999-12', modo: 'novas', simular: false, codigos: doPedido, interno: true, fonte: fonteP }, u);
   if (!r.linhas) throw new Error('O pedido não foi encontrado na planilha.');
   return [...mem.values()].filter((x) => !x.excluido && doPedido.has(chaveCodigo(x.codigo)));
 }
@@ -454,17 +454,17 @@ export async function unificarCliente(de, para, u) {
 }
 
 // ---------- importação da base (planilha conectada ou arquivo .xlsx) ----------
-async function linhasDaFonte(bytes) {
+async function linhasDaFonte(bytes, recente = false) {
   if (bytes) return { linhas: lerXlsx(bytes).linhas, origem: 'arquivo' };
   if (config.demo) return { linhas: gerarDemoPlanilha().linhas, origem: 'demonstração' };
   if (!planilhaConfigurada()) throw new Error('A planilha não está conectada. Ligue a planilha em Controle → Planilha × sistema (mês) → Ligar pelo meu e-mail, ou envie o arquivo .xlsx.');
-  return { linhas: (await lerPlanilha()).linhas, origem: 'planilha conectada' };
+  return { linhas: (await (recente ? lerPlanilhaRecente() : lerPlanilha())).linhas, origem: 'planilha conectada' };
 }
 const chaveLinhaImport = (o) => [chaveCodigo(o.codigo_pedido || o.codigo || ''), o.data || '', sem(clienteBase(o.cliente_original || o.cliente || '')), sem(o.tipo_produto), sem(o.cor), Number(o.quantidade) || 0, Math.round((Number(o.total) || 0) * 100)].join('|');
-export async function importar({ de = '2026-01', ate = '9999-12', modo = 'novas', simular = true, bytes = null, nomeArquivo = '', codigos = null, interno = false }, u) {
+export async function importar({ de = '2026-01', ate = '9999-12', modo = 'novas', simular = true, bytes = null, nomeArquivo = '', codigos = null, interno = false, fonte: fontePronta = null }, u) {
   if (!interno && !podeEditarTudo(u)) throw new Error('Só a gestão importa a base.');
   await carregar();
-  const fonte = await linhasDaFonte(bytes);
+  const fonte = fontePronta || await linhasDaFonte(bytes);
   let noPeriodo = fonte.linhas.filter((l) => l.mes && l.mes >= de && l.mes <= ate && (l.total || l.quantidade));
   if (codigos) noPeriodo = noPeriodo.filter((l) => codigos.has(chaveCodigo(l.codigo_pedido || l.codigo || '')));
   // "só as linhas novas": compara cada linha da planilha com o que já está no painel (código, data, cliente, produto, cor, qtd e total)

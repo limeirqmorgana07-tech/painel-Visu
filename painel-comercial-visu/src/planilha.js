@@ -325,7 +325,18 @@ export function lerXlsx(bytes, aba = env.PLANILHA_ABA) {
   return r;
 }
 
+// última leitura da planilha (para não baixar de novo a cada pedido trazido para o painel)
+let ultimaLeitura = null;
+export async function lerPlanilhaRecente(maxIdadeMs = 10 * 60e3) {
+  if (ultimaLeitura && Date.now() - ultimaLeitura.t < maxIdadeMs) return ultimaLeitura.r;
+  return lerPlanilha();
+}
 export async function lerPlanilha() {
+  const r = await lerPlanilhaAgora();
+  ultimaLeitura = { t: Date.now(), r };
+  return r;
+}
+async function lerPlanilhaAgora() {
   // 1) ligada pelo e-mail de quem tem acesso (script do Google, sem credenciais no Render)
   if (scriptConfigurado()) {
     const arq = await baixarPorScript();

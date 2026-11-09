@@ -2,6 +2,10 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v66 — 09/11/2026 — Pedido da planilha abre mais rápido para alterar
+
+- Alterar ou complementar um pedido da planilha ficou mais rápido: o painel lê a planilha do Google uma vez só (antes eram três leituras seguidas) e aproveita a leitura dos últimos 10 minutos; a tela não espera mais o recálculo dos indicadores, que é feito em seguida.
+
 ## v65 — 09/11/2026 — Vídeo do treinamento com parcelas e aprovação de preço
 
 - Cadeado 🔒 também nos pedidos lidos da planilha do Google (de 04/11 em diante estavam sem cadeado) e nos trazidos para o painel: contam as 24 horas pela data da venda.
