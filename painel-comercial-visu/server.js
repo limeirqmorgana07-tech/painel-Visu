@@ -424,6 +424,11 @@ app.post('/api/sincronizar-agora', exigeLogin, exigePedidos, resp(async (req) =>
   const r = pscript.scriptConfigurado() ? await gravarRecebimentosNaPlanilha(req.usuario, true) : { aviso: 'Planilha não ligada: só a Conta Azul foi atualizada.' };
   return { ok: true, ...r, envio, quando: new Date().toISOString() };
 }));
+app.post('/api/pedidos/assumir', exigeLogin, exigePedidos, resp(async (req) => {
+  const registros = await pedidos.assumirDaPlanilha(String(req.body?.codigo || ''), req.usuario);
+  depoisDeMudar(); dadosDeVendas(true).catch(() => {});
+  return { registros };
+}));
 app.post('/api/pedidos/conta-azul', exigeAdm, resp(async (req) => {
   const c = await pedidos.salvarConfigPedidos({ enviar_ca: !!req.body?.ativo }, req.usuario);
   return c;

@@ -298,6 +298,23 @@ export async function excluir(id, u) {
   return novo;
 }
 // unifica grafias de cliente (ex.: "Checkpoint 5 anos", "Checkpoint CT" → "Checkpoint")
+// Pedido que está só na planilha (enquanto ela estiver em uso): ao alterar ou fazer o complementar no painel,
+// o pedido é trazido para o painel (todas as linhas com o mesmo código) e passa a valer a versão do painel.
+export async function assumirDaPlanilha(codigo, u) {
+  if (!podeLancar(u)) throw new Error('Seu perfil só consulta os pedidos.');
+  const k = chaveCodigo(codigo); if (!k) throw new Error('Linha sem código: corrija na planilha.');
+  await carregar();
+  const ja = [...mem.values()].filter((r) => !r.excluido && chaveCodigo(r.codigo) === k);
+  if (ja.length) return ja;
+  if (u?.perfil === 'vendedor') {
+    const fonte = await linhasDaFonte(null);
+    const ls = fonte.linhas.filter((l) => chaveCodigo(l.codigo_pedido || l.codigo || '') === k);
+    if (ls.length && !ls.some((l) => ehDoVendedor(u, { vendedor: l.vendedor }))) throw new Error('Este pedido é de outro vendedor.');
+  }
+  const r = await importar({ de: '2026-01', ate: '9999-12', modo: 'novas', simular: false, codigos: new Set([k]), interno: true }, u);
+  if (!r.linhas) throw new Error('O pedido não foi encontrado na planilha.');
+  return [...mem.values()].filter((x) => !x.excluido && chaveCodigo(x.codigo) === k);
+}
 // envio à Conta Azul: guarda o resultado em cada linha do pedido (sem mexer em "alterado_em", que é edição de quem lança)
 export async function marcarEnvioCA(ids, campos, u) {
   await carregar();
@@ -327,11 +344,12 @@ async function linhasDaFonte(bytes) {
   return { linhas: (await lerPlanilha()).linhas, origem: 'planilha conectada' };
 }
 const chaveLinhaImport = (o) => [chaveCodigo(o.codigo_pedido || o.codigo || ''), o.data || '', sem(clienteBase(o.cliente_original || o.cliente || '')), sem(o.tipo_produto), sem(o.cor), Number(o.quantidade) || 0, Math.round((Number(o.total) || 0) * 100)].join('|');
-export async function importar({ de = '2026-01', ate = '9999-12', modo = 'novas', simular = true, bytes = null, nomeArquivo = '' }, u) {
-  if (!podeEditarTudo(u)) throw new Error('Só a gestão importa a base.');
+export async function importar({ de = '2026-01', ate = '9999-12', modo = 'novas', simular = true, bytes = null, nomeArquivo = '', codigos = null, interno = false }, u) {
+  if (!interno && !podeEditarTudo(u)) throw new Error('Só a gestão importa a base.');
   await carregar();
   const fonte = await linhasDaFonte(bytes);
   let noPeriodo = fonte.linhas.filter((l) => l.mes && l.mes >= de && l.mes <= ate && (l.total || l.quantidade));
+  if (codigos) noPeriodo = noPeriodo.filter((l) => codigos.has(chaveCodigo(l.codigo_pedido || l.codigo || '')));
   // "só as linhas novas": compara cada linha da planilha com o que já está no painel (código, data, cliente, produto, cor, qtd e total)
   const chaveLinha = (o) => [chaveCodigo(o.codigo_pedido || o.codigo || ''), o.data || '', sem(clienteBase(o.cliente_original || o.cliente_lancado || o.cliente || '')), sem(o.tipo_produto), sem(o.cor), Number(o.quantidade) || 0, Math.round((Number(o.total) || 0) * 100)].join('|');
   let jaTem = null;

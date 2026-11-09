@@ -107,7 +107,26 @@ export async function salvarDivergencias(b, u) {
     let dif = numDireto(b.dif);
     if (extrato !== null && sistema !== null && status !== 'incompleto') { dif = Math.round((extrato - sistema) * 100) / 100; status = Math.abs(dif) < 0.005 ? 'conferido' : 'dif'; }
     if (status === 'conferido') dif = 0;
-    c.meses[b.mes] = { status, dif: status === 'dif' ? dif : status === 'conferido' ? 0 : null, extrato, sistema, obs: txt(b.obs), em: new Date().toISOString(), por: u?.nome || '' };
+    c.meses[b.mes] = { status, dif: status === 'dif' ? dif : status === 'conferido' ? 0 : null, extrato, sistema, obs: txt(b.obs), acoes: c.meses[b.mes]?.acoes || [], em: new Date().toISOString(), por: u?.nome || '' };
+  } else if (tipo === 'acao') {
+    // nova ação no mês (comercial) ou numa conta (financeiro), sem precisar abrir a edição
+    if (!mesOk(b.mes)) throw new Error('Mês inválido.');
+    const a = { texto: txt(b.texto, 2000), resp: txt(b.resp, 160), feito: !!b.feito, em: new Date().toISOString(), por: u?.nome || '' };
+    if (!a.texto) throw new Error('Descreva a ação.');
+    if (b.conta) {
+      const c = d.financeiro.contas.find((x) => x.nome === b.conta);
+      if (!c) throw new Error('Conta não encontrada.');
+      const m = c.meses[b.mes] || (c.meses[b.mes] = { status: '' });
+      (m.acoes ||= []).push(a);
+    } else {
+      const m = d.comercial[b.mes] || (d.comercial[b.mes] = { obs: '', acoes: [] });
+      (m.acoes ||= []).push(a);
+    }
+  } else if (tipo === 'acao_feita') {
+    if (!mesOk(b.mes)) throw new Error('Mês inválido.');
+    const lista = b.conta ? d.financeiro.contas.find((x) => x.nome === b.conta)?.meses?.[b.mes]?.acoes : d.comercial[b.mes]?.acoes;
+    const a = lista?.[Number(b.i)]; if (!a) throw new Error('Ação não encontrada.');
+    a.feito = !a.feito; a.feito_em = a.feito ? new Date().toISOString() : null;
   } else if (tipo === 'nova_conta') {
     const nome = txt(b.nome, 80);
     if (!nome) throw new Error('Informe o nome da conta.');

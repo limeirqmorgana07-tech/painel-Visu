@@ -2,6 +2,12 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v59 — 09/11/2026 — Alterar e complementar pedidos da planilha e + Ação nas divergências
+
+- Pedidos que vieram da planilha (marca "planilha") agora também têm o ＋ (novo item) e o ⊕ (pedido complementar), e podem ser alterados clicando na célula (dois cliques para confirmar). O pedido passa para o painel com todas as linhas do mesmo código e a versão do painel passa a valer; as correções seguem a regra das 24 horas a partir desse momento. Vale até a planilha ser encerrada.
+- Divergências: quando o mês tem diferença, aparece sozinha uma caixa com o valor e as causas (pedidos com valor diferente, vendas só na Conta Azul, pedidos só na planilha e linhas sem código), com o link Ver pedido a pedido.
+- Divergências: botão + Ação em cada mês do comercial e em cada mês de cada conta do financeiro, para incluir uma ação com responsável sem abrir a edição; cada ação tem Marcar como concluída. A conta com ação aberta mostra um número laranja no mês.
+
 ## v58 — 08/11/2026 — De-para do número da Conta Azul e pedido complementar no envio
 
 - De-para do número da Conta Azul (que não tem os zeros do começo) com o código do painel: 21112026 = 0021112026. O pedido complementar vai para a Conta Azul como venda própria, com o sufixo colado no número (0021112026-1 → 211120261), e volta para o painel como 0021112026-1, sem diferença na conferência.
