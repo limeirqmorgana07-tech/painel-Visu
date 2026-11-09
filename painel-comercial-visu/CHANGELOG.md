@@ -2,6 +2,10 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v68 — 09/11/2026 — Planilha de vendas com todas as linhas no mesmo padrão
+
+- Planilha de vendas: todas as linhas no mesmo padrão. Os pedidos lidos da planilha (de 04/11 em diante) ficam iguais aos trazidos para o painel: ⊕, 🔒 e 💲 primeiro e a marca planilha depois, e o cadeado também aparece na data, no código e nos valores quando o pedido está fechado.
+
 ## v67 — 09/11/2026 — Diretores criam o acesso dos vendedores
 
 - Pedido fechado (mais de 24 h): o vendedor não inclui mais item no mesmo pedido. O ＋ some da linha e o painel recusa; peças a mais entram pelo ⊕ (pedido complementar). A gestão continua podendo incluir.
