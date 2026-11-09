@@ -2,6 +2,10 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v71 — 09/11/2026 — Mês da premiação manual por venda
+
+- Premiação: nova coluna Mês da premiação (manual) na Planilha de vendas, ao lado de Premiação % (manual). A venda com o mês preenchido sai do mês da venda e entra no faturamento e na premiação do mês escolhido, sem mudar a data da venda nem os outros relatórios. Ex.: Raíra Sicoob, venda de 01/10 premiada em setembro (autorização do Egberto); use o Motivo do % diferente para registrar a autorização.
+
 ## v70 — 09/11/2026 — Conferência de pagamentos volta como estava
 
 - Inconsistências: Valor recebido diferente do anotado na planilha volta exatamente como estava até a v68 (1º e 2º pagamento comparados com cada parcela da Conta Azul). A mudança da v69 marcava como diferença os pedidos com pagamento anotado na planilha e ainda não baixado na Conta Azul.

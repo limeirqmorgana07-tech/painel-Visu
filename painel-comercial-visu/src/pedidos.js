@@ -23,7 +23,7 @@ export const CAMPOS = {
   data: 'data', codigo: 'texto', cliente: 'texto', lote: 'texto', nome_pedido: 'texto', vendedor: 'texto', tipo_venda: 'texto',
   novo_recompra: 'nr', segmento: 'texto', tipo_produto: 'texto', material: 'texto', especificacao: 'texto', cor: 'texto',
   quantidade: 'num', valor_unit: 'num', total: 'num', pag1: 'num', data_pag1: 'data', pag2: 'num', data_pag2: 'data', pag3: 'num', banco_pag: 'texto', pago_100: 'bool', prazo_entrega: 'data',
-  forma_pagamento: 'texto', parcelas: 'parc', frete: 'texto', pagador: 'texto', observacao: 'texto', pct_premiacao: 'pct', obs_premiacao: 'texto',
+  forma_pagamento: 'texto', parcelas: 'parc', frete: 'texto', pagador: 'texto', observacao: 'texto', pct_premiacao: 'pct', mes_premiacao: 'mesp', obs_premiacao: 'texto',
 };
 // travados para o vendedor 24 h depois do lançamento (o resto, como cliente e novo × recompra, ele revisa sempre)
 export const CAMPOS_VALOR = ['data', 'codigo', 'tipo_produto', 'material', 'especificacao', 'cor', 'quantidade', 'valor_unit', 'total'];
@@ -42,6 +42,8 @@ function limpar(campo, v) {
   const t = CAMPOS[campo];
   if (campo === 'vendedor') return tituloNome(String(v ?? '').slice(0, 120));
   // % de premiação manual: em branco = segue a faixa do mês (não é 0%)
+  // mês da premiação (manual): a venda entra na premiação deste mês, sem mudar a data da venda (ex.: Raíra Sicoob, venda de 01/10 premiada em setembro)
+  if (t === 'mesp') { const s0 = String(v ?? '').trim(); let m = s0.match(/^(\d{4})-(\d{2})/); if (m) return `${m[1]}-${m[2]}`; m = s0.match(/^(?:\d{1,2}\/)?(\d{1,2})\/(\d{4})$/); if (m) return `${m[2]}-${m[1].padStart(2, '0')}`; return ''; }
   if (t === 'pct') { if (v === '' || v == null) return null; const n = Number(String(v).replace(/[%\s]/g, '').replace(',', '.')); return Number.isFinite(n) ? r2(n) : null; }
   // parcelas: 1 = à vista, 2 = 50% + 50% (padrão), 3 ou mais = parcelas iguais
   if (t === 'parc') { const s0 = sem(v); if (!s0) return 2; if (/vista/.test(s0)) return 1; const n = parseInt(s0, 10); return Number.isFinite(n) && n >= 1 ? Math.min(n, 12) : 2; }
@@ -215,7 +217,7 @@ export const planilhaEmUso = () => !cfgMem?.planilha_encerrada;
 export async function prepararFonte() { await configPedidos(); await carregar().catch(() => {}); }
 export function linhasDoPainel() {
   return [...(mem?.values() || [])].filter((r) => !r.excluido && (r.total || r.quantidade)).map((r) => ({
-    linha: r.linha_planilha || null, do_painel: true, pct_premiacao: r.pct_premiacao ?? null, obs_premiacao: r.obs_premiacao || '', data: r.data, mes: r.mes || (r.data || '').slice(0, 7), cliente: r.cliente || 'Sem cliente',
+    linha: r.linha_planilha || null, do_painel: true, pct_premiacao: r.pct_premiacao ?? null, mes_premiacao: r.mes_premiacao || '', obs_premiacao: r.obs_premiacao || '', data: r.data, mes: r.mes || (r.data || '').slice(0, 7), cliente: r.cliente || 'Sem cliente',
     cliente_original: r.cliente_lancado || [r.cliente, r.lote].filter(Boolean).join(' '),
     // o complementar conta no mesmo pedido (não infla a quantidade de pedidos nem derruba o ticket)
     // linhas importadas seguem a regra da base tratada (pedido = cliente + data), para os números baterem com a planilha;

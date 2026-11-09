@@ -344,6 +344,7 @@ async function montar(bruto) {
       ...(l.pos_corte ? { pv: 1 } : {}),
       ...(l.lote ? { lo: l.lote } : {}),
       ...(l.pct_premiacao != null ? { pp: l.pct_premiacao, op: l.obs_premiacao || '' } : {}),
+      ...(l.mes_premiacao && l.mes_premiacao !== l.mes ? { mp: l.mes_premiacao, op: l.obs_premiacao || '' } : {}),
     })),
     // vendas do sistema, para a conciliação (data da venda, situação, cliente, valor)
     conta_azul: vendasCA
