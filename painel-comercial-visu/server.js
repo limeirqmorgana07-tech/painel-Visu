@@ -408,6 +408,8 @@ app.get('/api/pedidos', exigeLogin, exigePedidos, resp(async (req) => {
 app.get('/api/pedidos/proximo-codigo', exigeLogin, exigePedidos, resp(async (req) => { await pedidos.listar(); await codigosExternos(); return { codigo: req.query.de ? pedidos.proximoComplemento(req.query.de) : pedidos.proximoCodigo(req.query.data) }; }));
 app.post('/api/pedidos', exigeLogin, exigePedidos, resp(async (req) => { await codigosExternos(); const r = await pedidos.criarPedido(req.body, req.usuario); depoisDeMudar(); return { registros: r }; }));
 app.patch('/api/pedidos/:id', exigeLogin, exigePedidos, resp(async (req) => { const r = await pedidos.alterar(req.params.id, req.body?.mudancas || req.body, req.usuario); depoisDeMudar(); return { registro: r }; }));
+app.post('/api/pedidos/:id/solicitar', exigeLogin, exigePedidos, resp(async (req) => ({ registro: await pedidos.solicitarAlteracao(req.params.id, req.body || {}, req.usuario) })));
+app.post('/api/pedidos/:id/responder', exigeLogin, exigePedidos, resp(async (req) => { const r = await pedidos.responderSolicitacao(req.params.id, req.body || {}, req.usuario); depoisDeMudar(); return { registro: r }; }));
 app.delete('/api/pedidos/:id', exigeLogin, exigePedidos, resp(async (req) => { await pedidos.excluir(req.params.id, req.usuario); depoisDeMudar(); return { ok: true }; }));
 app.post('/api/pedidos/unificar-cliente', exigeLogin, exigePedidos, resp(async (req) => { const r = await pedidos.unificarCliente(req.body?.de, req.body?.para, req.usuario); depoisDeMudar(); return r; }));
 // importação: JSON {de, ate, modo, simular} lê a planilha conectada; com ?arquivo=nome.xlsx o corpo é o próprio .xlsx

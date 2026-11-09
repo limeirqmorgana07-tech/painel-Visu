@@ -1,6 +1,6 @@
 // Pedidos lançados no painel → vendas na Conta Azul (definido com a Visu em 08/11/2026):
 // item = o tipo de produto escolhido no lançamento (produto com esse nome na Conta Azul; se não existir, é criado),
-// condição de pagamento 50% + 50% (2x), situação "em andamento", número da venda = código interno do pedido.
+// condição de pagamento do campo Parcelas (padrão 50% + 50%, 2x; também à vista ou 3x ou mais), situação "em andamento", número da venda = código interno do pedido.
 // Só vão os pedidos lançados no painel (os importados da planilha já são lançados na Conta Azul pela equipe).
 // Pedido complementar (código com -1, -2…): vai como venda própria, com o sufixo colado no número (0021112026-1 → 211120261).
 import * as ca from './contaAzul.js';
@@ -21,6 +21,17 @@ export function parcelas5050(total, data, prazo) {
   return [{ data_vencimento: data, valor: p1, descricao: 'Parcela 1 (50%)' }, { data_vencimento: v2, valor: p2, descricao: 'Parcela 2 (50%)' }];
 }
 
+// condição do pedido: 1 = à vista (na data da venda), 2 = 50% + 50% (padrão), 3 ou mais = parcelas iguais a cada 30 dias
+export function parcelasPedido(n, total, data, prazo) {
+  n = Math.max(1, Math.min(12, parseInt(n, 10) || 2));
+  if (n === 2) return parcelas5050(total, data, prazo);
+  if (n === 1) return [{ data_vencimento: data, valor: r2(total), descricao: 'À vista' }];
+  const base = Math.floor((total / n) * 100) / 100, out = [];
+  for (let i = 0; i < n; i++) out.push({ data_vencimento: i ? somaDias(data, 30 * i) : data, valor: i === n - 1 ? r2(total - base * (n - 1)) : base, descricao: `Parcela ${i + 1} de ${n}` });
+  return out;
+}
+export const opcaoCondicao = (n) => { n = parseInt(n, 10) || 2; return n === 1 ? 'À vista' : `${n}x`; };
+
 // monta o corpo da venda de um pedido (todas as linhas com o mesmo código)
 export function corpoVenda(linhas, { idCliente, idVendedor, produtoDe }) {
   const c = linhas[0];
@@ -38,7 +49,7 @@ export function corpoVenda(linhas, { idCliente, idVendedor, produtoDe }) {
     situacao: 'EM_ANDAMENTO',
     data_venda: c.data,
     itens,
-    condicao_pagamento: { opcao_condicao_pagamento: '2x', parcelas: parcelas5050(total, c.data, c.prazo_entrega), ...(tp ? { tipo_pagamento: tp } : {}) },
+    condicao_pagamento: { opcao_condicao_pagamento: opcaoCondicao(c.parcelas), parcelas: parcelasPedido(c.parcelas, total, c.data, c.prazo_entrega), ...(tp ? { tipo_pagamento: tp } : {}) },
     observacoes: [/-\d+$/.test(c.codigo) ? `Pedido complementar ${c.codigo} (acréscimo ao pedido ${pedidos.codigoBase(c.codigo)}) lançado no Painel de Gestão Visu` : `Pedido ${c.codigo} lançado no Painel de Gestão Visu`, c.nome_pedido ? `Pedido (Trello): ${c.nome_pedido}` : '', c.lote ? `Lote / obs.: ${c.lote}` : '', c.observacao || ''].filter(Boolean).join(' · ').slice(0, 1000),
   };
   if (idVendedor) corpo.id_vendedor = idVendedor;

@@ -22,8 +22,8 @@ const r2 = (v) => Math.round((Number(v) || 0) * 100) / 100;
 export const CAMPOS = {
   data: 'data', codigo: 'texto', cliente: 'texto', lote: 'texto', nome_pedido: 'texto', vendedor: 'texto', tipo_venda: 'texto',
   novo_recompra: 'nr', segmento: 'texto', tipo_produto: 'texto', material: 'texto', especificacao: 'texto', cor: 'texto',
-  quantidade: 'num', valor_unit: 'num', total: 'num', pag1: 'num', data_pag1: 'data', pag2: 'num', data_pag2: 'data', banco_pag: 'texto', pago_100: 'bool', prazo_entrega: 'data',
-  forma_pagamento: 'texto', frete: 'texto', pagador: 'texto', observacao: 'texto', pct_premiacao: 'pct', obs_premiacao: 'texto',
+  quantidade: 'num', valor_unit: 'num', total: 'num', pag1: 'num', data_pag1: 'data', pag2: 'num', data_pag2: 'data', pag3: 'num', banco_pag: 'texto', pago_100: 'bool', prazo_entrega: 'data',
+  forma_pagamento: 'texto', parcelas: 'parc', frete: 'texto', pagador: 'texto', observacao: 'texto', pct_premiacao: 'pct', obs_premiacao: 'texto',
 };
 // travados para o vendedor 24 h depois do lançamento (o resto, como cliente e novo × recompra, ele revisa sempre)
 export const CAMPOS_VALOR = ['data', 'codigo', 'tipo_produto', 'material', 'especificacao', 'cor', 'quantidade', 'valor_unit', 'total'];
@@ -43,6 +43,8 @@ function limpar(campo, v) {
   if (campo === 'vendedor') return tituloNome(String(v ?? '').slice(0, 120));
   // % de premiação manual: em branco = segue a faixa do mês (não é 0%)
   if (t === 'pct') { if (v === '' || v == null) return null; const n = Number(String(v).replace(/[%\s]/g, '').replace(',', '.')); return Number.isFinite(n) ? r2(n) : null; }
+  // parcelas: 1 = à vista, 2 = 50% + 50% (padrão), 3 ou mais = parcelas iguais
+  if (t === 'parc') { const s0 = sem(v); if (!s0) return 2; if (/vista/.test(s0)) return 1; const n = parseInt(s0, 10); return Number.isFinite(n) && n >= 1 ? Math.min(n, 12) : 2; }
   if (t === 'num') { const n = typeof v === 'number' ? v : Number(String(v ?? '').replace(/[R$\s.]/g, '').replace(',', '.')); return Number.isFinite(n) ? r2(n) : 0; }
   if (t === 'bool') return v === true || ['sim', 's', 'true', '1', 'x'].includes(sem(v));
   if (t === 'data') { const s = String(v ?? '').trim(); const m = s.match(/^(\d{4})-(\d{2})-(\d{2})/) || s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/); if (!m) return ''; return m[1].length === 4 ? `${m[1]}-${m[2]}-${m[3]}` : `${m[3]}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}`; }
@@ -306,6 +308,40 @@ export async function alterar(id, mudancas, u) {
   await registrarLog([{ ...quem(u), acao: 'alterou', registro: id, codigo: novo.codigo, cliente: novo.cliente, mudancas: log }]);
   return novo;
 }
+// ---------- alteração de preço depois do pedido fechado: o vendedor pede, a gestão aprova ----------
+export async function solicitarAlteracao(id, b, u) {
+  await carregar();
+  const r = mem.get(id);
+  if (!r || r.excluido) throw new Error('Linha não encontrada.');
+  if (!podeLancar(u)) throw new Error('Seu perfil só consulta os pedidos.');
+  if (!ehDoVendedor(u, r)) throw new Error('Esta linha é de outro vendedor: só ele ou a gestão pede a alteração.');
+  if (r.solicitacao?.status === 'pendente') throw new Error('Já existe um pedido de alteração aguardando a gestão nesta linha.');
+  const vu = limpar('valor_unit', b?.valor_unit), q = b?.quantidade != null && b.quantidade !== '' ? limpar('quantidade', b.quantidade) : (Number(r.quantidade) || 0);
+  if (!(vu > 0)) throw new Error('Informe o novo valor por unidade.');
+  const motivo = String(b?.motivo || '').trim().slice(0, 500);
+  if (!motivo) throw new Error('Explique o motivo da alteração para a gestão.');
+  if (vu === r2(r.valor_unit) && q === (Number(r.quantidade) || 0)) throw new Error('O valor informado é igual ao atual.');
+  const s0 = { status: 'pendente', valor_unit_antes: r2(r.valor_unit), valor_unit: vu, quantidade_antes: Number(r.quantidade) || 0, quantidade: q, total_antes: r2(r.total), total: r2(q * vu), motivo, por: u?.nome || '', por_id: u?.id || '', em: agoraISO() };
+  const novo = { ...r, solicitacao: s0 };
+  mem.set(id, novo); await gravar([novo]);
+  await registrarLog([{ ...quem(u), acao: 'solicitou', registro: id, codigo: r.codigo, cliente: r.cliente, mudancas: [{ campo: 'valor_unit', antes: s0.valor_unit_antes, depois: vu }, ...(q !== s0.quantidade_antes ? [{ campo: 'quantidade', antes: s0.quantidade_antes, depois: q }] : []), { campo: 'total', antes: s0.total_antes, depois: s0.total }], detalhe: `Pedido de alteração de preço para a gestão aprovar · ${motivo}` }]);
+  return novo;
+}
+export async function responderSolicitacao(id, b, u) {
+  if (!podeEditarTudo(u)) throw new Error('Só a gestão aprova alteração de preço.');
+  await carregar();
+  const r = mem.get(id);
+  if (!r || r.excluido) throw new Error('Linha não encontrada.');
+  const s0 = r.solicitacao; if (s0?.status !== 'pendente') throw new Error('Não há pedido de alteração aguardando nesta linha.');
+  const obs = String(b?.obs || '').trim().slice(0, 500), aprovar = !!b?.aprovar;
+  let atual = r;
+  if (aprovar) atual = await alterar(id, { quantidade: s0.quantidade, valor_unit: s0.valor_unit, total: s0.total }, u);
+  const fim = { ...s0, status: aprovar ? 'aprovada' : 'recusada', resp_por: u?.nome || '', resp_em: agoraISO(), resp_obs: obs, ...(aprovar && r.ca_venda_id ? { ajustar_ca: true } : {}) };
+  const novo = { ...(mem.get(id) || atual), solicitacao: fim, solicitacoes: [...(r.solicitacoes || []), fim].slice(-10) };
+  mem.set(id, novo); await gravar([novo]);
+  await registrarLog([{ ...quem(u), acao: aprovar ? 'aprovou' : 'recusou', registro: id, codigo: r.codigo, cliente: r.cliente, mudancas: [{ campo: 'valor_unit', antes: s0.valor_unit_antes, depois: aprovar ? s0.valor_unit : `${s0.valor_unit} (recusado)` }], detalhe: `${aprovar ? 'Aprovou' : 'Recusou'} a alteração de preço pedida por ${s0.por}${obs ? ' · ' + obs : ''}${aprovar && r.ca_venda_id ? ' · corrigir o valor na Conta Azul' : ''}` }]);
+  return novo;
+}
 export async function excluir(id, u) {
   await carregar();
   const r = mem.get(id);
@@ -522,6 +558,7 @@ export async function preencherPagamentos(pagamentos, u, { auto = false } = {}) 
     const r0 = { ...regs[0] }, ch = [];
     const set = (c, v) => { if (v === '' || v == null || v === 0) return; if (r0[c] && !(CAMPOS[c] === 'num' && !+r0[c])) return; ch.push({ campo: c, antes: r0[c] ?? '', depois: v }); r0[c] = v; };
     [0, 1].forEach((i) => { const p = ps[i]; if (!p || !(p.pago > 0)) return; const b = p.baixas?.[0]; const antes = ch.length; set(i ? 'pag2' : 'pag1', r2(p.pago)); if (ch.length > antes) r0.pag_ca = [...new Set([...(r0.pag_ca || []), i + 1])]; if (b?.data) set(i ? 'data_pag2' : 'data_pag1', b.data); if (b?.conta) set('banco_pag', b.conta); if (b?.forma) set('forma_pagamento', b.forma); });
+    { const resto = ps.slice(2).filter((p) => p.pago > 0); if (resto.length) { const antes = ch.length; set('pag3', r2(resto.reduce((a, p) => a + p.pago, 0))); if (ch.length > antes) r0.pag_ca = [...new Set([...(r0.pag_ca || []), 3])]; } }
     const total = regs.reduce((s2, r) => s2 + (+r.total || 0), 0), recebido = ps.reduce((s2, p) => s2 + (+p.pago || 0), 0), quitado = ps.every((p) => !(p.aberto > 0.01)) && Math.abs(recebido - total) <= 1;
     const marcar = quitado ? regs.filter((r) => !r.pago_100) : [];
     if (ch.length) { Object.assign(r0, { alterado_em: agoraISO(), alterado_por: auto ? 'Conta Azul (automático)' : u?.nome || '' }); mem.set(r0.id, r0); mudou.push(r0); log.push({ registro: r0.id, codigo: r0.codigo, cliente: r0.cliente, mudancas: ch }); }

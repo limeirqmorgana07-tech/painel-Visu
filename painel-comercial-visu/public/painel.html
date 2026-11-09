@@ -150,6 +150,9 @@ tr.tot td{font-weight:700;border-top:1px solid var(--line2)}
 td.ed{white-space:nowrap}
 .ca-bd{display:inline-block;font-size:9.5px;font-weight:800;letter-spacing:.03em;padding:1px 5px;border-radius:4px;background:var(--line);color:var(--ink2);margin-left:2px;vertical-align:middle;cursor:help}
 .ca-bd.ok{background:var(--greenSoft);color:var(--green)} .ca-bd.erro{background:var(--redSoft);color:var(--red)}
+#solModal .f{margin-top:10px;display:flex;flex-direction:column;gap:4px}#solModal .f label{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2)}#solModal input,#solModal textarea{width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid var(--line2);border-radius:8px;font:inherit;font-size:13px;background:var(--panel);color:var(--ink)}
+.pl-tab select[data-k="parcelas"]{min-width:150px}
+.sol-bd{background:#fde7c4!important;color:#8a4b00!important;border-radius:999px;padding:1px 8px!important;font-size:11px;font-weight:700;width:auto!important}.pd-bd.sol-ok{background:#d9f2e3;color:#16643a}.pd-bd.sol-no{background:#fbe0e0;color:#9b1c1c}
 #cadModal .f,#dvModal .f{margin-top:10px;display:flex;flex-direction:column;gap:4px}
 #cadModal .f label,#dvModal .f label{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2)}
 #cadModal input:not([type=checkbox]),#cadModal select,#dvModal input:not([type=checkbox]),#dvModal select,#dvModal textarea{width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid var(--line2);border-radius:8px;font:inherit;font-size:13px;background:var(--panel);color:var(--ink)}
@@ -773,6 +776,7 @@ table.matriz td.vz{color:var(--line2)}
       <div class="f"><label for="pmNR">Novo ou recompra *</label><select id="pmNR" name="novo_recompra" required><option value="">—</option><option value="novo">Novo</option><option value="recompra">Recompra</option></select><div class="dica-c" id="pmNRdica"></div></div>
       <div class="f"><label for="pmSeg">Segmento</label><input id="pmSeg" name="segmento" list="dlSegmento"></div>
       <div class="f"><label for="pmFP">Forma de pagamento</label><input id="pmFP" name="forma_pagamento" list="dlForma"></div>
+      <div class="f"><label for="pmParc">Parcelas</label><select id="pmParc" name="parcelas"><option value="1">À vista</option><option value="2" selected>2x (50% + 50%)</option><option value="3">3x</option><option value="4">4x</option><option value="5">5x</option><option value="6">6x</option><option value="7">7x</option><option value="8">8x</option><option value="9">9x</option><option value="10">10x</option><option value="11">11x</option><option value="12">12x</option></select></div>
       <div class="f"><label for="pmPrazo">Prazo de entrega</label><input id="pmPrazo" name="prazo_entrega" type="date"></div>
       <div class="f"><label for="pmPag">Nome pagador (comprovante)</label><input id="pmPag" name="pagador"></div>
       <div class="f f2"><label for="pmObs">Observação</label><input id="pmObs" name="observacao"></div>
@@ -821,6 +825,11 @@ table.matriz td.vz{color:var(--line2)}
   <div class="pol-hd"><div><div class="eyebrow">Lançamento · Cadastro novo</div><h3 id="cadTit">Incluir</h3><div class="sub" id="cadSub"></div></div><button class="bt2" type="button" id="cadFechar" aria-label="Fechar">✕</button></div>
   <div class="pol-corpo"><div id="cadCorpo"></div><div class="e" id="cadErro"></div>
     <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px"><button class="bt2" type="button" id="cadCancelar">Cancelar</button><button class="bt2 pri" type="button" id="cadSalvar">Incluir</button></div></div>
+</div>
+<div id="solModal" class="pol" role="dialog" aria-modal="true" aria-labelledby="solTit" hidden style="width:min(560px,96vw);z-index:1001">
+  <div class="pol-hd"><div><div class="eyebrow">Pedido fechado · Alteração de preço</div><h3 id="solTit">Pedir alteração de preço</h3><div class="sub" id="solSub"></div></div><button class="bt2" type="button" id="solFechar" aria-label="Fechar">✕</button></div>
+  <div class="pol-corpo"><div id="solCorpo"></div><div class="e" id="solErro"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:14px;flex-wrap:wrap" id="solBts"></div></div>
 </div>
 <div id="dvModal" class="pol" role="dialog" aria-modal="true" aria-labelledby="dvTit" hidden style="width:min(760px,96vw)">
   <div class="pol-hd"><div><div class="eyebrow">Conferência · Divergências</div><h3 id="dvTit">Editar</h3><div class="sub" id="dvSub"></div></div><button class="bt2" type="button" id="dvFecharBt" aria-label="Fechar">✕</button></div>
@@ -971,6 +980,7 @@ table.matriz td.vz{color:var(--line2)}
       <div style="display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap"><button class="bt2" type="button" id="plMais">+ Item do mesmo pedido</button><span class="dica-c" id="plDica"></span><span style="flex:1"></span><span class="ped-tot" id="plTotal">Total do pedido: R$ 0,00</span><button class="bt2" type="button" id="plCancelar">Cancelar</button><button class="bt2 pri" type="button" id="plSalvar">Salvar pedido</button></div>
       <div class="e" id="plErro"></div>
     </div>
+    <div class="card ped-card" id="pdAprovCard" hidden style="margin-bottom:14px;border-color:var(--orange)"><div class="hd"><div><h3>Alterações de preço aguardando aprovação</h3><div class="sub">Pedidos fechados (mais de 24 h) em que o vendedor pediu para mudar o preço. A gestão aprova ou recusa; aprovado, o valor muda no pedido e fica no histórico.</div></div></div><div id="pdAprov"></div></div>
     <div class="card ped-card"><div class="hd"><div><h3>Registro de vendas</h3><div class="sub" id="pdSub">As mesmas colunas da planilha do comercial</div></div></div>
       <div class="ped-grade" id="pdGrade"></div>
       <div class="nota" id="pdNota"></div>
@@ -1131,8 +1141,10 @@ table.matriz td.vz{color:var(--line2)}
       <h4>5. Cliente, produto, material ou cor novos</h4><p>Se não estiver na lista, clique no <b>+</b> laranja ao lado do campo. No cliente, informe o nome (sem lote), se é pessoa jurídica ou física e, se tiver, CNPJ/CPF, e-mail e telefone: ele entra na lista do painel e é cadastrado também na Conta Azul. Produto, material e cor novos passam a aparecer na lista para todos. O lote ou detalhe do cliente vai na coluna <b>Lote / obs. do cliente</b>, nunca no nome.</p>
       <h4>6. Corrigir um pedido nas primeiras 24 horas</h4><p>Nas primeiras <b>24 horas</b> depois do lançamento você pode alterar a quantidade e os valores, clicando na célula. Depois disso o campo fica com cadeado 🔒.</p>
       <h4>7. Acrescentar peças depois de 24 horas: pedido complementar</h4><p>Nas primeiras 24 horas, para acrescentar outro item ao mesmo pedido, use o <b>＋</b> no começo da linha do pedido. Depois de 24 horas, quantidade e valores ficam com cadeado 🔒. Para acrescentar peças, clique no <b>⊕</b> no começo da linha do pedido (ao passar o mouse aparece "Acréscimo: pedido complementar"). Abre o pedido com o mesmo cliente e o mesmo número, com sufixo <b>-1</b> (o próximo será -2, -3…). Preencha só os itens acrescentados e salve. Na Conta Azul, o título do acréscimo é lançado com esse mesmo número. Isso vale também para os pedidos que vieram da planilha (marca <b>planilha</b>): ao clicar no ＋, no ⊕ ou numa célula, o pedido passa para o painel.</p>
+      <h4>6b. Parcelas</h4><p>No campo <b>Parcelas</b>, o padrão é <b>2x (50% + 50%)</b>: a 1ª na data da venda e a 2ª no prazo de entrega. Escolha <b>À vista</b> quando o cliente pagar tudo de uma vez, ou <b>3x</b> ou mais quando houver mais pagamentos (parcelas iguais a cada 30 dias). A Conta Azul recebe a venda com essas parcelas.</p>
+      <h4>6c. Alterar o preço de um pedido fechado</h4><p>Depois de 24 horas, o preço só muda com aprovação da gestão. Clique no <b>💲</b> no começo da linha (ou na célula do valor com cadeado), informe o novo valor por unidade e o motivo e clique em <b>Enviar para aprovação</b>. A linha fica com <b>⏳ aprovação</b> até a gestão aprovar ou recusar; aprovado, o valor muda no pedido e fica no histórico.</p>
       <h4>7b. O pedido na Conta Azul</h4><p>Depois de salvo, o pedido vai para a Conta Azul no próximo horário como venda <b>em andamento</b>, com o mesmo número. O pedido complementar também vai, com o sufixo colado no número (0021112026-1 aparece na Conta Azul como 211120261). Na linha aparece <b>CA ✓</b> quando a venda foi criada. Se precisar corrigir um pedido que já foi para a Conta Azul, avise o financeiro (a linha mostra <b>CA !</b>).</p>
-      <h4>8. Conferir pagamentos</h4><p>Os campos de 1º e 2º pagamento são preenchidos pela Conta Azul. Passe o mouse para ver a data da baixa, o banco e a forma de pagamento.</p>
+      <h4>8. Conferir pagamentos</h4><p>Os campos de 1º, 2º e 3º pagamento em diante são preenchidos pela Conta Azul. Passe o mouse para ver a data da baixa, o banco e a forma de pagamento.</p>
       <h4>9. Atualizações</h4><p>O painel atualiza com a Conta Azul e a planilha <b>às 09:30, 14:00 e 17:30</b>. Quando houver muitos pedidos de uma vez, a gestão pode usar <b>Atualizar agora</b>, na Planilha de vendas, sem esperar o próximo horário. Enquanto a planilha do Google estiver em uso, o que for lançado nela também aparece no painel; quando o painel virar a única ferramenta, a gestão encerra a planilha.</p>
       <h4>10. Dúvidas</h4><p>Fale com a gestão antes de alterar um pedido que já passou de 24 horas, porque depois disso só a gestão altera.</p>
     </div>
@@ -1190,8 +1202,9 @@ const nomeMes=(m)=>{const[a,b]=m.split('-');return MES_L[+b-1]+' de '+a};
 const somaMes=(m,n)=>{const[a,b]=m.split('-').map(Number);const d=new Date(Date.UTC(a,b-1+n,1));return d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0')};
 function delta(a,b,inv){ if(!b) return '<span class="delta eq">sem base</span>'; const d=(a-b)/b; const c=Math.abs(d)<.005?'eq':(d>0)!==!!inv?'up':'down'; return `<span class="delta ${c}">${d>0?'▲':d<0?'▼':'■'} ${pct(Math.abs(d))}</span>`; }
 
-const VERSAO='v63';
+const VERSAO='v64';
 const VERSOES=[
+ {v:'v64',data:'09/11/2026',tit:'Parcelas no pedido e aprovação de alteração de preço',arq:'painel-visu-v64.zip',itens:["Campo Parcelas no pedido: 2x (50% + 50%) como padrão, À vista, ou 3x a 12x (parcelas iguais a cada 30 dias). Vale na linha do Novo pedido, no formulário e na célula da Planilha de vendas, e a venda vai para a Conta Azul com essas parcelas.", "Coluna 3º pagamento em diante: soma das parcelas a partir da 3ª, preenchida pela Conta Azul quando baixadas.", "Alteração de preço em pedido fechado (mais de 24 h): o vendedor clica no 💲 (ou na célula do valor com cadeado), informa o novo valor por unidade e o motivo e envia para aprovação. A gestão vê o quadro Alterações de preço aguardando aprovação, aprova ou recusa; aprovado, o valor muda no pedido e tudo fica no Histórico. Se o pedido já estava na Conta Azul, a marca CA ! avisa para corrigir lá.", "Treinamento: passos novos sobre Parcelas e alteração de preço com aprovação."]},
  {v:'v63',data:'09/11/2026',tit:'Premiação da Milena volta ao cálculo anterior',arq:'painel-visu-v63.zip',itens:["Premiação: o pedido da Cabo Branco (Milena, outubro) estava com Premiação % gravada como 0%, por um erro das versões até a v60 (salvar o campo em branco virava 0%). Por isso a premiação da Milena caiu para R$ 2.987,25. Esses 0% voltam para em branco e o pedido segue a faixa do mês (Milena volta a R$ 3.179,15 em outubro). O % devido é ajustado pela gestão na coluna Premiação % (manual). A correção roda uma vez só e fica no Histórico de alterações."]},
  {v:'v62',data:'09/11/2026',tit:'Vídeo do treinamento narrado, cadeado, marca planilha e recompra automática',arq:'painel-visu-v62.zip',itens:["Treinamento: o vídeo narrado pela Eva (3 minutos, com voz e legendas) está em Comercial → Treinamento. O navegador não guarda mais a versão antiga do vídeo.", "Pedidos que vieram da planilha aparecem com a marca planilha.", "Pedido fechado (mais de 24 horas) mostra o cadeado 🔒 na linha; complementares (-1, -2…) aparecem com a marca ajuste.", "Novo × recompra: cliente que já comprou antes é marcado como Recompra automaticamente, mesmo nos pedidos da planilha que estavam em branco. O preenchimento também roda quando o painel é publicado.", "Inconsistências: enquanto a planilha estiver em uso, os pedidos de novembro que estão só na planilha não aparecem mais como erro."]},
  {v:'v61',data:'09/11/2026',tit:'Correção da Planilha de vendas, premiação por pedido, Enter, cliente da carteira e horários',arq:'painel-visu-v61.zip',itens:["Correção: ao alterar um pedido que veio da planilha num mês antes de novembro (ex.: % de premiação da Cabo Branco em outubro), as outras vendas do mês sumiam da Planilha de vendas. Agora só aquele pedido passa a valer pela versão do painel; as demais continuam vindo da planilha. O pedido vem junto com os complementares (-1, -2…).","Premiação % (manual): botão Salvar ao lado do campo em edição; em branco volta a seguir a faixa do mês (não vira 0%). O % salvo já entra em Vendedores e premiação.","Lançamento: Enter passa para o próximo campo, como o Tab, na linha do pedido e no formulário.","Cliente da carteira: ao digitar um cliente que já comprou, o painel marca Recompra e trava o campo. Cliente sem compra anterior mostra os nomes parecidos já cadastrados (Já existe na carteira?) e o + avisa antes de cadastrar um cliente que já existe.","Botão Preencher novo × recompra (gestão): preenche os campos em branco no painel e envia para a planilha do Google (Novo na 1ª compra, Recompra depois). Roda também nos horários automáticos.","Pedidos que vieram da planilha não têm mais o ✕ (excluir) enquanto a planilha estiver em uso; o ⏱ mostra o histórico de alterações.","Divergências: botão Importar fatura do cartão (OFX, CSV ou Excel da fatura).","Filtros: o período De/Até vale sobre o mês escolhido; botão Limpar filtros; Atualizar agora e Atualizar recarregam a tela sem precisar de F5.","Horários automáticos: 09:30, 14:00 e 17:30. A Conta Azul é lida por completo uma vez por dia; nas outras atualizações só do mês anterior em diante."]},
@@ -1309,6 +1322,8 @@ function agrupar(ls,campo){
 
 // ---------- filtros ----------
 const ROT_NR={novo:'Novo',recompra:'Recompra',sem:'Sem classificação'};
+const ROT_PARC=Object.fromEntries([['1','À vista'],['2','2x (50% + 50%)'],...[3,4,5,6,7,8,9,10,11,12].map(n=>[String(n),n+'x'])]);
+const rotSel=(c,o)=>(c==='parcelas'?ROT_PARC[o]:ROT_NR[o])||o;
 function montarFiltros(){
   const d=E.dados;
   const meses=[...new Set(d.linhas.map(l=>l.m).filter(Boolean))].sort().reverse();
@@ -2185,7 +2200,7 @@ function codDoNumero(n){ const s=String(n??'').replace(/\D/g,'').replace(/^0+/,'
 const semA=(s)=>String(s??'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/\s+/g,' ').trim();
 const dataBR=(d)=>d?String(d).slice(0,10).split('-').reverse().join('/'):'';
 const PED={d:null,carr:null,mes:null,vend:'',inVend:null,inTipo:'',busca:'',fil:'',cfMes:null,cfVend:'',cfBase:null,cfSit:'',hs:null,hsDias:null,editando:null};
-const COLS_PED=[['data','Data da venda','data'],['mes','Mês','ro'],['codigo','Cód. interno','texto'],['cliente','Cliente','texto','dlCliente'],['lote','Lote / obs. do cliente','texto'],['nome_pedido','Nome do pedido (Trello)','texto'],['vendedor','Vendedor','texto','dlVendedor'],['tipo_venda','Tipo de venda','sel:|B2B|B2C'],['novo_recompra','Cliente novo ou recompra?','sel:|novo|recompra'],['segmento','Segmento','texto','dlSegmento'],['tipo_produto','Tipo de produto','texto','dlProduto'],['material','Material','texto','dlMaterial'],['especificacao','Especificação','texto','dlEspec'],['quantidade','Quantidade','num'],['cor','Cor','texto','dlCor'],['valor_unit','Valor/und','brl'],['total','Total','brl'],['pag1','1º pagamento','pag'],['pag2','2º pagamento','pag'],['pago_100','Pedido 100% pago','bool'],['prazo_entrega','Prazo de entrega','data'],['forma_pagamento','Forma de pagamento','texto','dlForma'],['pagador','Nome pagador (comprovante)','texto'],['observacao','Observação','texto'],['pct_premiacao','Premiação % (manual)','num'],['obs_premiacao','Motivo do % diferente','texto']];
+const COLS_PED=[['data','Data da venda','data'],['mes','Mês','ro'],['codigo','Cód. interno','texto'],['cliente','Cliente','texto','dlCliente'],['lote','Lote / obs. do cliente','texto'],['nome_pedido','Nome do pedido (Trello)','texto'],['vendedor','Vendedor','texto','dlVendedor'],['tipo_venda','Tipo de venda','sel:|B2B|B2C'],['novo_recompra','Cliente novo ou recompra?','sel:|novo|recompra'],['segmento','Segmento','texto','dlSegmento'],['tipo_produto','Tipo de produto','texto','dlProduto'],['material','Material','texto','dlMaterial'],['especificacao','Especificação','texto','dlEspec'],['quantidade','Quantidade','num'],['cor','Cor','texto','dlCor'],['valor_unit','Valor/und','brl'],['total','Total','brl'],['pag1','1º pagamento','pag'],['pag2','2º pagamento','pag'],['pag3','3º pagamento em diante','pag'],['pago_100','Pedido 100% pago','bool'],['prazo_entrega','Prazo de entrega','data'],['forma_pagamento','Forma de pagamento','texto','dlForma'],['parcelas','Parcelas','sel:1|2|3|4|5|6|7|8|9|10|11|12'],['pagador','Nome pagador (comprovante)','texto'],['observacao','Observação','texto'],['pct_premiacao','Premiação % (manual)','num'],['obs_premiacao','Motivo do % diferente','texto']];
 const ROT_PED=Object.fromEntries(COLS_PED.map(c=>[c[0],c[1]]));
 // subtotal das linhas visíveis na Planilha de vendas (quantidade e total)
 function rodapeSub(rows){ if(!rows.length) return ''; const soma=k=>rows.reduce((a,r)=>a+(Number(r[k])||0),0);
@@ -2305,7 +2320,7 @@ function pgRegistro(){
   // grade
   vis.sort((a,b)=>(a.data||a.mes||'').localeCompare(b.data||b.mes||'')||cbase(a.codigo).localeCompare(cbase(b.codigo))||String(a.codigo).localeCompare(String(b.codigo))||(a.ordem||0)-(b.ordem||0));
   const LIM=1500, mostra=vis.slice(0,LIM);
-  const fmt=(c,t,v)=>v===''||v==null||(t!=='bool'&&t!=='num'&&t!=='brl'&&t!=='pag'&&!v)?'':t==='data'?dataBR(v):t==='brl'||t==='pag'?(+v?brl2(+v):''):t==='num'?(+v?int(+v)===String(+v)?int(+v):(+v).toLocaleString('pt-BR'):''):t==='bool'?(v?'Sim':'Não'):c==='novo_recompra'?ROT_NR[v]||v:c==='mes'?(v?MES_C[+v.slice(5)-1]+'/'+v.slice(0,4):''):esc(v);
+  const fmt=(c,t,v)=>c==='parcelas'?esc(ROT_PARC[String(v||2)]||v):v===''||v==null||(t!=='bool'&&t!=='num'&&t!=='brl'&&t!=='pag'&&!v)?'':t==='data'?dataBR(v):t==='brl'||t==='pag'?(+v?brl2(+v):''):t==='num'?(+v?int(+v)===String(+v)?int(+v):(+v).toLocaleString('pt-BR'):''):t==='bool'?(v?'Sim':'Não'):c==='parcelas'?esc(ROT_PARC[String(v)]||v):c==='novo_recompra'?ROT_NR[v]||v:c==='mes'?(v?MES_C[+v.slice(5)-1]+'/'+v.slice(0,4):''):esc(v);
   let ant='', html='';
   for(const r of mostra){
     const k=r.codigo?ckey(r.codigo):'', g=k?grupos.get(k):null, prim=(r.codigo||r.id)!==ant; ant=r.codigo||r.id;
@@ -2316,12 +2331,12 @@ function pgRegistro(){
       let cont=fmt(c,t,v), cls=[], extra='';
       if(t==='brl'||t==='num'||t==='pag') cls.push('v');
       if((REQ_PED.includes(c)&&!v)||(c==='codigo'&&pd.has('codigo'))||(c==='cliente'&&pd.has('cliente'))) cls.push('vz');
-      if(t==='pag'&&r.codigo){ const i=c==='pag1'?0:1, p=parcelasDe(r.codigo)[i];
+      if(t==='pag'&&r.codigo){ const i=c==='pag1'?0:c==='pag2'?1:2, p=parcelasDe(r.codigo)[i];
         if(!+v&&prim&&p){ cont=p.pago>0?`${brl2(p.pago)}<span class="ca" title="recebido, preenchido pela Conta Azul">CA</span>`:`<span style="color:var(--ink3)" title="parcela ainda não recebida">${p.venc<hojeISO()?'atrasado':'a receber'} ${brl2(p.valor)}</span>`; cls.push('sys'); }
         if(+v&&(r.pag_ca||[]).includes(i+1)) cont+=`<span class="ca" title="preenchido pela Conta Azul">CA</span>`;
         if(prim||+v) extra=` data-pg="${esc(r.codigo)}|${i}|${+v||0}|${r.id}"`; }
       if(c==='pago_100'&&r.codigo&&prim) extra=` data-pgall="${esc(r.codigo)}"`;
-      if(trv&&trv!=='x'&&P.lancar) { cls.push('lk'); extra+=` title="${esc(trv)}"`; }
+      if(trv&&trv!=='x'&&P.lancar) { cls.push('lk'); extra+=` data-lkc="${c}" title="${esc(trv)}${['valor_unit','quantidade','total'].includes(c)&&!P.gestao?' Clique para pedir a alteração de preço à gestão.':''}"`; }
       else if(t!=='ro'&&!viva&&P.lancar) extra+=` data-c="${c}"`;
       if(c==='cliente'&&v) extra+=` title="${esc(v)}${r.cliente_lancado&&r.cliente_lancado!==v?' · lançado como: '+esc(r.cliente_lancado):''}"`;
       cel+=`<td class="${cls.join(' ')}"${extra}>${cont}</td>`;
@@ -2332,6 +2347,8 @@ function pgRegistro(){
       +(podeExcluir(r)?`<button type="button" class="acb" data-ac="del" title="Excluir esta linha">✕</button>`:'')
       +(paginasAtivas().includes('historico')&&r.codigo&&prim?`<button type="button" class="acb" data-ac="hist" title="Histórico deste pedido">🕘</button>`:'')
       +(prim&&r.codigo&&pedidoFechado(r)?`<span class="pd-lock" title="Pedido fechado: passaram 24 h do lançamento. Quantidade e valores não mudam mais; peças a mais entram como pedido complementar (⊕).">🔒</span>`:'')
+      +(r.solicitacao?.status==='pendente'?`<button type="button" class="acb sol-bd" data-ac="sol" title="Alteração de preço pedida por ${esc(r.solicitacao.por)}: ${brl2(r.solicitacao.valor_unit_antes)} → ${brl2(r.solicitacao.valor_unit)}/und. ${P.gestao?'Clique para aprovar ou recusar.':'Aguardando a gestão.'}">⏳ aprovação</button>`:r.solicitacao&&Date.now()-Date.parse(r.solicitacao.resp_em||0)<7*864e5?`<span class="pd-bd ${r.solicitacao.status==='aprovada'?'sol-ok':'sol-no'}" title="Alteração de preço ${r.solicitacao.status} por ${esc(r.solicitacao.resp_por||'')}${r.solicitacao.resp_obs?': '+esc(r.solicitacao.resp_obs):''}${r.solicitacao.ajustar_ca?' · corrigir o valor na Conta Azul':''}">${r.solicitacao.status==='aprovada'?'preço aprovado':'preço recusado'}</span>`:'')
+      +(P.lancar&&!P.gestao&&prim&&r.codigo&&pedidoFechado(r)&&ehMinha(r)&&r.origem!=='planilha_viva'&&r.solicitacao?.status!=='pendente'?`<button type="button" class="acb" data-ac="sol" title="Pedido fechado: pedir à gestão para alterar o preço">💲</button>`:'')
       +(prim&&/-\d+$/.test(r.codigo||'')?`<span class="pd-bd aj" title="Pedido complementar (ajuste) do pedido ${esc(String(r.codigo).replace(/-\d+$/,''))}">ajuste</span>`:'')
       +(prim&&r.origem==='planilha'?`<span class="pd-bd" style="background:var(--line);color:var(--ink2)" title="Veio da planilha do Google e foi trazido para o painel: as alterações valem pela versão do painel.">planilha</span>`:'')
       +(prim&&r.origem==='painel'?(r.ca_venda_id?`<span class="ca-bd ok" title="${r.ca_venda_id==='ja-existia'?'Já existia venda com este número na Conta Azul':'Venda criada na Conta Azul (em andamento)'+(r.ca_enviado_em?' em '+new Date(r.ca_enviado_em).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'')}${r.alterado_em&&r.ca_enviado_em&&r.alterado_em>r.ca_enviado_em?' · ALTERADO DEPOIS DO ENVIO: corrigir na Conta Azul':''}">CA${r.alterado_em&&r.ca_enviado_em&&r.alterado_em>r.ca_enviado_em?' !':' ✓'}</span>`:r.ca_erro?`<span class="ca-bd erro" title="Não foi para a Conta Azul: ${esc(r.ca_erro)}">CA ✕</span>`:/-\d+$/.test(r.codigo||'')?`<span class="ca-bd" title="Pedido complementar: lançar o título na Conta Azul">CA</span>`:''):'')
@@ -2344,6 +2361,7 @@ function pgRegistro(){
   g0.scrollTop=st.t; g0.scrollLeft=st.l; PED.flash=null;
   $('pdNota').innerHTML=(vis.length>LIM?`Mostrando as primeiras ${int(LIM)} de ${int(vis.length)} linhas; escolha um mês ou busque. `:'')+`<b>Sistema</b> = valor da venda na Conta Azul com o mesmo código (cód. interno = número da venda). <b>CA</b> = pagamento preenchido pela Conta Azul; passe o mouse em 1º/2º pagamento para ver data da baixa e banco${d.pagamentos?.erro?` (pagamentos indisponíveis: ${esc(d.pagamentos.erro)})`:''}.`;
   revisaoClientes(conhecidos);
+  cardAprovacoes();
   fontePed();
 }
 // edição na própria célula
@@ -2352,7 +2370,7 @@ function editarCelula(td){
   const c=td.dataset.c, col=COLS_PED.find(x=>x[0]===c), t=col[2]; const v=r[c];
   PED.editando={td,r,c}; esconderBalao(true); td.classList.add('ed');
   let el;
-  if(t.startsWith('sel:')){ el=document.createElement('select'); el.innerHTML=t.slice(4).split('|').map(o=>`<option value="${o}">${o?ROT_NR[o]||o:'—'}</option>`).join(''); el.value=v||''; }
+  if(t.startsWith('sel:')){ el=document.createElement('select'); el.innerHTML=t.slice(4).split('|').map(o=>`<option value="${o}">${o?rotSel(c,o):'—'}</option>`).join(''); el.value=c==='parcelas'?String(v||2):v||''; }
   else if(t==='bool'){ el=document.createElement('select'); el.innerHTML='<option value="false">Não</option><option value="true">Sim</option>'; el.value=String(!!v); }
   else { el=document.createElement('input'); el.type=t==='data'?'date':(t==='num'||t==='brl'||t==='pag')?'number':'text'; if(el.type==='number') el.step='0.01'; el.value=v??''; if(el.type==='number'&&!+v) el.value=''; if(col[3]) el.setAttribute('list',col[3]); }
   td.innerHTML=''; td.appendChild(el); const okb=document.createElement('button'); okb.type='button'; okb.className='cel-ok'; okb.textContent='Salvar'; okb.title='Salvar (ou Enter)'; td.appendChild(okb); el.focus(); if(el.select) try{el.select();}catch(e){}
@@ -2360,7 +2378,7 @@ function editarCelula(td){
   let feito=false;
   const fim=async(salvar,proximo)=>{ if(feito) return; feito=true; PED.editando=null;
     let nv=el.value; if(t==='bool') nv=nv==='true'; else if(c==='pct_premiacao') nv=nv===''?null:+nv; else if(['num','brl','pag'].includes(t)) nv=nv===''?0:+nv;
-    const igual=t==='bool'?nv===!!v:c==='pct_premiacao'?(nv??'')===(v??''):['num','brl','pag'].includes(t)?(+nv||0)===(+v||0):String(nv)===String(v??'');
+    const igual=c==='parcelas'?String(nv)===String(v||2):t==='bool'?nv===!!v:c==='pct_premiacao'?(nv??'')===(v??''):['num','brl','pag'].includes(t)?(+nv||0)===(+v||0):String(nv)===String(v??'');
     if(!salvar||igual){ pgRegistro(); if(proximo) proximaCelula(tr.dataset.id,c); return; }
     try{ const res=await api('/api/pedidos/'+r.id,{method:'PATCH',body:JSON.stringify({mudancas:{[c]:nv}})}); Object.assign(r,res.registro); depoisPedido(); toast(`${ROT_PED[c]} atualizado${r.codigo?' no pedido '+r.codigo:''}.`); }
     catch(e){ toast(e.message,true); }
@@ -2373,6 +2391,43 @@ let tDep=null;
 function depoisPedido(){ if(PED.d?.config?.fonte&&PED.d.config.fonte!=='planilha'){ clearTimeout(tDep); tDep=setTimeout(()=>carregar(),1500); } }
 async function excluirLinha(r){ if(!confirmar(`Excluir a linha ${r.codigo||''} · ${r.quantidade||''} ${r.tipo_produto||''} de ${r.cliente}? Fica registrado no histórico.`)) return;
   try{ await api('/api/pedidos/'+r.id,{method:'DELETE'}); PED.d.registros=regsPed().filter(x=>x.id!==r.id); depoisPedido(); toast('Linha excluída.'); pgRegistro(); }catch(e){ toast(e.message,true); } }
+// ---------- alteração de preço em pedido fechado: vendedor pede, gestão aprova ----------
+const SOL={r:null};
+function abrirSolic(r,modo){ SOL.r=r; const s=r.solicitacao||{}; $('solErro').textContent='';
+  const lin=`<b>${esc(r.codigo||'')}</b> · ${esc(r.cliente||'')} · ${esc(r.tipo_produto||'')} ${esc([r.material,r.cor].filter(Boolean).join(' '))}`;
+  if(modo==='pedir'){
+    $('solTit').textContent='Pedir alteração de preço'; $('solSub').innerHTML=`${lin}<br>O pedido está fechado (mais de ${PED.d.horas_edicao||24} h). A gestão recebe o pedido e aprova ou recusa.`;
+    $('solCorpo').innerHTML=`<div class="f"><label>Valor atual</label><div>${int(r.quantidade||0)} × ${brl2(r.valor_unit||0)} = <b>${brl2(r.total||0)}</b></div></div>
+      <div class="f"><label for="solVU">Novo valor por unidade *</label><input id="solVU" type="number" min="0" step="0.01" value="${r.valor_unit||''}"></div>
+      <div class="f"><label for="solQ">Quantidade</label><input id="solQ" type="number" min="0" step="1" value="${r.quantidade||''}"></div>
+      <div class="f"><label>Novo total</label><b id="solTot">—</b></div>
+      <div class="f"><label for="solMot">Motivo *</label><textarea id="solMot" rows="3" placeholder="Ex.: cliente negociou desconto na 2ª remessa"></textarea></div>`;
+    const tot=()=>{ $('solTot').textContent=brl2((+$('solVU').value||0)*(+$('solQ').value||0)); }; $('solVU').oninput=tot; $('solQ').oninput=tot; tot();
+    $('solBts').innerHTML='<button class="bt2" type="button" data-sb="x">Cancelar</button><button class="bt2 pri" type="button" data-sb="enviar">Enviar para aprovação</button>';
+  } else {
+    $('solTit').textContent=modo==='responder'?'Aprovar alteração de preço':'Alteração de preço pedida'; $('solSub').innerHTML=lin;
+    $('solCorpo').innerHTML=`<div class="f"><label>Pedido por</label><div>${esc(s.por||'')} em ${s.em?new Date(s.em).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):''}</div></div>
+      <div class="f"><label>De</label><div>${int(s.quantidade_antes||0)} × ${brl2(s.valor_unit_antes||0)} = ${brl2(s.total_antes||0)}</div></div>
+      <div class="f"><label>Para</label><div><b>${int(s.quantidade||0)} × ${brl2(s.valor_unit||0)} = ${brl2(s.total||0)}</b> (${(s.total||0)>=(s.total_antes||0)?'+':''}${brl2((s.total||0)-(s.total_antes||0))})</div></div>
+      <div class="f"><label>Motivo</label><div>${esc(s.motivo||'')}</div></div>
+      ${r.ca_venda_id?'<div class="nota">Este pedido já está na Conta Azul: depois de aprovar, corrija o valor da venda lá também (a marca CA ! avisa).</div>':''}
+      ${modo==='responder'?'<div class="f"><label for="solObs">Observação da gestão</label><textarea id="solObs" rows="2"></textarea></div>':''}`;
+    $('solBts').innerHTML=modo==='responder'?'<button class="bt2" type="button" data-sb="x">Fechar</button><button class="bt2 del" type="button" data-sb="recusar">Recusar</button><button class="bt2 pri" type="button" data-sb="aprovar">Aprovar</button>':'<button class="bt2" type="button" data-sb="x">Fechar</button>';
+  }
+  $('solModal').hidden=false; SOL.fundo=$('pdFundo').hidden; $('pdFundo').hidden=false; setTimeout(()=>($('solVU')||$('solObs'))?.focus(),40); }
+function fecharSolic(){ $('solModal').hidden=true; if(SOL.fundo&&$('pdModal').hidden) $('pdFundo').hidden=true; }
+$('solFechar').onclick=fecharSolic;
+$('solBts').addEventListener('click',async e=>{ const b=e.target.closest('[data-sb]'); if(!b) return; const r=SOL.r, a=b.dataset.sb; if(a==='x') return fecharSolic();
+  b.disabled=true; $('solErro').textContent='';
+  try{ let res;
+    if(a==='enviar') res=await api(`/api/pedidos/${r.id}/solicitar`,{method:'POST',body:JSON.stringify({valor_unit:+$('solVU').value||0,quantidade:+$('solQ').value||0,motivo:$('solMot').value.trim()})});
+    else res=await api(`/api/pedidos/${r.id}/responder`,{method:'POST',body:JSON.stringify({aprovar:a==='aprovar',obs:$('solObs')?.value.trim()||''})});
+    Object.assign(r,res.registro); fecharSolic(); toast(a==='enviar'?'Pedido de alteração enviado para a gestão aprovar.':a==='aprovar'?`Alteração aprovada: novo total ${brl2(res.registro.total)}.`:'Alteração recusada.'); if(a!=='enviar') depoisPedido(); pgRegistro(); }
+  catch(x){ $('solErro').textContent=x.message; } finally{ b.disabled=false; } });
+function cardAprovacoes(){ const P=PED.d?.pode||{}, pend=regsPed().filter(r=>r.solicitacao?.status==='pendente'&&(P.gestao||ehMinha(r)));
+  $('pdAprovCard').hidden=!pend.length; if(!pend.length) return;
+  $('pdAprov').innerHTML=`<div class="tw"><table><thead><tr><th>Pedido</th><th>Cliente</th><th>Vendedor</th><th class="v">De</th><th class="v">Para</th><th>Motivo</th><th>Pedido por</th><th></th></tr></thead><tbody>${pend.map(r=>{ const s=r.solicitacao; return `<tr><td>${esc(r.codigo||'')}</td><td>${esc(r.cliente||'')}</td><td>${esc(r.vendedor||'')}</td><td class="v">${brl2(s.total_antes)}<div class="dica-c">${int(s.quantidade_antes)} × ${brl2(s.valor_unit_antes)}</div></td><td class="v"><b>${brl2(s.total)}</b><div class="dica-c">${int(s.quantidade)} × ${brl2(s.valor_unit)}</div></td><td style="white-space:normal;min-width:180px">${esc(s.motivo)}</td><td>${esc(s.por)}<div class="dica-c">${new Date(s.em).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</div></td><td>${P.gestao?`<button class="bt2 pri" type="button" data-apr="${r.id}">Aprovar / recusar</button>`:'<span class="dica-c">aguardando a gestão</span>'}</td></tr>`; }).join('')}</tbody></table></div>`;
+  $('pdAprov').querySelectorAll('[data-apr]').forEach(b=>b.onclick=()=>{ const r=regsPed().find(x=>x.id===b.dataset.apr); if(r) abrirSolic(r,'responder'); }); }
 // confirmação sem caixa de diálogo do navegador: segundo clique em até 4 s confirma
 const confirmar=(msg)=>{ const agora=Date.now(); if(confirmar.msg===msg&&agora-confirmar.t<4000){ confirmar.msg=null; return true; } confirmar.msg=msg; confirmar.t=agora; toast(msg+' Clique de novo para confirmar.'); return false; };
 
@@ -2399,7 +2454,7 @@ function fontePed(){
     $('pdEncerrar').onclick=async()=>{ const enc2=!enc; if(enc2&&!confirmar('Encerrar a planilha? As vendas que só estão nela entram como pedidos do painel.')) return;
       try{ const r=await api('/api/pedidos/planilha-uso',{method:'POST',body:JSON.stringify({encerrar:enc2})}); PED.d.config=r; toast(enc2?`Planilha encerrada${r.importadas?`: ${int(r.importadas)} vendas entraram como pedidos do painel`:''}.`:'O painel volta a ler a planilha.'); await carregarPedidos(); await carregar(true); }catch(e){ toast(e.message,true); } }; }
   { const c=PED.d.config||{}, on=!!c.enviar_ca, u=c.ultimo_envio_ca, pend=regsPed().filter(r=>r.origem==='painel'&&r.codigo&&!r.ca_venda_id&&!/-\d+$/.test(r.codigo)), nPend=new Set(pend.map(r=>r.codigo)).size;
-    $('pdFonte').insertAdjacentHTML('beforeend',`<div class="aviso${on?' ok':''}" style="margin-top:10px"><span style="flex:1;min-width:240px"><b>Pedidos do painel → Conta Azul: ${on?'envio ligado':'envio desligado'}.</b> ${on?'Nos horários (09:30, 14:00 e 17:30) e no Atualizar agora, cada pedido lançado aqui vira uma venda <b>em andamento</b> na Conta Azul, com o mesmo número, o tipo de produto como item e pagamento 50% + 50%.':'Ligue para que os pedidos lançados aqui virem vendas em andamento na Conta Azul (mesmo número, tipo de produto como item, 50% + 50%).'} ${int(nPend)} ${nPend===1?'pedido aguardando':'pedidos aguardando'} envio.${u?`<br>Último envio: ${new Date(u.em).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})} · ${int(u.enviados)} enviados${u.ja_existiam?` · ${int(u.ja_existiam)} já existiam`:''}${u.erros?.length?` · <b style="color:var(--red)">${int(u.erros.length)} com erro</b> (${esc(u.erros.slice(0,3).map(e=>e.codigo+': '+e.erro).join(' | '))})`:''}${u.complementares?` · ${pl(u.complementares,'item','itens')} de pedido complementar para lançar à mão`:''}`:''}</span><span style="display:flex;gap:8px;flex-wrap:wrap"><button class="bt2" type="button" id="pdCaLiga">${on?'Desligar envio':'Ligar envio'}</button><button class="bt2${on?' pri':''}" type="button" id="pdCaEnvia"${nPend?'':' disabled'}>Enviar agora</button></span></div>`);
+    $('pdFonte').insertAdjacentHTML('beforeend',`<div class="aviso${on?' ok':''}" style="margin-top:10px"><span style="flex:1;min-width:240px"><b>Pedidos do painel → Conta Azul: ${on?'envio ligado':'envio desligado'}.</b> ${on?'Nos horários (09:30, 14:00 e 17:30) e no Atualizar agora, cada pedido lançado aqui vira uma venda <b>em andamento</b> na Conta Azul, com o mesmo número, o tipo de produto como item e as parcelas do pedido (padrão 50% + 50%; também à vista ou 3x ou mais).':'Ligue para que os pedidos lançados aqui virem vendas em andamento na Conta Azul (mesmo número, tipo de produto como item, 50% + 50%).'} ${int(nPend)} ${nPend===1?'pedido aguardando':'pedidos aguardando'} envio.${u?`<br>Último envio: ${new Date(u.em).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})} · ${int(u.enviados)} enviados${u.ja_existiam?` · ${int(u.ja_existiam)} já existiam`:''}${u.erros?.length?` · <b style="color:var(--red)">${int(u.erros.length)} com erro</b> (${esc(u.erros.slice(0,3).map(e=>e.codigo+': '+e.erro).join(' | '))})`:''}${u.complementares?` · ${pl(u.complementares,'item','itens')} de pedido complementar para lançar à mão`:''}`:''}</span><span style="display:flex;gap:8px;flex-wrap:wrap"><button class="bt2" type="button" id="pdCaLiga">${on?'Desligar envio':'Ligar envio'}</button><button class="bt2${on?' pri':''}" type="button" id="pdCaEnvia"${nPend?'':' disabled'}>Enviar agora</button></span></div>`);
     $('pdCaLiga').onclick=async()=>{ try{ PED.d.config=await api('/api/pedidos/conta-azul',{method:'POST',body:JSON.stringify({ativo:!on})}); toast(on?'Envio para a Conta Azul desligado.':'Envio para a Conta Azul ligado.'); fontePed(); }catch(e){ toast(e.message,true); } };
     $('pdCaEnvia').onclick=async()=>{ const b=$('pdCaEnvia'); b.disabled=true; b.textContent='Enviando…'; try{ const r=await api('/api/pedidos/enviar-ca',{method:'POST',body:'{}'}); PED.d.config=r.config; await carregarPedidos(true); toast(`${int(r.enviados.length)} ${r.enviados.length===1?'pedido enviado':'pedidos enviados'} para a Conta Azul${r.ja_existiam.length?` · ${int(r.ja_existiam.length)} já existiam`:''}${r.erros.length?` · ${int(r.erros.length)} com erro: ${r.erros[0].erro}`:''}.`,!!r.erros.length); pgRegistro(); }catch(e){ toast(e.message,true); } finally{ b.textContent='Enviar agora'; } }; }
   $('pdFonte').querySelectorAll('[data-fp]').forEach(b=>b.onclick=async()=>{ if(b.dataset.fp===f) return; if(b.dataset.fp==='painel'&&!regsPed().length){ toast('Importe a base antes de trocar a fonte.',true); return; }
@@ -2421,7 +2476,7 @@ function abrirPedido(modo,base){
   PM.modo=modo; PM.base=base||null; const f=$('pdmForm'); f.reset(); $('pmNR').dataset.auto=''; $('pmErro').textContent=''; $('pmNRdica').textContent='';
   const conh=valoresConhecidos();
   const cab=base?{...base}:{}; const set=(n,v)=>{ if(f.elements[n]) f.elements[n].value=v??''; };
-  ['cliente','lote','nome_pedido','vendedor','tipo_venda','novo_recompra','segmento','forma_pagamento','prazo_entrega','pagador','observacao'].forEach(k=>set(k,modo==='novo'?'':cab[k]));
+  ['cliente','lote','nome_pedido','vendedor','tipo_venda','novo_recompra','segmento','forma_pagamento','prazo_entrega','pagador','observacao'].forEach(k=>set(k,modo==='novo'?'':cab[k])); set('parcelas',modo==='novo'?'2':String(cab.parcelas||2));
   set('data',modo==='item'?cab.data:hojeISO());
   $('pmVend').readOnly=!!meuVend(); if(meuVend()) set('vendedor',conh.vendedor.find(x=>semA(x)===semA(meuVend()))||meuVend());
   else if(modo==='novo'){ const eu=semA(E.eu?.nome||'').split(' ')[0]; const v=eu&&conh.vendedor.find(x=>semA(x).split(' ')[0]===eu); if(v) set('vendedor',v); }
@@ -2435,7 +2490,7 @@ function abrirPedido(modo,base){
 }
 const fecharPedido=()=>{ $('pdModal').hidden=true; $('pdFundo').hidden=true; };
 async function salvarPedido(e){
-  e.preventDefault(); const f=$('pdmForm'), cab={}; ['data','codigo','cliente','lote','nome_pedido','vendedor','tipo_venda','novo_recompra','segmento','forma_pagamento','prazo_entrega','pagador','observacao'].forEach(k=>cab[k]=f.elements[k].value.trim());
+  e.preventDefault(); const f=$('pdmForm'), cab={}; ['data','codigo','cliente','lote','nome_pedido','vendedor','tipo_venda','novo_recompra','segmento','forma_pagamento','parcelas','prazo_entrega','pagador','observacao'].forEach(k=>cab[k]=f.elements[k].value.trim());
   const itens=[...$('pmItens').querySelectorAll('tr')].map(tr=>Object.fromEntries([...tr.querySelectorAll('[data-k]')].map(i=>[i.dataset.k,i.type==='number'?(+i.value||0):i.value.trim()]))).filter(i=>i.tipo_produto||i.quantidade||i.valor_unit);
   const err=(t)=>{ $('pmErro').textContent=t; };
   if(/\blote\s*\d/i.test(cab.cliente)){ const m=cab.cliente.match(/\s*[-–(]?\s*\b(lote\s*\d+)\)?\s*$/i); if(m){ cab.lote=cab.lote||m[1].replace(/^l/,'L'); cab.cliente=cab.cliente.slice(0,m.index).trim(); f.elements.cliente.value=cab.cliente; f.elements.lote.value=cab.lote; } }
@@ -2942,22 +2997,22 @@ let tBusca=null; $('pdBusca').oninput=()=>{ clearTimeout(tBusca); tBusca=setTime
 document.querySelectorAll('[data-pdf]').forEach(b=>b.onclick=()=>{ PED.fil=b.dataset.pdf; pgRegistro(); });
 $('pdNovo').onclick=()=>abrirLinha();
 // ---------- novo pedido em linha (v48): igual à planilha, uma linha por item ----------
-const PL_CAB=['data','cliente','lote','nome_pedido','vendedor','tipo_venda','novo_recompra','segmento','prazo_entrega','forma_pagamento','pagador'];
+const PL_CAB=['data','cliente','lote','nome_pedido','vendedor','tipo_venda','novo_recompra','segmento','prazo_entrega','forma_pagamento','parcelas','pagador'];
 const PL_ITEM=['tipo_produto','material','especificacao','quantidade','cor','valor_unit','observacao','lote'];
-const PL_RO=new Set(['mes','codigo','total','pag1','pag2','pago_100']);
+const PL_RO=new Set(['mes','codigo','total','pag1','pag2','pag3','pago_100']);
 function abrirLinha(){ $('plCard').hidden=false; $('plErro').textContent=''; $('plHead').innerHTML='<tr>'+COLS_PED.map(c=>`<th${['quantidade','valor_unit','total'].includes(c[0])?' class="v"':''}>${esc(c[1])}${(REQ_PED.includes(c[0])&&c[0]!=='total')||c[0]==='data'||c[0]==='valor_unit'?' *':''}</th>`).join('')+'<th></th></tr>';
   $('plCorpo').innerHTML=''; addLinhaPl(); carregarClientes().catch(()=>{}); $('plCard').scrollIntoView({behavior:'smooth',block:'start'}); setTimeout(()=>$('plCorpo').querySelector('[data-k="cliente"]')?.focus(),250); }
 function addLinhaPl(){
   const prim=$('plCorpo').querySelector('tr'), base=prim?Object.fromEntries([...prim.querySelectorAll('[data-k]')].map(i=>[i.dataset.k,i.value])):{};
   const conh=valoresConhecidos(), eu=semA(E.eu?.nome||'').split(' ')[0];
   const vend=meuVend()?(conh.vendedor.find(x=>semA(x)===semA(meuVend()))||meuVend()):(eu&&conh.vendedor.find(x=>semA(x).split(' ')[0]===eu))||'';
-  const v=(k)=>prim?(PL_CAB.includes(k)&&k!=='lote'?base[k]:''):k==='data'?hojeISO():k==='vendedor'?vend:'';
+  const v=(k)=>prim?(PL_CAB.includes(k)&&k!=='lote'?base[k]:''):k==='data'?hojeISO():k==='vendedor'?vend:k==='parcelas'?'2':'';
   const cel=([k,,t,dl])=>{ const cab=PL_CAB.includes(k)&&k!=='lote'&&!!prim; const cls=(cab?'cab ':'')+(['cliente','nome_pedido','especificacao','observacao'].includes(k)?'w2':'');
     if(k==='mes') return `<td class="ro" data-mes>${v('data')?nomeMes(v('data').slice(0,7)):'—'}</td>`;
     if(k==='codigo') return `<td class="ro" data-cod>${prim?'mesmo código':'automático: '+proxCod(v('data'))}</td>`;
     if(k==='total') return `<td class="v ro"><b data-tot>—</b></td>`;
     if(PL_RO.has(k)) return `<td class="ro" title="Preenchido pela Conta Azul quando o pagamento for baixado">—</td>`;
-    if(t&&t.startsWith('sel:')){ const ops=t.slice(4).split('|'); return `<td><select data-k="${k}" class="${cls}">${ops.map(o=>`<option value="${o}"${o===v(k)?' selected':''}>${o?esc(ROT_NR[o]||o):'—'}</option>`).join('')}</select></td>`; }
+    if(t&&t.startsWith('sel:')){ const ops=t.slice(4).split('|'); return `<td><select data-k="${k}" class="${cls}">${ops.map(o=>`<option value="${o}"${o===v(k)?' selected':''}>${o?esc(rotSel(k,o)):'—'}</option>`).join('')}</select></td>`; }
     const ty=t==='data'?'date':t==='num'||t==='brl'?'number':'text';
     const inp=`<input data-k="${k}" class="${cls}" type="${ty}" ${ty==='number'?`min="0" step="${t==='brl'?'0.01':'1'}"`:''} ${dl?`list="${dl}"`:''} value="${esc(v(k)||'')}" ${k==='vendedor'&&meuVend()?'readonly':''} aria-label="${esc(ROT_PED[k])}">`;
     if(CAD_ADD[k]&&!(k==='cliente'&&prim)) return `<td><div class="pl-in">${inp}<button type="button" class="pl-add" data-add="${k}" title="Incluir ${CAD_ADD[k]} novo" aria-label="Incluir ${CAD_ADD[k]} novo">+</button></div></td>`;
@@ -3016,10 +3071,10 @@ async function assumirPedido(r){ try{ toast(`Trazendo o pedido ${r.codigo} da pl
 $('pdGrade').addEventListener('click',e=>{
   const b=e.target.closest('[data-ac]'); if(b){ const idL=b.closest('tr').dataset.id; let r=regsPed().find(x=>x.id===idL)||linhasPlanilhaViva().find(x=>x.id===idL); if(!r) return;
     if(r.origem==='planilha_viva'&&(b.dataset.ac==='item'||b.dataset.ac==='comp')){ const ac=b.dataset.ac; assumirPedido(r).then(n=>{ if(n) abrirPedido(ac,n); }); return; }
-    if(b.dataset.ac==='item') abrirPedido('item',r); else if(b.dataset.ac==='comp') abrirPedido('comp',r); else if(b.dataset.ac==='del') excluirLinha(r); else if(b.dataset.ac==='hist'){ $('hsBusca').value=r.codigo; irPara('historico'); } return; }
+    if(b.dataset.ac==='item') abrirPedido('item',r); else if(b.dataset.ac==='comp') abrirPedido('comp',r); else if(b.dataset.ac==='del') excluirLinha(r); else if(b.dataset.ac==='sol') abrirSolic(r,PED.d.pode.gestao&&r.solicitacao?.status==='pendente'?'responder':r.solicitacao?.status==='pendente'?'ver':'pedir'); else if(b.dataset.ac==='hist'){ $('hsBusca').value=r.codigo; irPara('historico'); } return; }
   const td=e.target.closest('td'); if(!td||td.classList.contains('ed')) return;
   { const tr=td.closest('tr'), r=tr&&tr.dataset.id&&(regsPed().find(x=>x.id===tr.dataset.id)||linhasPlanilhaViva().find(x=>x.id===tr.dataset.id)); if(r&&r.origem==="planilha_viva"&&PED.d?.pode?.lancar&&r.codigo&&!td.classList.contains('ac')){ if(!confirmar(`Trazer o pedido ${r.codigo} da planilha para o painel para alterar? Clique de novo para confirmar.`)) return; assumirPedido(r).then(n=>{ if(n) toast(`Pedido ${n.codigo} agora está no painel: clique na célula para alterar.`); }); return; } }
-  if(td.dataset.c) editarCelula(td); else if(td.classList.contains('lk')) toast(td.title,true); });
+  if(td.dataset.c) editarCelula(td); else if(td.classList.contains('lk')){ const r=regsPed().find(x=>x.id===td.closest('tr')?.dataset.id); if(r&&['valor_unit','quantidade','total'].includes(td.dataset.lkc)&&!PED.d.pode.gestao&&ehMinha(r)) abrirSolic(r,'pedir'); else toast(td.title,true); } });
 $('pdGrade').addEventListener('mouseover',e=>{ if(PED.editando) return; const ta=e.target.closest('[data-pgall]'); if(ta){ mostrarBalao(ta,cardPedidoPag(ta.dataset.pgall)); return; } const td=e.target.closest('[data-pg]'); if(!td) return; const [cod,i,v,rid]=td.dataset.pg.split('|'); mostrarBalao(td,cardPag(cod,+i,+v,rid)); });
 $('pdGrade').addEventListener('mouseout',e=>{ const td=e.target.closest('[data-pg],[data-pgall]'); if(td&&!td.contains(e.relatedTarget)&&!$('balao').contains(e.relatedTarget)) esconderBalao(); });
 $('pdGrade').addEventListener('scroll',()=>esconderBalao(true),{passive:true}); addEventListener('scroll',()=>esconderBalao(true),{passive:true});

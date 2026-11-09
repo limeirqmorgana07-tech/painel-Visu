@@ -2,6 +2,13 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v64 — 09/11/2026 — Parcelas no pedido e aprovação de alteração de preço
+
+- Campo Parcelas no pedido: 2x (50% + 50%) como padrão, À vista, ou 3x a 12x (parcelas iguais a cada 30 dias). Vale na linha do Novo pedido, no formulário e na célula da Planilha de vendas, e a venda vai para a Conta Azul com essas parcelas.
+- Coluna 3º pagamento em diante: soma das parcelas a partir da 3ª, preenchida pela Conta Azul quando baixadas.
+- Alteração de preço em pedido fechado (mais de 24 h): o vendedor clica no 💲 (ou na célula do valor com cadeado), informa o novo valor por unidade e o motivo e envia para aprovação. A gestão vê o quadro Alterações de preço aguardando aprovação, aprova ou recusa; aprovado, o valor muda no pedido e tudo fica no Histórico. Se o pedido já estava na Conta Azul, a marca CA ! avisa para corrigir lá.
+- Treinamento: passos novos sobre Parcelas e alteração de preço com aprovação.
+
 ## v63 — 09/11/2026 — Premiação da Milena volta ao cálculo anterior
 
 - Premiação: o pedido da Cabo Branco (Milena, outubro) estava com Premiação % gravada como 0%, por um erro das versões até a v60 (salvar o campo em branco virava 0%). Por isso a premiação da Milena caiu para R$ 2.987,25. Esses 0% voltam para em branco e o pedido segue a faixa do mês (Milena volta a R$ 3.179,15 em outubro). O % devido é ajustado pela gestão na coluna Premiação % (manual). A correção roda uma vez só e fica no Histórico de alterações.
