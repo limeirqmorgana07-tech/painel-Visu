@@ -1202,8 +1202,9 @@ const nomeMes=(m)=>{const[a,b]=m.split('-');return MES_L[+b-1]+' de '+a};
 const somaMes=(m,n)=>{const[a,b]=m.split('-').map(Number);const d=new Date(Date.UTC(a,b-1+n,1));return d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0')};
 function delta(a,b,inv){ if(!b) return '<span class="delta eq">sem base</span>'; const d=(a-b)/b; const c=Math.abs(d)<.005?'eq':(d>0)!==!!inv?'up':'down'; return `<span class="delta ${c}">${d>0?'▲':d<0?'▼':'■'} ${pct(Math.abs(d))}</span>`; }
 
-const VERSAO='v68';
+const VERSAO='v69';
 const VERSOES=[
+ {v:'v69',data:'09/11/2026',tit:'Pagamentos conferidos pelo total recebido do pedido',arq:'painel-visu-v69.zip',itens:["Diretores e Comercial também vendem: no cadastro deles (Usuários e permissões → Editar) há o campo Nome dele na planilha (coluna Vendedor). Com ele preenchido, o + Novo pedido já vem com o nome dele como vendedor, e as vendas e a premiação ficam ligadas ao login.","Inconsistências · Valor recebido diferente do anotado na planilha: agora compara o total recebido do pedido (1º + 2º pagamento da planilha × tudo o que já entrou na Conta Azul), numa linha só por pedido. Antes comparava parcela por parcela e mostrava duas linhas do mesmo pedido quando a Conta Azul tinha o pagamento dividido em outras baixas (ex.: 696,00 = 382,50 + 313,50)."]},
  {v:'v68',data:'09/11/2026',tit:'Planilha de vendas com todas as linhas no mesmo padrão',arq:'painel-visu-v68.zip',itens:["Planilha de vendas: todas as linhas no mesmo padrão. Os pedidos lidos da planilha (de 04/11 em diante) ficam iguais aos trazidos para o painel: ⊕, 🔒 e 💲 primeiro e a marca planilha depois, e o cadeado também aparece na data, no código e nos valores quando o pedido está fechado."]},
  {v:'v67',data:'09/11/2026',tit:'Diretores criam o acesso dos vendedores',arq:'painel-visu-v67.zip',itens:["Pedido fechado (mais de 24 h): o vendedor não inclui mais item no mesmo pedido. O ＋ some da linha e o painel recusa; peças a mais entram pelo ⊕ (pedido complementar). A gestão continua podendo incluir.","Diretores criam e cuidam do acesso dos vendedores: o menu Administração → Usuários e permissões passa a aparecer para o perfil Diretor. O diretor cadastra, edita, gera senha temporária ou link e remove usuários Vendedor, Comercial e Consultor externo. ADMs, diretores e financeiro, e as tabelas do que cada perfil vê, continuam só com o ADM."]},
  {v:'v66',data:'09/11/2026',tit:'Pedido da planilha abre mais rápido para alterar',arq:'painel-visu-v66.zip',itens:["Alterar ou complementar um pedido da planilha ficou mais rápido: o painel lê a planilha do Google uma vez só (antes eram três leituras seguidas) e aproveita a leitura dos últimos 10 minutos; a tela não espera mais o recálculo dos indicadores, que é feito em seguida."]},
@@ -2495,7 +2496,7 @@ function abrirPedido(modo,base){
   ['cliente','lote','nome_pedido','vendedor','tipo_venda','novo_recompra','segmento','forma_pagamento','prazo_entrega','pagador','observacao'].forEach(k=>set(k,modo==='novo'?'':cab[k])); set('parcelas',modo==='novo'?'2':String(cab.parcelas||2));
   set('data',modo==='item'?cab.data:hojeISO());
   $('pmVend').readOnly=!!meuVend(); if(meuVend()) set('vendedor',conh.vendedor.find(x=>semA(x)===semA(meuVend()))||meuVend());
-  else if(modo==='novo'){ const eu=semA(E.eu?.nome||'').split(' ')[0]; const v=eu&&conh.vendedor.find(x=>semA(x).split(' ')[0]===eu); if(v) set('vendedor',v); }
+  else if(modo==='novo'){ const vp=PED.d?.vendedor_padrao, eu=semA(E.eu?.nome||'').split(' ')[0]; const v=(vp&&(conh.vendedor.find(x=>semA(x)===semA(vp))||vp))||(eu&&conh.vendedor.find(x=>semA(x).split(' ')[0]===eu)); if(v) set('vendedor',v); }
   $('pmCodigo').readOnly=modo!=='novo';
   $('pmCodigo').value=modo==='item'?cab.codigo:modo==='comp'?proxComp(cab.codigo):''; $('pmCodigo').placeholder=modo==='novo'?'automático: '+proxCod($('pmData').value):'';
   $('pdmTit').textContent=modo==='novo'?'Novo pedido':modo==='item'?`Novo item no pedido ${cab.codigo}`:`Acréscimo ao pedido ${cab.codigo}`;
@@ -2621,7 +2622,7 @@ const TIPOS_INC=[
   ['dif','Valor do pedido diferente na Conta Azul',1,'O total do pedido (soma de todos os itens com o mesmo código) é diferente do total da venda na Conta Azul. Conferir frete, peças extras (pedido complementar código-1) ou desconto.'],
   ['soP','Pedido sem venda aprovada no sistema',1,'Lançar a venda na Conta Azul com o mesmo número ou corrigir o código.'],
   ['soS','Venda no sistema sem pedido na planilha',1,'Lançar o pedido na planilha com o mesmo código da Conta Azul.'],
-  ['pag','Valor recebido diferente do anotado na planilha',0,'O total do pedido bate, mas o 1º ou 2º pagamento anotado na planilha é diferente do que entrou na Conta Azul. Conferir o comprovante e corrigir a planilha ou a baixa.'],
+  ['pag','Valor recebido diferente do anotado na planilha',0,'O total do pedido bate, mas o total recebido anotado na planilha (1º + 2º pagamento) é diferente do que já entrou na Conta Azul. Conferir o comprovante e corrigir a planilha ou a baixa.'],
   ['vaz','Coluna obrigatória em branco',1,'Preencher as colunas indicadas.'],
   ['nr','Novo × recompra em branco',0,'Marcar se o cliente é novo ou recompra.'],
   ['pgeCA','Pagamento em branco, já baixado na Conta Azul',1,'O painel grava sozinho o valor (e a data, o banco e a forma no balão); se quiser na hora, clique em Preencher pagamentos.'],
@@ -2672,9 +2673,13 @@ function linhasInconsistencias(ls,b,ca,desde,noMes,vendSel){
     for(const [k,x] of g){ const st=statusCod(x.codigo,x.t,x.mes,ca), v=ca.get(k), base={data:x.data,codigo:x.codigo,cliente:x.cliente,vendedor:x.vendedor||'',total:x.t,_sp:x.regs[0]?._sp};
       if(st[0]==='dif') push('dif',base,{sis:v.t,dif:v.t-x.t,falta:'Conta Azul '+brl2(v.t)});
       else if(['so_painel','cancelado','nao_aprov'].includes(st[0])) push('soP',base,{sis:v?v.t:'',dif:v?v.t-x.t:'',falta:v?SIT_CA[v.s]||v.s:'não existe na Conta Azul'});
-      if(x.mes>=desde&&st[0]!=='dif'){ const ps=parcelasDe(x.codigo); if(ps.length){ ['pag1','pag2'].forEach((c,i)=>{ const pc=ps[i]; if(!pc) return; const vs=x.regs.map(r=>+r[c]||0).filter(v=>v>0); if(!vs.length) return; const soma=vs.reduce((a,v)=>a+v,0), alvo=pc.pago||pc.valor;
-        // pedido com vários itens: vale a soma das linhas ou o valor repetido em cada linha
-        if([soma,Math.max(...vs)].some(v=>Math.abs(v-alvo)<=1)) return; push('pag',base,{plan:soma,sis:alvo,dif:alvo-soma,falta:`${i?'2º':'1º'} pagamento: planilha ${brl2(soma)}${vs.length>1?` (${vs.length} linhas)`:''} × Conta Azul ${brl2(alvo)}${pc.pago>0?' recebido':' a receber'}`}); }); } } }
+      if(x.mes>=desde&&st[0]!=='dif'){ const ps=parcelasDe(x.codigo); if(ps.length){
+        // compara o total recebido do pedido (planilha × Conta Azul), não parcela por parcela: a Conta Azul pode ter o mesmo pagamento em 2 baixas ou em outra divisão
+        const cols=['pag1','pag2','pag3'].map(c=>{ const vs=x.regs.map(r=>+r[c]||0).filter(v=>v>0); if(!vs.length) return null; const soma=vs.reduce((a2,v)=>a2+v,0); return {c,soma,ops:vs.length>1&&vs.every(v=>Math.abs(v-vs[0])<=0.01)?[soma,vs[0]]:[soma]}; }).filter(Boolean);
+        if(cols.length){ let tots=[0]; cols.forEach(o=>{ tots=tots.flatMap(t=>o.ops.map(v=>t+v)); });
+          const caPago=ps.reduce((a2,p)=>a2+(+p.pago||0),0), baixas=ps.filter(p=>+p.pago>0);
+          if(!tots.some(t=>Math.abs(t-caPago)<=1)){ const plan=tots.reduce((m,t)=>Math.abs(t-caPago)<Math.abs(m-caPago)?t:m,tots[0]);
+            push('pag',base,{plan,sis:caPago,dif:caPago-plan,falta:`Recebido: planilha ${brl2(plan)} (${cols.map(o=>`${o.c==='pag1'?'1º':o.c==='pag2'?'2º':'3º em diante'} ${brl2(o.soma)}`).join(' + ')}) × Conta Azul ${brl2(caPago)}${baixas.length?` (${baixas.map(p=>brl2(p.pago)).join(' + ')})`:' (nada baixado ainda)'}. ${plan>caPago?'Baixar na Conta Azul o que falta ou corrigir a planilha.':'Anotar na planilha o que já entrou na Conta Azul.'}`}); } } } } }
     const usados=new Set(g.keys());
     if(ls.length) for(const v of E.dados.conta_azul.vendas||[]){ const m=(v.d||'').slice(0,7); if(m<desde||!noMes({data:v.d,mes:m})||v.n==null||usados.has(ckey(v.n))||!['APROVADO','FATURADO'].includes(v.s)) continue; if(vendSel&&nv(v.v)!==nv(vendSel)) continue; out.push({tipo:'soS',data:v.d,codigo:codDoNumero(v.n),cliente:v.c,vendedor:v.v||'',plan:'',sis:v.t,dif:v.t,falta:SIT_CA[v.s]||v.s}); }
   }
@@ -3021,7 +3026,7 @@ function abrirLinha(){ $('plCard').hidden=false; $('plErro').textContent=''; $('
 function addLinhaPl(){
   const prim=$('plCorpo').querySelector('tr'), base=prim?Object.fromEntries([...prim.querySelectorAll('[data-k]')].map(i=>[i.dataset.k,i.value])):{};
   const conh=valoresConhecidos(), eu=semA(E.eu?.nome||'').split(' ')[0];
-  const vend=meuVend()?(conh.vendedor.find(x=>semA(x)===semA(meuVend()))||meuVend()):(eu&&conh.vendedor.find(x=>semA(x).split(' ')[0]===eu))||'';
+  const vp=PED.d?.vendedor_padrao, vend=meuVend()?(conh.vendedor.find(x=>semA(x)===semA(meuVend()))||meuVend()):vp?(conh.vendedor.find(x=>semA(x)===semA(vp))||vp):(eu&&conh.vendedor.find(x=>semA(x).split(' ')[0]===eu))||'';
   const v=(k)=>prim?(PL_CAB.includes(k)&&k!=='lote'?base[k]:''):k==='data'?hojeISO():k==='vendedor'?vend:k==='parcelas'?'2':'';
   const cel=([k,,t,dl])=>{ const cab=PL_CAB.includes(k)&&k!=='lote'&&!!prim; const cls=(cab?'cab ':'')+(['cliente','nome_pedido','especificacao','observacao'].includes(k)?'w2':'');
     if(k==='mes') return `<td class="ro" data-mes>${v('data')?nomeMes(v('data').slice(0,7)):'—'}</td>`;
@@ -3510,9 +3515,9 @@ function mostrarLink(){
   $('usCopiar').addEventListener('click',e=>cp(L.link,e.target)); $('usCopiarMsg').addEventListener('click',e=>cp(msg,e.target));
 }
 $('usForm').addEventListener('submit',async e=>{ e.preventDefault(); const f=e.target; $('usErro').textContent='';
-  try{ await api('/api/usuarios',{method:'POST',body:JSON.stringify({id:f.id.value||undefined,nome:f.nome.value,email:f.email.value,perfil:f.perfil.value,vendedor:f.perfil.value==='vendedor'?f.vendedor.value:'',empresa:f.empresa.value,valido_ate:f.perfil.value==='consultor'?f.valido_ate.value:''})}); f.reset(); f.id.value=''; $('usFormTit').textContent='Novo usuário'; $('usCancelar').hidden=true; pgUsuarios(); }
+  try{ await api('/api/usuarios',{method:'POST',body:JSON.stringify({id:f.id.value||undefined,nome:f.nome.value,email:f.email.value,perfil:f.perfil.value,vendedor:['vendedor','diretor','comercial'].includes(f.perfil.value)?f.vendedor.value:'',empresa:f.empresa.value,valido_ate:f.perfil.value==='consultor'?f.valido_ate.value:''})}); f.reset(); f.id.value=''; $('usFormTit').textContent='Novo usuário'; $('usCancelar').hidden=true; pgUsuarios(); }
   catch(err){ $('usErro').textContent=err.message; } });
-const consCampos=()=>{ document.querySelectorAll('.us-vend').forEach(x=>x.hidden=$('usPerfil').value!=='vendedor'); if($('usPerfil').value==='vendedor') try{ valoresConhecidos(); }catch(e){} const on=$('usPerfil').value==='consultor'; document.querySelectorAll('.us-cons').forEach(x=>x.hidden=!on); if(on&&!$('usValidade').value){ const d=new Date(Date.now()+90*864e5); $('usValidade').value=d.toISOString().slice(0,10); } };
+const consCampos=()=>{ document.querySelectorAll('.us-vend').forEach(x=>x.hidden=!['vendedor','diretor','comercial'].includes($('usPerfil').value)); if(['vendedor','diretor','comercial'].includes($('usPerfil').value)) try{ valoresConhecidos(); }catch(e){} const on=$('usPerfil').value==='consultor'; document.querySelectorAll('.us-cons').forEach(x=>x.hidden=!on); if(on&&!$('usValidade').value){ const d=new Date(Date.now()+90*864e5); $('usValidade').value=d.toISOString().slice(0,10); } };
 $('usPerfil').addEventListener('change',consCampos);
 $('usCancelar').addEventListener('click',()=>{ const f=$('usForm'); f.reset(); f.id.value=''; $('usFormTit').textContent='Novo usuário'; $('usCancelar').hidden=true; });
 async function carregarEu(){

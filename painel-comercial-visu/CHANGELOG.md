@@ -2,6 +2,11 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v69 — 09/11/2026 — Pagamentos conferidos pelo total recebido do pedido
+
+- Diretores e Comercial também vendem: no cadastro deles (Usuários e permissões → Editar) há o campo Nome dele na planilha (coluna Vendedor). Com ele preenchido, o + Novo pedido já vem com o nome dele como vendedor, e as vendas e a premiação ficam ligadas ao login.
+- Inconsistências · Valor recebido diferente do anotado na planilha: agora compara o total recebido do pedido (1º + 2º pagamento da planilha × tudo o que já entrou na Conta Azul), numa linha só por pedido. Antes comparava parcela por parcela e mostrava duas linhas do mesmo pedido quando a Conta Azul tinha o pagamento dividido em outras baixas (ex.: 696,00 = 382,50 + 313,50).
+
 ## v68 — 09/11/2026 — Planilha de vendas com todas as linhas no mesmo padrão
 
 - Planilha de vendas: todas as linhas no mesmo padrão. Os pedidos lidos da planilha (de 04/11 em diante) ficam iguais aos trazidos para o painel: ⊕, 🔒 e 💲 primeiro e a marca planilha depois, e o cadeado também aparece na data, no código e nos valores quando o pedido está fechado.

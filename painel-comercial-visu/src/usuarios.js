@@ -62,7 +62,8 @@ export async function salvar({ id, nome, email, perfil, paginas, valido_ate, emp
   const validade = /^\d{4}-\d{2}-\d{2}$/.test(String(valido_ate || '')) ? String(valido_ate) : null;
   empresa = String(empresa || '').trim().slice(0, 80);
   // perfil Vendedor: o nome dele na planilha (coluna VENDEDOR), para lançar e revisar as próprias vendas
-  vendedor = perfil === 'vendedor' ? String(vendedor || nome.split(' ')[0]).trim().slice(0, 60) : '';
+  // diretores e comercial também vendem: o nome na coluna Vendedor liga o login às vendas e à premiação
+  vendedor = perfil === 'vendedor' ? String(vendedor || nome.split(' ')[0]).trim().slice(0, 60) : ['diretor', 'comercial'].includes(perfil) ? String(vendedor || '').trim().slice(0, 60) : '';
   let u = id && lista.find((x) => x.id === id);
   const pag = Array.isArray(paginas) ? paginas.map(String) : paginas === null ? null : undefined;
   if (u) { Object.assign(u, { nome, email, perfil, valido_ate: validade, empresa, vendedor }); if (pag !== undefined) u.paginas = pag; }
