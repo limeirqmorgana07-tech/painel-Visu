@@ -2,6 +2,10 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v79 — 10/11/2026 — Anexar comprovantes e notas fiscais em lote
+
+- 📎 Anexar em lote (Planilha de vendas, gestão): selecione vários comprovantes e notas fiscais de uma vez, junto com o manifesto.json, e o painel coloca cada arquivo no pedido certo. Sem manifesto ou sem código do pedido, ele sugere o pedido pelo nome de quem pagou e pelo valor; você confere, ajusta e clica em Anexar. Pedidos que ainda estão só na planilha são trazidos para o painel automaticamente. Arquivo já anexado no mesmo pedido não é enviado de novo.
+
 ## v78 — 10/11/2026 — Falta receber, parcelas personalizadas, comprovantes e nota fiscal
 
 - Falta receber: nova coluna na Planilha de vendas (total do pedido − o que já foi baixado na Conta Azul; mostra "quitado" quando está tudo recebido) e card Falta receber com o total em aberto do período.

@@ -157,6 +157,7 @@ td.ed{white-space:nowrap}
 #dicaBalao.on{opacity:1}
 .dica-i{font-style:normal;font-size:11px;color:var(--ink3,#8a90a8);margin-left:3px;cursor:help}
 .anx-l{margin:4px 0;padding-left:18px}.anx-l li{margin:4px 0}.acb.an-on{color:var(--orange,#f4a62a)}.acb sup{font-size:9px;font-weight:700}.acb sup.nf{color:#16643a;margin-left:1px}
+#loteCorpo th,#loteCorpo td{text-align:left;vertical-align:top}#loteCorpo td.v,#loteCorpo th.v{text-align:right}
 #persModal input{padding:7px 10px;border:1px solid var(--line2);border-radius:8px;font:inherit;background:var(--panel);color:var(--ink)}
 .sol-bd{background:#fde7c4!important;color:#8a4b00!important;border-radius:999px;padding:1px 8px!important;font-size:11px;font-weight:700;width:auto!important}.pd-bd.sol-ok{background:#d9f2e3;color:#16643a}.pd-bd.sol-no{background:#fbe0e0;color:#9b1c1c}
 #cadModal .f,#dvModal .f{margin-top:10px;display:flex;flex-direction:column;gap:4px}
@@ -837,6 +838,13 @@ table.matriz td.vz{color:var(--line2)}
   <div class="pol-hd"><div><div class="eyebrow">Pedido · Anexos</div><h3 id="anxTit">Comprovantes e nota fiscal</h3><div class="sub" id="anxSub"></div></div><button class="bt2" type="button" id="anxFechar" aria-label="Fechar">✕</button></div>
   <div class="pol-corpo"><div id="anxCorpo"></div><div class="e" id="anxErro"></div><input type="file" id="anxArq" accept="application/pdf,image/jpeg,image/png,image/webp,image/heic,image/heif" hidden></div>
 </div>
+<div id="loteModal" class="pol" role="dialog" aria-modal="true" aria-labelledby="loteTit" hidden style="width:min(1100px,97vw);z-index:1001">
+  <div class="pol-hd"><div><div class="eyebrow">Planilha de vendas · Anexos</div><h3 id="loteTit">Anexar comprovantes e notas fiscais em lote</h3><div class="sub">Selecione os arquivos (PDF ou foto) e, se tiver, o <b>manifesto.json</b> que veio junto: ele já diz o pedido de cada arquivo. Sem pedido, o painel sugere pelo nome de quem pagou e pelo valor. Confira, ajuste o pedido se precisar e clique em Anexar.</div></div><button class="bt2" type="button" id="loteFechar" aria-label="Fechar">✕</button></div>
+  <div class="pol-corpo"><input type="file" id="loteArqs" multiple accept="application/pdf,image/jpeg,image/png,image/webp,image/heic,image/heif,application/json,.json">
+    <div id="loteCorpo" style="margin-top:12px"></div><div class="e" id="loteErro"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px;flex-wrap:wrap"><span class="dica-c" id="loteMsg" style="margin-right:auto"></span><button class="bt2" type="button" id="loteCancelar">Fechar</button><button class="bt2 pri" type="button" id="loteEnviar" disabled>Anexar</button></div></div>
+</div>
+<datalist id="dlPedidosLote"></datalist>
 <div id="persModal" class="pol" role="dialog" aria-modal="true" aria-labelledby="persTit" hidden style="width:min(520px,96vw);z-index:1002">
   <div class="pol-hd"><div><div class="eyebrow">Condição de pagamento</div><h3 id="persTit">Parcelas personalizadas</h3><div class="sub">Informe o valor e a data de cada parcela. A soma precisa bater com o total do pedido.</div></div></div>
   <div class="pol-corpo"><div id="persCorpo"></div><div class="e" id="persErro"></div>
@@ -985,6 +993,7 @@ table.matriz td.vz{color:var(--line2)}
       <div class="seg" role="group" aria-label="Mostrar"><button type="button" data-pdf="" aria-pressed="true">Todas as linhas</button><button type="button" data-pdf="pend" aria-pressed="false">A revisar</button><button type="button" data-pdf="div" aria-pressed="false">Com divergência</button></div>
       <span style="flex:1"></span>
       <div class="exp" data-exp="pd"><button class="bt2" type="button" aria-haspopup="true" aria-expanded="false">Exportar ▾</button><div class="exp-m" hidden><button type="button" data-fmt="xlsx">Excel (.xlsx)</button><button type="button" data-fmt="pdf">PDF</button><button type="button" data-fmt="csv">CSV</button></div></div>
+      <button class="bt2" type="button" id="pdLote" hidden title="Anexar vários comprovantes e notas fiscais de uma vez (ex.: os do grupo do WhatsApp)">📎 Anexar em lote</button>
       <button class="bt2" type="button" id="pdPagar" hidden title="Completa 1º/2º pagamento, data, banco, forma e 100% pago com o que já foi baixado na Conta Azul">Preencher pagamentos</button>
       <button class="bt2" type="button" id="pdImportar" hidden>Importar base</button><button class="bt2" type="button" id="pdEnviarAgora" hidden title="Busca agora as vendas e baixas da Conta Azul e grava os pagamentos na planilha, sem esperar o próximo horário">Atualizar agora</button><button class="bt2" type="button" id="pdNR" hidden title="Cliente que já comprou antes = Recompra; 1ª compra = Novo. Preenche os campos em branco no painel e na planilha do Google">Preencher novo × recompra</button><button class="bt2" type="button" id="pdLimpar" title="Limpar mês, período, vendedor e busca">Limpar filtros</button>
       <button class="bt2 pri" type="button" id="pdNovo">+ Novo pedido</button>
@@ -1226,8 +1235,9 @@ const nomeMes=(m)=>{const[a,b]=m.split('-');return MES_L[+b-1]+' de '+a};
 const somaMes=(m,n)=>{const[a,b]=m.split('-').map(Number);const d=new Date(Date.UTC(a,b-1+n,1));return d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0')};
 function delta(a,b,inv){ if(!b) return '<span class="delta eq">sem base</span>'; const d=(a-b)/b; const c=Math.abs(d)<.005?'eq':(d>0)!==!!inv?'up':'down'; return `<span class="delta ${c}">${d>0?'▲':d<0?'▼':'■'} ${pct(Math.abs(d))}</span>`; }
 
-const VERSAO='v78';
+const VERSAO='v79';
 const VERSOES=[
+ {v:'v79',data:'10/11/2026',tit:'Anexar comprovantes e notas fiscais em lote',arq:'painel-visu-v79.zip',itens:["📎 Anexar em lote (Planilha de vendas, gestão): selecione vários comprovantes e notas fiscais de uma vez, junto com o manifesto.json, e o painel coloca cada arquivo no pedido certo. Sem manifesto ou sem código do pedido, ele sugere o pedido pelo nome de quem pagou e pelo valor; você confere, ajusta e clica em Anexar. Pedidos que ainda estão só na planilha são trazidos para o painel automaticamente. Arquivo já anexado no mesmo pedido não é enviado de novo."]},
  {v:'v78',data:'10/11/2026',tit:'Falta receber, parcelas personalizadas, comprovantes e nota fiscal',arq:'painel-visu-v78.zip',itens:["Falta receber: nova coluna na Planilha de vendas (total do pedido − o que já foi baixado na Conta Azul; mostra \"quitado\" quando está tudo recebido) e card Falta receber com o total em aberto do período.", "Parcelas → Personalizado…: o vendedor informa o valor e a data de cada parcela, e o painel confere se a soma bate com o total do pedido. A venda vai para a Conta Azul com essas parcelas.", "📎 Comprovantes e nota fiscal: botão no começo da linha de cada pedido. O vendedor anexa o comprovante de pagamento; a gestão anexa a nota fiscal. PDF ou foto até 5 MB (fotos grandes são reduzidas). Os arquivos ficam guardados no painel e tudo fica no Histórico de alterações.", "Nota fiscal da Conta Azul: o painel consulta as notas emitidas das vendas aprovadas dos últimos 75 dias (até 25 por vez, para gastar pouco) e mostra o número, a data e a chave no 📎 do pedido."]},
  {v:'v77',data:'10/11/2026',tit:'Lote em qualquer parte do nome vai para a observação',arq:'painel-visu-v77.zip',itens:["Lote em qualquer parte do nome do cliente: o painel tira o lote do nome também quando ele vem no começo ou no meio, ou entre colchetes (ex.: \"Lote 1: Alpha Run\" → Alpha Run; \"BOX CTPL - Lote 2 - Itapetim/PE\" → BOX CTPL; \"[Correria 83 - Lote 2]\" → Correria 83; \"Cultura Inglesa RUN: LOTE 2 KIDS\" → Cultura Inglesa RUN). O lote e o que vem depois dele vão para a coluna Lote / obs. do cliente, e essas linhas saem das Inconsistências. Vale para a planilha do Google e para os pedidos já trazidos para o painel."]},
  {v:'v76',data:'10/11/2026',tit:'Explicação dos indicadores mais completa',arq:'painel-visu-v76.zip',itens:["Balãozinho dos indicadores mais explicado, em linguagem do comercial: o que é, a conta com um exemplo e como ler o número (Vendas, Clientes, Vendedores e premiação). Na Projeção do mês, o balão traz a conta com os números do mês, o que quer dizer \"pelo ritmo de N dias\", o que é o PE e os cuidados da projeção."]},
@@ -2340,7 +2350,7 @@ function pgRegistro(){
   $('pdVend').innerHTML='<option value="">Todos</option>'+[...new Set(regs.map(r=>r.vendedor).filter(Boolean))].sort().map(v=>`<option>${esc(v)}</option>`).join(''); $('pdVend').value=PED.vend;
   $('pdBusca').value=PED.busca;
   document.querySelectorAll('[data-pdf]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.pdf===PED.fil)));
-  $('pdNovo').hidden=!P.lancar; $('pdImportar').hidden=!P.importar; $('pdEnviarAgora').hidden=!P.importar; $('pdNR').hidden=!P.importar; $('pdPagar').hidden=!P.lancar||!(regs.length||(E.eu?.perfil==='adm'&&E.dados?.planilha_script?.configurado))||!E.dados?.conta_azul;
+  $('pdNovo').hidden=!P.lancar; $('pdLote').hidden=!P.gestao; $('pdImportar').hidden=!P.importar; $('pdEnviarAgora').hidden=!P.importar; $('pdNR').hidden=!P.importar; $('pdPagar').hidden=!P.lancar||!(regs.length||(E.eu?.perfil==='adm'&&E.dados?.planilha_script?.configurado))||!E.dados?.conta_azul;
   // aviso
   const av=$('pdAviso'); av.hidden=false; av.className='aviso';
   if(regs.some(r=>r.mes===PED.mes&&r.origem==='planilha_viva')) av.innerHTML=`<span><b>${nomeMes(PED.mes)} vem da planilha do Google</b> (somente consulta): enquanto a planilha estiver em uso, as correções dessas linhas são feitas na própria planilha. Passe o mouse em <b>1º/2º pagamento</b> ou <b>Pedido 100% pago</b> para ver o que já foi baixado na Conta Azul. ${E.dados.corte_sistema?`A partir de ${nomeMes(E.dados.corte_sistema)} as vendas são lançadas aqui no sistema.`:''}</span>`;
@@ -2520,6 +2530,47 @@ $('anxArq').onchange=async()=>{ let f=$('anxArq').files[0]; if(!f) return; $('an
   catch(x){ $('anxErro').textContent=x.message; } };
 $('anxFechar').onclick=fecharAnexos;
 // ---------- parcelas personalizadas: valor e data de cada parcela; precisam somar o total do pedido ----------
+// ---------- anexar em lote (comprovantes e NFs de vários pedidos de uma vez) ----------
+const LOTE={itens:[]};
+const tokensNome=(t)=>semA(t||'').replace(/[^a-z0-9 ]/g,' ').split(/\s+/).filter(w=>w.length>2&&!['ltda','eireli','me','epp','dos','das','de','da','do','pagamento','pedido','visu','industria','textil'].includes(w));
+function sugerirPedido(it,cands){ const tp=tokensNome(it.pagador); if(!tp.length&&!it.valor_num) return null; let best=null;
+  for(const c of cands){ if(it.data&&c.data&&(c.data>it.data||Date.parse(it.data)-Date.parse(c.data)>75*864e5)) continue;
+    const tc=new Set(tokensNome([c.cliente,c.pagador,c.nome_pedido].join(' '))); const nm=tp.filter(w=>tc.has(w)).length;
+    const v=+it.valor_num||0, vals=[c.total,c.total/2,...parcelasDe(c.codigo).map(p=>p.valor),...parcelasDe(c.codigo).map(p=>p.pago)].filter(x=>x>0); const vm=v&&vals.some(x=>Math.abs(x-v)<=1);
+    const sc=nm*2+(vm?2:0); if(sc>=3&&(!best||sc>best.sc)) best={sc,c,nm,vm}; }
+  return best?{codigo:best.c.codigo,como:`sugestão: ${best.nm?'nome do pagador':''}${best.nm&&best.vm?' + ':''}${best.vm?'valor':''} (${best.c.cliente})`}:null; }
+function pedidosLote(){ const m=new Map(); for(const r of [...regsPed(),...linhasPlanilhaViva()]){ if(!r.codigo||r.excluido) continue; const k=ckey(r.codigo), x=m.get(k)||{codigo:r.codigo,cliente:r.cliente,pagador:r.pagador||'',nome_pedido:r.nome_pedido||'',data:r.data,total:0}; x.total+=(+r.total||0); m.set(k,x); } return [...m.values()]; }
+$('pdLote').onclick=()=>{ LOTE.itens=[]; $('loteArqs').value=''; $('loteCorpo').innerHTML=''; $('loteErro').textContent=''; $('loteMsg').textContent=''; $('loteEnviar').disabled=true;
+  const peds=pedidosLote(); LOTE.peds=peds; $('dlPedidosLote').innerHTML=peds.sort((a,b)=>(b.data||'').localeCompare(a.data||'')).map(p=>`<option value="${esc(p.codigo)}">${esc(p.cliente)} · ${dataBR(p.data)} · ${brl2(p.total)}</option>`).join('');
+  $('loteModal').hidden=false; LOTE.fundo=$('pdFundo').hidden; $('pdFundo').hidden=false; };
+const fecharLote=()=>{ $('loteModal').hidden=true; if(LOTE.fundo&&$('pdModal').hidden) $('pdFundo').hidden=true; };
+$('loteFechar').onclick=fecharLote; $('loteCancelar').onclick=fecharLote;
+$('loteArqs').onchange=async()=>{ const fs=[...$('loteArqs').files]; let man=null; const mf=fs.find(f=>/\.json$/i.test(f.name));
+  if(mf){ try{ man=JSON.parse(await mf.text()); }catch(x){ $('loteErro').textContent='manifesto.json inválido.'; } }
+  const porNome=new Map((man?.itens||[]).map(i=>[i.arquivo_novo,i]));
+  LOTE.itens=fs.filter(f=>f!==mf).map(f=>{ const m=porNome.get(f.name)||{}; const it={f,nome:f.name,data:m.data||'',valor_num:m.valor_num??null,pagador:m.pagador||'',tipo:m.tipo==='nf'?'nf':'comprovante',pedido:m.pedido||'',como:m.como||'',obs:m.obs||'',legenda:m.legenda||''};
+    if(!it.pedido){ const sg=sugerirPedido(it,LOTE.peds); if(sg){ it.pedido=sg.codigo; it.como=sg.como; it.sugerido=true; } }
+    it.ok=!!it.pedido; return it; });
+  desenharLote(); };
+function desenharLote(){ const its=LOTE.itens;
+  $('loteCorpo').innerHTML=its.length?`<div class="tw" style="max-height:52vh;overflow:auto"><table><thead><tr><th></th><th>Arquivo</th><th>Data</th><th class="v">Valor</th><th>Quem pagou / legenda</th><th>Tipo</th><th>Pedido</th><th>Como achou</th></tr></thead><tbody>${its.map((it,i)=>{ const p=LOTE.peds.find(x=>ckey(x.codigo)===ckey(it.pedido||'')); return `<tr${it.feito?' style="opacity:.55"':''}><td><input type="checkbox" data-lok="${i}"${it.ok?' checked':''}${it.feito?' disabled':''}></td><td style="max-width:220px;white-space:normal">${esc(it.nome)}</td><td>${dataBR(it.data)}</td><td class="v">${it.valor_num?brl2(it.valor_num):'—'}</td><td style="max-width:240px;white-space:normal">${esc(it.pagador||it.legenda||'')}${it.obs?`<div class="dica-c">${esc(it.obs)}</div>`:''}</td><td><select data-lti="${i}"><option value="comprovante"${it.tipo==='comprovante'?' selected':''}>Comprovante</option><option value="nf"${it.tipo==='nf'?' selected':''}>Nota fiscal</option></select></td><td><input data-lpe="${i}" list="dlPedidosLote" value="${esc(it.pedido||'')}" placeholder="código do pedido" style="width:130px">${p?`<div class="dica-c">${esc(p.cliente)}</div>`:it.pedido?'<div class="dica-c" style="color:#9b1c1c">pedido não encontrado</div>':''}</td><td><span class="dica-c">${it.feito?'✓ anexado':it.erro?'<b style="color:#9b1c1c">'+esc(it.erro)+'</b>':esc(it.como||(it.pedido?'':'escolha o pedido'))}</span></td></tr>`; }).join('')}</tbody></table></div>`:'';
+  $('loteCorpo').querySelectorAll('[data-lok]').forEach(e=>e.onchange=()=>{ its[+e.dataset.lok].ok=e.checked; contaLote(); });
+  $('loteCorpo').querySelectorAll('[data-lti]').forEach(e=>e.onchange=()=>{ its[+e.dataset.lti].tipo=e.value; });
+  $('loteCorpo').querySelectorAll('[data-lpe]').forEach(e=>e.onchange=()=>{ const it=its[+e.dataset.lpe]; it.pedido=e.value.trim(); it.como=it.pedido?'escolhido por você':''; it.ok=!!it.pedido; desenharLote(); });
+  contaLote(); }
+function contaLote(){ const n=LOTE.itens.filter(i=>i.ok&&!i.feito&&i.pedido).length, sem=LOTE.itens.filter(i=>!i.pedido&&!i.feito).length; $('loteEnviar').disabled=!n; $('loteEnviar').textContent=`Anexar ${n} arquivo${n===1?'':'s'}`; $('loteMsg').textContent=`${LOTE.itens.length} arquivos · ${LOTE.itens.filter(i=>i.feito).length} anexados${sem?` · ${sem} sem pedido (ficam de fora)`:''}`; }
+$('loteEnviar').onclick=async()=>{ const fila=LOTE.itens.filter(i=>i.ok&&!i.feito&&i.pedido); $('loteEnviar').disabled=true; let n=0;
+  for(const it of fila){ $('loteMsg').textContent=`Anexando ${++n} de ${fila.length}…`;
+    try{ const k=ckey(it.pedido); let r=regsPed().find(x=>x.codigo&&ckey(x.codigo)===k&&!x.excluido);
+      if(!r){ const v=linhasPlanilhaViva().find(x=>x.codigo&&ckey(x.codigo)===k); if(!v) throw new Error('pedido não encontrado'); r=await assumirPedido(v); if(!r) throw new Error('não foi possível trazer o pedido da planilha'); }
+      if(anexosPed(r).some(a=>a.nome===it.nome)){ it.feito=true; it.como='já estava anexado'; continue; }
+      let f=it.f; f=await reduzirImagem(f).catch(()=>f); if(f.size>5*1024*1024) throw new Error('maior que 5 MB');
+      const resp=await fetch(`/api/pedidos/${r.id}/anexos?tipo=${it.tipo}&nome=${encodeURIComponent(it.nome)}`,{method:'POST',headers:{'Content-Type':f.type||'application/octet-stream'},body:f,credentials:'same-origin'});
+      const j=await resp.json().catch(()=>({})); if(!resp.ok||j.erro) throw new Error(j.erro||'falhou');
+      Object.assign(r,j.registro); it.feito=true; it.erro=''; }
+    catch(x){ it.erro=x.message; }
+    desenharLote(); }
+  const ok=LOTE.itens.filter(i=>i.feito).length; $('loteMsg').textContent=`${ok} de ${LOTE.itens.length} anexados.`; toast(`${ok} arquivo(s) anexado(s).`); pgRegistro(); };
 const PERS={};
 // grade: monta as parcelas do pedido e grava em todas as linhas dele
 function editarPers(r){ const linhas=regsPed().filter(x=>x.codigo===r.codigo&&!x.excluido), tot=linhas.reduce((a,x)=>a+(+x.total||0),0);
