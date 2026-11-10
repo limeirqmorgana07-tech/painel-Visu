@@ -22,7 +22,15 @@ export function parcelas5050(total, data, prazo) {
 }
 
 // condição do pedido: 1 = à vista (na data da venda), 2 = 50% + 50% (padrão), 3 ou mais = parcelas iguais a cada 30 dias
-export function parcelasPedido(n, total, data, prazo) {
+export function parcelasPedido(n, total, data, prazo, pers = []) {
+  // personalizado: as parcelas como o vendedor montou (valor e data de cada uma); precisam somar o total do pedido
+  if (n === 'P') {
+    const ps = (pers || []).filter((p) => p.valor > 0);
+    if (!ps.length) throw new Error('Parcelas personalizadas não preenchidas.');
+    const soma = r2(ps.reduce((a2, p) => a2 + p.valor, 0));
+    if (Math.abs(soma - total) > 0.05) throw new Error(`As parcelas personalizadas somam ${soma.toFixed(2)} e o pedido é ${total.toFixed(2)}.`);
+    return ps.map((p, i) => ({ data_vencimento: p.data || data, valor: r2(p.valor), descricao: `Parcela ${i + 1} de ${ps.length}` }));
+  }
   n = Math.max(1, Math.min(12, parseInt(n, 10) || 2));
   if (n === 2) return parcelas5050(total, data, prazo);
   if (n === 1) return [{ data_vencimento: data, valor: r2(total), descricao: 'À vista' }];
@@ -30,7 +38,7 @@ export function parcelasPedido(n, total, data, prazo) {
   for (let i = 0; i < n; i++) out.push({ data_vencimento: i ? somaDias(data, 30 * i) : data, valor: i === n - 1 ? r2(total - base * (n - 1)) : base, descricao: `Parcela ${i + 1} de ${n}` });
   return out;
 }
-export const opcaoCondicao = (n) => { n = parseInt(n, 10) || 2; return n === 1 ? 'À vista' : `${n}x`; };
+export const opcaoCondicao = (n, pers = []) => { if (n === 'P') { const k = (pers || []).filter((p) => p.valor > 0).length; return k <= 1 ? 'À vista' : `${k}x`; } n = parseInt(n, 10) || 2; return n === 1 ? 'À vista' : `${n}x`; };
 
 // monta o corpo da venda de um pedido (todas as linhas com o mesmo código)
 export function corpoVenda(linhas, { idCliente, idVendedor, produtoDe }) {
@@ -49,7 +57,7 @@ export function corpoVenda(linhas, { idCliente, idVendedor, produtoDe }) {
     situacao: 'EM_ANDAMENTO',
     data_venda: c.data,
     itens,
-    condicao_pagamento: { opcao_condicao_pagamento: opcaoCondicao(c.parcelas), parcelas: parcelasPedido(c.parcelas, total, c.data, c.prazo_entrega), ...(tp ? { tipo_pagamento: tp } : {}) },
+    condicao_pagamento: { opcao_condicao_pagamento: opcaoCondicao(c.parcelas, c.parcelas_pers), parcelas: parcelasPedido(c.parcelas, total, c.data, c.prazo_entrega, c.parcelas_pers), ...(tp ? { tipo_pagamento: tp } : {}) },
     observacoes: [/-\d+$/.test(c.codigo) ? `Pedido complementar ${c.codigo} (acréscimo ao pedido ${pedidos.codigoBase(c.codigo)}) lançado no Painel de Gestão Visu` : `Pedido ${c.codigo} lançado no Painel de Gestão Visu`, c.nome_pedido ? `Pedido (Trello): ${c.nome_pedido}` : '', c.lote ? `Lote / obs.: ${c.lote}` : '', c.observacao || ''].filter(Boolean).join(' · ').slice(0, 1000),
   };
   if (idVendedor) corpo.id_vendedor = idVendedor;

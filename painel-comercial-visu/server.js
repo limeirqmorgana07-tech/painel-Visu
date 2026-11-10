@@ -8,6 +8,8 @@ import { config, redirectUri } from './src/config.js';
 import * as ca from './src/contaAzul.js';
 import { dadosDeVendas, faixasComissao, FAIXAS_PADRAO, remontarVendas, vendasContaAzulEmCache } from './src/vendas.js';
 import * as pedidos from './src/pedidos.js';
+import * as anexos from './src/anexos.js';
+import * as notasCA from './src/notasCA.js';
 import { dadosFinanceiros } from './src/financeiro.js';
 import { planilhaConfigurada } from './src/planilha.js';
 import * as google from './src/google.js';
@@ -423,14 +425,34 @@ app.get('/api/pedidos', exigeLogin, exigePedidos, resp(async (req) => {
   await codigosExternos();
   let pagamentos = null;
   try { pagamentos = await pedidos.pagamentosPorPedido(vendasContaAzulEmCache(), req.query.forcar === '1'); if (pagamentos?.conectado && (await pedidos.preencherPagamentos(pagamentos, null, { auto: true })).linhas) depoisDeMudar(); } catch (e) { pagamentos = { erro: e.message }; }
-  const [registros, cfg, cads] = await Promise.all([pedidos.listar(), pedidos.configPedidos(), cadastros.listarCadastros()]);
-  return { registros, config: cfg, cadastros: cads, pagamentos, campos_valor: pedidos.CAMPOS_VALOR, proximo_codigo: pedidos.proximoCodigo(new Date(Date.now() - 3 * 3600e3).toISOString().slice(0, 10)), codigos_externos: pedidos.codigosExternosLista(), horas_edicao: Number(process.env.HORAS_EDICAO_PEDIDO || 24),
+  notasCA.atualizarNotas(vendasContaAzulEmCache());
+  const [registros, cfg, cads, notas_ca] = await Promise.all([pedidos.listar(), pedidos.configPedidos(), cadastros.listarCadastros(), notasCA.notasPorCodigo().catch(() => ({}))]);
+  return { registros, config: cfg, cadastros: cads, pagamentos, notas_ca, campos_valor: pedidos.CAMPOS_VALOR, proximo_codigo: pedidos.proximoCodigo(new Date(Date.now() - 3 * 3600e3).toISOString().slice(0, 10)), codigos_externos: pedidos.codigosExternosLista(), horas_edicao: Number(process.env.HORAS_EDICAO_PEDIDO || 24),
     vendedor: req.usuario.perfil === 'vendedor' ? req.usuario.vendedor || '' : '', vendedor_padrao: req.usuario.vendedor || '', whatsapp_aprovacao: (await pedidos.configPedidos()).whatsapp_aprovacao || [], pode: { lancar: pedidos.podeLancar(req.usuario), gestao: pedidos.podeEditarTudo(req.usuario), importar: pedidos.podeEditarTudo(req.usuario), fonte: req.usuario.perfil === 'adm' },
     planilha_conectada: planilhaConfigurada() || config.demo, eu: { id: req.usuario.id, nome: req.usuario.nome, perfil: req.usuario.perfil, vendedor: req.usuario.vendedor || '' } };
 }));
 app.get('/api/pedidos/proximo-codigo', exigeLogin, exigePedidos, resp(async (req) => { await pedidos.listar(); await codigosExternos(); return { codigo: req.query.de ? pedidos.proximoComplemento(req.query.de) : pedidos.proximoCodigo(req.query.data) }; }));
 app.post('/api/pedidos', exigeLogin, exigePedidos, resp(async (req) => { await codigosExternos(); const r = await pedidos.criarPedido(req.body, req.usuario); depoisDeMudar(); return { registros: r }; }));
 app.patch('/api/pedidos/:id', exigeLogin, exigePedidos, resp(async (req) => { const r = await pedidos.alterar(req.params.id, req.body?.mudancas || req.body, req.usuario); depoisDeMudar(); return { registro: r }; }));
+// anexos do pedido: comprovante de pagamento (vendedor e gestão) e nota fiscal (gestão); arquivo enviado cru, até 5 MB
+app.post('/api/pedidos/:id/anexos', exigeLogin, exigePedidos, express.raw({ type: () => true, limit: '6mb' }), resp(async (req) => {
+  const r = await pedidos.registro(req.params.id); if (!r) throw new Error('Linha não encontrada.');
+  const tipo = req.query.tipo === 'nf' ? 'nf' : 'comprovante';
+  if (tipo === 'nf' && !pedidos.podeEditarTudo(req.usuario)) throw new Error('A nota fiscal é anexada pela gestão.');
+  if (tipo === 'comprovante' && !pedidos.ehDoVendedor(req.usuario, r)) throw new Error('Só o vendedor do pedido ou a gestão anexa o comprovante.');
+  const nome = String(req.query.nome || 'arquivo').slice(0, 120), mime = String(req.headers['content-type'] || '').split(';')[0].trim().toLowerCase();
+  const g = await anexos.guardarArquivo({ registro: r.id, codigo: r.codigo, tipo, nome, mime, bytes: Buffer.isBuffer(req.body) ? req.body : null, por: req.usuario.nome });
+  return { registro: await pedidos.anexar(r.id, { id: g.id, tipo, nome, mime, tamanho: g.tamanho }, req.usuario) };
+}));
+app.delete('/api/pedidos/:id/anexos/:aid', exigeLogin, exigePedidos, resp(async (req) => { const r = await pedidos.removerAnexo(req.params.id, req.params.aid, req.usuario); await anexos.apagarArquivo(req.params.aid); return { registro: r }; }));
+app.get('/api/anexos/:aid', exigeLogin, async (req, res) => {
+  try {
+    const a = await anexos.lerArquivo(req.params.aid); if (!a) return res.status(404).send('Arquivo não encontrado.');
+    const r = await pedidos.registro(a.registro); if (!r || !pedidos.podeVerRegistro(req.usuario, r)) return res.status(403).send('Sem acesso a este arquivo.');
+    res.set('Content-Type', a.mime || 'application/octet-stream'); res.set('Content-Disposition', `inline; filename*=UTF-8''${encodeURIComponent(a.nome || 'arquivo')}`); res.set('Cache-Control', 'private, max-age=3600');
+    res.send(a.dados);
+  } catch (e) { res.status(500).send(e.message); }
+});
 app.post('/api/pedidos/:id/solicitar', exigeLogin, exigePedidos, resp(async (req) => ({ registro: await pedidos.solicitarAlteracao(req.params.id, req.body || {}, req.usuario) })));
 app.post('/api/pedidos/:id/responder', exigeLogin, exigePedidos, resp(async (req) => { const r = await pedidos.responderSolicitacao(req.params.id, req.body || {}, req.usuario); depoisDeMudar(); return { registro: r }; }));
 app.delete('/api/pedidos/:id', exigeLogin, exigePedidos, resp(async (req) => { await pedidos.excluir(req.params.id, req.usuario); depoisDeMudar(); return { ok: true }; }));

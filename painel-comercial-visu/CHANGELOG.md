@@ -2,6 +2,13 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v78 — 10/11/2026 — Falta receber, parcelas personalizadas, comprovantes e nota fiscal
+
+- Falta receber: nova coluna na Planilha de vendas (total do pedido − o que já foi baixado na Conta Azul; mostra "quitado" quando está tudo recebido) e card Falta receber com o total em aberto do período.
+- Parcelas → Personalizado…: o vendedor informa o valor e a data de cada parcela, e o painel confere se a soma bate com o total do pedido. A venda vai para a Conta Azul com essas parcelas.
+- 📎 Comprovantes e nota fiscal: botão no começo da linha de cada pedido. O vendedor anexa o comprovante de pagamento; a gestão anexa a nota fiscal. PDF ou foto até 5 MB (fotos grandes são reduzidas). Os arquivos ficam guardados no painel e tudo fica no Histórico de alterações.
+- Nota fiscal da Conta Azul: o painel consulta as notas emitidas das vendas aprovadas dos últimos 75 dias (até 25 por vez, para gastar pouco) e mostra o número, a data e a chave no 📎 do pedido.
+
 ## v77 — 10/11/2026 — Lote em qualquer parte do nome vai para a observação
 
 - Lote em qualquer parte do nome do cliente: o painel tira o lote do nome também quando ele vem no começo ou no meio, ou entre colchetes (ex.: "Lote 1: Alpha Run" → Alpha Run; "BOX CTPL - Lote 2 - Itapetim/PE" → BOX CTPL; "[Correria 83 - Lote 2]" → Correria 83; "Cultura Inglesa RUN: LOTE 2 KIDS" → Cultura Inglesa RUN). O lote e o que vem depois dele vão para a coluna Lote / obs. do cliente, e essas linhas saem das Inconsistências. Vale para a planilha do Google e para os pedidos já trazidos para o painel.

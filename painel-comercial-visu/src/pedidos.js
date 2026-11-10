@@ -23,7 +23,7 @@ export const CAMPOS = {
   data: 'data', codigo: 'texto', cliente: 'texto', lote: 'texto', nome_pedido: 'texto', vendedor: 'texto', tipo_venda: 'texto',
   novo_recompra: 'nr', segmento: 'texto', tipo_produto: 'texto', material: 'texto', especificacao: 'texto', cor: 'texto',
   quantidade: 'num', valor_unit: 'num', total: 'num', pag1: 'num', data_pag1: 'data', pag2: 'num', data_pag2: 'data', pag3: 'num', banco_pag: 'texto', pago_100: 'bool', prazo_entrega: 'data',
-  forma_pagamento: 'texto', parcelas: 'parc', frete: 'texto', pagador: 'texto', observacao: 'texto', pct_premiacao: 'pct', mes_premiacao: 'mesp', obs_premiacao: 'texto',
+  forma_pagamento: 'texto', parcelas: 'parc', parcelas_pers: 'parcp', frete: 'texto', pagador: 'texto', observacao: 'texto', pct_premiacao: 'pct', mes_premiacao: 'mesp', obs_premiacao: 'texto',
 };
 // travados para o vendedor 24 h depois do lançamento (o resto, como cliente e novo × recompra, ele revisa sempre)
 export const CAMPOS_VALOR = ['data', 'codigo', 'tipo_produto', 'material', 'especificacao', 'cor', 'quantidade', 'valor_unit', 'total'];
@@ -46,7 +46,9 @@ function limpar(campo, v) {
   if (t === 'mesp') { const s0 = String(v ?? '').trim(); let m = s0.match(/^(\d{4})-(\d{2})/); if (m) return `${m[1]}-${m[2]}`; m = s0.match(/^(?:\d{1,2}\/)?(\d{1,2})\/(\d{4})$/); if (m) return `${m[2]}-${m[1].padStart(2, '0')}`; return ''; }
   if (t === 'pct') { if (v === '' || v == null) return null; const n = Number(String(v).replace(/[%\s]/g, '').replace(',', '.')); return Number.isFinite(n) ? r2(n) : null; }
   // parcelas: 1 = à vista, 2 = 50% + 50% (padrão), 3 ou mais = parcelas iguais
-  if (t === 'parc') { const s0 = sem(v); if (!s0) return 2; if (/vista/.test(s0)) return 1; const n = parseInt(s0, 10); return Number.isFinite(n) && n >= 1 ? Math.min(n, 12) : 2; }
+  if (t === 'parc') { const s0 = sem(v); if (!s0) return 2; if (/vista/.test(s0)) return 1; if (/^p$|pers/.test(s0)) return 'P'; const n = parseInt(s0, 10); return Number.isFinite(n) && n >= 1 ? Math.min(n, 12) : 2; }
+  // parcelas personalizadas: [{valor, data}] (data AAAA-MM-DD), até 24 parcelas
+  if (t === 'parcp') { const a = Array.isArray(v) ? v : (() => { try { return JSON.parse(v || '[]'); } catch { return []; } })(); return a.map((x) => ({ valor: limpar('total', x?.valor) || 0, data: limpar('data', x?.data) || '' })).filter((x) => x.valor > 0).slice(0, 24); }
   if (t === 'num') { const n = typeof v === 'number' ? v : Number(String(v ?? '').replace(/[R$\s.]/g, '').replace(',', '.')); return Number.isFinite(n) ? r2(n) : 0; }
   if (t === 'bool') return v === true || ['sim', 's', 'true', '1', 'x'].includes(sem(v));
   if (t === 'data') { const s = String(v ?? '').trim(); const m = s.match(/^(\d{4})-(\d{2})-(\d{2})/) || s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/); if (!m) return ''; return m[1].length === 4 ? `${m[1]}-${m[2]}-${m[3]}` : `${m[3]}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}`; }
@@ -375,6 +377,33 @@ export async function responderSolicitacao(id, b, u) {
   const novo = { ...(mem.get(id) || atual), solicitacao: fim, solicitacoes: [...(r.solicitacoes || []), fim].slice(-10) };
   mem.set(id, novo); await gravar([novo]);
   await registrarLog([{ ...quem(u), acao: aprovar ? 'aprovou' : 'recusou', registro: id, codigo: r.codigo, cliente: r.cliente, mudancas: [{ campo: 'valor_unit', antes: s0.valor_unit_antes, depois: aprovar ? s0.valor_unit : `${s0.valor_unit} (recusado)` }], detalhe: `${aprovar ? 'Aprovou' : 'Recusou'} a alteração de preço pedida por ${s0.por}${obs ? ' · ' + obs : ''}${aprovar && r.ca_venda_id ? ' · corrigir o valor na Conta Azul' : ''}` }]);
+  return novo;
+}
+// ---------- anexos: comprovantes de pagamento (vendedor e gestão) e nota fiscal (gestão) ----------
+export const podeVerRegistro = (u, r) => u?.perfil !== 'vendedor' || ehDoVendedor(u, r);
+export async function registro(id) { await carregar(); const r = mem.get(id); return r && !r.excluido ? r : null; }
+export async function anexar(id, a, u) {
+  await carregar();
+  const r = mem.get(id);
+  if (!r || r.excluido) throw new Error('Linha não encontrada.');
+  if (!['comprovante', 'nf'].includes(a.tipo)) throw new Error('Tipo de anexo inválido.');
+  if (a.tipo === 'nf' && !podeEditarTudo(u)) throw new Error('A nota fiscal é anexada pela gestão.');
+  if (a.tipo === 'comprovante' && (!podeLancar(u) || !ehDoVendedor(u, r))) throw new Error('Só o vendedor do pedido ou a gestão anexa o comprovante.');
+  const item = { id: a.id, tipo: a.tipo, nome: String(a.nome || 'arquivo').slice(0, 120), mime: a.mime, tamanho: a.tamanho, por: u?.nome || '', por_id: u?.id || '', em: agoraISO() };
+  const novo = { ...r, anexos: [...(r.anexos || []), item] };
+  mem.set(id, novo); await gravar([novo]);
+  await registrarLog([{ ...quem(u), acao: 'anexou', registro: id, codigo: r.codigo, cliente: r.cliente, mudancas: [], detalhe: `${a.tipo === 'nf' ? 'Nota fiscal' : 'Comprovante de pagamento'}: ${item.nome}` }]);
+  return novo;
+}
+export async function removerAnexo(id, aid, u) {
+  await carregar();
+  const r = mem.get(id);
+  const a = r?.anexos?.find((x) => x.id === aid);
+  if (!a) throw new Error('Anexo não encontrado.');
+  if (!podeEditarTudo(u) && !(a.tipo === 'comprovante' && a.por_id === u?.id)) throw new Error('Só quem anexou ou a gestão remove este arquivo.');
+  const novo = { ...r, anexos: r.anexos.filter((x) => x.id !== aid) };
+  mem.set(id, novo); await gravar([novo]);
+  await registrarLog([{ ...quem(u), acao: 'removeu anexo', registro: id, codigo: r.codigo, cliente: r.cliente, mudancas: [], detalhe: `${a.tipo === 'nf' ? 'Nota fiscal' : 'Comprovante'}: ${a.nome}` }]);
   return novo;
 }
 export async function excluir(id, u) {
