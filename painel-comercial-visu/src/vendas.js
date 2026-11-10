@@ -3,7 +3,7 @@
 // A Conta Azul também alimenta a conciliação "planilha x sistema" mês a mês.
 import { config } from './config.js';
 import * as ca from './contaAzul.js';
-import { planilhaConfigurada, lerPlanilha, sem, clienteBase } from './planilha.js';
+import { planilhaConfigurada, lerPlanilha, sem, clienteBase, separarLoteNome } from './planilha.js';
 import { gerarDemoPlanilha, gerarDemoContaAzul } from './demo.js';
 import { lerAtributos } from './produtos.js';
 import { lerKV, salvarKV } from './tokenStore.js';
@@ -67,8 +67,8 @@ function qualidade(linhas, mapa) {
     const g = porChave.get(chave(l.cliente));
     if (g && g.size > 1) l.cliente = clienteBase([...g.entries()].sort((a, b) => b[1] - a[1])[0][0]);
     // o lote que estava no nome vai para a coluna Lote / obs. do cliente
-    const lt = String(l.cliente_original || '').match(/\b(lote\s*\d+)\)?\s*$/i);
-    if (lt && !l.lote) l.lote = lt[1].replace(/\s+/g, ' ').replace(/^l/, 'L');
+    if (!l.lote) { const sl = separarLoteNome(l.cliente_original || l.cliente || ''); if (sl.lote) l.lote = sl.lote; }
+    if (/\blote\s*\d/i.test(l.cliente || '')) l.cliente = clienteBase(l.cliente);
     // e o que diferencia a venda depois do nome (ex.: "(Dental Center)") também
     if (!l.lote && l.cliente_original && l.cliente_original !== l.cliente) { const r = restoDoNome(l.cliente_original, l.cliente); if (r) l.lote = r; }
   }

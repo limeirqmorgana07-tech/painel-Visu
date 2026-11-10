@@ -10,7 +10,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { config } from './config.js';
 import { banco, lerKV, salvarKV } from './tokenStore.js';
-import { lerPlanilha, lerPlanilhaRecente, lerXlsx, planilhaConfigurada, clienteBase, sem } from './planilha.js';
+import { lerPlanilha, lerPlanilhaRecente, lerXlsx, planilhaConfigurada, clienteBase, sem, separarLoteNome } from './planilha.js';
 import { gerarDemoPlanilha, gerarDemoParcelas } from './demo.js';
 import * as ca from './contaAzul.js';
 
@@ -65,10 +65,7 @@ export function restoDoNome(original, para) {
 }
 const juntarObs = (lote, resto) => !resto || sem(lote || '').includes(sem(resto)) ? (lote || '') : (lote ? `${lote} · ${resto}` : resto);
 // "Contour Inglesa lote 2" → cliente "Contour Inglesa" e lote "Lote 2"
-export function separarLote(nome) {
-  const m = String(nome || '').match(/\s*[-–(]?\s*\b(lote\s*\d+)\)?\s*$/i);
-  return m ? { cliente: clienteBase(nome), lote: m[1].replace(/\s+/g, ' ').replace(/^l/, 'L') } : { cliente: String(nome || '').trim(), lote: '' };
-}
+export function separarLote(nome) { return separarLoteNome(nome); }
 
 // ---------- armazenamento (Postgres com DATABASE_URL; arquivo sem ele) ----------
 let mem = null; // Map id → registro
@@ -102,7 +99,9 @@ async function carregar() {
 async function recuperarObsCliente() {
   const novos = [];
   for (const r of mem.values()) {
-    if (r.excluido || !r.cliente_lancado || r.cliente_lancado === r.cliente) continue;
+    if (r.excluido) continue;
+    if (/\blote\s*\d/i.test(r.cliente || '')) { const sl = separarLoteNome(r.cliente); const n = { ...r, cliente: sl.cliente || r.cliente, cliente_lancado: r.cliente_lancado || r.cliente, lote: juntarObs(r.lote, sl.lote) }; mem.set(r.id, n); novos.push([r, n]); continue; }
+    if (!r.cliente_lancado || r.cliente_lancado === r.cliente) continue;
     const resto = restoDoNome(r.cliente_lancado, r.cliente); const lote = juntarObs(r.lote, resto);
     if (lote !== (r.lote || '')) { const n = { ...r, lote }; mem.set(r.id, n); novos.push([r, n]); }
   }

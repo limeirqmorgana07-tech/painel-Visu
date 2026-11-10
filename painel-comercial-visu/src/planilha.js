@@ -144,8 +144,19 @@ function simNao(v) {
 }
 
 // "Yelloran lote 1", "Yelloran - Lote 2" → "Yelloran" (cadastro único por cliente, seção 5 da especificação)
+// O lote pode estar em qualquer parte do nome (v77): "Lote 1: Alpha Run" → Alpha Run · "BOX CTPL - Lote 2 - Itapetim/PE" → BOX CTPL,
+// obs. "Lote 2 - Itapetim/PE" · "[Correria 83 - Lote 2]" → Correria 83 · "Cultura Inglesa RUN: LOTE 2 KIDS" → Cultura Inglesa RUN, obs. "Lote 2 - KIDS"
+export function separarLoteNome(nome) {
+  const t = String(nome || '').trim();
+  const m = t.match(/\blote\s*(\d+)/i);
+  const limpa = (x) => x.replace(/[\[\]{}]/g, ' ').replace(/^[\s\-–—:;,.()/|]+|[\s\-–—:;,.()/|]+$/g, '').replace(/\s+/g, ' ').trim();
+  if (!m) return { cliente: t.replace(/\s+/g, ' ').trim(), lote: '' };
+  let cliente = limpa(t.slice(0, m.index)), resto = limpa(t.slice(m.index + m[0].length));
+  if (!cliente) { cliente = resto; resto = ''; }
+  return { cliente, lote: `Lote ${m[1]}${resto ? ` - ${resto}` : ''}` };
+}
 export function clienteBase(nome) {
-  return String(nome || '').replace(/\s*[-–(]?\s*\blote\s*\d+\)?\s*$/i, '').replace(/\s+/g, ' ').trim();
+  return separarLoteNome(nome).cliente;
 }
 
 // ---------- Normalização das linhas ----------
@@ -180,7 +191,7 @@ export function normalizarLinhas(matriz) {
     linhas.push({
       linha: i + 1,
       data, mes,
-      cliente: (idx.clienteLancado !== undefined ? clientePadrao : clienteBase(clienteOriginal)) || 'Sem cliente',
+      cliente: (idx.clienteLancado !== undefined ? clienteBase(clientePadrao) : clienteBase(clienteOriginal)) || 'Sem cliente',
       cliente_original: clienteOriginal,
       pedido: pedidoTxt || `${clienteBase(clienteOriginal)}|${data || mes}`,
       pedido_informado: !!pedidoTxt,

@@ -2,6 +2,10 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v77 — 10/11/2026 — Lote em qualquer parte do nome vai para a observação
+
+- Lote em qualquer parte do nome do cliente: o painel tira o lote do nome também quando ele vem no começo ou no meio, ou entre colchetes (ex.: "Lote 1: Alpha Run" → Alpha Run; "BOX CTPL - Lote 2 - Itapetim/PE" → BOX CTPL; "[Correria 83 - Lote 2]" → Correria 83; "Cultura Inglesa RUN: LOTE 2 KIDS" → Cultura Inglesa RUN). O lote e o que vem depois dele vão para a coluna Lote / obs. do cliente, e essas linhas saem das Inconsistências. Vale para a planilha do Google e para os pedidos já trazidos para o painel.
+
 ## v76 — 10/11/2026 — Explicação dos indicadores mais completa
 
 - Balãozinho dos indicadores mais explicado, em linguagem do comercial: o que é, a conta com um exemplo e como ler o número (Vendas, Clientes, Vendedores e premiação). Na Projeção do mês, o balão traz a conta com os números do mês, o que quer dizer "pelo ritmo de N dias", o que é o PE e os cuidados da projeção.
