@@ -2,6 +2,10 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v76 — 10/11/2026 — Explicação dos indicadores mais completa
+
+- Balãozinho dos indicadores mais explicado, em linguagem do comercial: o que é, a conta com um exemplo e como ler o número (Vendas, Clientes, Vendedores e premiação). Na Projeção do mês, o balão traz a conta com os números do mês, o que quer dizer "pelo ritmo de N dias", o que é o PE e os cuidados da projeção.
+
 ## v75 — 10/11/2026 — Balãozinho com a explicação dos indicadores
 
 - Balãozinho de explicação: passe o mouse no card (ou toque no ⓘ no celular) para ver como cada indicador é calculado. Vale para os cards de Vendas, Painel executivo, Clientes, Vendedores e premiação, Financeiro, Conferência e Aprovações. Na Projeção do mês, o balão mostra a conta com os números do mês (vendido até hoje ÷ dias × dias do mês) e quanto falta para o ponto de equilíbrio.
