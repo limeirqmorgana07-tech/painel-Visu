@@ -2,6 +2,10 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v74 — 10/11/2026 — Lote já tratado sai das Inconsistências
+
+- Inconsistências · Cliente com "lote" no nome: o lote que o painel já tirou do nome e levou para a coluna Lote / obs. do cliente não aparece mais como inconsistência, mesmo que a planilha do Google ainda tenha o nome com o lote. Só fica na lista o cliente que ainda está com o lote no nome no painel.
+
 ## v73 — 10/11/2026 — Aprovações na Comercial, aviso no WhatsApp e vídeo todo narrado
 
 - Aprovações (Comercial): página nova para a diretoria com os pedidos de alteração de preço aguardando (Aprovar / recusar), as respondidas nos últimos 30 dias e o número de pendentes no menu. O vendedor vê ali os pedidos dele.
