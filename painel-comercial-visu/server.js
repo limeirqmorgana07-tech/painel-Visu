@@ -425,7 +425,7 @@ app.get('/api/pedidos', exigeLogin, exigePedidos, resp(async (req) => {
   try { pagamentos = await pedidos.pagamentosPorPedido(vendasContaAzulEmCache(), req.query.forcar === '1'); if (pagamentos?.conectado && (await pedidos.preencherPagamentos(pagamentos, null, { auto: true })).linhas) depoisDeMudar(); } catch (e) { pagamentos = { erro: e.message }; }
   const [registros, cfg, cads] = await Promise.all([pedidos.listar(), pedidos.configPedidos(), cadastros.listarCadastros()]);
   return { registros, config: cfg, cadastros: cads, pagamentos, campos_valor: pedidos.CAMPOS_VALOR, proximo_codigo: pedidos.proximoCodigo(new Date(Date.now() - 3 * 3600e3).toISOString().slice(0, 10)), codigos_externos: pedidos.codigosExternosLista(), horas_edicao: Number(process.env.HORAS_EDICAO_PEDIDO || 24),
-    vendedor: req.usuario.perfil === 'vendedor' ? req.usuario.vendedor || '' : '', vendedor_padrao: req.usuario.vendedor || '', pode: { lancar: pedidos.podeLancar(req.usuario), gestao: pedidos.podeEditarTudo(req.usuario), importar: pedidos.podeEditarTudo(req.usuario), fonte: req.usuario.perfil === 'adm' },
+    vendedor: req.usuario.perfil === 'vendedor' ? req.usuario.vendedor || '' : '', vendedor_padrao: req.usuario.vendedor || '', whatsapp_aprovacao: (await pedidos.configPedidos()).whatsapp_aprovacao || [], pode: { lancar: pedidos.podeLancar(req.usuario), gestao: pedidos.podeEditarTudo(req.usuario), importar: pedidos.podeEditarTudo(req.usuario), fonte: req.usuario.perfil === 'adm' },
     planilha_conectada: planilhaConfigurada() || config.demo, eu: { id: req.usuario.id, nome: req.usuario.nome, perfil: req.usuario.perfil, vendedor: req.usuario.vendedor || '' } };
 }));
 app.get('/api/pedidos/proximo-codigo', exigeLogin, exigePedidos, resp(async (req) => { await pedidos.listar(); await codigosExternos(); return { codigo: req.query.de ? pedidos.proximoComplemento(req.query.de) : pedidos.proximoCodigo(req.query.data) }; }));
@@ -491,6 +491,13 @@ app.post('/api/pedidos/planilha-uso', exigeAdm, resp(async (req) => {
   return { ...c, importadas };
 }));
 app.post('/api/pedidos/config', exigeAdm, resp(async (req) => { const f = ['painel', 'misto'].includes(req.body?.fonte) ? req.body.fonte : 'planilha'; const r = await pedidos.salvarConfigPedidos({ fonte: f, corte: f === 'misto' ? (/^\d{4}-\d{2}$/.test(req.body?.corte || '') ? req.body.corte : '2026-11') : undefined }, req.usuario); depoisDeMudar(); return r; }));
+// WhatsApp da diretoria para o aviso de pedido de aprovação (o vendedor abre o WhatsApp com a mensagem pronta)
+app.post('/api/pedidos/whatsapp', exigeLogin, resp(async (req) => {
+  if (!['adm', 'diretor'].includes(req.usuario.perfil)) throw new Error('Só ADM e diretores definem o WhatsApp dos avisos.');
+  const lista = (Array.isArray(req.body?.numeros) ? req.body.numeros : []).map((x) => ({ nome: String(x?.nome || '').trim().slice(0, 40), numero: String(x?.numero || '').replace(/\D/g, '').slice(0, 15) })).filter((x) => x.numero.length >= 10).slice(0, 5);
+  const r = await pedidos.salvarConfigPedidos({ whatsapp_aprovacao: lista }, req.usuario);
+  return { whatsapp_aprovacao: r.whatsapp_aprovacao };
+}));
 app.get('/api/pedidos/historico', exigeLogin, (req, res, next) => (veHistorico(req.usuario) ? next() : res.status(403).json({ erro: 'o histórico de alterações é só para a gestão' })), resp(async (req) => ({ itens: await pedidos.historico({ codigo: req.query.codigo, usuario: req.query.usuario, acao: req.query.acao, dias: req.query.dias || 90 }) })));
 
 // ---------- Conciliação bancária: extrato do banco × baixas na Conta Azul ----------

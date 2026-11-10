@@ -2,6 +2,13 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v73 — 10/11/2026 — Aprovações na Comercial, aviso no WhatsApp e vídeo todo narrado
+
+- Aprovações (Comercial): página nova para a diretoria com os pedidos de alteração de preço aguardando (Aprovar / recusar), as respondidas nos últimos 30 dias e o número de pendentes no menu. O vendedor vê ali os pedidos dele.
+- Aviso no WhatsApp: ADM e diretores cadastram até 5 números em Aprovações. Quando o vendedor envia um pedido de alteração, aparece o botão Avisar no WhatsApp, que abre o WhatsApp dele com a mensagem pronta (pedido, cliente, valor de antes e o novo, motivo e o link para aprovar).
+- Inconsistências: a conferência pedido a pedido com a Conta Azul (valor diferente, pedido sem venda no sistema, venda sem pedido na planilha, pagamentos) passa a valer a partir de setembro/2026, quando o código do pedido começou. Agosto fica só com o fechamento pelo total do mês, em Divergências.
+- Treinamento: vídeo da Eva com voz em todas as cenas (4 min 16 s), incluindo Parcelas, alteração de preço, aviso no WhatsApp e a página Aprovações.
+
 ## v72 — 09/11/2026 — Mesmo pedido numa linha só nas Inconsistências de pagamento
 
 - Inconsistências · Valor recebido diferente do anotado na planilha: o mesmo pedido aparece numa linha só, com o 1º e o 2º pagamento juntos (ex.: Geraldo Costa 0021112026). A conferência continua a mesma.

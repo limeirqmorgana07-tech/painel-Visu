@@ -2,7 +2,7 @@
 // O ADM pode restringir ainda mais por usuário, na página Usuários e permissões.
 export const MENU = [
   { grupo: 'Gestão', itens: [['painel', 'Painel executivo'], ['indicadores', 'Quadro de indicadores']] },
-  { grupo: 'Comercial', itens: [['registro', 'Planilha de vendas'], ['vendas', 'Vendas'], ['produtos', 'Produtos e mix'], ['clientes', 'Clientes'], ['vendedores', 'Vendedores e premiação'], ['pedidos', 'Pedidos e entregas'], ['treinamento', 'Treinamento']] },
+  { grupo: 'Comercial', itens: [['registro', 'Planilha de vendas'], ['vendas', 'Vendas'], ['produtos', 'Produtos e mix'], ['clientes', 'Clientes'], ['vendedores', 'Vendedores e premiação'], ['aprovacoes', 'Aprovações'], ['pedidos', 'Pedidos e entregas'], ['treinamento', 'Treinamento']] },
   // reunião de 03/11/2026: conferência sistema × planilha num grupo próprio (a planilha é a referência das vendas)
   { grupo: 'Conferência', itens: [['inconsistencias', 'Inconsistências'], ['divergencias', 'Divergências'], ['historico', 'Histórico de alterações']] },
   { grupo: 'Financeiro', itens: [['dre', 'DRE gerencial'], ['equilibrio', 'Margem e ponto de equilíbrio'], ['caixa', 'Fluxo de caixa'], ['receber', 'Contas a receber'], ['pagar', 'Contas a pagar'], ['extrato', 'Conciliação bancária']] },
@@ -17,12 +17,12 @@ const PADRAO_BASE = {
   // diretores criam o acesso dos vendedores (09/11/2026)
   diretor: TODAS,
   // reunião de 03/11/2026: vendedores lançam os pedidos no painel e veem a conciliação; o histórico fica com a gestão
-  comercial: ['registro', ...COM, 'inconsistencias', 'conciliacao', 'versoes', 'treinamento'],
+  comercial: ['registro', ...COM, 'aprovacoes', 'inconsistencias', 'conciliacao', 'versoes', 'treinamento'],
   financeiro: ['painel', 'indicadores', 'registro', ...FIN, 'inconsistencias', 'divergencias', 'historico', 'conciliacao', 'dados', 'versoes', 'treinamento'],
   // consultor externo liberado pela diretoria: só o módulo de vendas (em homologação); o ADM pode ampliar
   consultor: [...COM],
   // perfil Vendedor (v32): lança e revisa as próprias vendas na Planilha de vendas e vê as inconsistências dele
-  vendedor: ['registro', ...COM, 'inconsistencias', 'treinamento'],
+  vendedor: ['registro', ...COM, 'aprovacoes', 'inconsistencias', 'treinamento'],
 };
 // O ADM pode mudar o que cada perfil vê (vale para todas as pessoas daquele perfil). Guardado na chave perfis_paginas.
 let personalizado = {};
@@ -31,13 +31,15 @@ const NOVAS_V31 = ['registro', 'inconsistencias', 'historico'];
 const NOVAS_V43 = ['extrato'];
 // v56: Divergências (Conferência) e Treinamento entram nas listas salvas antes, conforme o padrão do perfil
 const NOVAS_V56 = ['divergencias', 'treinamento'];
+// v73: Aprovações (Comercial) entra nas listas salvas antes, conforme o padrão do perfil
+const NOVAS_V73 = ['aprovacoes'];
 export function definirPerfis(o) {
   personalizado = {};
   // listas salvas antes da v31 não conheciam os 3 menus novos: entram conforme o padrão do perfil
-  const antiga = o && !o._v31, antes43 = o && !o._v43, antes56 = o && !o._v56;
-  for (const [k, v] of Object.entries(o || {})) if (k !== 'adm' && PADRAO_BASE[k] && Array.isArray(v)) personalizado[k] = [...new Set([...v, ...(antiga ? NOVAS_V31.filter((p) => PADRAO_BASE[k].includes(p) && !v.includes(p)) : []), ...(antes43 ? NOVAS_V43.filter((p) => PADRAO_BASE[k].includes(p)) : []), ...(antes56 ? NOVAS_V56.filter((p) => PADRAO_BASE[k].includes(p)) : [])])].filter((p) => LIBERAVEIS.includes(p));
+  const antiga = o && !o._v31, antes43 = o && !o._v43, antes56 = o && !o._v56, antes73 = o && !o._v73;
+  for (const [k, v] of Object.entries(o || {})) if (k !== 'adm' && PADRAO_BASE[k] && Array.isArray(v)) personalizado[k] = [...new Set([...v, ...(antiga ? NOVAS_V31.filter((p) => PADRAO_BASE[k].includes(p) && !v.includes(p)) : []), ...(antes43 ? NOVAS_V43.filter((p) => PADRAO_BASE[k].includes(p)) : []), ...(antes56 ? NOVAS_V56.filter((p) => PADRAO_BASE[k].includes(p)) : []), ...(antes73 ? NOVAS_V73.filter((p) => PADRAO_BASE[k].includes(p)) : [])])].filter((p) => LIBERAVEIS.includes(p));
 }
-export const perfisPersonalizados = () => ({ ...personalizado, _v31: true, _v43: true, _v56: true });
+export const perfisPersonalizados = () => ({ ...personalizado, _v31: true, _v43: true, _v56: true, _v73: true });
 export const padraoDe = (perfil) => (perfil === 'adm' ? TODAS : perfil === 'diretor' && personalizado.diretor?.length ? [...personalizado.diretor, 'usuarios'] : personalizado[perfil]?.length ? personalizado[perfil] : PADRAO_BASE[perfil] || []);
 export const PADRAO = new Proxy({}, { get: (_, k) => padraoDe(k), ownKeys: () => Object.keys(PADRAO_BASE), getOwnPropertyDescriptor: () => ({ enumerable: true, configurable: true }) });
 export const padroesOriginais = () => ({ ...PADRAO_BASE });
@@ -47,7 +49,7 @@ export function paginasDe(u) {
   if (!u) return [];
   const base = padraoDe(u.perfil);
   if (u.perfil === 'adm' || !Array.isArray(u.paginas)) return base;
-  const r = base.filter((p) => u.paginas.includes(p) || (u.perfil === 'diretor' && p === 'usuarios'));
+  const r = base.filter((p) => u.paginas.includes(p) || (u.perfil === 'diretor' && p === 'usuarios') || p === 'aprovacoes');
   return r.length ? r : base.slice(0, 1);
 }
 // Blocos das páginas de Gestão (Painel executivo e Quadro de indicadores): o ADM escolhe o que cada perfil enxerga.
