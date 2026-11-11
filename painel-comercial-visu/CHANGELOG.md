@@ -2,6 +2,13 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v82 — 11/11/2026 — Contas a receber: Sintético e Analítico, com exportação
+- Contas a receber reorganizada em uma coluna só, sem quadros lado a lado, com duas visões: Sintético (igual à planilha: posição geral, faixas de atraso, o que fazer, a vencer por semana e maiores saldos) e Analítico (títulos em aberto e recebimentos sem cliente identificado — DNI).
+- Clique em qualquer linha do Sintético (ou nos quadros do topo) para ver os títulos daquele grupo com as descrições, observações e a descrição da Conta Azul; a lista tem busca, ordenação e exportação.
+- Botão Base 10/11 (planilha) para conferir com a planilha do Tiago na mesma data base.
+- Exportar relatório (Excel) com as abas Resumo, Títulos em aberto, Maiores saldos e DNI; e Exportar (Excel, PDF ou CSV) em Maiores saldos, Títulos em aberto e DNI.
+- A página não usa mais o mês do topo: mostra toda a carteira em aberto. A data base só muda o que está vencido e os dias de atraso.
+
 ## v81 — 11/11/2026 — Contas a receber com gestão da cobrança
 
 - Financeiro → Contas a receber: nova Gestão da cobrança, no formato da planilha da Seja Expert (10/11): posição geral (vencidos × a vencer), vencidos por faixa de atraso, a vencer por semana, o que fazer com cada título (ação) e os 15 maiores saldos vencidos por cliente. Filtros por vendedor, cliente e data de referência (recalcula os atrasos).
