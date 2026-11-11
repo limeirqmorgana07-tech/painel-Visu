@@ -2,6 +2,11 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v89 — 11/11/2026 — Em andamento conta como aprovado e Ver como exato
+- Divergência: venda em andamento na Conta Azul deixa de aparecer como Não aprovado no sistema. O pedido já sai aprovado pelo gestor comercial e o painel envia como em andamento; com o valor igual, fica Batendo.
+- Ver o painel como uma pessoa (ex.: um diretor) mostra exatamente o que ela vê: as páginas que você liberou para ela, os blocos do perfil e as mesmas funções (lançar, gestão, importar), lidos direto do servidor.
+- Ver como Perfil segue a mesma regra do servidor (Aprovações para todos e Usuários e permissões para o diretor).
+
 ## v88 — 11/11/2026 — Selo CA ✓ em todos os pedidos do mês
 - Selo CA ✓ também nos pedidos que vieram da planilha: ao lado dos ícones de cada pedido do mês, CA ✓ quando a venda com o mesmo número está na Conta Azul (passe o mouse para ver o valor) e CA ? quando não foi encontrada.
 - A coluna de ações da Planilha de vendas não corta mais os selos.

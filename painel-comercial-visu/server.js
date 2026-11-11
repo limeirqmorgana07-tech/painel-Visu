@@ -209,6 +209,15 @@ async function podeGerirUsuario(eu, id, perfilNovo) {
 }
 const SO_ADM_USU = 'Diretores cadastram e cuidam só do acesso de Vendedor, Comercial e Consultor externo. Para os outros perfis, fale com o ADM.';
 app.get('/api/usuarios', exigeGestorUsuarios, async (req, res) => res.json({ usuarios: await usuarios.listar(), perfis: usuarios.PERFIS, perfis_permitidos: req.usuario.perfil === 'adm' ? Object.keys(usuarios.PERFIS) : PERFIS_DIRETOR, banco: await usuarios.bancoConfigurado(), banco_status: await statusBanco().catch((e) => ({ erro: e.message })) }));
+// v89: "Ver o painel como" uma pessoa: exatamente as páginas, blocos e funções que o servidor dá a ela
+app.get('/api/usuarios/:id/visao', exigeAdm, async (req, res) => {
+  try {
+    const u = (await usuarios.listar()).find((x) => x.id === req.params.id);
+    if (!u) return res.status(404).json({ erro: 'Usuário não encontrado.' });
+    res.json({ paginas: paginasDe(u), blocos: blocosDe(u.perfil), vendedor: u.perfil === 'vendedor' ? u.vendedor || '' : '',
+      pode: { lancar: pedidos.podeLancar(u), gestao: pedidos.podeEditarTudo(u), importar: pedidos.podeEditarTudo(u), fonte: u.perfil === 'adm' } });
+  } catch (e) { res.status(500).json({ erro: e.message }); }
+});
 app.post('/api/usuarios', exigeGestorUsuarios, async (req, res) => {
   try {
     const b = req.body || {};

@@ -1284,8 +1284,9 @@ const nomeMes=(m)=>{const[a,b]=m.split('-');return MES_L[+b-1]+' de '+a};
 const somaMes=(m,n)=>{const[a,b]=m.split('-').map(Number);const d=new Date(Date.UTC(a,b-1+n,1));return d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0')};
 function delta(a,b,inv){ if(!b) return '<span class="delta eq">sem base</span>'; const d=(a-b)/b; const c=Math.abs(d)<.005?'eq':(d>0)!==!!inv?'up':'down'; return `<span class="delta ${c}">${d>0?'▲':d<0?'▼':'■'} ${pct(Math.abs(d))}</span>`; }
 
-const VERSAO='v88';
+const VERSAO='v89';
 const VERSOES=[
+ {v:'v89',data:'11/11/2026',tit:'Em andamento conta como aprovado e Ver como exato',arq:'painel-visu-v89.zip',itens:["Divergência: venda em andamento na Conta Azul deixa de aparecer como Não aprovado no sistema. O pedido já sai aprovado pelo gestor comercial e o painel envia como em andamento; com o valor igual, fica Batendo.", "Ver o painel como uma pessoa (ex.: um diretor) mostra exatamente o que ela vê: as páginas que você liberou para ela, os blocos do perfil e as mesmas funções (lançar, gestão, importar), lidos direto do servidor.", "Ver como Perfil segue a mesma regra do servidor (Aprovações para todos e Usuários e permissões para o diretor)."]},
  {v:'v88',data:'11/11/2026',tit:'Selo CA ✓ em todos os pedidos do mês',arq:'painel-visu-v88.zip',itens:["Selo CA ✓ também nos pedidos que vieram da planilha: ao lado dos ícones de cada pedido do mês, CA ✓ quando a venda com o mesmo número está na Conta Azul (passe o mouse para ver o valor) e CA ? quando não foi encontrada.", "A coluna de ações da Planilha de vendas não corta mais os selos."]},
  {v:'v87',data:'11/11/2026',tit:'Ficha do pedido e confirmação imediata na Conta Azul',arq:'painel-visu-v87.zip',itens:["Ficha do pedido: o botão 🔍 em cada pedido abre tudo dele numa janela só, com dados do pedido, itens, condição de pagamento com as parcelas exatamente como vão para a Conta Azul, soma das parcelas, situação na Conta Azul, recebimentos, comprovantes e histórico.", "Quando as parcelas personalizadas não fecham com o total do pedido, a ficha mostra em vermelho a diferença e como corrigir.", "Conta Azul: o pedido passa a Confirmado na CA assim que a Conta Azul devolve o número da venda criada no envio; não fica mais esperando a próxima leitura.", "Depois do Enviar agora, o painel relê as vendas da Conta Azul sozinho."]},
  {v:'v86',data:'11/11/2026',tit:'Botão Atualizar funcionando',arq:'painel-visu-v86.zip',itens:["Botão Atualizar (no alto do painel) corrigido: agora busca de novo as vendas, os pedidos, o financeiro, as contas a receber e o extrato, e redesenha a página em que você está, sem precisar do F5.", "Enquanto atualiza, o botão mostra Atualizando… e, no fim, avisa a hora da atualização (ou o motivo, se algo falhar)."]},
@@ -2488,7 +2489,8 @@ function statusCod(cod,tot,mes,ca){
   if(mes&&mes<DESDE()) return ['antes','Antes do detalhe'];
   const v=ca.get(ckey(cod)); if(!v) return ['so_painel','Só no painel'];
   if(v.s==='CANCELADO') return ['cancelado','Cancelado no sistema'];
-  if(v.s!=='APROVADO'&&v.s!=='FATURADO') return ['nao_aprov','Não aprovado no sistema'];
+  // v89: venda em andamento conta como aprovada (o pedido já é aprovado pelo gestor comercial ao ser lançado; o painel envia como em andamento)
+  if(v.s!=='APROVADO'&&v.s!=='FATURADO'&&v.s!=='EM_ANDAMENTO') return ['nao_aprov','Não aprovado no sistema'];
   return Math.abs((v.t||0)-tot)<=1?['ok','Batendo']:['dif','Valor diferente'];
 }
 const ST_CL={ok:'st-ok',dif:'st-dif',so_painel:'st-so',so_sistema:'st-so',cancelado:'st-dif',nao_aprov:'st-so',sem:'st-na',antes:'st-na',semca:'st-na'};
@@ -2549,7 +2551,7 @@ function linhasPlanilhaViva(){
 // "Ver o painel como" um vendedor: a Planilha de vendas fica como ele vê (cadeado, 💲 para pedir alteração de preço, sem botões da gestão)
 function aplicarVerComo(){ const d=PED.d; if(!d) return; if(!d.podeReal){ d.podeReal={...d.pode}; d.vendedorReal=d.vendedor||''; }
   const vc=E.verComo, vend=vc&&!['adm','diretor','financeiro'].includes(vc.perfil);
-  d.pode=vend?{...d.podeReal,gestao:false,importar:false,fonte:false,lancar:vc.perfil!=='consultor'}:{...d.podeReal};
+  d.pode=vc?.podeReais?{...vc.podeReais}:vend?{...d.podeReal,gestao:false,importar:false,fonte:false,lancar:vc.perfil!=='consultor'}:vc?{...d.podeReal,fonte:vc.perfil==='adm'}:{...d.podeReal};
   d.vendedor=vend?(vc.vendedor||''):d.vendedorReal; }
 function pgRegistro(){
   if(PED.editando) return;
@@ -3682,7 +3684,7 @@ const ITEM=Object.fromEntries(MENU.flatMap(g=>g.itens.map(i=>[i[0],{rot:i[1],ctx
 const GRUPO_DE=Object.fromEntries(TODAS.map(p=>[p,ITEM[p].grupo]));
 const COMP=['vendas','produtos','clientes','vendedores','pedidos'], FINP=['dre','equilibrio','caixa','receber','pagar','extrato'];
 const PADRAO={adm:TODAS,diretor:TODAS,comercial:['registro',...COMP,'aprovacoes','inconsistencias','conciliacao','versoes','treinamento'],financeiro:['painel','indicadores','registro',...FINP,'inconsistencias','divergencias','historico','conciliacao','dados','versoes','treinamento'],consultor:[...COMP],vendedor:['registro',...COMP,'aprovacoes','inconsistencias','treinamento']};
-function paginasDe(u){ if(!u) return []; const base=PADRAO[u.perfil]||[]; if(u.perfil==='adm'||!Array.isArray(u.paginas)) return base; const r=base.filter(p=>u.paginas.includes(p)); return r.length?r:base.slice(0,1); }
+function paginasDe(u){ if(!u) return []; if(Array.isArray(u.paginasReais)) return u.paginasReais; const base=PADRAO[u.perfil]||[]; if(u.perfil==='adm'||!Array.isArray(u.paginas)) return base; const r=base.filter(p=>u.paginas.includes(p)||(u.perfil==='diretor'&&p==='usuarios')||p==='aprovacoes'); return r.length?r:base.slice(0,1); }
 // páginas que aparecem agora (com o "Ver o painel como" do ADM)
 function paginasAtivas(){ if(E.verComo) return paginasDe(E.verComo); return E.eu?.paginas||paginasDe(E.eu)||TODAS; }
 function montarMenu(){
@@ -3736,7 +3738,7 @@ const BLOCOS_DEF=[
   {id:'vendedores.premiacao',pag:'vendedores',nome:'Vendedores: premiação, bônus e apuração (valores de cada vendedor)',fin:false}];
 const BL_TODOS=BLOCOS_DEF.map(b=>b.id), BL_COM=BLOCOS_DEF.filter(b=>!b.fin&&b.id!=='vendedores.premiacao').map(b=>b.id);
 const BL_PADRAO={diretor:BL_TODOS,financeiro:BL_TODOS,comercial:BL_COM,consultor:BL_COM,vendedor:BL_COM};
-function blocosVis(){ const p=E.verComo?E.verComo.perfil:E.eu?.perfil; if(!p||p==='adm') return BL_TODOS; if(E.verComo) return (E.eu?.blocos_perfis||{})[p]||BL_PADRAO[p]||[]; return E.eu?.blocos||BL_PADRAO[p]||[]; }
+function blocosVis(){ const p=E.verComo?E.verComo.perfil:E.eu?.perfil; if(!p||p==='adm') return BL_TODOS; if(E.verComo) return E.verComo.blocosReais||(E.eu?.blocos_perfis||{})[p]||BL_PADRAO[p]||[]; return E.eu?.blocos||BL_PADRAO[p]||[]; }
 const vb=(id)=>blocosVis().includes(id);
 const precisaFinPainel=()=>['painel.financeiro','painel.equilibrio','painel.cascata','painel.grafico','painel.alertas'].some(vb);
 function pgVisao(j){
@@ -3877,7 +3879,7 @@ async function montarVerComo(){
   let us=[]; try{ us=(await api('/api/usuarios')).usuarios; }catch(e){}
   const ops=[['','Administrador (eu)'],...Object.keys(PERF).filter(k=>k!=='adm').map(k=>['p:'+k,'Perfil '+PERF[k]]),...us.filter(u=>u.perfil!=='adm').map(u=>['u:'+u.id,u.nome+' · '+PERF[u.perfil]])];
   $('verComo').innerHTML=ops.map(([v,r])=>`<option value="${esc(v)}">${esc(r)}</option>`).join('');
-  $('verComo').onchange=async()=>{ const v=$('verComo').value; if(!v) E.verComo=null; else if(v.startsWith('p:')) E.verComo={perfil:v.slice(2),nome:'Perfil '+PERF[v.slice(2)]}; else { try{ us=(await api('/api/usuarios')).usuarios||us; }catch(e){} const u=us.find(x=>x.id===v.slice(2)); E.verComo=u?{...u}:null; } desenhar(); };
+  $('verComo').onchange=async()=>{ const v=$('verComo').value; if(!v) E.verComo=null; else if(v.startsWith('p:')) E.verComo={perfil:v.slice(2),nome:'Perfil '+PERF[v.slice(2)]}; else { try{ us=(await api('/api/usuarios')).usuarios||us; }catch(e){} const u=us.find(x=>x.id===v.slice(2)); E.verComo=u?{...u}:null; if(u){ try{ const vi=await api('/api/usuarios/'+encodeURIComponent(u.id)+'/visao'); Object.assign(E.verComo,{paginasReais:vi.paginas,blocosReais:vi.blocos,podeReais:vi.pode,vendedor:vi.vendedor||u.vendedor||''}); }catch(e){ toast('Não consegui ler as permissões exatas de '+u.nome+': '+e.message,true); } } } montarMenu(); desenhar(); };
 }
 let US={lista:[],banco:true,link:null};
 async function api(url,op={}){ if(PREVIA) return previaApi(url,op); const r=await fetch(url,{...op,headers:{'Content-Type':'application/json',Accept:'application/json'}}); const d=await r.json().catch(()=>({})); if(!r.ok) throw new Error(d.erro||('erro '+r.status)); return d; }
