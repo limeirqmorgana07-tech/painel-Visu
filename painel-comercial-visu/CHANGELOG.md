@@ -2,6 +2,16 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v81 — 11/11/2026 — Contas a receber com gestão da cobrança
+
+- Financeiro → Contas a receber: nova Gestão da cobrança, no formato da planilha da Seja Expert (10/11): posição geral (vencidos × a vencer), vencidos por faixa de atraso, a vencer por semana, o que fazer com cada título (ação) e os 15 maiores saldos vencidos por cliente. Filtros por vendedor, cliente e data de referência (recalcula os atrasos).
+- Títulos em aberto: lista de todos os títulos da Conta Azul com dias de atraso, venda, parcela, vencimento, valor, recebido, em aberto e vendedor (pelo código do pedido). Ação, observações, decisão na reunião e responsável são editáveis (ADM, diretores e financeiro) e ficam guardados. Já vêm preenchidos com a análise da planilha de 10/11; os títulos novos recebem uma ação sugerida (em cinza). Exportar para Excel.
+- Recebimentos sem cliente identificado (DNI): os 95 depósitos e créditos sem conciliação da planilha, com o possível título e a marcação de conciliado.
+
+## v80 — 10/11/2026 — Subtotal com pagamentos, falta receber, planilha e sistema
+
+- Subtotal da Planilha de vendas completo: soma também o 1º, o 2º e o 3º pagamento (como aparecem na grade: o anotado ou, em branco, o recebido na Conta Azul), a linha 1º + 2º pagamento, o Falta receber e as colunas Planilha (pedido), Sistema (Conta Azul) e a diferença entre elas.
+
 ## v79 — 10/11/2026 — Anexar comprovantes e notas fiscais em lote
 
 - 📎 Anexar em lote (Planilha de vendas, gestão): selecione vários comprovantes e notas fiscais de uma vez, junto com o manifesto.json, e o painel coloca cada arquivo no pedido certo. Sem manifesto ou sem código do pedido, ele sugere o pedido pelo nome de quem pagou e pelo valor; você confere, ajusta e clica em Anexar. Pedidos que ainda estão só na planilha são trazidos para o painel automaticamente. Arquivo já anexado no mesmo pedido não é enviado de novo.

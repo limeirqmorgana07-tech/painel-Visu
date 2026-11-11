@@ -159,6 +159,8 @@ td.ed{white-space:nowrap}
 .anx-l{margin:4px 0;padding-left:18px}.anx-l li{margin:4px 0}.acb.an-on{color:var(--orange,#f4a62a)}.acb sup{font-size:9px;font-weight:700}.acb sup.nf{color:#16643a;margin-left:1px}
 #loteCorpo th,#loteCorpo td{text-align:left;vertical-align:top}#loteCorpo td.v,#loteCorpo th.v{text-align:right}
 #persModal input{padding:7px 10px;border:1px solid var(--line2);border-radius:8px;font:inherit;background:var(--panel);color:var(--ink)}
+.rc-h{margin:12px 0 6px;font-size:13px;color:var(--ink2)}
+#rcTit td.ed{cursor:pointer}#rcTit td.ed:hover{background:var(--line)}#rcTit td{vertical-align:top}#rcTit .sv{color:#9b1c1c;font-weight:700}#rcTit .sa{color:#16643a}
 .sol-bd{background:#fde7c4!important;color:#8a4b00!important;border-radius:999px;padding:1px 8px!important;font-size:11px;font-weight:700;width:auto!important}.pd-bd.sol-ok{background:#d9f2e3;color:#16643a}.pd-bd.sol-no{background:#fbe0e0;color:#9b1c1c}
 #cadModal .f,#dvModal .f{margin-top:10px;display:flex;flex-direction:column;gap:4px}
 #cadModal .f label,#dvModal .f label{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2)}
@@ -1098,6 +1100,26 @@ table.matriz td.vz{color:var(--line2)}
       <div class="card"><div class="hd"><div><h3>Maiores atrasos por cliente</h3><div class="sub">Para a cobrança</div></div></div><div class="tw" id="rcPessoas"></div></div>
       <div class="card"><div class="hd"><div><h3>Próximos recebimentos</h3><div class="sub">Em ordem de vencimento</div></div></div><div class="tw" id="rcProx"></div></div>
     </div>
+    <div class="card" style="margin-top:16px"><div class="hd"><div><h3>Gestão da cobrança</h3><div class="sub">Títulos em aberto na Conta Azul, com a ação de cada um, a decisão da reunião e o responsável. Filtre por vendedor ou cliente; a data de referência recalcula os atrasos.</div></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:end">
+        <label class="dica-c">Data de referência<br><input type="date" id="rcRef"></label>
+        <label class="dica-c">Vendedor<br><select id="rcVend"></select></label>
+        <label class="dica-c">Cliente<br><input id="rcCli" placeholder="nome do cliente" style="width:170px"></label>
+        <button class="bt2" type="button" id="rcExp">Exportar (Excel)</button></div></div>
+      <div class="g3" style="margin-top:6px">
+        <div><h4 class="rc-h">1. Posição geral</h4><div class="tw" id="rcPos"></div></div>
+        <div><h4 class="rc-h">2. Vencidos por faixa de atraso</h4><div class="tw" id="rcFx"></div></div>
+        <div><h4 class="rc-h">3. A vencer por semana</h4><div class="tw" id="rcSem"></div></div>
+      </div>
+      <h4 class="rc-h" style="margin-top:18px">4. O que fazer com cada título</h4><div class="tw" id="rcAcoes"></div>
+      <h4 class="rc-h" style="margin-top:18px">5. Maiores saldos vencidos por cliente</h4><div class="tw" id="rcTop"></div>
+    </div>
+    <div class="card" style="margin-top:16px"><div class="hd"><div><h3>Títulos em aberto</h3><div class="sub" id="rcTitSub">Clique na ação, na observação, na decisão ou no responsável para editar. Passe o mouse no cliente para ver o que já se sabe do recebimento.</div></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><select id="rcSit"><option value="">Todas as situações</option><option value="v">Vencidos</option><option value="a">A vencer</option></select><select id="rcAc"><option value="">Todas as ações</option></select></div></div>
+      <div class="tw" id="rcTit" style="max-height:70vh;overflow:auto"></div></div>
+    <div class="card" style="margin-top:16px"><div class="hd"><div><h3>Recebimentos sem cliente identificado (DNI)</h3><div class="sub">Depósitos e créditos sem conciliação. "Possível título" é indício (mesmo valor e data compatível), não confirmação. Marque Conciliado quando resolver.</div></div>
+      <label class="dica-c"><input type="checkbox" id="rcDniTodos"> mostrar os conciliados</label></div>
+      <div class="tw" id="rcDni" style="max-height:60vh;overflow:auto"></div></div>
   </section>
 
   <section data-pagina="extrato" hidden>
@@ -1235,8 +1257,10 @@ const nomeMes=(m)=>{const[a,b]=m.split('-');return MES_L[+b-1]+' de '+a};
 const somaMes=(m,n)=>{const[a,b]=m.split('-').map(Number);const d=new Date(Date.UTC(a,b-1+n,1));return d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0')};
 function delta(a,b,inv){ if(!b) return '<span class="delta eq">sem base</span>'; const d=(a-b)/b; const c=Math.abs(d)<.005?'eq':(d>0)!==!!inv?'up':'down'; return `<span class="delta ${c}">${d>0?'▲':d<0?'▼':'■'} ${pct(Math.abs(d))}</span>`; }
 
-const VERSAO='v79';
+const VERSAO='v81';
 const VERSOES=[
+ {v:'v81',data:'11/11/2026',tit:'Contas a receber com gestão da cobrança',arq:'painel-visu-v81.zip',itens:["Financeiro → Contas a receber: nova Gestão da cobrança, no formato da planilha da Seja Expert (10/11): posição geral (vencidos × a vencer), vencidos por faixa de atraso, a vencer por semana, o que fazer com cada título (ação) e os 15 maiores saldos vencidos por cliente. Filtros por vendedor, cliente e data de referência (recalcula os atrasos).", "Títulos em aberto: lista de todos os títulos da Conta Azul com dias de atraso, venda, parcela, vencimento, valor, recebido, em aberto e vendedor (pelo código do pedido). Ação, observações, decisão na reunião e responsável são editáveis (ADM, diretores e financeiro) e ficam guardados. Já vêm preenchidos com a análise da planilha de 10/11; os títulos novos recebem uma ação sugerida (em cinza). Exportar para Excel.", "Recebimentos sem cliente identificado (DNI): os 95 depósitos e créditos sem conciliação da planilha, com o possível título e a marcação de conciliado."]},
+ {v:'v80',data:'10/11/2026',tit:'Subtotal com pagamentos, falta receber, planilha e sistema',arq:'painel-visu-v80.zip',itens:["Subtotal da Planilha de vendas completo: soma também o 1º, o 2º e o 3º pagamento (como aparecem na grade: o anotado ou, em branco, o recebido na Conta Azul), a linha 1º + 2º pagamento, o Falta receber e as colunas Planilha (pedido), Sistema (Conta Azul) e a diferença entre elas."]},
  {v:'v79',data:'10/11/2026',tit:'Anexar comprovantes e notas fiscais em lote',arq:'painel-visu-v79.zip',itens:["📎 Anexar em lote (Planilha de vendas, gestão): selecione vários comprovantes e notas fiscais de uma vez, junto com o manifesto.json, e o painel coloca cada arquivo no pedido certo. Sem manifesto ou sem código do pedido, ele sugere o pedido pelo nome de quem pagou e pelo valor; você confere, ajusta e clica em Anexar. Pedidos que ainda estão só na planilha são trazidos para o painel automaticamente. Arquivo já anexado no mesmo pedido não é enviado de novo."]},
  {v:'v78',data:'10/11/2026',tit:'Falta receber, parcelas personalizadas, comprovantes e nota fiscal',arq:'painel-visu-v78.zip',itens:["Falta receber: nova coluna na Planilha de vendas (total do pedido − o que já foi baixado na Conta Azul; mostra \"quitado\" quando está tudo recebido) e card Falta receber com o total em aberto do período.", "Parcelas → Personalizado…: o vendedor informa o valor e a data de cada parcela, e o painel confere se a soma bate com o total do pedido. A venda vai para a Conta Azul com essas parcelas.", "📎 Comprovantes e nota fiscal: botão no começo da linha de cada pedido. O vendedor anexa o comprovante de pagamento; a gestão anexa a nota fiscal. PDF ou foto até 5 MB (fotos grandes são reduzidas). Os arquivos ficam guardados no painel e tudo fica no Histórico de alterações.", "Nota fiscal da Conta Azul: o painel consulta as notas emitidas das vendas aprovadas dos últimos 75 dias (até 25 por vez, para gastar pouco) e mostra o número, a data e a chave no 📎 do pedido."]},
  {v:'v77',data:'10/11/2026',tit:'Lote em qualquer parte do nome vai para a observação',arq:'painel-visu-v77.zip',itens:["Lote em qualquer parte do nome do cliente: o painel tira o lote do nome também quando ele vem no começo ou no meio, ou entre colchetes (ex.: \"Lote 1: Alpha Run\" → Alpha Run; \"BOX CTPL - Lote 2 - Itapetim/PE\" → BOX CTPL; \"[Correria 83 - Lote 2]\" → Correria 83; \"Cultura Inglesa RUN: LOTE 2 KIDS\" → Cultura Inglesa RUN). O lote e o que vem depois dele vão para a coluna Lote / obs. do cliente, e essas linhas saem das Inconsistências. Vale para a planilha do Google e para os pedidos já trazidos para o painel."]},
@@ -2026,8 +2050,58 @@ function pgReceber(){
   $('rcCatSub').textContent=`Competência · ${nomeMes(m)}`;
   const cats=f.receitas_categoria.map(x=>({nome:x.nome,val:x.valores[m]||0,t:x.total})).filter(x=>x.val>0).sort((a,b)=>b.val-a.val);
   const tot=cats.reduce((s2,x)=>s2+x.val,0)||1;
+  desenharCobranca();
   rankTab('rcCat',cats,{nome:'Categoria',valor:'Receita',cab:['Part.'],extra:(g)=>[pct(g.val/tot)],vazio:'Sem receitas no mês.',limite:8,abrir:(g)=>detLanc(g.nome+' · '+nomeMes(m),l=>l[1]==='r'&&l[0]===m&&l[2]===g.nome)});
 }
+
+// ---------- contas a receber · gestão da cobrança (v81) ----------
+const RC={g:null,carregando:false};
+const parseTit=(desc)=>{ const v=(String(desc).match(/(\d{5,})/)||[])[1]||''; const p=String(desc).match(/(\d+)\s*(?:\/|de)\s*(\d+)/i); return {venda:v,parcela:p?`${p[1]}/${p[2]}`:'única'}; };
+const chaveTit=(venda,venc,valor)=>`${String(venda||'').replace(/\D/g,'').replace(/^0+/,'')}|${String(venc||'').slice(0,10)}|${Math.round((+valor||0)*100)}`;
+function faixaAtr(d){ return d<=0?'A vencer':d<=30?'1 a 30 dias':d<=60?'31 a 60 dias':d<=90?'61 a 90 dias':'Mais de 90 dias'; }
+function vendaInfo(){ const m=new Map(); for(const l of E.dados?.linhas||[]){ if(l.cd&&!m.has(ckey(l.cd))) m.set(ckey(l.cd),{vendedor:l.vo||l.v,cliente:l.c}); } for(const r of (PED.d?regsPed():[])) if(r.codigo&&!r.excluido) m.set(ckey(r.codigo),{vendedor:r.vendedor,cliente:r.cliente}); return m; }
+function titulosRc(){ const ref=$('rcRef').value||hojeISO(), vi=vendaInfo(), g=RC.g||{anot:{}};
+  return (E.fin?.det_abertos||[]).filter(x=>x[0]==='r'&&x[5]>0.009).map(x=>{ const t=parseTit(x[3]), an=g.anot[chaveTit(t.venda,x[1],x[6])]||g.anot['id:'+x[7]]||{}, info=vi.get(ckey(t.venda))||{}; const dias=Math.max(0,Math.round((Date.parse(ref)-Date.parse(x[1]))/864e5));
+    const venc=x[1]<ref; const pago=+x[8]||0; const sug=!venc?'A vencer: acompanhar':pago>0&&x[5]<=Math.max(30,0.05*x[6])?'Baixar resíduo (desconto/taxa)':'Cobrar cliente';
+    return {id:x[7],venc:x[1],cliente:x[2],desc:x[3],valor:x[6],aberto:x[5],recebido:pago||Math.max(0,x[6]-x[5]),venda:t.venda,parcela:t.parcela,vencido:venc,dias:venc?dias:0,faixa:venc?faixaAtr(dias):'A vencer',vendedor:info.vendedor||an.vendedor||'',acao:an.acao||sug,acaoSug:!an.acao,obs:an.obs||'',decisao:an.decisao||'',resp:an.resp||'',info:[an.ca,an.planilha,an.possiveis].filter(Boolean).join('\n'),chave:t.venda?chaveTit(t.venda,x[1],x[6]):'id:'+x[7]}; }); }
+async function desenharCobranca(){
+  if(!RC.g&&!RC.carregando){ RC.carregando=true; try{ RC.g=await api('/api/receber/gestao'); }catch(e){ RC.g={anot:{},dni:[],acoes:[],erro:e.message}; } RC.carregando=false;
+    $('rcAc').innerHTML='<option value="">Todas as ações</option>'+(RC.g.acoes||[]).map(a=>`<option>${esc(a)}</option>`).join(''); }
+  if(!RC.g) return;
+  if(!$('rcRef').value) $('rcRef').value=hojeISO();
+  const todos=titulosRc(); const vends=[...new Set(todos.map(t=>t.vendedor).filter(Boolean))].sort(); const vsel=$('rcVend').value;
+  $('rcVend').innerHTML='<option value="">Todos</option>'+vends.map(v=>`<option${v===vsel?' selected':''}>${esc(v)}</option>`).join('');
+  const q=semA($('rcCli').value||''); const ts=todos.filter(t=>(!$('rcVend').value||t.vendedor===$('rcVend').value)&&(!q||semA(t.cliente).includes(q)));
+  const soma=(a)=>a.reduce((s2,t)=>s2+t.aberto,0), V=ts.filter(t=>t.vencido), A=ts.filter(t=>!t.vencido), tot=soma(ts)||1, totV=soma(V)||1, totA=soma(A)||1;
+  const tab=(cab,linhas,rod)=>`<table><thead><tr>${cab.map((c,i)=>`<th${i?' class="v"':''}>${c}</th>`).join('')}</tr></thead><tbody>${linhas.map(l=>`<tr>${l.map((c,i)=>`<td${i?' class="v"':''}>${c}</td>`).join('')}</tr>`).join('')}</tbody>${rod?`<tfoot><tr class="tot">${rod.map((c,i)=>`<td${i?' class="v"':''}><b>${c}</b></td>`).join('')}</tr></tfoot>`:''}</table>`;
+  $('rcPos').innerHTML=tab(['Situação','Títulos','Em aberto','%'],[['Vencidos',int(V.length),brl(soma(V)),pct(soma(V)/tot)],['A vencer',int(A.length),brl(soma(A)),pct(soma(A)/tot)]],['Total',int(ts.length),brl(soma(ts)),'100%']);
+  const FXS=['1 a 30 dias','31 a 60 dias','61 a 90 dias','Mais de 90 dias'];
+  $('rcFx').innerHTML=tab(['Faixa','Títulos','Vencido','%'],FXS.map(f=>{ const g=V.filter(t=>t.faixa===f); return [f,int(g.length),brl(soma(g)),pct(soma(g)/totV)]; }),['Total vencido',int(V.length),brl(soma(V)),'100%']);
+  const ref=$('rcRef').value, dia=(n)=>new Date(Date.parse(ref)+n*864e5).toISOString().slice(0,10);
+  const sem=[['Hoje ('+dataBR(ref).slice(0,5)+')',ref,ref],[`${dataBR(dia(1)).slice(0,5)} a ${dataBR(dia(7)).slice(0,5)}`,dia(1),dia(7)],[`${dataBR(dia(8)).slice(0,5)} a ${dataBR(dia(14)).slice(0,5)}`,dia(8),dia(14)],[`${dataBR(dia(15)).slice(0,5)} a ${dataBR(dia(30)).slice(0,5)}`,dia(15),dia(30)],['Depois de '+dataBR(dia(30)).slice(0,5),dia(31),'9999']];
+  $('rcSem').innerHTML=tab(['Período','Títulos','A vencer','%'],sem.map(([r,a,b])=>{ const g=A.filter(t=>t.venc>=a&&t.venc<=b); return [r,int(g.length),brl(soma(g)),pct(soma(g)/totA)]; }),['Total a vencer',int(A.length),brl(soma(A)),'100%']);
+  const acs=RC.g.acoes||[]; $('rcAcoes').innerHTML=tab(['Ação','Títulos vencidos','Vencido','A vencer'],acs.map(a=>{ const g=ts.filter(t=>t.acao===a); return [a,int(g.filter(t=>t.vencido).length),brl(soma(g.filter(t=>t.vencido))),brl(soma(g.filter(t=>!t.vencido)))]; }),['Total',int(V.length),brl(soma(V)),brl(soma(A))])
+    +`<div class="dica-c" style="margin-top:6px">Vencido a cobrar de fato (Cobrar cliente + Confirmar com o comercial): <b>${brl(soma(V.filter(t=>['Cobrar cliente','Confirmar com o comercial'].includes(t.acao))))}</b>. O restante do vencido é ajuste, conciliação ou baixa de resíduo, sem cobrança ao cliente. Ação em cinza = sugerida pelo painel (ainda não definida).</div>`;
+  const pc=new Map(); V.forEach(t=>{ const g=pc.get(t.cliente)||{n:0,v:0}; g.n++; g.v+=t.aberto; pc.set(t.cliente,g); }); const top=[...pc.entries()].sort((a,b)=>b[1].v-a[1].v).slice(0,15);
+  $('rcTop').innerHTML=tab(['Cliente','Títulos vencidos','Vencido','% dos vencidos'],top.map(([c,g])=>[esc(c),int(g.n),brl(g.v),pct(g.v/totV)]),['Total dos 15 maiores',int(top.reduce((s2,x)=>s2+x[1].n,0)),brl(top.reduce((s2,x)=>s2+x[1].v,0)),pct(top.reduce((s2,x)=>s2+x[1].v,0)/totV)]);
+  const fs=$('rcSit').value, fa=$('rcAc').value; const lt=ts.filter(t=>(!fs||(fs==='v')===t.vencido)&&(!fa||t.acao===fa)).sort((a,b)=>b.dias-a.dias||a.venc.localeCompare(b.venc));
+  RC.lt=lt; const ed=RC.g.pode_editar;
+  $('rcTit').innerHTML=lt.length?`<table><thead><tr><th>Situação</th><th class="v">Dias</th><th>Cliente</th><th>Venda</th><th>Parcela</th><th>Vencimento</th><th class="v">Valor</th><th class="v">Recebido</th><th class="v">Em aberto</th><th>Vendedor</th><th>Ação</th><th>Observações</th><th>Decisão na reunião</th><th>Responsável</th></tr></thead><tbody>${lt.map((t,i)=>`<tr><td class="${t.vencido?'sv':'sa'}">${t.vencido?'Vencido':'A vencer'}<div class="dica-c">${t.vencido?t.faixa:''}</div></td><td class="v">${t.dias||''}</td><td${t.info?` data-dica="${esc(t.info)}"`:''}>${esc(t.cliente)}${t.info?' <i class="dica-i">ⓘ</i>':''}</td><td>${esc(t.venda)}</td><td>${esc(t.parcela)}</td><td>${dataBR(t.venc)}</td><td class="v">${brl2(t.valor)}</td><td class="v">${t.recebido?brl2(t.recebido):''}</td><td class="v"><b>${brl2(t.aberto)}</b></td><td>${esc(t.vendedor)}</td><td class="${ed?'ed':''}" data-rc="${i}|acao"${t.acaoSug?' style="color:var(--ink3)"':''}>${esc(t.acao)}</td><td class="${ed?'ed':''}" data-rc="${i}|obs" style="min-width:240px;white-space:normal">${esc(t.obs)}</td><td class="${ed?'ed':''}" data-rc="${i}|decisao" style="min-width:160px;white-space:normal">${esc(t.decisao)}</td><td class="${ed?'ed':''}" data-rc="${i}|resp">${esc(t.resp)}</td></tr>`).join('')}</tbody><tfoot><tr class="tot"><td colspan="6"><b>${int(lt.length)} títulos</b></td><td class="v"><b>${brl2(lt.reduce((s2,t)=>s2+t.valor,0))}</b></td><td class="v"><b>${brl2(lt.reduce((s2,t)=>s2+t.recebido,0))}</b></td><td class="v"><b>${brl2(soma(lt))}</b></td><td colspan="5"></td></tr></tfoot></table>`:vazio('Nenhum título em aberto com esses filtros.');
+  if(ed) $('rcTit').querySelectorAll('td.ed').forEach(td=>td.onclick=()=>editarRc(td));
+  const dn=(RC.g.dni||[]).filter(x=>$('rcDniTodos').checked||!x.conciliado);
+  $('rcDni').innerHTML=dn.length?`<table><thead><tr><th>Conciliado</th><th>Origem</th><th>Conta</th><th>Data</th><th class="v">Valor</th><th>Pagador / descrição</th><th>Possível título</th></tr></thead><tbody>${dn.map(x=>`<tr${x.conciliado?' style="opacity:.55"':''}><td><input type="checkbox" data-dni="${x.id}"${x.conciliado?' checked':''}${ed?'':' disabled'}></td><td>${esc(x.origem)}</td><td>${esc(x.conta)}</td><td>${dataBR(x.data)}</td><td class="v">${brl2(+x.valor||0)}</td><td>${esc(x.pagador)}</td><td class="${ed?'ed':''}" data-dnit="${x.id}" style="white-space:normal;min-width:200px">${esc(x.titulo||'')}</td></tr>`).join('')}</tbody><tfoot><tr class="tot"><td colspan="4"><b>${int(dn.length)} lançamentos</b></td><td class="v"><b>${brl2(dn.reduce((s2,x)=>s2+(+x.valor||0),0))}</b></td><td colspan="2"></td></tr></tfoot></table>`:vazio('Nenhum recebimento sem cliente identificado.');
+  $('rcDni').querySelectorAll('[data-dni]').forEach(c=>c.onchange=async()=>{ try{ const r=await api('/api/receber/dni',{method:'POST',body:JSON.stringify({id:c.dataset.dni,conciliado:c.checked})}); Object.assign(RC.g.dni.find(x=>x.id===c.dataset.dni),r.dni); desenharCobranca(); }catch(e){ toast(e.message,true); } });
+  if(ed) $('rcDni').querySelectorAll('[data-dnit]').forEach(td=>td.onclick=()=>{ const x=RC.g.dni.find(y=>y.id===td.dataset.dnit); editarTexto(td,x.titulo||'',async v=>{ const r=await api('/api/receber/dni',{method:'POST',body:JSON.stringify({id:x.id,titulo:v})}); Object.assign(x,r.dni); }); });
+}
+function editarTexto(td,valor,salvar,opcoes){ if(td.querySelector('input,select,textarea')) return; const el=opcoes?document.createElement('select'):document.createElement('textarea');
+  if(opcoes){ el.innerHTML=opcoes.map(o=>`<option${o===valor?' selected':''}>${esc(o)}</option>`).join(''); } else { el.value=valor; el.rows=3; el.style.width='100%'; }
+  td.textContent=''; td.appendChild(el); el.focus();
+  const fim=async(ok)=>{ const v=el.value; if(ok&&v!==valor){ try{ await salvar(v); toast('Salvo.'); }catch(e){ toast(e.message,true); } } desenharCobranca(); };
+  el.onblur=()=>fim(true); el.onkeydown=e=>{ if(e.key==='Escape'){ el.onblur=null; fim(false); } if(e.key==='Enter'&&(opcoes||!e.shiftKey)){ e.preventDefault(); el.onblur=null; fim(true); } }; if(opcoes) el.onchange=()=>{ el.onblur=null; fim(true); }; }
+function editarRc(td){ const [i,c]=td.dataset.rc.split('|'), t=RC.lt[+i];
+  editarTexto(td,t[c],async v=>{ const r=await api('/api/receber/titulo',{method:'POST',body:JSON.stringify({chave:t.chave,[c]:v})}); RC.g.anot[t.chave]=r.anot; },c==='acao'?RC.g.acoes:null); }
+['rcRef','rcVend','rcSit','rcAc','rcDniTodos'].forEach(id=>$(id).addEventListener('change',()=>desenharCobranca())); $('rcCli').addEventListener('input',()=>desenharCobranca());
+$('rcExp').onclick=()=>{ const lt=RC.lt||[]; baixarCsv('contas_a_receber_'+($('rcRef').value||hojeISO()),['Situação','Dias de atraso','Faixa','Cliente','Venda','Parcela','Vencimento','Valor','Recebido','Em aberto','Vendedor','Ação','Observações','Decisão na reunião','Responsável'],lt.map(t=>[t.vencido?'Vencido':'A vencer',t.dias,t.faixa,t.cliente,t.venda,t.parcela,dataBR(t.venc),t.valor,t.recebido,t.aberto,t.vendedor,t.acao,t.obs,t.decisao,t.resp])); };
 
 // ---------- contas a pagar e despesas ----------
 function pgPagar(){
@@ -2252,8 +2326,13 @@ const PED={d:null,carr:null,mes:null,vend:'',inVend:null,inTipo:'',busca:'',fil:
 const COLS_PED=[['data','Data da venda','data'],['mes','Mês','ro'],['codigo','Cód. interno','texto'],['cliente','Cliente','texto','dlCliente'],['lote','Lote / obs. do cliente','texto'],['nome_pedido','Nome do pedido (Trello)','texto'],['vendedor','Vendedor','texto','dlVendedor'],['tipo_venda','Tipo de venda','sel:|B2B|B2C'],['novo_recompra','Cliente novo ou recompra?','sel:|novo|recompra'],['segmento','Segmento','texto','dlSegmento'],['tipo_produto','Tipo de produto','texto','dlProduto'],['material','Material','texto','dlMaterial'],['especificacao','Especificação','texto','dlEspec'],['quantidade','Quantidade','num'],['cor','Cor','texto','dlCor'],['valor_unit','Valor/und','brl'],['total','Total','brl'],['pag1','1º pagamento','pag'],['pag2','2º pagamento','pag'],['pag3','3º pagamento em diante','pag'],['pago_100','Pedido 100% pago','bool'],['falta_receber','Falta receber','ro'],['prazo_entrega','Prazo de entrega','data'],['forma_pagamento','Forma de pagamento','texto','dlForma'],['parcelas','Parcelas','sel:1|2|3|4|5|6|7|8|9|10|11|12|P'],['pagador','Nome pagador (comprovante)','texto'],['observacao','Observação','texto'],['pct_premiacao','Premiação % (manual)','num'],['mes_premiacao','Mês da premiação (manual)','mes'],['obs_premiacao','Motivo do % diferente','texto']];
 const ROT_PED=Object.fromEntries(COLS_PED.map(c=>[c[0],c[1]]));
 // subtotal das linhas visíveis na Planilha de vendas (quantidade e total)
-function rodapeSub(rows){ if(!rows.length) return ''; const soma=k=>rows.reduce((a,r)=>a+(Number(r[k])||0),0);
-  return `<tfoot><tr class="tot"><td class="ac"></td>${COLS_PED.map(([c,,t])=>`<td class="${t==='brl'||t==='num'?'v':''}">${c==='cliente'?`<b>Subtotal · ${int(rows.length)} linhas</b>`:c==='quantidade'?int(soma('quantidade')):c==='total'?brl(soma('total')):''}</td>`).join('')}<td colspan="3"></td></tr></tfoot>`; }
+function rodapeSub(rows,grupos,ca){ if(!rows.length) return ''; const soma=k=>rows.reduce((a,r)=>a+(Number(r[k])||0),0);
+  // por pedido (código): 1º/2º/3º pagamento como aparecem na grade (anotado na planilha ou, em branco, o recebido na Conta Azul), falta receber, planilha e sistema
+  const cods=[...new Set(rows.filter(r=>r.codigo).map(r=>ckey(r.codigo)))]; const pg=[0,0,0]; let falta=0, plan=0, sis=0;
+  ['pag1','pag2','pag3'].forEach((c,i)=>{ const vistos=new Set(); for(const r of rows){ const v=+r[c]||0; if(v){ pg[i]+=v; continue; } if(!r.codigo) continue; const k=ckey(r.codigo); if(vistos.has(k)) continue; vistos.add(k); const p=parcelasDe(r.codigo)[i]; if(p&&p.pago>0) pg[i]+=p.pago; } });
+  for(const k of cods){ const g=grupos?.get(k); if(!g) continue; plan+=g.t; falta+=faltaPed(g.codigo,g.t).falta; const v=ca?.get(k); if(v) sis+=v.t; }
+  const cel=(c)=>c==='cliente'?`<b>Subtotal · ${int(rows.length)} linhas</b>`:c==='quantidade'?int(soma('quantidade')):c==='total'?brl(soma('total')):c==='pag1'?brl(pg[0]):c==='pag2'?brl(pg[1]):c==='pag3'?(pg[2]?brl(pg[2]):''):c==='falta_receber'?(grupos?`<b>${brl(falta)}</b>`:''):'';
+  return `<tfoot><tr class="tot"><td class="ac"></td>${COLS_PED.map(([c,,t])=>`<td class="${t==='brl'||t==='num'||t==='pag'||c==='falta_receber'?'v':''}" ${c==='pag2'?`title="1º + 2º pagamento = ${brl(pg[0]+pg[1])}"`:''}>${cel(c)}</td>`).join('')}${grupos?`<td class="v"><b>${brl(plan)}</b></td><td class="v"><b>${brl(sis)}</b></td><td class="v" title="Sistema − planilha">${brl(sis-plan)}</td>`:'<td colspan="3"></td>'}</tr>${grupos?`<tr class="tot"><td class="ac"></td>${COLS_PED.map(([c])=>`<td class="v">${c==='pag2'?`<span class="dica-c">1º + 2º = </span><b>${brl(pg[0]+pg[1])}</b>`:''}</td>`).join('')}<td colspan="3"></td></tr>`:''}</tfoot>`; }
 const REQ_PED=['cliente','vendedor','tipo_venda','novo_recompra','tipo_produto','material','cor','quantidade','total'];
 const DESDE=()=>E.dados?.detalhe_desde||'2026-08';
 const DESDE_COD='2026-09';
@@ -2419,7 +2498,7 @@ function pgRegistro(){
     html+=`<tr data-id="${r.id}" class="${prim?'g1':''}${r.id===PED.flash?' novo-flash':''}"><td class="ac">${ac}</td>${cel}${sys}</tr>`;
   }
   const g0=$('pdGrade'), st={t:g0.scrollTop,l:g0.scrollLeft};
-  g0.innerHTML=vis.length?`<table><thead><tr><th class="ac"></th>${COLS_PED.map(([c,rot,t])=>`<th class="${t==='brl'||t==='num'||t==='pag'?'v':''}">${rot}</th>`).join('')}<th class="v">Planilha (pedido)</th><th class="v">Sistema (Conta Azul)</th><th>Divergência</th></tr></thead><tbody>${html}</tbody>${rodapeSub(vis)}</table>`
+  g0.innerHTML=vis.length?`<table><thead><tr><th class="ac"></th>${COLS_PED.map(([c,rot,t])=>`<th class="${t==='brl'||t==='num'||t==='pag'?'v':''}">${rot}</th>`).join('')}<th class="v">Planilha (pedido)</th><th class="v">Sistema (Conta Azul)</th><th>Divergência</th></tr></thead><tbody>${html}</tbody>${rodapeSub(vis,grupos,ca)}</table>`
     :`<table><thead><tr><th class="ac"></th>${COLS_PED.map(([c,rot,t])=>`<th class="${t==='brl'||t==='num'||t==='pag'?'v':''}">${rot}</th>`).join('')}<th class="v">Planilha (pedido)</th><th class="v">Sistema (Conta Azul)</th><th>Divergência</th></tr></thead><tbody><tr><td class="ac"></td><td colspan="${COLS_PED.length+3}" style="padding:22px 12px;white-space:normal">${regs.length?'Nenhuma linha com esses filtros.':`<b>A planilha de vendas ainda está vazia.</b> ${P.importar?'Clique em <b>Importar base</b> para trazer janeiro a outubro da planilha do comercial'+(d.planilha_conectada?'':' (arquivo .xlsx, ou ligue a planilha em Controle → Planilha × sistema)')+'. ':''}${P.lancar?'Para lançar uma venda nova, use <b>+ Novo pedido</b>.':''}`}</td></tr></tbody></table>`;
   g0.scrollTop=st.t; g0.scrollLeft=st.l; PED.flash=null;
   $('pdNota').innerHTML=(vis.length>LIM?`Mostrando as primeiras ${int(LIM)} de ${int(vis.length)} linhas; escolha um mês ou busque. `:'')+`<b>Sistema</b> = valor da venda na Conta Azul com o mesmo código (cód. interno = número da venda). <b>CA</b> = pagamento preenchido pela Conta Azul; passe o mouse em 1º/2º pagamento para ver data da baixa e banco${d.pagamentos?.erro?` (pagamentos indisponíveis: ${esc(d.pagamentos.erro)})`:''}.`;

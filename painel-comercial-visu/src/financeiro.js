@@ -253,7 +253,7 @@ function montar(b, fonte) {
     indicadores: indicadores(estrutura, lComp, meses),
     det_competencia: detalhar(comp.filter((x) => meses.includes((x.competencia || '').slice(0, 7))), 'total', 'competencia', classificador(estrutura)),
     det_caixa: detalhar(pagas, 'pago', 'mes_pag', classificador(estrutura)),
-    det_abertos: abertos.map((x) => [x.tipo === 'receber' ? 'r' : 'p', x.vencimento, x.pessoa || '', x.descricao || '', x.categorias[0]?.nome || '', r2(x.aberto), r2(x.total)]),
+    det_abertos: abertos.map((x) => [x.tipo === 'receber' ? 'r' : 'p', x.vencimento, x.pessoa || '', x.descricao || '', x.categorias[0]?.nome || '', r2(x.aberto), r2(x.total), x.id || '', r2(x.pago || 0)]),
     indicadores_caixa: indicadores(estrutura, lCaixa, meses),
     primeiro_mes_despesas: meses.find((m) => Math.abs(lComp.filter((x) => x.tipo === 'pagar' && x.mes === m).reduce((s, x) => s + x.valor, 0)) > 0.25 * Math.max(1, Math.abs(lComp.filter((x) => x.tipo === 'receber' && x.mes === m).reduce((s, x) => s + x.valor, 0)))) || null,
   };

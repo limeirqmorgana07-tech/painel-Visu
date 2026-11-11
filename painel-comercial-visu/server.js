@@ -9,6 +9,7 @@ import * as ca from './src/contaAzul.js';
 import { dadosDeVendas, faixasComissao, FAIXAS_PADRAO, remontarVendas, vendasContaAzulEmCache } from './src/vendas.js';
 import * as pedidos from './src/pedidos.js';
 import * as anexos from './src/anexos.js';
+import * as receber from './src/receber.js';
 import * as notasCA from './src/notasCA.js';
 import { dadosFinanceiros } from './src/financeiro.js';
 import { planilhaConfigurada } from './src/planilha.js';
@@ -453,6 +454,11 @@ app.get('/api/anexos/:aid', exigeLogin, async (req, res) => {
     res.send(a.dados);
   } catch (e) { res.status(500).send(e.message); }
 });
+// Contas a receber · gestão da cobrança: anotações por título e DNIs (leitura: quem vê o Financeiro; edição: ADM, diretores e financeiro)
+const podeCobranca = (u) => ['adm', 'diretor', 'financeiro'].includes(u?.perfil);
+app.get('/api/receber/gestao', exigeLogin, resp(async (req) => ({ ...(await receber.lerGestao()), acoes: receber.ACOES, pode_editar: podeCobranca(req.usuario) })));
+app.post('/api/receber/titulo', exigeLogin, resp(async (req) => { if (!podeCobranca(req.usuario)) throw new Error('Só ADM, diretores e financeiro editam a cobrança.'); return { anot: await receber.salvarTitulo(req.body || {}, req.usuario) }; }));
+app.post('/api/receber/dni', exigeLogin, resp(async (req) => { if (!podeCobranca(req.usuario)) throw new Error('Só ADM, diretores e financeiro editam a cobrança.'); return { dni: await receber.salvarDni(req.body || {}, req.usuario) }; }));
 app.post('/api/pedidos/:id/solicitar', exigeLogin, exigePedidos, resp(async (req) => ({ registro: await pedidos.solicitarAlteracao(req.params.id, req.body || {}, req.usuario) })));
 app.post('/api/pedidos/:id/responder', exigeLogin, exigePedidos, resp(async (req) => { const r = await pedidos.responderSolicitacao(req.params.id, req.body || {}, req.usuario); depoisDeMudar(); return { registro: r }; }));
 app.delete('/api/pedidos/:id', exigeLogin, exigePedidos, resp(async (req) => { await pedidos.excluir(req.params.id, req.usuario); depoisDeMudar(); return { ok: true }; }));
