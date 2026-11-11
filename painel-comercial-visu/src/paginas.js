@@ -7,7 +7,7 @@ export const MENU = [
   { grupo: 'Conferência', itens: [['inconsistencias', 'Inconsistências'], ['divergencias', 'Divergências'], ['historico', 'Histórico de alterações']] },
   { grupo: 'Financeiro', itens: [['dre', 'DRE gerencial'], ['equilibrio', 'Margem e ponto de equilíbrio'], ['caixa', 'Fluxo de caixa'], ['receber', 'Contas a receber'], ['pagar', 'Contas a pagar'], ['extrato', 'Conciliação bancária']] },
   { grupo: 'Controle', itens: [['conciliacao', 'Planilha × sistema (mês)'], ['dados', 'Qualidade dos dados'], ['versoes', 'Versões do painel']] },
-  { grupo: 'Administração', itens: [['usuarios', 'Usuários e permissões']] },
+  { grupo: 'Administração', itens: [['usuarios', 'Usuários e permissões'], ['acessos', 'Acessos ao painel']] },
 ];
 export const TODAS = MENU.flatMap((g) => g.itens.map((i) => i[0]));
 const COM = ['vendas', 'produtos', 'clientes', 'vendedores', 'pedidos'];
@@ -15,7 +15,7 @@ const FIN = ['dre', 'equilibrio', 'caixa', 'receber', 'pagar', 'extrato'];
 const PADRAO_BASE = {
   adm: TODAS,
   // diretores criam o acesso dos vendedores (09/11/2026)
-  diretor: TODAS,
+  diretor: TODAS.filter((p) => p !== 'acessos'),
   // reunião de 03/11/2026: vendedores lançam os pedidos no painel e veem a conciliação; o histórico fica com a gestão
   comercial: ['registro', ...COM, 'aprovacoes', 'inconsistencias', 'conciliacao', 'versoes', 'treinamento'],
   financeiro: ['painel', 'indicadores', 'registro', ...FIN, 'inconsistencias', 'divergencias', 'historico', 'conciliacao', 'dados', 'versoes', 'treinamento'],
@@ -26,7 +26,7 @@ const PADRAO_BASE = {
 };
 // O ADM pode mudar o que cada perfil vê (vale para todas as pessoas daquele perfil). Guardado na chave perfis_paginas.
 let personalizado = {};
-const LIBERAVEIS = TODAS.filter((p) => p !== 'usuarios');
+const LIBERAVEIS = TODAS.filter((p) => p !== 'usuarios' && p !== 'acessos');
 const NOVAS_V31 = ['registro', 'inconsistencias', 'historico'];
 const NOVAS_V43 = ['extrato'];
 // v56: Divergências (Conferência) e Treinamento entram nas listas salvas antes, conforme o padrão do perfil
@@ -40,7 +40,8 @@ export function definirPerfis(o) {
   for (const [k, v] of Object.entries(o || {})) if (k !== 'adm' && PADRAO_BASE[k] && Array.isArray(v)) personalizado[k] = [...new Set([...v, ...(antiga ? NOVAS_V31.filter((p) => PADRAO_BASE[k].includes(p) && !v.includes(p)) : []), ...(antes43 ? NOVAS_V43.filter((p) => PADRAO_BASE[k].includes(p)) : []), ...(antes56 ? NOVAS_V56.filter((p) => PADRAO_BASE[k].includes(p)) : []), ...(antes73 ? NOVAS_V73.filter((p) => PADRAO_BASE[k].includes(p)) : [])])].filter((p) => LIBERAVEIS.includes(p));
 }
 export const perfisPersonalizados = () => ({ ...personalizado, _v31: true, _v43: true, _v56: true, _v73: true });
-export const padraoDe = (perfil) => (perfil === 'adm' ? TODAS : perfil === 'diretor' && personalizado.diretor?.length ? [...personalizado.diretor, 'usuarios'] : personalizado[perfil]?.length ? personalizado[perfil] : PADRAO_BASE[perfil] || []);
+export const padraoDe = (perfil) => (perfil === 'adm' ? TODAS : padraoDe0(perfil).filter((p) => p !== 'acessos'));
+const padraoDe0 = (perfil) => (perfil === 'diretor' && personalizado.diretor?.length ? [...personalizado.diretor, 'usuarios'] : personalizado[perfil]?.length ? personalizado[perfil] : PADRAO_BASE[perfil] || []);
 export const PADRAO = new Proxy({}, { get: (_, k) => padraoDe(k), ownKeys: () => Object.keys(PADRAO_BASE), getOwnPropertyDescriptor: () => ({ enumerable: true, configurable: true }) });
 export const padroesOriginais = () => ({ ...PADRAO_BASE });
 

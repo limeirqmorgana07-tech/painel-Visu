@@ -11,6 +11,7 @@ import * as pedidos from './src/pedidos.js';
 import * as anexos from './src/anexos.js';
 import * as receber from './src/receber.js';
 import * as notasCA from './src/notasCA.js';
+import * as acessos from './src/acessos.js';
 import { dadosFinanceiros } from './src/financeiro.js';
 import { planilhaConfigurada } from './src/planilha.js';
 import * as google from './src/google.js';
@@ -90,6 +91,7 @@ app.post('/login', async (req, res) => {
   if (!u) return res.status(401).send(paginaLogin(r.erro || 'E-mail ou senha incorretos.', email));
   gravarCookie(req, res, usuarios.cookieDeSessao(u));
   if (u.id !== '__admin') usuarios.registrarAcesso(u.id);
+  acessos.registrar(u, 'login', req).catch(() => {});
   res.redirect(u.temporaria ? '/trocar-senha' : '/');
 });
 app.get('/sair', (req, res) => {
@@ -145,7 +147,7 @@ app.post('/convite/:token', async (req, res) => {
 
 // ---------- usuários (perfil ADM) ----------
 app.use(express.json());
-app.get('/api/eu', exigeLogin, async (req, res) => res.json({ id: req.usuario.id, nome: req.usuario.nome, email: req.usuario.email || '', perfil: req.usuario.perfil, paginas: paginasDe(req.usuario), perfis: { diretor: padraoDe('diretor'), comercial: padraoDe('comercial'), financeiro: padraoDe('financeiro'), consultor: padraoDe('consultor'), vendedor: padraoDe('vendedor') }, vendedor: req.usuario.vendedor || '', perfis_originais: padroesOriginais(), blocos: blocosDe(req.usuario.perfil), blocos_def: BLOCOS, blocos_perfis: req.usuario.perfil === 'adm' ? Object.fromEntries(['diretor', 'comercial', 'financeiro', 'consultor', 'vendedor'].map((k) => [k, blocosDe(k)])) : undefined, blocos_padrao: req.usuario.perfil === 'adm' ? blocosPadrao() : undefined, visual_padrao: (await lerKV('visual_padrao').catch(() => null)) || null }));
+app.get('/api/eu', exigeLogin, async (req, res, next) => { acessos.registrar(req.usuario, 'abriu', req).catch(() => {}); next(); }, async (req, res) => res.json({ id: req.usuario.id, nome: req.usuario.nome, email: req.usuario.email || '', perfil: req.usuario.perfil, paginas: paginasDe(req.usuario), perfis: { diretor: padraoDe('diretor'), comercial: padraoDe('comercial'), financeiro: padraoDe('financeiro'), consultor: padraoDe('consultor'), vendedor: padraoDe('vendedor') }, vendedor: req.usuario.vendedor || '', perfis_originais: padroesOriginais(), blocos: blocosDe(req.usuario.perfil), blocos_def: BLOCOS, blocos_perfis: req.usuario.perfil === 'adm' ? Object.fromEntries(['diretor', 'comercial', 'financeiro', 'consultor', 'vendedor'].map((k) => [k, blocosDe(k)])) : undefined, blocos_padrao: req.usuario.perfil === 'adm' ? blocosPadrao() : undefined, visual_padrao: (await lerKV('visual_padrao').catch(() => null)) || null }));
 // o que cada perfil vê (ADM edita em Usuários e permissões)
 app.post('/api/perfis', exigeAdm, async (req, res) => {
   const atual = perfisPersonalizados();
@@ -209,6 +211,9 @@ async function podeGerirUsuario(eu, id, perfilNovo) {
 }
 const SO_ADM_USU = 'Diretores cadastram e cuidam só do acesso de Vendedor, Comercial e Consultor externo. Para os outros perfis, fale com o ADM.';
 app.get('/api/usuarios', exigeGestorUsuarios, async (req, res) => res.json({ usuarios: await usuarios.listar(), perfis: usuarios.PERFIS, perfis_permitidos: req.usuario.perfil === 'adm' ? Object.keys(usuarios.PERFIS) : PERFIS_DIRETOR, banco: await usuarios.bancoConfigurado(), banco_status: await statusBanco().catch((e) => ({ erro: e.message })) }));
+// v90: acessos ao painel (só ADM)
+app.post('/api/acesso', exigeLogin, (req, res) => { acessos.registrar(req.usuario, 'pagina', req, String(req.body?.pagina || '')).catch(() => {}); res.json({ ok: true }); });
+app.get('/api/acessos', exigeAdm, async (req, res) => { try { res.json({ acessos: await acessos.listar(req.query.dias), usuarios: (await usuarios.listar()).map((u) => ({ id: u.id, nome: u.nome, perfil: u.perfil, ultimo_acesso: u.ultimo_acesso || null })) }); } catch (e) { res.status(500).json({ erro: e.message }); } });
 // v89: "Ver o painel como" uma pessoa: exatamente as páginas, blocos e funções que o servidor dá a ela
 app.get('/api/usuarios/:id/visao', exigeAdm, async (req, res) => {
   try {

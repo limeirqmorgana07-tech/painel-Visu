@@ -1,6 +1,6 @@
 // Pedidos lançados no painel → vendas na Conta Azul (definido com a Visu em 08/11/2026):
 // item = o tipo de produto escolhido no lançamento (produto com esse nome na Conta Azul; se não existir, é criado),
-// condição de pagamento do campo Parcelas (padrão 50% + 50%, 2x; também à vista ou 3x ou mais), situação "em andamento", número da venda = código interno do pedido.
+// condição de pagamento do campo Parcelas (padrão 50% + 50%, 2x; também à vista ou 3x ou mais), situação "aprovado" (desde a v91; antes "em andamento"), número da venda = código interno do pedido.
 // Só vão os pedidos lançados no painel (os importados da planilha já são lançados na Conta Azul pela equipe).
 // Pedido complementar (código com -1, -2…): vai como venda própria, com o sufixo colado no número (0021112026-1 → 211120261).
 import * as ca from './contaAzul.js';
@@ -54,7 +54,8 @@ export function corpoVenda(linhas, { idCliente, idVendedor, produtoDe }) {
   const corpo = {
     id_cliente: idCliente,
     numero: pedidos.numeroParaCA(c.codigo),
-    situacao: 'EM_ANDAMENTO',
+    // v91: os pedidos já chegam aprovados pela gestão (cotação e aprovação no CRM): a venda entra APROVADA na Conta Azul
+    situacao: 'APROVADO',
     data_venda: c.data,
     itens,
     condicao_pagamento: { opcao_condicao_pagamento: opcaoCondicao(c.parcelas, c.parcelas_pers), parcelas: parcelasPedido(c.parcelas, total, c.data, c.prazo_entrega, c.parcelas_pers), ...(tp ? { tipo_pagamento: tp } : {}) },
