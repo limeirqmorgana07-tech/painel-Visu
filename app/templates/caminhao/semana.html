@@ -1,0 +1,245 @@
+{% extends "base.html" %}
+{% block titulo %}Planejamento do caminhão{% endblock %}
+{% block ctx %}Logística · abra a vaga do caminhão no dia (em branco ou já com a obra) e arraste para dentro a solicitação quando ela chegar{% endblock %}
+{% block conteudo %}
+{% set volta = request.full_path %}
+{% set dias = f.dias %}
+<form method="get" class="card bi-filtros no-print" style="align-items:flex-end;">
+  <a class="btn ghost" href="{{ url_for('caminhao.semana', **args(f, semana=(f.seg - timedelta(days=7)).isoformat(), de=None, ate=None)) }}">‹ Semana anterior</a>
+  <div class="field"><label>Semana de</label><input type="date" name="semana" value="{{ f.seg.isoformat() }}" onchange="this.form.de.value=''; this.form.ate.value=''; this.form.submit()"></div>
+  <a class="btn ghost" href="{{ url_for('caminhao.semana', **args(f, semana=(f.seg + timedelta(days=7)).isoformat(), de=None, ate=None)) }}">Próxima semana ›</a>
+  <div class="field"><label>De</label><input type="date" name="de" value="{{ f.de.isoformat() if f.periodo else '' }}"></div>
+  <div class="field"><label>Até</label><input type="date" name="ate" value="{{ f.ate.isoformat() if f.periodo else '' }}"></div>
+  <div class="field"><label>Encarregado</label><select name="enc" onchange="this.form.submit()"><option value="">Todos</option>{% for e in encs %}<option value="{{ e.id }}" {{ 'selected' if f.enc_id == e.id }}>{{ e.nome }}</option>{% endfor %}</select></div>
+  <div class="field" style="min-width:220px;"><label>Obra</label><select name="obra" data-busca="Digite o nome da obra…" onchange="this.form.submit()"><option value="">Todas</option>{% for o in todas_obras %}<option value="{{ o.id }}" {{ 'selected' if f.obra_id == o.id }}>{{ o.nome }}</option>{% endfor %}</select></div>
+  <div class="field"><label>Mostrar</label><div style="display:flex;gap:6px;flex-wrap:wrap;">{% for k, r in ROTULOS.items() if k != 'fixa' %}<label class="pl-cb small"><input type="checkbox" name="tipo" value="{{ k }}" {{ 'checked' if k in f.tipos }}> {{ r }}</label>{% endfor %}</div></div>
+  <label class="pl-cb" style="align-self:center;"><input type="checkbox" name="dom" value="1" {{ 'checked' if f.dom }}> com domingo</label>
+  <div class="field"><label>Busca rápida</label><input type="search" name="q" id="busca" value="{{ f.q }}" placeholder="obra, nº, encarregado…"></div>
+  <button class="btn ghost" style="align-self:flex-end;">Filtrar</button>
+  {% if f.periodo or f.q or f.obra_id or f.enc_id %}<a class="btn ghost" style="align-self:flex-end;" href="{{ url_for('caminhao.semana', enc='') }}">✕ limpar</a>{% endif %}
+  <span class="small muted" style="align-self:center;">{{ dias[0].strftime('%d/%m') }} a {{ dias[-1].strftime('%d/%m/%Y') }}{{ ' · período' if f.periodo }} · {{ total }} item(ns)</span>
+</form>
+<div class="btn-row no-print" style="margin:8px 0;">
+  <a class="btn sm primary" href="{{ url_for('caminhao.whatsapp', **args(f)) }}">📲 Enviar pelo WhatsApp</a>
+  <a class="btn sm" target="_blank" href="{{ url_for('caminhao.pdf', **args(f)) }}">📄 PDF</a>
+  <a class="btn sm" href="{{ url_for('caminhao.excel', **args(f)) }}">📊 Excel</a>
+  <button type="button" class="btn ghost sm" onclick="window.print()">🖨 Imprimir</button>
+</div>
+{% if editar %}
+<div class="pg-paleta no-print" id="paleta">
+  <b class="small" style="margin-right:4px;">Arraste para o dia (ou toque e depois toque no dia):</b>
+  <span class="pl-chip" draggable="true" data-acao="vaga" style="background:#fff; color:#00304E; border:2px dashed #00304E;" title="Pré-reserva o caminhão no dia; a obra ou a solicitação entra depois">⬜ Vaga em branco</span>
+  {% for e, obs in grupos %}{% for o in obs|sort(attribute='nome') %}<span class="pl-chip" draggable="true" data-obra="{{ o.id }}" data-nome="{{ o.nome }}" style="background:{{ o.cor_final }}; color:{{ contraste(o.cor_final) }};">{{ o.nome }}</span>{% endfor %}{% endfor %}
+  {% for o in antigas %}<span class="pl-chip cm-antiga" draggable="true" data-obra="{{ o.id }}" data-nome="{{ o.nome }}" style="display:none; background:#E5E7EB; color:#334155; border:1px dashed #64748B;" title="Obra concluída / inativa — aparece só na busca">{{ o.nome }} (antiga)</span>{% endfor %}
+  <span class="pl-chip" data-acao="apagar" style="background:#fff; color:#B91C1C; border-color:#FCA5A5;" title="Toque na vaga ou na solicitação encaixada para tirar">✕ Tirar</span>
+  <input type="search" id="buscaObra" placeholder="procurar obra (inclui antigas)…" style="max-width:160px; margin-left:6px;">
+</div>
+{% endif %}
+<div style="display:flex; gap:10px; align-items:flex-start;">
+<div class="pl-wrap" style="flex:1; min-width:0;">
+<table class="pg" id="grade">
+  <thead><tr>{% for d in dias %}<th class="{{ 'hoje' if d == hoje }}" style="min-width:150px;">{{ DIAS[d.weekday()] }} {{ d.strftime('%d/%m') }}</th>{% endfor %}</tr></thead>
+  <tbody><tr>
+    {% for d in dias %}<td class="cm-cel{{ ' fds' if d.weekday() >= 5 }}" data-data="{{ d.isoformat() }}" style="vertical-align:top; min-height:240px; height:240px; cursor:{{ 'copy' if editar else 'default' }};{{ 'background:#FEFCE8;' if d == hoje }}">
+      {% for it in grade.get(d, []) %}
+      <div class="cm-it{{ ' cm-vaga' if it.tipo == 'vaga' }}{{ ' cm-branca' if it.branca }}" data-busca="{{ it.busca }}" data-tipo="{{ it.tipo }}" {% if it.id %}data-vid="{{ it.id }}"{% endif %}{% if it.regra %}data-regra="{{ it.regra }}"{% endif %}{% if it.sid %}data-sol="{{ it.sid }}"{% endif %}{% if editar and (it.sid or it.tipo == 'vaga') %} draggable="true"{% endif %}
+           style="background:{{ it.cor }}; color:{{ contraste(it.cor) }}; border-radius:6px; padding:4px 6px; margin:3px 0; font-size:11.5px;{{ ' border:2px dashed #00304E;' if it.branca else (' border:1px solid #0003;' if it.tipo == 'vaga') }}"
+           title="{{ 'Vaga em branco — arraste a obra ou a solicitação para dentro' if it.branca else ROTULOS.get(it.tipo, 'Vaga') }}{{ ' · ' ~ it.enc if it.enc }}{{ ' · por ' ~ it.por if it.por }}">
+        {% if it.tipo == 'vaga' %}<span style="background:#00304E; color:#fff; border-radius:9px; padding:0 6px; font-size:10.5px; margin-right:3px;" title="Ordem de entrega no dia — arraste a vaga para cima ou para baixo">{{ it.seq }}º</span>{% endif %}{% if it.link %}<a href="{{ it.link }}" style="color:inherit;"><b>{{ it.rot }}</b></a>{% else %}<b>{{ it.rot }}</b>{% endif %}
+        {% if it.tipo == 'solicitacao' and it.obra %}<div>{{ it.obra }}</div>{% endif %}
+        {% if it.sub %}<div style="opacity:.8;">{{ it.sub }}</div>{% endif %}
+        {% for x in it.encaixes or [] %}<div class="cm-enc" data-eid="{{ x.eid }}" data-sol="{{ x.sid }}"{% if editar %} draggable="true"{% endif %} style="cursor:grab; background:{{ CORES.solicitacao }}; color:#0F172A; border-radius:4px; padding:2px 5px; margin-top:3px;"><a href="{{ x.link }}" style="color:inherit;"><b>{{ x.rot }}</b></a>{% if x.obra and x.obra != it.obra %} · {{ x.obra }}{% endif %} <span style="opacity:.7;">{{ x.sub }}</span></div>{% endfor %}
+        {% for x in it.itens or [] %}<div style="font-size:11px; margin-top:2px;">• {{ x.texto }}</div>{% endfor %}
+        {% if it.branca and not it.encaixes and not it.itens %}<div style="opacity:.6;">solte aqui a obra ou a solicitação</div>{% endif %}
+        {% if it.tipo == 'vaga' and current_user.pode('almoxarife', 'encarregado') %}<a class="btn ghost sm" draggable="false" href="{{ url_for('solicitacoes.nova', obra_id=it.obra_id, vaga=it.id) if it.obra_id else url_for('solicitacoes.nova', vaga=it.id) }}" style="padding:0 6px; margin-top:3px; color:inherit;" title="Fazer a solicitação já nesta vaga do caminhão">➕ solicitar</a>{% endif %}
+        {% if editar and it.tipo == 'vaga' %}<button type="button" class="btn ghost sm cm-edit" data-vid="{{ it.id }}" data-obs="{{ it.obs }}" data-itens="{{ it.itens|tojson|forceescape }}" data-titulo="{{ DIAS[d.weekday()] }} {{ d.strftime('%d/%m') }}{{ ' · ' ~ it.obra if it.obra }}" style="padding:0 6px; margin-top:3px; color:inherit;">✏️ observação / itens</button>{% endif %}
+      </div>{% endfor %}
+    </td>{% endfor %}
+  </tr></tbody>
+</table>
+</div>
+{% if editar %}
+<div class="card no-print" style="width:250px; flex:none; max-height:70vh; overflow:auto; padding:8px;" id="pendentes">
+  <b class="small">📦 Solicitações a encaixar ({{ pendentes|length }})</b>
+  <div class="small muted" style="margin:2px 0 6px;">arraste para a vaga do dia</div>
+  <input type="search" id="buscaSol" placeholder="procurar…" style="width:100%; margin-bottom:6px;">
+  {% for s in pendentes %}<div class="cm-pend" draggable="true" data-sol="{{ s.sid }}" data-busca="{{ s.busca }}" style="border-left:6px solid {{ s.cor }}; background:#F8FAFC; border-radius:4px; padding:4px 6px; margin:3px 0; font-size:11.5px; cursor:grab;">
+    <b>{{ s.num }}</b> · {{ s.obra }}<div class="muted">{{ ('para ' ~ s.quando.strftime('%d/%m')) if s.quando else 'sem data' }} · {{ s.status }}</div></div>
+  {% else %}<div class="small muted">Nenhuma solicitação em aberto fora do caminhão.</div>{% endfor %}
+</div>
+{% endif %}
+</div>
+<p class="small muted no-print" style="margin-top:6px;">
+  <span class="pl-chip" style="background:#fff; border:2px dashed #00304E;">⬜ vaga em branco</span> caminhão pré-reservado, obra a definir ·
+  <span class="pl-chip" style="background:#F9A8D4;">📌 vaga da obra</span> pré-reserva com obra (as solicitações encaixadas ficam dentro) ·
+  <span class="pl-chip" style="background:{{ CORES.solicitacao }};">📦 solicitação</span>
+  <span class="pl-chip" style="background:{{ CORES.retirada }};">♻ retirada de material</span>
+  <span class="pl-chip" style="background:{{ CORES.entulho }};">🚛 entulho (motorista)</span></p>
+
+{% if editar %}
+<div class="row no-print" style="gap:14px; margin-top:10px; align-items:flex-start;">
+
+{% if regras %}<details class="card" style="flex:1; min-width:300px;"><summary><b>Entregas fixas antigas</b> <span class="small muted">— desligue se não usar</span></summary>
+  {% for rg in regras %}<div class="small" style="margin:6px 0; padding:4px 8px; border-left:6px solid {{ rg.cor }};">{{ rg.obra_nome or (rg.encarregado.nome if rg.encarregado else '') }} — toda {{ rg.dias_txt }}
+    <form method="post" action="{{ url_for('caminhao.regra') }}" class="inline-form"><input type="hidden" name="volta" value="{{ volta }}"><input type="hidden" name="id" value="{{ rg.id }}"><input type="hidden" name="acao" value="excluir"><button class="btn ghost sm">desligar</button></form></div>{% endfor %}</details>{% endif %}
+</div>
+{% endif %}
+{% if editar %}
+<div id="cmModal" style="display:none; position:fixed; inset:0; background:#0007; z-index:50; align-items:center; justify-content:center;">
+ <div class="card" style="width:min(640px,96vw); max-height:90vh; overflow:auto;">
+  <b id="cmTit">Vaga</b> <span class="small muted">— a obra e o dia já são os da vaga</span>
+  <div class="field" style="margin-top:8px;"><label>Observação</label><input id="cmObs" maxlength="200" placeholder="ex.: entregar na garagem, falar com Léo"></div>
+  <label class="small"><b>Itens que vão</b> — digite e escolha do estoque, ou deixe o texto para item comprado por fora</label>
+  <div id="cmLinhas"></div>
+  <datalist id="dlIns"></datalist>
+  <div class="btn-row" style="margin-top:6px;"><button type="button" class="btn sm" id="cmAdd">+ item</button>
+   <span style="margin-left:auto;"></span><button type="button" class="btn ghost sm" id="cmFechar">Cancelar</button><button type="button" class="btn primary sm" id="cmSalvar">Salvar</button></div>
+ </div>
+</div>
+{% endif %}
+{% endblock %}
+{% block scripts %}
+<style>@media print{ .no-print{display:none !important;} } td.cm-cel:hover{outline:2px solid #00304E33;}
+  .cm-it[draggable=true]{cursor:grab;} .cm-arrastando{opacity:.35;} td.cm-alvo{background:#DBEAFE !important; outline:2px dashed #00304E;}
+  .cm-it.cm-alvo{outline:3px solid #00304E;}</style>
+<script>
+(function(){
+  // busca rápida na própria tela (sem recarregar); Enter filtra também no PDF / Excel / WhatsApp
+  var busca = document.getElementById('busca');
+  function norm(t){ return (t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toUpperCase(); }
+  busca.addEventListener('input', function(){
+    var t = norm(this.value.trim());
+    document.querySelectorAll('#grade .cm-it').forEach(function(i){ i.style.display = !t || norm(i.dataset.busca).indexOf(t) >= 0 ? '' : 'none'; });
+  });
+  var paleta = document.getElementById('paleta'); if (!paleta) return;
+  // ---- observação e itens da vaga (estoque ou comprado por fora)
+  var modal = document.getElementById('cmModal'), linhas = document.getElementById('cmLinhas'), dl = document.getElementById('dlIns'), vagaAtual = null, cache = {};
+  function linha(x){
+    x = x || {};
+    var d = document.createElement('div'); d.className = 'row'; d.style.cssText = 'gap:6px; align-items:center; margin:4px 0;';
+    d.innerHTML = '<input class="cmN" list="dlIns" style="flex:3;" placeholder="item do estoque ou de fora">' +
+      '<input class="cmQ" style="width:70px;" placeholder="qtd"><input class="cmU" style="width:60px;" placeholder="un">' +
+      '<span class="cmT small" style="width:110px;"></span><button type="button" class="btn ghost sm">✕</button>';
+    var n = d.querySelector('.cmN'), t = d.querySelector('.cmT');
+    n.value = x.descricao || ''; d.querySelector('.cmQ').value = x.quantidade || ''; d.querySelector('.cmU').value = x.unidade || '';
+    d.dataset.ins = x.insumo_id || '';
+    function marca(){ t.innerHTML = d.dataset.ins ? '<span style="color:#15803D;">✓ do estoque</span>' : (n.value.trim() ? '<span style="color:#B45309;">comprar por fora</span>' : ''); }
+    n.addEventListener('input', function(){
+      var v = n.value.trim(); d.dataset.ins = cache[v] ? cache[v].id : '';
+      if (cache[v]) d.querySelector('.cmU').value = cache[v].unidade || '';
+      marca();
+      if (v.length >= 2 && !cache[v]) fetch({{ url_for('main.api_insumos')|tojson }} + '?q=' + encodeURIComponent(v)).then(function(r){ return r.json(); }).then(function(l){
+        dl.innerHTML = ''; l.forEach(function(i){ var lab = i.nome + (i.codigo ? ' · ' + i.codigo : ''); cache[lab] = i;
+          var o = document.createElement('option'); o.value = lab; o.label = 'disp. ' + i.disponivel + ' ' + (i.unidade || ''); dl.appendChild(o); });
+      });
+    });
+    d.querySelector('button').onclick = function(){ d.remove(); };
+    marca(); linhas.appendChild(d);
+  }
+  document.querySelectorAll('.cm-edit').forEach(function(b){ b.addEventListener('click', function(ev){
+    ev.stopPropagation(); vagaAtual = b.dataset.vid; document.getElementById('cmTit').textContent = 'Vaga · ' + b.dataset.titulo;
+    document.getElementById('cmObs').value = b.dataset.obs || ''; linhas.innerHTML = '';
+    var its = []; try { its = JSON.parse(b.dataset.itens || '[]'); } catch(e){}
+    its.forEach(linha); if (!its.length) linha(); modal.style.display = 'flex';
+  }); });
+  document.getElementById('cmAdd').onclick = function(){ linha(); };
+  document.getElementById('cmFechar').onclick = function(){ modal.style.display = 'none'; };
+  document.getElementById('cmSalvar').onclick = function(){
+    var its = Array.prototype.map.call(linhas.children, function(d){ return {insumo_id: d.dataset.ins || '',
+      descricao: d.querySelector('.cmN').value.replace(/ · [A-Z0-9-]+$/, ''), quantidade: d.querySelector('.cmQ').value, unidade: d.querySelector('.cmU').value}; });
+    var fd = new FormData(); fd.append('obs', document.getElementById('cmObs').value); fd.append('itens', JSON.stringify(its));
+    fetch({{ url_for('caminhao.vaga_itens', vid=0)|tojson }}.replace('/0/', '/' + vagaAtual + '/'), {method: 'POST', body: fd, headers: {'X-Requested-With': 'fetch'}})
+      .then(function(r){ return r.json(); }).then(function(j){ alert(j.msg); if (j.ok) location.reload(); });
+  };
+  var bo = document.getElementById('buscaObra');
+  bo.addEventListener('input', function(){ var t = norm(this.value.trim());
+    paleta.querySelectorAll('[data-obra]').forEach(function(c){
+      var bate = t && norm(c.dataset.nome).indexOf(t) >= 0;
+      c.style.display = c.classList.contains('cm-antiga') ? (bate ? '' : 'none') : (!t || bate ? '' : 'none'); }); });
+  var bs = document.getElementById('buscaSol');
+  if (bs) bs.addEventListener('input', function(){ var t = norm(this.value.trim());
+    document.querySelectorAll('.cm-pend').forEach(function(c){ c.style.display = !t || norm(c.dataset.busca).indexOf(t) >= 0 ? '' : 'none'; }); });
+  function post(url, dados){
+    var fd = new FormData(); Object.keys(dados).forEach(function(k){ if (dados[k] != null) fd.append(k, dados[k]); });
+    return fetch(url, {method: 'POST', body: fd, headers: {'X-Requested-With': 'fetch'}}).then(function(r){ return r.json(); })
+      .catch(function(){ return {ok: false, msg: 'Sem conexão.'}; });
+  }
+  function aviso(m, ok){   // aviso no canto, some sozinho (sem janela para clicar)
+    var t = document.getElementById('cmToast');
+    if (!t) { t = document.createElement('div'); t.id = 'cmToast'; t.style.cssText = 'position:fixed;right:16px;bottom:16px;z-index:60;padding:8px 12px;border-radius:8px;font-size:13px;box-shadow:0 4px 12px #0003;max-width:360px;'; document.body.appendChild(t); }
+    t.textContent = m; t.style.background = ok ? '#DCFCE7' : '#FEE2E2'; t.style.color = ok ? '#14532D' : '#7F1D1D'; t.style.display = 'block';
+    clearTimeout(t._h); t._h = setTimeout(function(){ t.style.display = 'none'; }, ok ? 1800 : 4000); }
+  function recarrega(j){ aviso(j.msg, j.ok); if (j.ok) setTimeout(function(){ try { sessionStorage.setItem('cmScroll', window.scrollY); } catch(e){} location.reload(); }, 250); }
+  try { var sy = sessionStorage.getItem('cmScroll'); if (sy) { window.scrollTo(0, +sy); sessionStorage.removeItem('cmScroll'); } } catch(e){}
+  var U = {marcar: {{ url_for('caminhao.marcar')|tojson }}, encaixar: {{ url_for('caminhao.encaixar')|tojson }},
+           tirar: {{ url_for('caminhao.viagem_excluir', vid=0)|tojson }}, desenc: {{ url_for('caminhao.desencaixar', eid=0)|tojson }},
+           pular: {{ url_for('caminhao.pular')|tojson }}, mover: {{ url_for('caminhao.vaga_mover', vid=0)|tojson }}};
+  // o que está "na mão": {vaga:1} | {obra:id} | {sol:id} | {apagar:1}
+  var mao = null;
+  function soltar(alvoTd, alvoIt, m){
+    if (!m) { aviso('Escolha no alto (vaga, obra) ou uma solicitação da lista.', false); return; }
+    var data = alvoTd.dataset.data, vaga = alvoIt && alvoIt.dataset.vid && alvoIt.dataset.tipo === 'vaga' ? alvoIt.dataset.vid : null;
+    if (m.vaga) return post(U.marcar, {vaga: 1, data: data}).then(recarrega);
+    if (m.obra && vaga && alvoIt.classList.contains('cm-branca')) return post(U.encaixar, {vaga: vaga, obra: m.obra}).then(recarrega);
+    if (m.obra) {   // entra na posição onde soltou (entre duas vagas), sem trocar nenhuma
+      var pos = 0;
+      alvoTd.querySelectorAll('.cm-vaga').forEach(function(v){ var r = v.getBoundingClientRect(); if (r.top + r.height / 2 < (window._cmY || 0)) pos++; });
+      return post(U.marcar, {obra: m.obra, data: data, pos: pos}).then(recarrega);
+    }
+    if (m.sol) return post(U.encaixar, {vaga: vaga, sol: m.sol, data: data}).then(recarrega);
+  }
+  paleta.querySelectorAll('[data-obra],[data-acao]').forEach(function(ch){
+    ch.addEventListener('click', function(){ document.querySelectorAll('.sel').forEach(function(x){ x.classList.remove('sel'); });
+      ch.classList.add('sel'); mao = ch.dataset.obra ? {obra: ch.dataset.obra} : (ch.dataset.acao === 'vaga' ? {vaga: 1} : {apagar: 1}); });
+  });
+  document.querySelectorAll('#grade a, #pendentes a').forEach(function(a){ a.setAttribute('draggable', 'false'); });
+  var arrasto = null;   // o que está sendo arrastado agora
+  document.querySelectorAll('[draggable=true]').forEach(function(el){
+    el.addEventListener('dragstart', function(ev){
+      ev.stopPropagation();   // a solicitação encaixada não arrasta a vaga junto
+      arrasto = el.dataset.obra ? {obra: el.dataset.obra} : el.dataset.acao === 'vaga' ? {vaga: 1}
+              : el.classList.contains('cm-it') && el.dataset.tipo === 'vaga' ? {mover: el.dataset.vid}
+              : el.dataset.sol ? {sol: el.dataset.sol} : null;
+      try { ev.dataTransfer.setData('text/plain', 'cm'); ev.dataTransfer.effectAllowed = 'move'; } catch(e){}
+      el.classList.add('cm-arrastando');
+    });
+    el.addEventListener('dragend', function(){ el.classList.remove('cm-arrastando'); arrasto = null;
+      document.querySelectorAll('.cm-alvo').forEach(function(x){ x.classList.remove('cm-alvo'); }); });
+    if (el.classList.contains('cm-pend')) el.addEventListener('click', function(){
+      document.querySelectorAll('.sel').forEach(function(x){ x.classList.remove('sel'); }); el.classList.add('sel'); mao = {sol: el.dataset.sol}; });
+  });
+  document.querySelectorAll('td.cm-cel').forEach(function(td){
+    td.addEventListener('dragover', function(ev){ if (!arrasto) return; ev.preventDefault();
+      document.querySelectorAll('.cm-alvo').forEach(function(x){ x.classList.remove('cm-alvo'); });
+      var it = ev.target.closest('.cm-it');
+      (it && it.dataset.tipo === 'vaga' && !arrasto.mover && !arrasto.vaga && !(arrasto.obra && !it.classList.contains('cm-branca')) ? it : td).classList.add('cm-alvo');
+      if ((arrasto.mover || arrasto.obra) && it && it.dataset.tipo === 'vaga' && it.dataset.vid !== arrasto.mover) {
+        var r = it.getBoundingClientRect(); it.style.boxShadow = ev.clientY < r.top + r.height / 2 ? '0 -4px 0 #00304E' : '0 4px 0 #00304E';
+        clearTimeout(it._t); it._t = setTimeout(function(){ it.style.boxShadow = ''; }, 300); } });
+    td.addEventListener('drop', function(ev){ ev.preventDefault(); window._cmY = ev.clientY;
+      document.querySelectorAll('.cm-alvo').forEach(function(x){ x.classList.remove('cm-alvo'); });
+      var m = arrasto; arrasto = null; if (!m) return;
+      if (m.mover) {   // posição = quantas vagas do dia ficam acima de onde soltou
+        var pos = 0;
+        td.querySelectorAll('.cm-vaga').forEach(function(v){
+          if (v.dataset.vid === m.mover) return;
+          var r = v.getBoundingClientRect(); if (r.top + r.height / 2 < ev.clientY) pos++; });
+        return post(U.mover.replace('/0/', '/' + m.mover + '/'), {data: td.dataset.data, pos: pos}).then(recarrega);
+      }
+      soltar(td, ev.target.closest('.cm-it'), m); });
+    td.addEventListener('click', function(ev){ window._cmY = ev.clientY;
+      if (ev.target.closest('a')) return;
+      var it = ev.target.closest('.cm-it'), enc = ev.target.closest('.cm-enc');
+      if (mao && mao.apagar) {
+        if (enc) return post(U.desenc.replace('/0', '/' + enc.dataset.eid), {}).then(recarrega);
+        if (it && it.dataset.vid) { if (!confirm('Tirar esta vaga do caminhão?' + (it.querySelector('.cm-enc') ? ' As solicitações encaixadas voltam para a lista.' : ''))) return;
+          return post(U.tirar.replace('/0/', '/' + it.dataset.vid + '/'), {}).then(recarrega); }
+        if (it && it.dataset.regra) return post(U.pular, {regra_id: it.dataset.regra, data: td.dataset.data}).then(recarrega);
+        aviso('Toque na vaga ou na solicitação encaixada.', false); return;
+      }
+      if (mao) return soltar(td, it, mao);
+    });
+  });
+})();
+</script>
+{% endblock %}
