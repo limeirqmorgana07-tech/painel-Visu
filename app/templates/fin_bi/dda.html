@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block titulo %}DDA · boletos x contas a pagar{% endblock %}
+{% block ctx %}Boletos registrados no seu CNPJ (DDA do banco) comparados com o que está lançado no financeiro{% endblock %}
+{% block conteudo %}
+{% include "fin_bi/_abas.html" %}
+<div class="card" style="margin-bottom:14px;">
+  <form method="post" enctype="multipart/form-data" class="bi-filtros" style="margin:0;">
+    <div class="field"><label>Arquivo do DDA (Excel .xlsx/.xls, CSV ou PDF)</label><input type="file" name="arquivo" accept=".xlsx,.xls,.csv,.txt,.pdf" required></div>
+    <div class="field"><label>Empresa do DDA</label><select name="empresa_id"><option value="">Pela coluna Pagador (ou procurar nas duas)</option>{% for e in empresas %}<option value="{{ e.id }}">{{ e.nome }}</option>{% endfor %}</select></div>
+    <div class="btn-row"><button class="btn primary">Importar e conferir</button></div>
+  </form>
+  <p class="small muted" style="margin:8px 0 0;">No internet banking do Itaú: <b>Pagamentos → DDA (boletos) → filtre o período → Exportar/Salvar em Excel</b>. O sistema acha as colunas Pagador, Beneficiário, CPF/CNPJ, Venc., Nº doc., A pagar, Tipo e Banco (e a Linha digitável, quando vier). A empresa é reconhecida pelo Pagador (F. DINIZ / VIEIRA DINIZ = F. Diniz; RAMOS DINIZ = Ramos). Pode importar de novo quando quiser: boletos repetidos não duplicam.
+  Cada boleto é comparado com as contas a pagar (mesmo valor e vencimento próximo, ou nome parecido).</p>
+</div>
+<form method="get" class="card bi-filtros no-print" style="margin-bottom:14px;">
+  {% if x.filtro != 'todos' %}<input type="hidden" name="ver" value="{{ x.filtro }}">{% endif %}
+  <div class="field"><label>Empresa</label><select name="empresa"><option value="">Todas</option>{% for e in empresas %}<option value="{{ e.id }}" {{ 'selected' if x.empresa_id == e.id }}>{{ e.nome }}</option>{% endfor %}</select></div>
+  <div class="field"><label>Vencimento de</label><input type="date" name="de" value="{{ x.de.isoformat() if x.de else '' }}"></div>
+  <div class="field"><label>até</label><input type="date" name="ate" value="{{ x.ate.isoformat() if x.ate else '' }}"></div>
+  <div class="field"><label>Pagamento</label><select name="pag"><option value="">Todos</option><option value="aberto" {{ 'selected' if x.pagamento == 'aberto' }}>A pagar (sem os já pagos)</option><option value="pago" {{ 'selected' if x.pagamento == 'pago' }}>Já pagos</option></select></div>
+  <div class="field" style="flex:1; min-width:220px;"><label>Procurar</label><input type="search" name="q" value="{{ x.busca }}" placeholder="Nº da nota / documento, fornecedor ou valor"></div>
+  <div class="btn-row"><button class="btn primary">Filtrar</button>
+    <a class="btn ghost" href="{{ url_for('fin_bi.dda', periodo='todos') }}">Todos os períodos</a></div>
+  <span class="small muted" style="align-self:center; width:100%;">{% if x.de or x.ate %}Vencimento {{ ('de ' ~ x.de.strftime('%d/%m/%Y')) if x.de }} {{ ('até ' ~ x.ate.strftime('%d/%m/%Y')) if x.ate }}{% else %}Todos os períodos{% endif %}. Sem escolher datas, a tela abre do mês atual em diante — boletos de meses anteriores ficam em “Todos os períodos”.</span>
+</form>
+{% set c = x.cont %}
+<div class="bi-kpis">
+  <a class="card kpi alerta" style="text-decoration:none; color:inherit;" href="{{ url_for('fin_bi.dda', **dict(request.args.to_dict(), ver='faltando')) }}"><div class="k">Falta lançar ›</div><div class="v">{{ (c.get('Falta lançar') or (0, 0))[1]|moeda }}</div><div class="s">{{ (c.get('Falta lançar') or (0, 0))[0] }} boleto(s) no banco sem conta a pagar</div></a>
+  <a class="card kpi" style="text-decoration:none; color:inherit;" href="{{ url_for('fin_bi.dda', **dict(request.args.to_dict(), ver='lancados')) }}"><div class="k">Lançados ›</div><div class="v" style="color:#15803D;">{{ ((c.get('Lançado') or (0, 0))[1] + (c.get('Lançado e pago') or (0, 0))[1])|moeda }}</div><div class="s">{{ (c.get('Lançado') or (0, 0))[0] }} em aberto · {{ (c.get('Lançado e pago') or (0, 0))[0] }} já pagos</div></a>
+  <a class="card kpi" style="text-decoration:none; color:inherit; border-top:4px solid #F59E0B;" href="{{ url_for('fin_bi.dda', **dict(request.args.to_dict(), ver='conferir')) }}"><div class="k">Conferir ›</div><div class="v" style="color:#B45309;">{{ (c.get('Conferir') or (0, 0))[1]|moeda }}</div><div class="s">{{ (c.get('Conferir') or (0, 0))[0] }} boleto(s) com mais de uma conta a pagar possível — escolha qual é</div></a>
+  <div class="card kpi"><div class="k">Ignorados</div><div class="v">{{ (c.get('Ignorado') or (0, 0))[1]|moeda }}</div><div class="s">{{ (c.get('Ignorado') or (0, 0))[0] }} boleto(s)</div></div>
+</div>
+<div class="banner {{ 'warning' if atualizando else 'info' }}" style="margin-bottom:14px; flex-wrap:wrap; align-items:center;">
+  <span>{% if atualizando %}<b>Atualizando o contas a pagar…</b> leva de 1 a 3 minutos; recarregue a página para ver o resultado.
+    {% else %}<b>Lançou no Omie ou no Mais Controle os títulos que faltavam?</b> Clique em <b>Atualizar e conferir</b>: o sistema busca o contas a pagar das duas empresas e confere o DDA de novo.{% endif %}
+    <span class="small muted" style="display:block; margin-top:2px;">{% if ult_pagar %}Última atualização pelo DDA: {{ ult_pagar.data|datahora }}{% if not ult_pagar.sucesso %} — <span style="color:var(--danger);">falhou: {{ ult_pagar.mensagem[:160] }}</span>{% endif %}{% endif %}
+      {% if ult_geral %}{{ ' · ' if ult_pagar }}Atualização geral (de hora em hora): {{ ult_geral.data|datahora }}{% endif %}</span></span>
+  <form method="post" action="{{ url_for('fin_bi.dda_atualizar') }}" style="margin-left:auto;"><button class="btn primary sm" {{ 'disabled' if atualizando }}>↻ Atualizar e conferir</button></form>
+</div>
+<div class="card"><div class="section-head"><div><h2>Boletos do DDA</h2><p>{{ x.linhas|length }} boleto(s){% if x.filtro != 'todos' %} · <a href="{{ url_for('fin_bi.dda', **dict(request.args.to_dict(), ver='todos')) }}">todas as situações</a>{% endif %}</p></div>
+
+  <form method="post" action="{{ url_for('fin_bi.dda_conciliar') }}"><button class="btn sm" title="Só compara de novo com o que já foi baixado (sem buscar no Omie / Mais Controle)">Conferir de novo</button></form></div>
+  <div class="table-wrap"><table>
+  <tr><th>Situação</th><th>Empresa</th><th>Beneficiário</th><th>Nº doc.</th><th>Vencimento</th><th class="num">Valor</th><th>Lançamento no financeiro</th><th></th></tr>
+  {% for l in x.linhas %}{% set b, t = l.b, l.t %}
+  <tr><td><span class="pill {{ 'bad' if l.status == 'Falta lançar' else ('neutral' if l.status == 'Ignorado' else ('warn' if l.status == 'Conferir' else 'ok')) }}">{{ l.status }}{% if l.status == 'Conferir' %} ({{ b.conferir }} possíveis){% endif %}</span>{% if b.manual %} <span class="small muted">manual</span>{% endif %}</td>
+    <td class="small">{{ b.empresa.nome.split(' ')[0] if b.empresa else '—' }}</td>
+    <td>{{ b.beneficiario or '—' }}{% if b.cnpj %}<div class="small muted">{{ b.cnpj }}{% if b.tipo %} · {{ b.tipo }}{% endif %}</div>{% endif %}</td><td class="small">{{ b.documento or '—' }}</td>
+    <td class="small" style="{{ 'color:#B91C1C; font-weight:600;' if l.vencido and l.status == 'Falta lançar' }}">{{ b.vencimento.strftime('%d/%m/%Y') }}</td><td class="num">{{ b.valor|moeda }}</td>
+    <td class="small">{% if t %}{{ t.empresa.nome.split(' ')[0] }} · {{ t.nome }} · venc. {{ t.vencimento.strftime('%d/%m/%Y') if t.vencimento else '—' }} · {{ t.valor|moeda }}{% if t.centro_custo %}<div class="muted">{{ t.centro_custo }}</div>{% endif %}{% else %}—{% endif %}</td>
+    <td><a class="small" href="{{ url_for('fin_bi.dda_boleto', bid=b.id) }}">{{ 'conferir' if t else ('escolher a conta' if l.status == 'Conferir' else 'vincular / ignorar') }}</a></td></tr>
+  {% else %}<tr class="empty-row"><td colspan="8">Nenhum boleto do DDA importado ainda.</td></tr>{% endfor %}
+  </table></div></div>
+{% endblock %}

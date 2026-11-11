@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block titulo %}Caixinha · {{ c.usuario.nome if c.usuario else '' }}{% endblock %}
+{% block ctx %}{{ c.descricao or 'Cartão' }}{% if c.empresa %} · {{ c.empresa.nome }}{% endif %}{% if not c.ativo %} · inativo{% endif %}{% endblock %}
+{% block acoes_topo %}{% if gerir %}<a class="btn ghost" href="{{ url_for('caixinha.inicio') }}">← Cartões</a> <a class="btn ghost" href="{{ url_for('caixinha.relatorio', cartao=c.id) }}">Prestação de contas</a>{% endif %}{% endblock %}
+{% block conteudo %}
+<div class="grid cols-2" style="align-items:start;">
+  <div class="card{% if sit.alerta %} cx-alerta{% endif %}">
+    <div class="small muted">Saldo do cartão (pelo que foi lançado)</div>
+    <div class="cx-saldo" style="font-size:30px;">{{ sit.saldo|moeda }}</div>
+    {% include "caixinha/_barra.html" %}
+    <p class="small" style="margin:6px 0 0;">{% if sit.ultima_recarga %}{{ '%.0f'|format(sit.pct) }}% do disponível na última recarga ({{ sit.base|moeda }} em {{ sit.ultima_recarga.data.strftime('%d/%m/%Y') }}) · alerta quando chegar a {{ sit.limite|moeda }} ({{ '%g'|format(c.alerta_pct or 20) }}%).{% else %}Ainda sem recarga registrada.{% endif %}
+      {% if sit.alerta %}<br><b style="color:var(--danger);">Saldo baixo: programar nova recarga.</b>{% if c.alerta_enviado_em %} <span class="muted">Aviso enviado em {{ c.alerta_enviado_em|datahora }}.</span>{% endif %}{% endif %}</p>
+  </div>
+  {% if dono or gerir %}
+  <div class="card" id="lancar">
+    <h3 style="margin-top:0;">Lançar gasto</h3>
+    <form method="post" action="{{ url_for('caixinha.gasto_salvar', cid=c.id) }}" enctype="multipart/form-data">
+      <div class="field"><label>Foto do comprovante (cupom / nota)</label><input type="file" name="foto" accept="image/*" capture="environment" required></div>
+      <div class="row">
+        <div class="field" style="flex:1;"><label>Valor (R$)</label><input name="valor" inputmode="decimal" placeholder="0,00" required></div>
+        <div class="field" style="flex:1;"><label>Data</label><input type="date" name="data" value="{{ hoje.isoformat() }}"></div>
+      </div>
+      <div class="field"><label>Categoria do gasto</label><select name="categoria" required><option value="">escolha…</option>{% for k in cats %}<option>{{ k.nome }}</option>{% endfor %}</select></div>
+      <div class="field"><label>Obra / centro de custo</label><select name="obra" required data-busca="Digite parte do nome da obra" data-livre="outro:"><option value="">escolha…</option><option value="empresa">Empresa (administrativo / escritório)</option>{% for o in obras %}<option value="obra:{{ o.id }}">{{ o.nome }}</option>{% endfor %}</select></div>
+      <div class="field"><label>Onde / o quê (opcional)</label><input name="descricao" placeholder="ex.: Posto BR — gasolina da van"></div>
+      <button class="btn primary" style="width:100%;">Enviar gasto</button>
+    </form>
+  </div>
+  {% endif %}
+</div>
+
+{% if gerir %}
+<div class="grid cols-2" style="align-items:start; margin-top:14px;">
+  <div class="card">
+    <h3 style="margin-top:0;">Recarga / ajuste</h3>
+    <form method="post" action="{{ url_for('caixinha.recarga', cid=c.id) }}" class="bi-filtros" style="margin:0;">
+      <div class="field"><label>Tipo</label><select name="tipo"><option value="recarga">Recarga (crédito)</option><option value="ajuste">Ajuste (+ ou −)</option></select></div>
+      <div class="field"><label>Valor (R$)</label><input name="valor" inputmode="decimal" required placeholder="ex.: 1.000,00"></div>
+      <div class="field"><label>Data</label><input type="date" name="data" value="{{ hoje.isoformat() }}"></div>
+      <div class="field" style="flex:1;"><label>Observação</label><input name="descricao" placeholder="ex.: PIX 02/10"></div>
+      <div class="btn-row"><button class="btn primary">Registrar</button></div>
+    </form>
+    <p class="small muted" style="margin:6px 0 0;">O valor da recarga é livre. Ajuste negativo (ex.: −50) corrige o saldo pelo extrato do cartão.</p>
+  </div>
+  <div class="card">
+    <h3 style="margin-top:0;">Dados do cartão</h3>
+    <form method="post" action="{{ url_for('caixinha.cartao_salvar', cid=c.id) }}" class="bi-filtros" style="margin:0;">
+      <div class="field"><label>Encarregado</label><select name="usuario_id">{% for u in usuarios %}<option value="{{ u.id }}" {{ 'selected' if u.id == c.usuario_id }}>{{ u.nome }}</option>{% endfor %}</select></div>
+      <div class="field"><label>Empresa</label><select name="empresa_id"><option value="">—</option>{% for e in empresas %}<option value="{{ e.id }}" {{ 'selected' if e.id == c.empresa_id }}>{{ e.nome }}</option>{% endfor %}</select></div>
+      <div class="field"><label>Identificação</label><input name="descricao" value="{{ c.descricao or '' }}"></div>
+      <div class="field" style="width:110px;"><label>Alerta em (%)</label><input name="alerta_pct" value="{{ '%g'|format(c.alerta_pct or 20) }}"></div>
+      <div class="field"><label>Ativo</label><select name="ativo"><option value="1">Sim</option><option value="0" {{ 'selected' if not c.ativo }}>Não</option></select></div>
+      <div class="btn-row"><button class="btn">Salvar</button></div>
+    </form>
+  </div>
+</div>
+{% endif %}
+
+<div class="card" style="margin-top:14px;">
+  <div class="section-head"><div><h2>Extrato</h2></div>
+    <div class="ger-setores" style="margin:0;">{% for k, rot in [('todos','Tudo'),('gastos','Gastos'),('conferir','A conferir'),('devolvidos','Devolvidos'),('recargas','Recargas')] %}<a class="{{ 'on' if filtro == k }}" href="{{ url_for('caixinha.cartao', cid=c.id, ver=k) }}">{{ rot }}</a>{% endfor %}</div></div>
+  <div class="table-wrap"><table>
+    <tr><th>Data</th><th>Tipo</th><th>Categoria</th><th>Obra / centro de custo</th><th>Descrição</th><th class="num">Valor</th><th>Foto</th><th>Situação</th><th></th></tr>
+    {% for m in movs %}
+    <tr{% if m.status == 'devolvido' %} style="background:#FEF2F2;"{% endif %}>
+      <td class="small">{{ m.data.strftime('%d/%m/%Y') }}</td>
+      <td class="small">{{ {'recarga':'Recarga','gasto':'Gasto','ajuste':'Ajuste'}[m.tipo] }}</td>
+      <td class="small">{{ m.categoria or '' }}</td><td class="small">{{ m.cc if m.tipo == 'gasto' else '' }}</td>
+      <td class="small">{{ m.descricao or '' }}<div class="muted">por {{ m.criado_por }}</div>{% if m.obs_conferencia %}<div style="color:#B45309;">Financeiro: {{ m.obs_conferencia }}</div>{% endif %}</td>
+      <td class="num" style="color:{{ '#15803D' if m.tipo == 'recarga' or (m.tipo == 'ajuste' and m.valor > 0) else 'inherit' }};">{{ '+' if m.tipo == 'recarga' or (m.tipo == 'ajuste' and m.valor > 0) else '−' }}{{ (m.valor|abs)|moeda }}</td>
+      <td>{% if m.foto %}<a href="{{ url_for('caixinha.foto', mid=m.id) }}" target="_blank"><img src="{{ url_for('caixinha.foto', mid=m.id) }}" alt="foto" loading="lazy" style="width:56px; height:56px; object-fit:cover; border-radius:6px; border:1px solid #E2E8F0;"></a>{% endif %}</td>
+      <td>{% if m.tipo == 'gasto' %}<span class="pill {{ {'enviado':'warn','conferido':'ok','devolvido':'bad'}[m.status] }}">{{ status[m.status] }}</span>{% if m.conferido_por and m.status != 'enviado' %}<div class="small muted">{{ m.conferido_por }}</div>{% endif %}{% endif %}</td>
+      <td style="white-space:nowrap;">
+        {% if gerir and m.tipo == 'gasto' %}
+        <form method="post" action="{{ url_for('caixinha.conferir', mid=m.id) }}" class="inline-form">
+          {% if m.status != 'conferido' %}<button class="btn sm primary" name="acao" value="conferir">Conferido</button>{% endif %}
+          {% if m.status != 'devolvido' %}<input name="obs" placeholder="motivo" style="width:110px;"><button class="btn ghost sm" name="acao" value="devolver">Devolver</button>{% endif %}
+          {% if m.status != 'enviado' %}<button class="btn ghost sm" name="acao" value="reabrir">Reabrir</button>{% endif %}
+        </form>{% endif %}
+        {% if (dono and m.tipo == 'gasto' and m.status != 'conferido') %}<details><summary class="small" style="cursor:pointer;">corrigir</summary>
+          <form method="post" action="{{ url_for('caixinha.gasto_salvar', mid=m.id) }}" enctype="multipart/form-data" style="min-width:240px;">
+            <input type="file" name="foto" accept="image/*" capture="environment" style="margin:4px 0;">
+            <input name="valor" value="{{ m.valor|valorbr }}" inputmode="decimal"><input type="date" name="data" value="{{ m.data.isoformat() }}">
+            <select name="categoria">{% for k in cats %}<option {{ 'selected' if k.nome == m.categoria }}>{{ k.nome }}</option>{% endfor %}</select>
+            <select name="obra"><option value="empresa" {{ 'selected' if m.centro_custo == 'Empresa' }}>Empresa</option>{% if m.centro_custo and m.centro_custo != 'Empresa' %}<option value="outro:{{ m.centro_custo }}" selected>{{ m.centro_custo }}</option>{% endif %}{% for o in obras %}<option value="obra:{{ o.id }}" {{ 'selected' if o.id == m.obra_id }}>{{ o.nome }}</option>{% endfor %}</select>
+            <input name="descricao" value="{{ m.descricao or '' }}"><button class="btn sm">Salvar e reenviar</button></form></details>{% endif %}
+        {% if gerir and m.tipo != 'gasto' %}<form method="post" action="{{ url_for('caixinha.conferir', mid=m.id) }}" class="inline-form" onsubmit="return confirm('Excluir este lançamento?')"><button class="btn ghost sm" name="acao" value="excluir">Excluir</button></form>{% endif %}
+      </td>
+    </tr>
+    {% else %}<tr class="empty-row"><td colspan="9">Nada lançado.</td></tr>{% endfor %}
+  </table></div>
+  <p class="small muted">O saldo é o que foi lançado aqui (recargas − gastos ± ajustes). Confira de tempos em tempos com o extrato do cartão e use um ajuste para corrigir diferenças.</p>
+</div>
+{% endblock %}

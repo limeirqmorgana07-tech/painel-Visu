@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block titulo %}Notas de serviço emitidas{% endblock %}
+{% block ctx %}NFS-e emitidas na Prefeitura do Recife · conferência com o contas a receber · exportação Excel e XML{% endblock %}
+{% block conteudo %}
+{% with aba="emitidas", diretoria=True %}{% include "nfse/_abas.html" %}{% endwith %}
+<div class="grid cols-2" style="margin-bottom:14px;">
+{% for s in status %}
+<div class="card"><div class="section-head"><div><h2>{{ s.emp.nome }}</h2>
+  <p>{% if s.im %}Inscrição municipal <b>{{ s.im }}</b> · {{ s.qtd }} nota(s) no sistema · última busca: {{ (s.ultima - timedelta(hours=3)).strftime('%d/%m/%Y %H:%M') if s.ultima else 'nunca' }}
+     {% if not s.cert %}<br><span class="pill bad">sem certificado A1</span> {% if current_user.perfil_ativo == 'admin' %}<a href="{{ url_for('sefaz.certificado') }}">enviar certificado</a> e cadastrar {{ s.var }} no Render{% else %}peça ao administrador{% endif %}{% endif %}
+     {% else %}<span class="muted">Não emite nota de serviço (sem inscrição municipal).</span>{% endif %}</p></div></div>
+  {% if current_user.perfil_ativo == 'admin' %}
+  <form method="post" action="{{ url_for('nfse.configurar') }}" class="inline-form no-print"><input type="hidden" name="empresa_id" value="{{ s.emp.id }}">
+    <input name="im" value="{{ s.im or '' }}" placeholder="inscrição municipal" style="width:160px;"><button class="btn sm ghost">Salvar</button></form>{% endif %}
+</div>
+{% endfor %}
+</div>
+
+<form method="post" action="{{ url_for('nfse.buscar') }}" class="card bi-filtros no-print">
+  <div class="field"><label>Buscar na prefeitura · de</label><input type="date" name="de" value="{{ f.ini.isoformat() }}"></div>
+  <div class="field"><label>até</label><input type="date" name="ate" value="{{ f.fim.isoformat() }}"></div>
+  <div class="btn-row"><button class="btn primary">Buscar notas emitidas</button></div>
+  <span class="small muted" style="align-self:center;">Usa o certificado A1 da empresa. Períodos longos são consultados mês a mês.</span>
+</form>
+
+<form method="get" class="card bi-filtros no-print">
+  <div class="field"><label>Emissão de</label><input type="date" name="de" value="{{ f.ini.isoformat() }}"></div>
+  <div class="field"><label>até</label><input type="date" name="ate" value="{{ f.fim.isoformat() }}"></div>
+  <div class="field"><label>Empresa</label><select name="empresa"><option value="">Todas</option>{% for e in empresas %}<option value="{{ e.id }}" {{ 'selected' if f.empresa_id == e.id }}>{{ e.nome }}</option>{% endfor %}</select></div>
+  <div class="field"><label>Situação</label><select name="situacao">{% for k, r in (('todas','Todas'),('validas','Válidas'),('canceladas','Canceladas')) %}<option value="{{ k }}" {{ 'selected' if f.situacao == k }}>{{ r }}</option>{% endfor %}</select></div>
+  <div class="field"><label>Pesquisar</label><input type="search" name="q" value="{{ f.q }}" placeholder="nº, tomador, CNPJ, obra, texto"></div>
+  <div class="btn-row"><button class="btn">Filtrar</button>
+    <a class="btn ghost" href="{{ url_for('nfse.lista', de=hoje.replace(day=1).isoformat(), ate=hoje.isoformat()) }}">Este mês</a></div>
+</form>
+
+<div class="grid cols-4" style="margin:14px 0;">
+  <div class="card"><div class="small muted">Notas válidas</div><div style="font-size:22px; font-weight:800;">{{ t.qtd }}</div>{% if t.canceladas %}<div class="small muted">{{ t.canceladas }} cancelada(s)</div>{% endif %}</div>
+  <div class="card"><div class="small muted">Valor dos serviços</div><div style="font-size:22px; font-weight:800;">{{ t.servicos|moeda }}</div></div>
+  <div class="card"><div class="small muted">ISS</div><div style="font-size:22px; font-weight:800;">{{ t.iss|moeda }}</div><div class="small muted">retido pelo tomador: {{ t.iss_retido|moeda }}</div></div>
+  <div class="card"><div class="small muted">Valor líquido (após retenções)</div><div style="font-size:22px; font-weight:800;">{{ t.liquido|moeda }}</div><div class="small muted">retenções: {{ t.retencoes|moeda }}</div></div>
+</div>
+
+{% set args = request.args.to_dict() %}
+<div class="card"><div class="section-head"><div><h2>{{ notas|length }} nota(s)</h2><p>“Recebimento”: parcela do contas a receber com o mesmo cliente e valor (Mais Controle / Omie).</p></div>
+  <div class="btn-row no-print"><a class="btn" href="{{ url_for('nfse.exportar', fmt='xlsx', **args) }}">Exportar Excel</a>
+    <a class="btn ghost" href="{{ url_for('nfse.exportar', fmt='xml', **args) }}">Baixar XMLs (.zip)</a></div></div>
+<div class="table-wrap"><table>
+  <tr><th>Emissão</th><th>Nº</th><th>Empresa</th><th>Tomador</th><th>Obra</th><th class="num">Serviços</th><th class="num">ISS</th><th class="num">Retenções</th><th class="num">Líquido</th><th>Recebimento</th><th></th></tr>
+  {% for n in notas %}{% set r = receb.get(n.id) %}
+  <tr {% if n.cancelada %}style="opacity:.55;"{% endif %}><td class="small">{{ n.data_emissao.strftime('%d/%m/%Y') if n.data_emissao else '—' }}</td>
+    <td><a href="{{ url_for('nfse.ver', nid=n.id) }}"><b>{{ n.numero }}</b></a>{% if n.cancelada %} <span class="pill bad">cancelada</span>{% endif %}</td>
+    <td class="small">{{ n.empresa.nome.split(' ')[0] }}</td>
+    <td>{{ n.tomador_nome }}<div class="small muted">{{ n.tomador_doc or '' }}</div></td>
+    <td class="small">{{ n.obra or '—' }}</td>
+    <td class="num">{{ n.valor_servicos|moeda }}</td><td class="num">{{ n.valor_iss|moeda }}{% if n.iss_retido %}<div class="small muted">retido</div>{% endif %}</td>
+    <td class="num">{{ n.retencoes|moeda }}</td><td class="num"><b>{{ n.valor_liquido|moeda }}</b></td>
+    <td class="small">{% if n.cancelada %}—{% elif r %}<span class="pill {{ 'ok' if not r.aberto else 'warn' }}">{{ 'recebido' if not r.aberto else 'em aberto' }}</span> venc. {{ r.vencimento.strftime('%d/%m/%Y') }}{% else %}<span class="pill neutral">não encontrado</span>{% endif %}</td>
+    <td class="small no-print" style="white-space:nowrap;"><a href="{{ url_for('nfse.ver', nid=n.id) }}">ver</a> · <a href="{{ url_for('nfse.pdf', nid=n.id) }}" target="_blank">PDF</a> · <a href="{{ url_for('nfse.xml', nid=n.id) }}">XML</a></td></tr>
+  {% else %}<tr class="empty-row"><td colspan="11">Nenhuma nota no período. Use “Buscar notas emitidas” para trazer da prefeitura.</td></tr>{% endfor %}
+</table></div></div>
+{% endblock %}

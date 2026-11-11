@@ -1,0 +1,20 @@
+{% if nota.empresa and nota.empresa.sistema == 'omie' %}
+{% if not nota.itens %}<div class="card" id="estoque" style="margin-top:14px;"><div class="section-head"><div><h2>Omie</h2></div></div>{% endif %}
+  {% set om = omie_info(nota) %}
+  <div class="banner {{ 'success' if nota.omie_concluido or nota.omie_conferido else 'info' }}" style="margin-top:12px; flex-wrap:wrap;">
+    <span><b>Omie (F. Diniz):</b>
+      {% if nota.omie_status %}{{ nota.omie_status }}{% if nota.omie_status_em %} <span class="small muted">· {{ nota.omie_status_em|datahora }}</span>{% endif %}
+      {% elif om.modo == 'conferido' %}ao lançar a nota, o sistema põe o card no Omie em “Conferido”, com a obra / centro de custo.
+      {% else %}ao dar entrada de todos os itens, o sistema conclui o Recebimento desta NF-e no Omie (estoque e contas a pagar lá).{% endif %}</span>
+    {% if not nota.omie_concluido and current_user.pode('almoxarife','compras') %}<form method="post" action="{{ url_for('notas.enviar_omie', nid=nota.id) }}" style="margin-left:auto;"><button class="btn sm">{{ 'Enviar de novo' if nota.omie_conferido else 'Enviar para o Omie' }}</button></form>{% endif %}
+    {% if om.faltam and om.deps and current_user.pode('almoxarife','compras') %}
+    <form method="post" action="{{ url_for('notas.omie_departamento', nid=nota.id) }}" style="width:100%; margin-top:6px;">
+      <div class="small" style="margin-bottom:4px;">Escolha o <b>departamento do Omie</b> de {{ 'cada obra' if om.faltam|length > 1 else 'da obra' }} (fica salvo para as próximas notas):</div>
+      {% for nome in om.faltam %}<div class="inline-form" style="margin-bottom:4px;"><input type="hidden" name="obra_nome" value="{{ nome }}"><span class="small" style="min-width:260px; display:inline-block;">{{ nome }}</span>
+        <select name="departamento" data-busca="Digite parte do nome do departamento"><option value="">escolha…</option>{% for c, n in om.deps %}<option value="{{ c }}">{{ n }}</option>{% endfor %}</select></div>{% endfor %}
+      <button class="btn sm">Salvar departamento</button></form>
+    {% elif not om.deps and nota.centro_custo_label and not nota.omie_concluido %}<div class="small" style="width:100%;">Os departamentos do Omie ainda não foram copiados: o administrador clica em <b>Atualizar do Omie</b> em <a href="{{ url_for('notas.omie_etapas') }}">Omie: etapas</a>.</div>{% endif %}
+    {% if om.modo == 'conferido' and not om.etapa and current_user.perfil_ativo == 'admin' %}<div class="small" style="width:100%;">Falta o código da etapa “Conferido”: <a href="{{ url_for('notas.omie_etapas') }}">configurar</a>.</div>{% endif %}
+  </div>
+{% if not nota.itens %}</div>{% endif %}
+{% endif %}

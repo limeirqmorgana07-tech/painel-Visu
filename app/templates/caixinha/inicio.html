@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block titulo %}Caixinha dos encarregados{% endblock %}
+{% block ctx %}Cartões pré-pagos · recargas, gastos com foto e alerta quando o saldo chega a 20% da última recarga{% endblock %}
+{% block acoes_topo %}{% if gerir %}<a class="btn ghost" href="{{ url_for('caixinha.relatorio') }}">Prestação de contas</a> <a class="btn ghost" href="{{ url_for('caixinha.categorias') }}">Categorias</a>{% endif %}{% endblock %}
+{% block conteudo %}
+<div class="cx-grid">
+  {% for c in cartoes %}{% set sit = sits[c.id] %}
+  <a class="card cx-card{% if sit.alerta %} cx-alerta{% endif %}{% if not c.ativo %} cx-inativo{% endif %}" href="{{ url_for('caixinha.cartao', cid=c.id) }}">
+    <div class="cx-topo"><b>{{ c.usuario.nome if c.usuario else '?' }}</b>{% if sit.alerta %}<span class="pill bad">saldo baixo</span>{% endif %}{% if not c.ativo %}<span class="pill neutral">inativo</span>{% endif %}</div>
+    <div class="small muted">{{ c.descricao or 'Cartão' }}{% if c.empresa %} · {{ c.empresa.nome }}{% endif %}</div>
+    <div class="cx-saldo">{{ sit.saldo|moeda }}</div>
+    {% include "caixinha/_barra.html" %}
+    <div class="small muted" style="margin-top:4px;">{% if sit.ultima_recarga %}{{ '%.0f'|format(sit.pct) }}% de {{ sit.base|moeda }} (recarga de {{ sit.ultima_recarga.data.strftime('%d/%m') }}) · alerta em {{ sit.limite|moeda }}{% else %}sem recarga ainda{% endif %}</div>
+    {% if sit.a_conferir or sit.devolvidos %}<div class="small" style="margin-top:6px;">{% if sit.a_conferir %}<span class="pill warn">{{ sit.a_conferir }} a conferir</span>{% endif %} {% if sit.devolvidos %}<span class="pill bad">{{ sit.devolvidos }} devolvido(s)</span>{% endif %}</div>{% endif %}
+  </a>
+  {% else %}<div class="card">Nenhum cartão cadastrado ainda.</div>{% endfor %}
+</div>
+{% if gerir %}
+<p class="small" style="margin-top:8px;">{% if mostrar == 'ativos' %}<a href="{{ url_for('caixinha.inicio', mostrar='todos') }}">mostrar também os inativos</a>{% else %}<a href="{{ url_for('caixinha.inicio') }}">só os ativos</a>{% endif %}</p>
+<div class="card" style="margin-top:14px;">
+  <h3 style="margin-top:0;">Novo cartão</h3>
+  <form method="post" action="{{ url_for('caixinha.cartao_salvar') }}" class="bi-filtros" style="margin:0;">
+    <div class="field"><label>Encarregado (usuário do sistema)</label><select name="usuario_id" required data-busca="Digite o nome"><option value="">—</option>{% for u in usuarios %}<option value="{{ u.id }}">{{ u.nome }} · {{ u.perfil_label }}</option>{% endfor %}</select></div>
+    <div class="field"><label>Empresa</label><select name="empresa_id"><option value="">—</option>{% for e in empresas %}<option value="{{ e.id }}">{{ e.nome }}</option>{% endfor %}</select></div>
+    <div class="field"><label>Identificação do cartão</label><input name="descricao" placeholder="ex.: Caixa final 1234"></div>
+    <div class="field" style="width:120px;"><label>Alerta em (%)</label><input name="alerta_pct" value="20" inputmode="decimal"></div>
+    <div class="btn-row"><button class="btn primary">Cadastrar</button></div>
+  </form>
+  <p class="small muted" style="margin:6px 0 0;">O encarregado precisa ter usuário no sistema para lançar os gastos pelo celular. O alerta vai para o WhatsApp dele e da diretoria (quem tiver o aviso do CallMeBot no cadastro) quando o saldo chegar ao % escolhido do valor disponível depois da última recarga.</p>
+</div>
+{% endif %}
+{% endblock %}

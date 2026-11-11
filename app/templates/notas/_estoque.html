@@ -1,0 +1,77 @@
+{% from "_macros.html" import busca_insumo %}
+{# Entrada no estoque direto pelos itens da nota (como o Recebimento de NF-e do Omie) #}
+{% if nota.itens %}
+<div class="card" id="estoque" style="margin-top:14px;">
+  <div class="section-head"><div><h2>Entrada no estoque</h2>
+    <p>{% if entrada.pendente %}Associe cada item a um insumo do catálogo, escolha o local de estoque e dê entrada. O custo unitário vem da nota.{% else %}Todos os itens desta nota já entraram no estoque.{% endif %}</p></div></div>
+  {% if entrada.pendente and current_user.pode('almoxarife','compras') %}
+  <form method="post" action="{{ url_for('notas.entrada_estoque', nid=nota.id) }}" id="fEntrada">
+  <div class="table-wrap table-card"><table>
+    <tr><th style="width:28px;"></th><th>Item da nota</th><th>Insumo do catálogo</th><th class="num">Qtd. a entrar</th>{% if entrada.obras %}<th>Obra do item</th>{% endif %}<th>Local de estoque</th></tr>
+    {% for l in entrada.linhas %}{% set ni = l.ni %}
+    <tr>
+      <td>{% if l.resta > 0 %}<input type="checkbox" name="entrar_{{ ni.id }}" value="1" checked>{% endif %}</td>
+      <td class="small">{{ ni.descricao }}<div class="muted">{{ ni.codigo }} · {{ ni.quantidade|qtd }} {{ ni.unidade }} · {{ ni.valor_unitario|moeda }}/{{ ni.unidade }}</div>
+        {% if l.feito %}<div><span class="pill {{ 'ok' if l.resta <= 0 else 'warn' }}">{{ 'entrou tudo' if l.resta <= 0 else 'já entrou ' ~ (l.feito|qtd) }}</span></div>{% endif %}</td>
+      <td style="min-width:260px;">{% if l.resta > 0 %}
+        {{ busca_insumo('insumo_' ~ ni.id, l.insumo, obrigatorio=False) }}
+        {% if l.motivo and l.motivo != 'associado' %}<div class="small muted">sugestão: {{ l.motivo }}</div>{% endif %}
+        <label class="small" style="display:inline-flex; align-items:center; gap:6px; margin-top:4px; cursor:pointer;"><input type="checkbox" name="novo_{{ ni.id }}" value="1" style="width:auto; margin:0;" {{ 'checked' if not l.insumo }}> cadastrar como novo insumo{% if not l.insumo %} <span class="muted">(não achei igual no catálogo: entra como “{{ ni.descricao|upper }}” — ou escolha outro na busca)</span>{% endif %}</label>
+        {% else %}<span class="small">{{ l.insumo.nome if l.insumo else '—' }}</span>{% endif %}</td>
+      <td class="num">{% if l.resta > 0 %}<input name="qtd_{{ ni.id }}" value="{{ l.resta|qtd }}" inputmode="decimal" style="width:90px; text-align:right;"> <span class="small muted">{{ ni.unidade }}</span>{% else %}—{% endif %}</td>
+      {% if entrada.obras %}<td><select name="obra_item_{{ ni.id }}" class="obra-item" style="min-width:200px;">{% for k, rot, dep in entrada.obras %}<option value="{{ k }}" data-dep="{{ dep }}" {{ 'selected' if k == l.obra }}>{{ rot }}</option>{% endfor %}</select></td>{% endif %}
+      <td>{% if l.resta > 0 %}<select name="dep_{{ ni.id }}">{% for d in entrada.deps %}<option value="{{ d.id }}" {{ 'selected' if d.id == l.dep.id }}>{{ d.nome }}</option>{% endfor %}</select>{% endif %}</td>
+    </tr>
+    {% endfor %}
+  </table></div>
+  <div id="avisoEntrada" class="banner danger" style="display:none; margin-top:10px;"></div>
+  <div class="btn-row" style="margin-top:10px;"><button class="btn primary">Dar entrada no estoque</button>
+    <span class="small muted">Desmarque o que não quer lançar agora. {% if entrada.obras %}Escolha a obra de cada item: o local muda para o depósito dessa obra.{% else %}Se a nota for de uma obra, o local padrão é o depósito da obra.{% endif %}</span></div>
+  </form>
+  <script>
+  // antes de enviar: aponta os itens marcados sem insumo escolhido (digitar não basta: é preciso clicar numa opção da lista)
+  document.getElementById('fEntrada').addEventListener('submit', function(e){
+    var faltam = [];
+    this.querySelectorAll('input[name^="entrar_"]:checked').forEach(function(cb){
+      var tr = cb.closest('tr'), id = cb.name.slice(7);
+      var ins = tr.querySelector('input[type=hidden][name="insumo_' + id + '"]'), novo = tr.querySelector('input[name="novo_' + id + '"]');
+      tr.style.background = '';
+      if ((!ins || !ins.value) && !(novo && novo.checked)) { faltam.push(tr.querySelector('td.small').firstChild.textContent.trim()); tr.style.background = '#FEF2F2'; }
+    });
+    var aviso = document.getElementById('avisoEntrada');
+    if (faltam.length) {
+      e.preventDefault();
+      aviso.style.display = 'block';
+      aviso.innerHTML = '<span><b>Falta escolher o insumo</b> (clique numa opção da lista que aparece ao digitar) ou marcar “cadastrar como novo insumo” em: ' + faltam.join('; ') + '. Ou desmarque esses itens para lançar só os outros.</span>' +
+        '<button type="button" class="btn sm primary" id="bNovosFaltam" style="margin-left:auto;">Cadastrar esses como novos e dar entrada</button>';
+      var form = this;
+      document.getElementById('bNovosFaltam').addEventListener('click', function(){
+        form.querySelectorAll('input[name^="entrar_"]:checked').forEach(function(cb){
+          var tr = cb.closest('tr'), id = cb.name.slice(7), ins = tr.querySelector('input[type=hidden][name="insumo_' + id + '"]'), novo = tr.querySelector('input[name="novo_' + id + '"]');
+          if ((!ins || !ins.value) && novo) novo.checked = true;
+        });
+        form.submit();
+      });
+      aviso.scrollIntoView({block: 'center'});
+    }
+  });
+  </script>
+  {% if entrada.obras %}<script>
+  document.querySelectorAll('select.obra-item').forEach(function(s){ s.addEventListener('change', function(){
+    var dep = s.options[s.selectedIndex].dataset.dep, d = s.closest('tr').querySelector('select[name^="dep_"]');
+    if (d && dep && d.querySelector('option[value="' + dep + '"]')) d.value = dep; }); });
+  </script>{% endif %}
+  {% endif %}
+  {% include 'notas/_omie_banner.html' %}
+  {% if entrada.movs %}
+  <h3 style="font-size:14px; margin:14px 0 6px;">Entradas lançadas por esta nota</h3>
+  <div class="table-wrap table-card"><table>
+    <tr><th>Data</th><th>Insumo</th><th class="num">Qtd.</th><th>Local</th><th>Por</th><th></th></tr>
+    {% for m in entrada.movs %}<tr><td class="small">{{ m.data|datahora }}</td><td class="small">{{ m.insumo.nome }}</td><td class="num">{{ m.quantidade|qtd }} {{ m.insumo.unidade }}</td>
+      <td class="small">{{ m.destino.nome if m.destino else '—' }}</td><td class="small">{{ m.usuario }}</td>
+      <td>{% if m.estornada_em %}<span class="pill bad">estornada</span>{% elif m.estornavel and current_user.pode('almoxarife') %}<a class="btn ghost sm" href="{{ url_for('estoque.estornar', mid=m.id) }}">Estornar</a>{% endif %}</td></tr>{% endfor %}
+  </table></div>
+  {% endif %}
+</div>
+{% endif %}
+{% if not nota.itens %}{% include 'notas/_omie_banner.html' %}{% endif %}

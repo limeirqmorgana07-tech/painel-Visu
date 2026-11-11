@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% from "_macros.html" import pill_prioridade %}
+{% block titulo %}Rota do motorista{% endblock %}
+{% block ctx %}{{ total }} parada(s) · de {{ ini.strftime('%d/%m') }} a {{ fim.strftime('%d/%m/%Y') }} · uma parada por obra, na ordem do horário limite{% endblock %}
+{% block acoes_topo %}{% if current_user.pode('almoxarife') %}<a class="btn" href="{{ url_for('solicitacoes.quadro') }}">Quadro (kanban)</a> {% endif %}<button class="btn ghost" onclick="window.print()">Imprimir rota</button>{% endblock %}
+{% block conteudo %}
+<style>
+  .parada{border-left:4px solid var(--line,#E2E8F0); padding:12px; margin-bottom:10px;}
+  .parada.p0{border-left-color:var(--danger,#b91c1c);} .parada.p1{border-left-color:#D97706;}
+  .parada .num{display:inline-flex; align-items:center; justify-content:center; width:26px; height:26px; border-radius:50%;
+    background:var(--brand,#0F2A4A); color:#fff; font-weight:700; font-size:13px; margin-right:6px;}
+  .parada .end{font-size:15px; margin:4px 0;}
+  .dia h2{font-size:17px; margin:8px 0;} .dia.atraso h2{color:var(--danger,#b91c1c);}
+  @media print{ .no-print, .sidebar, nav, .btn, form.toolbar{display:none !important;} .parada{break-inside:avoid;} }
+</style>
+<div class="card no-print" id="gpsCard" style="padding:10px 12px; margin-bottom:10px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+  <button type="button" class="btn primary" id="gpsBtn">📍 Compartilhar minha localização</button>
+  <span class="small muted" id="gpsStatus">O escritório acompanha o caminhão no mapa enquanto esta tela ficar aberta.</span>
+  {% if current_user.pode('almoxarife') %}<a class="btn ghost sm" href="{{ url_for('rastreio.mapa') }}" style="margin-left:auto;">🚚 Caminhão ao vivo</a>{% endif %}
+</div>
+<script>
+(function(){
+  var btn = document.getElementById('gpsBtn'), st = document.getElementById('gpsStatus'), watch = null, trava = null, ultimo = 0;
+  var URL = {{ url_for('rastreio.posicao')|tojson }};
+  function enviar(p){
+    if (Date.now() - ultimo < 25000) return;
+    ultimo = Date.now();
+    var f = new FormData(); f.append('lat', p.coords.latitude); f.append('lng', p.coords.longitude);
+    f.append('prec', p.coords.accuracy || ''); if (p.coords.speed != null) f.append('vel', p.coords.speed);
+    fetch(URL, {method: 'POST', body: f, headers: {'X-Requested-With': 'fetch'}}).then(function(r){ return r.json(); })
+      .then(function(j){ st.textContent = j.ok ? 'Localização ligada · última enviada às ' + new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'}) + '. Deixe esta tela aberta.' : j.msg; })
+      .catch(function(){ st.textContent = 'Sem internet agora — tentando de novo.'; });
+  }
+  function manterTela(){ if ('wakeLock' in navigator) navigator.wakeLock.request('screen').then(function(w){ trava = w; }).catch(function(){}); }
+  function ligar(){
+    if (!navigator.geolocation) { st.textContent = 'Este celular não permite localização pelo navegador.'; return; }
+    watch = navigator.geolocation.watchPosition(enviar, function(e){ st.textContent = e.code === 1 ? 'Permita o acesso à localização para o navegador (configurações do celular).' : 'Procurando o GPS…'; },
+      {enableHighAccuracy: true, maximumAge: 15000, timeout: 30000});
+    manterTela(); btn.textContent = '⏹ Parar de compartilhar'; btn.classList.remove('primary');
+    try { localStorage.setItem('vd_gps', '1'); } catch (e) {}
+  }
+  function desligar(){
+    if (watch !== null) navigator.geolocation.clearWatch(watch); watch = null;
+    if (trava) { trava.release(); trava = null; }
+    btn.textContent = '📍 Compartilhar minha localização'; btn.classList.add('primary'); st.textContent = 'Localização desligada.';
+    try { localStorage.removeItem('vd_gps'); } catch (e) {}
+  }
+  btn.addEventListener('click', function(){ watch === null ? ligar() : desligar(); });
+  document.addEventListener('visibilitychange', function(){ if (document.visibilityState === 'visible' && watch !== null) manterTela(); });
+  try { if (localStorage.getItem('vd_gps') === '1') ligar(); } catch (e) {}
+})();
+</script>
+<form class="toolbar no-print" method="get">
+  <label class="small">De <input type="date" name="de" value="{{ ini.isoformat() }}" onchange="this.form.submit()"></label>
+  <label class="small">até <input type="date" name="ate" value="{{ fim.isoformat() }}" onchange="this.form.submit()"></label>
+  {% set seg = hoje - timedelta(days=hoje.weekday()) %}
+  <a class="btn sm ghost" href="{{ url_for('solicitacoes.rota', de=hoje.isoformat(), ate=hoje.isoformat(), ver=request.args.get('ver')) }}">Hoje</a>
+  <a class="btn sm ghost" href="{{ url_for('solicitacoes.rota', de=(hoje + timedelta(days=1)).isoformat(), ate=(hoje + timedelta(days=1)).isoformat(), ver=request.args.get('ver')) }}">Amanhã</a>
+  <a class="btn sm ghost" href="{{ url_for('solicitacoes.rota', de=seg.isoformat(), ate=(seg + timedelta(days=5)).isoformat(), ver=request.args.get('ver')) }}">Esta semana</a>
+  <a class="btn sm ghost" href="{{ url_for('solicitacoes.rota', de=(seg + timedelta(days=7)).isoformat(), ate=(seg + timedelta(days=12)).isoformat(), ver=request.args.get('ver')) }}">Próxima semana</a>
+  <select name="ver" onchange="this.form.submit()">
+    <option value="prontas" {{ 'selected' if so_prontas }}>Só material pronto para levar</option>
+    <option value="todas" {{ 'selected' if not so_prontas }}>Todas em aberto (inclui aguardando compra)</option></select>
+</form>
+{% for g in grupos %}
+<div class="dia {{ 'atraso' if g.chave == 'atrasadas' }}" style="margin-bottom:18px;">
+  <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+    <h2>{{ g.titulo }} <span class="small muted">({{ g.paradas|length }} parada{{ 's' if g.paradas|length != 1 }})</span></h2>
+    {% if g.link_rota %}<a class="btn sm primary no-print" href="{{ g.link_rota }}" target="_blank" rel="noopener">Abrir a rota do dia no Google Maps</a>{% endif %}
+  </div>
+  {% if g.sem_endereco %}<p class="small" style="color:#B45309; margin:0 0 8px;">{{ g.sem_endereco }} obra(s) sem endereço cadastrado — ficam fora do mapa. Peça ao administrador para preencher em Obras → Editar.</p>{% endif %}
+  {% for p in g.paradas %}{% set o = p.obra %}
+  <div class="card parada p{{ p.prioridade }}">
+    <div style="display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+      <div><span class="num">{{ loop.index }}</span><b>{{ o.nome }}</b>
+        {% if p.prioridade == 0 %}{{ pill_prioridade('Urgente') }}{% elif p.prioridade == 1 %}{{ pill_prioridade('Alta') }}{% endif %}</div>
+      <div style="font-weight:700;">{% if p.hora %}entregar até {{ p.hora }}{% else %}<span class="muted" style="font-weight:400;">sem horário</span>{% endif %}</div>
+    </div>
+    <div class="end">{% if o.endereco_completo %}📍 {{ o.endereco_completo }} · <a href="{{ o.link_mapa }}" target="_blank" rel="noopener">abrir no mapa</a>{% else %}<span class="muted">📍 sem endereço cadastrado</span>{% endif %}</div>
+    {% if o.referencia %}<div class="small">Referência: {{ o.referencia }}</div>{% endif %}
+    <div class="small">
+      {% set contatos = p.sols|map(attribute='entrega_contato')|select|unique|list %}
+      <b>Recebe:</b> {{ (contatos|join(' · ')) or o.contato_obra or '—' }}{% if o.responsavel %} · encarregado: {{ o.responsavel }}{% endif %}
+    </div>
+    <ul class="small" style="margin:6px 0 0 16px; padding:0;">
+      {% for s in p.sols %}{% for i in s.itens if (i.qtd_reservada or 0) > 0 or (not so_prontas and (i.qtd_pendente_compra or 0) > 0) %}
+      <li>{{ i.insumo.nome }} — {% if (i.qtd_reservada or 0) > 0 %}<b>{{ i.qtd_reservada|qtd }} {{ i.insumo.unidade }}</b>{% if i.separado %} <span class="pill ok">separado</span>{% else %} <span class="pill warn">falta separar</span>{% endif %}{% endif %}
+        {% if (i.qtd_pendente_compra or 0) > 0 %}<span class="muted">· {{ i.qtd_pendente_compra|qtd }} aguardando compra</span>{% endif %}
+        <span class="muted">({{ s.numero }})</span></li>
+      {% endfor %}{% endfor %}
+    </ul>
+    {% set fotos_parada = [] %}{% for s in p.sols %}{% for f in s.fotos if f.tipo == 'carregamento' %}{% set _ = fotos_parada.append(f) %}{% endfor %}{% endfor %}
+    <div class="no-print" style="margin-top:8px; display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+      {% if fotos_parada %}<span class="pill ok">📷 {{ fotos_parada|length }} foto(s) do carregamento</span>
+        {% for f in fotos_parada[-3:] %}<a href="{{ url_for('solicitacoes.foto', fid=f.id) }}" target="_blank"><img src="{{ url_for('solicitacoes.foto', fid=f.id) }}" alt="foto" loading="lazy" style="width:56px; height:42px; object-fit:cover; border-radius:6px;"></a>{% endfor %}{% endif %}
+      <form method="post" action="{{ url_for('solicitacoes.fotos') }}" enctype="multipart/form-data" class="inline-form">
+        {% for s in p.sols %}<input type="hidden" name="sid" value="{{ s.id }}">{% endfor %}
+        <input type="hidden" name="tipo" value="carregamento"><input type="hidden" name="voltar" value="{{ request.full_path }}">
+        <label class="btn sm {{ '' if fotos_parada else 'primary' }}" style="cursor:pointer;">📷 {{ 'Mais uma foto' if fotos_parada else 'Foto do carregamento' }}
+          <input type="file" name="foto" accept="image/*" capture="environment" multiple hidden onchange="this.form.submit()"></label>
+      </form>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="card"><p class="muted">Nenhuma entrega {{ 'com material pronto' if so_prontas else 'em aberto' }} de {{ ini.strftime('%d/%m') }} a {{ fim.strftime('%d/%m/%Y') }}.</p></div>
+{% endfor %}
+{% endblock %}

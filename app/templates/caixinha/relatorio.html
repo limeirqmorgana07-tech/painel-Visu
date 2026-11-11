@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block titulo %}Caixinha · prestação de contas{% endblock %}
+{% block ctx %}Gastos dos cartões por obra / centro de custo e por categoria{% endblock %}
+{% block acoes_topo %}<a class="btn ghost" href="{{ url_for('caixinha.inicio') }}">← Cartões</a> <a class="btn ghost" href="{{ url_for('caixinha.relatorio', de=ini.isoformat(), ate=fim.isoformat(), empresa=emp or '', cartao=cid or '', excel=1) }}">Exportar Excel</a>{% endblock %}
+{% block conteudo %}
+<form method="get" class="card bi-filtros">
+  <div class="field"><label>De</label><input type="date" name="de" value="{{ ini.isoformat() }}"></div>
+  <div class="field"><label>Até</label><input type="date" name="ate" value="{{ fim.isoformat() }}"></div>
+  <div class="field"><label>Empresa</label><select name="empresa"><option value="">Todas</option>{% for e in empresas %}<option value="{{ e.id }}" {{ 'selected' if emp == e.id }}>{{ e.nome }}</option>{% endfor %}</select></div>
+  <div class="field"><label>Cartão</label><select name="cartao"><option value="">Todos</option>{% for c in cartoes %}<option value="{{ c.id }}" {{ 'selected' if cid == c.id }}>{{ c.nome }}</option>{% endfor %}</select></div>
+  <div class="btn-row"><button class="btn primary">Ver</button></div>
+</form>
+<div class="grid cols-2" style="align-items:start; margin-top:14px;">
+  <div class="card"><h3 style="margin-top:0;">Por obra / centro de custo</h3><div class="table-wrap"><table>
+    {% for k, v in r.por_cc %}<tr><td>{{ k }}</td><td class="num">{{ v|moeda }}</td></tr>{% else %}<tr class="empty-row"><td>Sem gastos no período.</td></tr>{% endfor %}
+    <tr><th>Total</th><th class="num">{{ r.total|moeda }}</th></tr></table></div></div>
+  <div class="card"><h3 style="margin-top:0;">Por categoria</h3><div class="table-wrap"><table>
+    {% for k, v in r.por_cat %}<tr><td>{{ k }}</td><td class="num">{{ v|moeda }}</td></tr>{% else %}<tr class="empty-row"><td>—</td></tr>{% endfor %}</table></div></div>
+</div>
+<div class="card" style="margin-top:14px;"><h3 style="margin-top:0;">Gastos ({{ r.movs|length }})</h3><div class="table-wrap"><table>
+  <tr><th>Data</th><th>Encarregado</th><th>Obra / centro de custo</th><th>Categoria</th><th>Descrição</th><th class="num">Valor</th><th>Situação</th><th>Foto</th></tr>
+  {% for m in r.movs %}<tr><td class="small">{{ m.data.strftime('%d/%m/%Y') }}</td><td class="small">{{ m.cartao.usuario.nome if m.cartao.usuario else '' }}</td><td class="small">{{ m.cc }}</td><td class="small">{{ m.categoria }}</td><td class="small">{{ m.descricao or '' }}</td><td class="num">{{ m.valor|moeda }}</td>
+    <td><span class="pill {{ {'enviado':'warn','conferido':'ok','devolvido':'bad'}[m.status] }}">{{ status[m.status] }}</span></td>
+    <td>{% if m.foto %}<a href="{{ url_for('caixinha.foto', mid=m.id) }}" target="_blank">ver</a>{% endif %}</td></tr>{% endfor %}
+</table></div></div>
+{% endblock %}

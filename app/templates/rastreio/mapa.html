@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block titulo %}Caminhão ao vivo{% endblock %}
+{% block ctx %}Posição do motorista pelo GPS do celular · atualiza sozinho a cada 20 segundos{% endblock %}
+{% block acoes_topo %}<a class="btn ghost" href="{{ url_for('solicitacoes.rota') }}">Rota do motorista</a>{% endblock %}
+{% block conteudo %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<div class="grid cols-2" style="grid-template-columns:3fr 1fr; align-items:start;">
+  <div class="card" style="padding:0; overflow:hidden;"><div id="mapa" style="height:calc(100vh - 230px); min-height:420px;"></div></div>
+  <div class="card"><h3 style="margin-top:0;">Motoristas</h3><div id="lista" class="small muted">Carregando…</div>
+    <p class="small muted" id="atualizado" style="margin-top:10px;"></p>
+    <p class="small muted">A posição só chega enquanto o motorista estiver com a <b>Rota do motorista</b> aberta no celular e o botão <b>Compartilhar minha localização</b> ligado (com a tela ligada). Sem sinal por mais de 3 min, aparece como “sem atualização”.</p></div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+(function(){
+  var mapa = L.map('mapa').setView([-8.0476, -34.877], 12);   // Recife
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 19, attribution: '&copy; OpenStreetMap'}).addTo(mapa);
+  var camadas = {}, primeiro = true;
+  function icone(vivo){ return L.divIcon({className: '', html: '<div style="font-size:26px; filter:' + (vivo ? 'none' : 'grayscale(1)') + ';">🚚</div>', iconSize: [30, 30], iconAnchor: [15, 15]}); }
+  function atualizar(){
+    fetch({{ url_for('rastreio.dados')|tojson }}).then(function(r){ return r.json(); }).then(function(d){
+      var lista = document.getElementById('lista'), limites = [];
+      lista.innerHTML = d.veiculos.length ? '' : 'Nenhum motorista compartilhando a localização nas últimas 12 horas.';
+      var vistos = {};
+      d.veiculos.forEach(function(v){
+        vistos[v.nome] = 1;
+        var c = camadas[v.nome];
+        if (!c) { c = camadas[v.nome] = {m: L.marker([v.lat, v.lng]).addTo(mapa), t: L.polyline([], {color: '#2F6D8F', weight: 4, opacity: .7}).addTo(mapa)}; }
+        c.m.setLatLng([v.lat, v.lng]).setIcon(icone(v.ao_vivo)).bindPopup('<b>' + v.nome + '</b><br>' + v.hora + (v.velocidade != null ? ' · ' + Math.round(v.velocidade) + ' km/h' : ''));
+        c.t.setLatLngs(v.trajeto);
+        limites.push([v.lat, v.lng]);
+        var li = document.createElement('div'); li.style.cssText = 'padding:6px 0; border-bottom:1px solid #EEF0F3; cursor:pointer; color:#111827;';
+        li.innerHTML = '<b>' + (v.ao_vivo ? '🟢 ' : '⚪ ') + v.nome + '</b><br><span class="muted">' + (v.ao_vivo ? 'ao vivo · ' + v.hora : 'sem atualização há ' + v.minutos + ' min (' + v.hora + ')') + (v.velocidade != null && v.ao_vivo ? ' · ' + Math.round(v.velocidade) + ' km/h' : '') + '</span>' +
+          '<br><a target="_blank" href="https://www.google.com/maps?q=' + v.lat + ',' + v.lng + '">abrir no Google Maps</a>';
+        li.addEventListener('click', function(){ mapa.setView([v.lat, v.lng], 15); c.m.openPopup(); });
+        lista.appendChild(li);
+      });
+      Object.keys(camadas).forEach(function(n){ if (!vistos[n]) { mapa.removeLayer(camadas[n].m); mapa.removeLayer(camadas[n].t); delete camadas[n]; } });
+      if (primeiro && limites.length) { mapa.fitBounds(limites, {maxZoom: 15, padding: [40, 40]}); primeiro = false; }
+      document.getElementById('atualizado').textContent = 'Atualizado às ' + d.agora;
+    }).catch(function(){ document.getElementById('atualizado').textContent = 'Sem conexão — tentando de novo…'; });
+  }
+  atualizar(); setInterval(atualizar, 20000);
+})();
+</script>
+{% endblock %}

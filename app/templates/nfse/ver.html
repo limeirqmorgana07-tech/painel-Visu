@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block titulo %}NFS-e {{ n.numero }}{% endblock %}
+{% block ctx %}{{ n.empresa.nome }} · emitida em {{ n.data_emissao.strftime('%d/%m/%Y %H:%M') if n.data_emissao else '—' }}{% if n.cancelada %} · CANCELADA{% endif %}{% endblock %}
+{% block acoes_topo %}<a class="btn ghost" href="{{ url_for('nfse.lista') }}">← Notas de serviço</a> <a class="btn primary" href="{{ url_for('nfse.pdf', nid=n.id) }}" target="_blank" title="{{ 'DANFSe no padrão nacional' if n.xml_nacional else 'Resumo (falta o XML nacional: clique em Buscar notas)' }}">Ver PDF{% if not n.xml_nacional %} (resumo){% endif %}</a> <a class="btn" href="{{ url_for('nfse.pdf', nid=n.id, baixar=1) }}">Baixar PDF</a> <a class="btn" href="{{ url_for('nfse.xml', nid=n.id) }}">Baixar XML</a> <button class="btn ghost" onclick="window.print()">Imprimir</button>{% endblock %}
+{% block conteudo %}
+{% if n.cancelada %}<div class="banner danger no-print"><span>Nota cancelada{% if n.cancelada_em %} em {{ n.cancelada_em.strftime('%d/%m/%Y') }}{% endif %}.</span></div>{% endif %}
+<div class="grid cols-2">
+  <div class="card"><h2 style="font-size:15px;">Nota</h2><table class="small">
+    <tr><td class="muted">Número</td><td><b>{{ n.numero }}</b></td></tr>
+    <tr><td class="muted">Código de verificação</td><td>{{ n.codigo_verificacao or '—' }}</td></tr>
+    {% if n.chave %}<tr><td class="muted">Chave de acesso (nacional)</td><td style="word-break:break-all;">{{ n.chave }}</td></tr>{% endif %}
+    <tr><td class="muted">Competência</td><td>{{ n.competencia.strftime('%m/%Y') if n.competencia else '—' }}</td></tr>
+    <tr><td class="muted">RPS</td><td>{{ n.rps or '—' }}</td></tr>
+    <tr><td class="muted">Item do serviço</td><td>{{ n.item_servico or '—' }}</td></tr>
+    <tr><td class="muted">Tomador</td><td>{{ n.tomador_nome }}<br>{{ n.tomador_doc or '' }}</td></tr></table></div>
+  <div class="card"><h2 style="font-size:15px;">Valores</h2><table class="small">
+    {% for rot, v in (('Serviços', n.valor_servicos), ('Deduções', n.valor_deducoes), ('PIS', n.valor_pis), ('COFINS', n.valor_cofins), ('INSS', n.valor_inss), ('IR', n.valor_ir), ('CSLL', n.valor_csll)) %}
+    <tr><td class="muted">{{ rot }}</td><td class="num">{{ v|moeda }}</td></tr>{% endfor %}
+    <tr><td class="muted">ISS{% if n.aliquota %} ({{ n.aliquota }}){% endif %}</td><td class="num">{{ n.valor_iss|moeda }}{{ ' · retido' if n.iss_retido }}</td></tr>
+    <tr><td><b>Líquido</b></td><td class="num"><b>{{ n.valor_liquido|moeda }}</b></td></tr></table></div>
+</div>
+<div class="card" style="margin-top:14px;"><h2 style="font-size:15px;">Discriminação</h2><p class="small" style="white-space:pre-wrap;">{{ n.discriminacao or '—' }}</p></div>
+<div class="grid cols-2" style="margin-top:14px;">
+  <form method="post" class="card no-print"><h2 style="font-size:15px;">Obra / centro de custo</h2>
+    <div class="bi-filtros" style="margin:0;"><div class="field" style="flex:1;"><input name="obra" value="{{ n.obra or '' }}" placeholder="nome da obra"></div><div class="btn-row"><button class="btn sm">Salvar</button></div></div></form>
+  <div class="card"><h2 style="font-size:15px;">Recebimento</h2>
+    {% if n.cancelada %}<p class="small muted">Nota cancelada.</p>
+    {% elif receb %}<p class="small">{{ receb.nome }} · {{ receb.valor|moeda }} · venc. {{ receb.vencimento.strftime('%d/%m/%Y') }} · <span class="pill {{ 'ok' if not receb.aberto else 'warn' }}">{{ 'recebido' if not receb.aberto else 'em aberto' }}</span></p>
+    {% else %}<p class="small muted">Nenhuma parcela do contas a receber com o mesmo cliente e valor.</p>{% endif %}</div>
+</div>
+{% endblock %}

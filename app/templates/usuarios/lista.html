@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block titulo %}Usuários e permissões{% endblock %}
+{% block acoes_topo %}<a class="btn primary" href="{{ url_for('usuarios.form') }}">Novo usuário</a>{% endblock %}
+{% block conteudo %}
+<div class="banner {{ 'success' if editor else 'info' }}" style="margin-bottom:12px; flex-wrap:wrap; align-items:center;">
+  <span>{% if editor %}<b>Permissões travadas:</b> só <b>{{ editor.nome }}</b> altera o menu, o perfil e a alçada de cada usuário.
+    {% else %}Hoje qualquer administrador pode mudar o menu, o perfil e a alçada dos usuários.{% endif %}</span>
+  {% if pode_perm %}<form method="post" action="{{ url_for('usuarios.travar_permissoes') }}" style="margin-left:auto;">
+    {% if editor %}<button class="btn ghost sm" name="acao" value="liberar">Liberar para os outros administradores</button>
+    {% else %}<button class="btn primary sm" name="acao" value="travar">Só eu posso alterar o que cada um vê</button>{% endif %}</form>{% endif %}
+</div>
+<div class="table-wrap"><table>
+  <tr><th>Nome</th><th>Login</th><th>Perfil</th><th>WhatsApp</th><th>Situação</th><th></th></tr>
+  {% for u in usuarios %}
+  <tr><td>{{ u.nome }}</td><td class="num small">{{ u.login }}</td><td>{{ u.perfil_label }}{% if u.limite_aprovacao %} <span class="pill warn">aprova {{ 'sem limite' if u.aprova_sem_limite else 'até ' ~ (u.aprova_ate|moeda) }}</span>{% endif %}</td><td class="small">{{ u.telefone or '—' }}{% if u.aviso_compras %} <span class="pill neutral" title="Recebe aviso de pedidos de compra">🛒 compras</span>{% endif %}{% if u.alerta_estoque %} <span class="pill neutral" title="Recebe alerta de estoque crítico">⚠ estoque</span>{% endif %}{% if u.aviso_reserva %} <span class="pill neutral" title="Recebe aviso de reserva de material">📦 reserva</span>{% endif %}</td>
+    <td>{% if u.ativo %}<span class="pill ok">ativo</span>{% else %}<span class="pill neutral">inativo</span>{% endif %}</td>
+    <td style="white-space:nowrap;"><a class="btn ghost sm" href="{{ url_for('usuarios.form', uid=u.id) }}">Editar</a>
+      <a class="btn ghost sm" href="{{ url_for('usuarios.menu', uid=u.id) }}">Menu{% set _n = menu_oculto(u)|length %}{% if _n %} <span class="pill warn">{{ _n }} oculto(s)</span>{% endif %}</a>
+      {% if u.id != current_user.id %}<form method="post" action="{{ url_for('usuarios.senha_provisoria', uid=u.id) }}" style="display:inline" onsubmit="return confirm('Gerar uma senha provisória nova para {{ u.nome }}? A senha atual deixa de funcionar.')"><button class="btn sm">Gerar senha provisória</button></form>{% endif %}</td></tr>
+  {% endfor %}
+</table></div>
+<div class="card" style="margin-top:14px;">
+  <h3 style="font-size:14px; margin-bottom:8px;">O que cada perfil pode fazer</h3>
+  {% for k, v in permissoes.items() %}<div class="kv"><span class="k">{{ perfis[k] }}</span><span style="text-align:right;">{{ v }}</span></div>{% endfor %}
+</div>
+{% endblock %}

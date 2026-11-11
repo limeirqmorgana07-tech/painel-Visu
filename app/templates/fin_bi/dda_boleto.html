@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block titulo %}Boleto do DDA · {{ b.beneficiario or 'sem nome' }}{% endblock %}
+{% block ctx %}Vencimento {{ b.vencimento.strftime('%d/%m/%Y') }} · {{ b.valor|moeda }}{% if b.arquivo %} · arquivo {{ b.arquivo }}{% endif %}{% endblock %}
+{% block acoes_topo %}<a class="btn ghost" href="{{ url_for('fin_bi.dda') }}">← DDA</a>{% endblock %}
+{% block conteudo %}
+{% include "fin_bi/_abas.html" %}
+{% set t = b.titulo %}
+<div class="card" style="margin-bottom:14px;">
+  <p><b>Situação:</b> {% if b.ignorado %}<span class="pill neutral">Ignorado</span>{% elif t %}<span class="pill ok">Lançado</span> {{ t.empresa.nome }} · {{ t.nome }} · venc. {{ t.vencimento.strftime('%d/%m/%Y') if t.vencimento else '—' }} · {{ t.valor|moeda }} · {{ t.status }}{% elif (b.conferir or 0) > 1 %}<span class="pill warn">Conferir</span> há {{ b.conferir }} contas a pagar igualmente possíveis (mesmo valor e fornecedor) — escolha abaixo qual é a deste boleto.{% else %}<span class="pill bad">Falta lançar</span> nenhuma conta a pagar corresponde a este boleto.{% endif %}
+  {% if b.manual %}<span class="small muted">(definido à mão)</span>{% endif %}</p>
+  {% if b.linha %}<p class="small">Linha digitável: <code>{{ b.linha }}</code></p>{% endif %}
+  <div class="btn-row">
+    {% if not b.ignorado %}<form method="post" class="inline-form"><input type="hidden" name="acao" value="ignorar"><button class="btn sm">Ignorar este boleto</button></form>{% endif %}
+    {% if b.manual %}<form method="post" class="inline-form"><input type="hidden" name="acao" value="automatico"><button class="btn sm">Voltar para a conferência automática</button></form>{% endif %}
+    <form method="post" class="inline-form" onsubmit="return confirm('Excluir este boleto da lista do DDA?');"><input type="hidden" name="acao" value="excluir"><button class="btn sm danger">Excluir</button></form>
+  </div>
+</div>
+<div class="card" style="margin-bottom:14px;"><div class="section-head"><div><h2>Procurar a conta a pagar</h2><p>Pelo nº da nota ou do documento, pelo fornecedor, pelo valor ou pela OC, e/ou pelo período de vencimento{% if b.documento %} · nº do documento deste boleto: <b>{{ b.documento }}</b>{% endif %}</p></div></div>
+  <form method="get" class="bi-filtros" style="margin:0;">
+    <div class="field" style="flex:1; min-width:260px;"><label>Procurar</label><input type="search" name="q" value="{{ busca }}" placeholder="ex.: 39499, MAFEMA, 265,20 (ou deixe em branco e use o período)" autofocus></div>
+    <div class="field"><label>Vencimento de</label><input type="date" name="de" value="{{ de.isoformat() if de else '' }}"></div>
+    <div class="field"><label>até</label><input type="date" name="ate" value="{{ ate.isoformat() if ate else '' }}"></div>
+    <label class="small" style="align-self:center;"><input type="checkbox" name="so_empresa" value="1" {{ 'checked' if request.args.get('so_empresa') }} style="width:auto;"> só da empresa do boleto</label>
+    <label class="small" style="align-self:center;"><input type="checkbox" name="abertos" value="1" {{ 'checked' if request.args.get('abertos') }} style="width:auto;"> só em aberto</label>
+    <div class="btn-row"><button class="btn primary">Procurar</button>{% if b.documento and not busca %}<a class="btn ghost" href="{{ url_for('fin_bi.dda_boleto', bid=b.id, q=b.documento) }}">Procurar pelo nº {{ b.documento }}</a>{% endif %}</div>
+  </form>
+  {% if achados is not none %}
+  <div class="table-wrap" style="margin-top:10px;"><table><tr><th>Empresa</th><th>Favorecido</th><th>Nº doc. / nota</th><th>Centro de custo</th><th>Vencimento</th><th class="num">Valor</th><th>Situação</th><th></th></tr>
+  {% for c in achados %}<tr><td class="small">{{ c.empresa.nome.split(' ')[0] }}</td><td>{{ c.nome }}</td><td class="small">{{ c.documento or '—' }}{% if c.parcela %} · parc. {{ c.parcela }}{% endif %}</td><td class="small">{{ c.centro_custo or '—' }}</td><td class="small">{{ c.vencimento.strftime('%d/%m/%Y') if c.vencimento else '—' }}</td><td class="num">{{ c.valor|moeda }}</td><td><span class="pill {{ 'warn' if c.aberto else 'ok' }}">{{ c.status }}</span></td>
+    <td><form method="post" action="{{ url_for('fin_bi.dda_boleto', bid=b.id) }}" class="inline-form"><input type="hidden" name="acao" value="vincular"><input type="hidden" name="titulo_id" value="{{ c.id }}"><button class="btn sm primary">É este</button></form></td></tr>
+  {% else %}<tr class="empty-row"><td colspan="8">Nada encontrado{% if busca %} para “{{ busca }}”{% endif %}. Se acabou de lançar, use ↻ Atualizar e conferir na tela do DDA.</td></tr>{% endfor %}
+  </table></div>{% endif %}
+</div>
+{% if diag %}
+<div class="card" style="margin-bottom:14px;"><div class="section-head"><div><h2>Por que não ligou sozinho?</h2><p>Contas a pagar com o mesmo valor ({{ b.valor|moeda }}) em qualquer empresa, até 90 dias de diferença no vencimento</p></div></div>
+  <div class="table-wrap"><table><tr><th>Empresa</th><th>Favorecido</th><th>Nº doc.</th><th>Vencimento</th><th>Situação</th><th>Motivo</th><th></th></tr>
+  {% for d in diag %}{% set c = d.t %}<tr><td class="small">{{ c.empresa.nome.split(' ')[0] }}</td><td>{{ c.nome }}</td><td class="small">{{ c.documento or '—' }}</td><td class="small">{{ c.vencimento.strftime('%d/%m/%Y') if c.vencimento else '—' }}</td><td><span class="pill {{ 'warn' if c.aberto else 'ok' }}">{{ c.status }}</span></td>
+    <td class="small" style="color:{{ '#15803D' if d.motivo.startswith('pode') else '#B45309' }};">{{ d.motivo }}</td>
+    <td><form method="post" action="{{ url_for('fin_bi.dda_boleto', bid=b.id) }}" class="inline-form"><input type="hidden" name="acao" value="vincular"><input type="hidden" name="titulo_id" value="{{ c.id }}"><button class="btn sm {{ 'primary' if d.motivo.startswith('pode') else 'ghost' }}">É este</button></form></td></tr>{% endfor %}
+  </table></div>
+  <p class="small muted" style="margin:6px 0 0;">Se nenhuma aparece aqui, a conta ainda não chegou ao sistema: use ↻ Atualizar e conferir na tela do DDA (ou o valor lançado é diferente do boleto).</p>
+</div>
+{% endif %}
+<div class="card"><div class="section-head"><div><h2>Contas a pagar parecidas</h2><p>Mesma empresa do boleto, valor até 20% de diferença e vencimento até 60 dias · {{ 'incluindo as já pagas' if request.args.get('pagos') else 'só as em aberto' }} · escolha a que corresponde ao boleto</p></div>
+  {% if request.args.get('pagos') %}<a class="btn ghost sm" href="{{ url_for('fin_bi.dda_boleto', bid=b.id) }}">Só em aberto</a>{% else %}<a class="btn ghost sm" href="{{ url_for('fin_bi.dda_boleto', bid=b.id, pagos=1) }}">Mostrar também as já pagas</a>{% endif %}</div>
+  <div class="table-wrap"><table><tr><th>Empresa</th><th>Favorecido</th><th>Nº doc. / nota</th><th>Centro de custo</th><th>Vencimento</th><th class="num">Valor</th><th>Situação</th><th></th></tr>
+  {% for c in cands %}<tr><td class="small">{{ c.empresa.nome.split(' ')[0] }}</td><td>{{ c.nome }}</td><td class="small">{{ c.documento or '—' }}</td><td class="small">{{ c.centro_custo or '—' }}</td><td class="small">{{ c.vencimento.strftime('%d/%m/%Y') if c.vencimento else '—' }}</td><td class="num">{{ c.valor|moeda }}</td><td><span class="pill {{ 'warn' if c.aberto else 'ok' }}">{{ c.status }}</span></td>
+    <td><form method="post" class="inline-form"><input type="hidden" name="acao" value="vincular"><input type="hidden" name="titulo_id" value="{{ c.id }}"><button class="btn sm primary">É este</button></form></td></tr>
+  {% else %}<tr class="empty-row"><td colspan="8">Nenhuma conta a pagar parecida. Este boleto precisa ser lançado no financeiro (Omie / Mais Controle).</td></tr>{% endfor %}
+  </table></div></div>
+{% endblock %}

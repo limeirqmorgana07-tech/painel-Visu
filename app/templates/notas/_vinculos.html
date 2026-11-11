@@ -1,0 +1,143 @@
+{# Vínculo da nota com os pedidos/ordens de compra do ERP #}
+{% set pode_vincular = current_user.pode('almoxarife','compras') %}
+{# Obra / centro de custo da nota #}
+<div class="card" style="margin-top:14px;">
+  <div class="section-head"><div><h2>Obra / centro de custo</h2>
+    <p>{% if nota.rateios|length > 1 %}Esta nota é de mais de uma obra: <b>{% for r in nota.rateios %}{{ r.label }}{{ ' + ' if not loop.last }}{% endfor %}</b>. A obra de cada item é escolhida em <a href="#estoque">Entrada no estoque</a>.
+      {% elif nota.centro_custo_label %}Esta nota está lançada em <b>{{ nota.centro_custo_label }}</b>.{% if nota.obra %} <a href="{{ url_for('obras.detalhe', oid=nota.obra.id) }}">Ver obra</a>{% endif %}
+      {% else %}<span style="color:var(--danger);">Ainda sem obra / centro de custo.</span>{% endif %}
+      {% if sug_obra[1] and sug_obra[1] != nota.centro_custo_label %} · Sugestão pela {{ sug_obra[2] }}: <b>{{ sug_obra[1] }}</b>{% if not sug_obra[0] and sug_obra[1] != 'Empresa' %} (obra não encontrada no cadastro){% endif %}{% endif %}</p></div></div>
+  {% if current_user.pode('almoxarife','compras') %}
+  <form method="post" action="{{ url_for('notas.definir_obra', nid=nota.id) }}" id="fRateio">
+    <div id="rtLinhas">
+    {% set _linhas = nota.rateios if nota.rateios|length > 1 else [nota] %}
+    {% for r in _linhas %}
+      <div class="btn-row rt-linha" style="align-items:center; margin-bottom:6px;">
+        {% with atual=r %}{% include "notas/_obra_select.html" %}{% endwith %}
+        <button type="button" class="btn ghost sm rt-tirar" title="Tirar esta obra" style="{{ '' if nota.rateios|length > 1 else 'display:none;' }}">✕</button>
+      </div>
+    {% endfor %}
+    </div>
+    <div class="btn-row" style="align-items:center;">
+      <button type="button" class="btn ghost sm" id="rtMais" title="A nota tem itens de mais de uma obra">+ obra / centro de custo</button>
+      <button class="btn primary sm">Salvar</button>
+      {% if sug_obras|length > 1 and nota.rateios|length != sug_obras|length %}<button class="btn sm" name="usar" value="todas" title="A OC tem mais de um centro de custo">Usar os {{ sug_obras|length }} centros de custo da OC</button>
+      {% elif sug_obra[0] and sug_obra[0].id != nota.obra_id %}<button class="btn sm" name="usar" value="obra:{{ sug_obra[0].id }}">Usar sugestão</button>
+      {% elif sug_obra[1] and not sug_obra[0] and sug_obra[1] != nota.centro_custo_label %}<button class="btn sm" name="usar" value="{{ 'empresa' if sug_obra[1]|upper == 'EMPRESA' else 'outro:' ~ sug_obra[1] }}">Usar “{{ sug_obra[1] }}”</button>{% endif %}
+      <span class="small muted" id="rtTotal"></span>
+    </div>
+  </form>
+  <template id="rtModelo"><div class="btn-row rt-linha" style="align-items:center; margin-bottom:6px;">
+    {% with atual=None %}{% include "notas/_obra_select.html" %}{% endwith %}
+    <button type="button" class="btn ghost sm rt-tirar" title="Tirar esta obra">✕</button></div></template>
+  <script>
+  (function(){
+    var caixa = document.getElementById('rtLinhas'), tot = document.getElementById('rtTotal');
+    function linhas(){ return caixa.querySelectorAll('.rt-linha'); }
+    function atualizar(){
+      var varias = linhas().length > 1;
+      linhas().forEach(function(l){ l.querySelector('.rt-tirar').style.display = varias ? '' : 'none'; });
+      tot.textContent = varias ? 'Depois de salvar, escolha a obra de cada item em Entrada no estoque.' : '';
+    }
+    document.getElementById('rtMais').addEventListener('click', function(){
+      var n = document.getElementById('rtModelo').content.firstElementChild.cloneNode(true);
+      caixa.appendChild(n); if (window.montarSelectBusca) window.montarSelectBusca(n); atualizar();
+    });
+    caixa.addEventListener('click', function(e){ var b = e.target.closest('.rt-tirar'); if (b && linhas().length > 1) { b.closest('.rt-linha').remove(); atualizar(); } });
+    atualizar();
+  })();
+  </script>
+  {% endif %}
+</div>
+
+
+{% if empresa in ('omie', None) or nota.vinculos_pedido %}
+<div class="card" style="margin-top:14px;">
+  <div class="section-head">
+    <div><h2>Pedidos de compra do Omie <span class="small muted">(F. Diniz)</span></h2>
+      <p>{% if ult_ped %}Pedidos atualizados em {{ ult_ped.data|datahora }}{% if not ult_ped.sucesso %} · <span style="color:var(--danger);">última tentativa falhou: {{ ult_ped.mensagem[:140] }}</span>{% endif %}{% else %}Os pedidos ainda não foram buscados no Omie.{% endif %}
+        {% if atualizando %} · <b>atualizando agora…</b>{% endif %}</p></div>
+    {% if pode_vincular %}<form method="post" action="{{ url_for('notas.atualizar_pedidos') }}"><button class="btn sm">↻ Atualizar pedidos do Omie</button></form>{% endif %}
+  </div>
+
+  {% if nota.vinculos_pedido %}
+  <div class="table-wrap table-card" style="margin-bottom:12px;"><table>
+    <tr><th>Pedido</th><th>Item do pedido</th><th>Item da nota</th><th class="num">Qtd.</th><th>Estoque</th><th></th></tr>
+    {% for v in nota.vinculos_pedido %}
+    <tr><td><b>{{ v.pedido_item.pedido.rotulo }}</b><div class="small muted">{{ v.pedido_item.pedido.fornecedor }}</div></td>
+      <td class="small">{{ v.pedido_item.descricao }}</td><td class="small">{{ v.nota_item.descricao if v.nota_item else '—' }}</td>
+      <td class="num">{{ v.quantidade|qtd }} <span class="small muted">{{ v.pedido_item.unidade }}</span></td>
+      <td>{% if v.movimentacao %}{% if v.movimentacao.estornada_em %}<span class="pill warn">entrada estornada</span>{% else %}<span class="pill ok">entrada #{{ v.movimentacao.id }}</span>{% endif %}{% else %}<span class="pill neutral">sem entrada</span>{% endif %}</td>
+      <td>{% if pode_vincular %}<form method="post" action="{{ url_for('notas.desfazer_vinculo', vid=v.id) }}" onsubmit="return confirm('Desfazer este vínculo?{{ ' A entrada no estoque será estornada.' if v.movimentacao and not v.movimentacao.estornada_em else '' }}');"><button class="btn ghost sm">Desfazer</button></form>{% endif %}</td></tr>
+    {% endfor %}
+  </table></div>
+  {% endif %}
+
+  {% if not tem_pedidos %}
+    <div class="banner info">Clique em <b>Atualizar pedidos do Omie</b> para trazer os pedidos de compra e vincular esta nota.</div>
+  {% elif not pedidos %}
+    <p class="small muted">Nenhum pedido de compra em aberto no Omie.</p>
+  {% elif pode_vincular %}
+    {% if mesmo_forn and not todos %}<div class="banner success">Pedidos em aberto do mesmo fornecedor da nota (CNPJ {{ cnpj }}). As quantidades foram preenchidas pelos itens parecidos da nota — confira antes de confirmar. <a href="?todos=1#pedidos">Ver todos os pedidos em aberto</a></div>
+    {% elif not mesmo_forn %}<div class="banner warning">Nenhum pedido em aberto do fornecedor desta nota (CNPJ {{ cnpj }}). Abaixo estão todos os pedidos em aberto — marque os itens se esta nota for de algum deles.</div>{% endif %}
+    <form method="post" action="{{ url_for('notas.vincular_pedidos', nid=nota.id) }}" id="pedidos">
+      <div class="table-wrap table-card"><table>
+        <tr><th></th><th>Item do pedido</th><th class="num">Pendente</th><th style="width:110px;">Recebido nesta nota</th><th>Item da nota</th><th>Entrada no estoque como</th></tr>
+        {% for p in pedidos %}
+        <tr style="background:var(--bg-soft,#F1F5F9);"><td colspan="6"><b>{{ p.rotulo }}</b> · {{ p.fornecedor }}{% if p.emissao %} · {{ p.emissao.strftime('%d/%m/%Y') }}{% endif %}{% if p.previsao %} · previsão {{ p.previsao.strftime('%d/%m/%Y') }}{% endif %} · {{ p.valor_total|moeda }} · <span class="pill {{ 'warn' if p.situacao == 'Recebido parcial' else 'neutral' }}">{{ p.situacao }}</span></td></tr>
+          {% for it in p.itens if it.qtd_pendente > 0 %}
+          {% set pr = pre.get(it.id) %}{% set ins = insumo_de(it) %}
+          <tr><td><input type="hidden" name="item_id" value="{{ it.id }}"><input type="checkbox" name="usar_{{ it.id }}" value="1" {{ 'checked' if pr }}></td>
+            <td class="small">{{ it.descricao }}<div class="muted">{{ it.codigo or '' }}{% if it.valor_unitario %} · {{ it.valor_unitario|moeda }}/{{ it.unidade }}{% endif %}</div></td>
+            <td class="num">{{ it.qtd_pendente|qtd }} <span class="small muted">{{ it.unidade }}</span></td>
+            <td><input name="qtd_{{ it.id }}" inputmode="decimal" value="{{ pr[0]|valorbr if pr else '' }}" placeholder="0" style="width:100px;"></td>
+            <td><select name="nota_item_{{ it.id }}" style="max-width:220px;"><option value="">—</option>
+              {% for ni in nota.itens %}<option value="{{ ni.id }}" {{ 'selected' if pr and pr[1].id == ni.id }}>{{ ni.descricao[:60] }} ({{ ni.quantidade|qtd }} {{ ni.unidade }})</option>{% endfor %}</select></td>
+            <td class="small"><label><input type="checkbox" name="entrar_{{ it.id }}" value="1" checked> {% if ins %}{{ ins.nome }}{% else %}<i>novo insumo:</i> {{ it.descricao|upper }}{% endif %}</label></td></tr>
+          {% endfor %}
+        {% endfor %}
+      </table></div>
+      <div class="btn-row" style="margin-top:10px; align-items:center;">
+        <label class="small"><input type="checkbox" name="dar_entrada" value="1" checked> Dar entrada no estoque dos itens marcados em</label>
+        <select name="deposito_id">{% for d in depositos %}<option value="{{ d.id }}" {{ 'selected' if nota.obra and nota.obra.deposito and d.id == nota.obra.deposito.id }}>{{ d.tipo_label }} · {{ d.nome }}</option>{% endfor %}</select>
+        <button class="btn primary">Vincular itens marcados</button>
+      </div>
+    </form>
+  {% endif %}
+</div>
+{% endif %}
+
+{% if empresa in ('maiscontrole', None) or nota.vinculos_mc or busca_oc %}
+<div class="card" style="margin-top:14px;">
+  <div class="section-head"><div><h2>Ordens de Compra do Mais Controle <span class="small muted">(Ramos Diniz)</span></h2>
+    <p>Lista importada dos PDFs do Mais Controle (sem itens). A entrada no estoque continua pela tela de entrada.</p></div>
+    <form method="get" class="toolbar" style="margin:0;"><input type="search" name="oc" value="{{ busca_oc }}" placeholder="Nº da OC ou fornecedor" style="max-width:200px;"><button class="btn sm">Buscar</button></form>
+  </div>
+  {% if nota.vinculos_mc %}
+  <div class="table-wrap table-card" style="margin-bottom:12px;"><table>
+    <tr><th>OC</th><th>Fornecedor</th><th class="num">Valor da OC</th><th>Data</th><th>Status</th><th></th></tr>
+    {% for v in nota.vinculos_mc %}{% set o = v.ordem %}
+    <tr><td><b>OC {{ v.ordem_numero }}</b></td><td class="small">{{ o.fornecedor if o else '—' }}</td><td class="num">{{ (o.valor if o else v.valor)|moeda }}</td>
+      <td class="small">{{ o.data.strftime('%d/%m/%Y') if o and o.data else '—' }}</td><td class="small">{{ o.status if o else 'não está mais na lista' }}</td>
+      <td>{% if pode_vincular %}<form method="post" action="{{ url_for('notas.desfazer_oc', vid=v.id) }}"><button class="btn ghost sm">Desvincular</button></form>{% endif %}</td></tr>
+    {% endfor %}
+  </table></div>
+  {% endif %}
+  {% if pode_vincular %}
+    {% if ocs %}
+    <form method="post" action="{{ url_for('notas.vincular_ocs', nid=nota.id) }}">
+      <div class="table-wrap table-card"><table>
+        <tr><th></th><th>OC</th><th>Fornecedor</th><th class="num">Valor</th><th>Data</th><th>Status</th><th>Por quê</th></tr>
+        {% for o, motivo in ocs %}
+        <tr><td><input type="checkbox" name="oc" value="{{ o.numero }}"></td><td><b>{{ o.numero }}</b></td><td class="small">{{ o.fornecedor }}<div class="muted">{{ o.centro_custo or '' }}</div></td>
+          <td class="num">{{ o.valor|moeda }}</td><td class="small">{{ o.data.strftime('%d/%m/%Y') if o.data else '—' }}</td><td class="small">{{ o.status or '—' }}</td><td class="small">{{ motivo or '' }}</td></tr>
+        {% endfor %}
+      </table></div>
+      <div class="btn-row" style="margin-top:10px;"><button class="btn primary">Vincular OCs marcadas</button></div>
+    </form>
+    {% else %}
+    <p class="small muted">{% if busca_oc %}Nenhuma OC encontrada para “{{ busca_oc }}”.{% elif not nota.tem_xml %}Envie o XML da nota para o sistema sugerir a OC pelo fornecedor e pelo valor, ou busque pelo número da OC.{% else %}Nenhuma OC parecida (mesmo fornecedor ou mesmo valor nos últimos 6 meses). Busque pelo número da OC.{% endif %}</p>
+    {% endif %}
+  {% endif %}
+</div>
+{% endif %}
