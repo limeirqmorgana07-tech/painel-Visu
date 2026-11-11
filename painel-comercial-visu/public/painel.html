@@ -163,6 +163,8 @@ td.ed{white-space:nowrap}
 .rc-bar{display:flex;gap:12px;flex-wrap:wrap;align-items:end;margin-bottom:10px}.rc-bar label{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink2)}.rc-bar input,.rc-bar select{margin-top:4px;padding:7px 10px;border:1px solid var(--line2);border-radius:8px;font:inherit;font-size:13px;background:var(--panel);color:var(--ink);text-transform:none;letter-spacing:0;font-weight:400}.rc-bt{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
 .rc-sec{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:4px 18px;margin-top:12px}.rc-sec>summary{cursor:pointer;padding:12px 0;display:flex;gap:12px;align-items:center;list-style:none}.rc-sec>summary::-webkit-details-marker{display:none}.rc-sec>summary::before{content:'▸';color:var(--ink3);transition:transform .15s}.rc-sec[open]>summary::before{transform:rotate(90deg)}.rc-sec>summary span{color:var(--ink2);font-size:13px}.rc-sec>summary .rc-exp{margin-left:auto}.rc-sec>.tw{padding-bottom:14px}
 .rc-abas{display:inline-flex;border:1px solid var(--line2);border-radius:10px;overflow:hidden;margin-bottom:12px}.rc-abas button{border:0;background:var(--panel);padding:8px 18px;font:inherit;font-size:13px;font-weight:600;color:var(--ink2);cursor:pointer}.rc-abas button.on{background:var(--navy,#1a204a);color:#fff}
+.rc-grupo{margin:26px 0 2px;font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--orange)}.rc-grupo span{color:var(--ink3);font-weight:600;letter-spacing:.04em;text-transform:none;margin-left:6px}
+.rc-comp select{padding:7px 10px;border:1px solid var(--line2);border-radius:8px;background:var(--panel);font:inherit;font-size:13px;color:var(--ink)}.rc-comp td:nth-child(3){white-space:nowrap}.rc-comp td{padding:5px 8px;font-size:12px;vertical-align:top}.rc-comp th{position:sticky;top:0;background:var(--panel);z-index:1}.rc-comp td[data-rc$="obs"],.rc-comp td[data-rc$="decisao"]{max-width:280px}
 .rc-sec tr.clk{cursor:pointer}.rc-sec tr.clk:hover td{background:var(--line)}
 #rcTit td.ed{cursor:pointer}#rcTit td.ed:hover{background:var(--line)}#rcTit td{vertical-align:top}#rcTit .sv{color:#9b1c1c;font-weight:700}#rcTit .sa{color:#16643a}
 .sol-bd{background:#fde7c4!important;color:#8a4b00!important;border-radius:999px;padding:1px 8px!important;font-size:11px;font-weight:700;width:auto!important}.pd-bd.sol-ok{background:#d9f2e3;color:#16643a}.pd-bd.sol-no{background:#fbe0e0;color:#9b1c1c}
@@ -317,19 +319,27 @@ table.quadro svg{display:block}
 tr[data-d]:hover td{background:var(--bg)}
 td.lk,span.lk{text-decoration:underline dotted var(--line2);text-underline-offset:3px}
 .motivos li[data-d]:hover{border-color:var(--orange)}
-.det-fundo{position:fixed;inset:0;background:rgba(20,16,40,.45);z-index:50}
-.det{position:fixed;top:0;right:0;bottom:0;width:min(980px,100vw);background:var(--panel);z-index:51;display:flex;flex-direction:column;box-shadow:-20px 0 50px rgba(0,0,0,.25)}
-.det header{padding:18px 20px 12px;border-bottom:1px solid var(--line);display:flex;gap:12px;align-items:flex-start}
-.det header h3{font-family:var(--display);font-weight:600;font-size:18px;margin:0}
-.det header .sub{font-size:12.5px;color:var(--ink3);margin-top:2px}
-.det .fe{margin-left:auto;border:0;background:var(--bg);border-radius:8px;width:34px;height:34px;font-size:18px;cursor:pointer;color:var(--ink)}
-.det .bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:10px 20px;border-bottom:1px solid var(--line)}
-.det .bar input{flex:1;min-width:160px;background:var(--bg);border:1px solid var(--line2);border-radius:8px;padding:7px 10px;font:inherit;font-size:13px;color:var(--ink)}
-.det .tot{font-size:13px;color:var(--ink2)}.det .tot b{color:var(--ink);font-variant-numeric:tabular-nums}
-.det .corpo{overflow:auto;flex:1;padding:0 20px 20px}
-.det td{white-space:nowrap}.det td.wr{white-space:normal;min-width:220px}
-.det th{position:sticky;top:0;background:var(--panel);cursor:pointer;z-index:1}
-.det th.ord::after{content:" ▾"}.det th.ord.asc::after{content:" ▴"}
+.det-fundo{position:fixed;inset:0;background:rgba(14,18,48,.5);backdrop-filter:blur(3px);z-index:50}
+.det{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(1240px,96vw);max-height:90vh;background:var(--panel);z-index:51;display:flex;flex-direction:column;border-radius:20px;overflow:hidden;box-shadow:0 40px 90px -24px rgba(0,0,0,.55);border:1px solid var(--line)}
+.det::before{content:'';display:block;height:5px;flex:none;background:linear-gradient(90deg,var(--navy),var(--navy2,var(--navy)) 55%,var(--orange))}
+.det header{padding:18px 24px 14px;display:flex;gap:14px;align-items:flex-start}
+.det header .eyebrow{display:block;margin-bottom:3px}
+.det header h3{font-family:var(--display);font-weight:600;font-size:22px;letter-spacing:-.01em;margin:0;line-height:1.2}
+.det header .sub{font-size:13px;color:var(--ink2);margin-top:4px}
+.det .fe{margin-left:auto;border:1px solid var(--line2);background:var(--panel);border-radius:10px;width:38px;height:38px;font-size:18px;cursor:pointer;color:var(--ink2);flex:none;transition:background .15s}.det .fe:hover{background:var(--bg);color:var(--ink)}
+.det .bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;padding:0 24px 14px;border-bottom:1px solid var(--line)}
+.det .bar input{flex:1;min-width:180px;background:var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%23888' stroke-width='2'%3E%3Ccircle cx='7' cy='7' r='5'/%3E%3Cpath d='m11 11 4 4'/%3E%3C/svg%3E") no-repeat 12px 50%;border:1px solid var(--line2);border-radius:10px;padding:9px 12px 9px 36px;font:inherit;font-size:13px;color:var(--ink)}
+.det .tot{display:flex;gap:8px;font-size:12.5px;color:var(--ink2)}.det .tot .ch{background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:6px 12px;white-space:nowrap}.det .tot b{color:var(--ink);font-variant-numeric:tabular-nums;font-weight:700}
+.det .corpo{overflow:auto;flex:1;padding:0 12px 6px}
+.det table{border-collapse:separate;border-spacing:0}
+.det td{white-space:nowrap;padding:9px 12px;font-size:13px;border-bottom:1px solid var(--line)}.det td.wr{white-space:normal;min-width:220px;max-width:340px;color:var(--ink2)}
+.det tbody tr:nth-child(even) td{background:color-mix(in srgb,var(--bg) 55%,transparent)}.det tbody tr:hover td{background:color-mix(in srgb,var(--orange) 9%,var(--panel))}
+.det td.vz{color:var(--ink3)}
+.det th{position:sticky;top:0;background:var(--panel);cursor:pointer;z-index:1;padding:12px 12px 9px;border-bottom:2px solid var(--line2)}.det th:hover{color:var(--ink)}
+.det th.ord{color:var(--navy)}.det th.ord::after{content:" ▾"}.det th.ord.asc::after{content:" ▴"}
+.det tfoot td{position:sticky;bottom:0;background:var(--panel);border-top:2px solid var(--line2);border-bottom:0;font-weight:700;color:var(--ink)}
+.det .pd{display:inline-block;padding:2px 9px;border-radius:999px;font-size:11.5px;font-weight:700}.det .pd.no{background:color-mix(in srgb,var(--red) 13%,transparent);color:var(--red)}.det .pd.ok{background:color-mix(in srgb,var(--navy) 10%,transparent);color:var(--navy)}
+@media (max-width:700px){.det{width:100vw;max-height:100vh;height:100vh;border-radius:0}}
 .rod{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:11.5px;color:var(--ink3);border-top:1px solid var(--line);padding-top:12px}
 @media (max-width:640px){.marca img{height:34px}.marca .div{display:none}.f select{max-width:150px}}
 /* ---------- v10: menu lateral (padrão Sistema de Gestão) ---------- */
@@ -1108,17 +1118,22 @@ table.matriz td.vz{color:var(--line2)}
     <div id="rcSint">
     <details class="rc-sec" open><summary><b>1. Posição geral</b><span id="rcS1"></span></summary><div class="tw" id="rcPos"></div></details>
     <details class="rc-sec" open><summary><b>2. Vencidos por faixa de atraso</b><span id="rcS2"></span></summary><div class="tw" id="rcFx"></div></details>
-    <details class="rc-sec" open><summary><b>3. O que fazer com cada título</b><span id="rcS3"></span></summary><div class="tw" id="rcAcoes"></div></details>
-    <details class="rc-sec" open><summary><b>4. A vencer por semana</b><span id="rcS4"></span></summary><div class="tw" id="rcSem"></div></details>
-    <details class="rc-sec"><summary><b>5. Maiores saldos vencidos por cliente</b><span id="rcS5"></span></summary><div style="display:flex;margin:6px 0 8px"><div class="exp" data-exp="rcTop" style="margin-left:auto"><button class="bt2" type="button" aria-haspopup="true" aria-expanded="false">⬇ Exportar ▾</button><div class="exp-m" hidden><button type="button" data-fmt="xlsx">Excel (.xlsx)</button><button type="button" data-fmt="pdf">PDF</button><button type="button" data-fmt="csv">CSV</button></div></div></div><div class="tw" id="rcTop"></div></details>
+    <details class="rc-sec" open><summary><b>3. A vencer por semana</b><span id="rcS4"></span></summary><div class="tw" id="rcSem"></div></details>
+    <details class="rc-sec" open><summary><b>4. Maiores saldos vencidos por cliente</b><span id="rcS5"></span></summary><div style="display:flex;margin:6px 0 8px"><div class="exp" data-exp="rcTop" style="margin-left:auto"><button class="bt2" type="button" aria-haspopup="true" aria-expanded="false">⬇ Exportar ▾</button><div class="exp-m" hidden><button type="button" data-fmt="xlsx">Excel (.xlsx)</button><button type="button" data-fmt="pdf">PDF</button><button type="button" data-fmt="csv">CSV</button></div></div></div><div class="tw" id="rcTop"></div></details>
+    <details class="rc-sec" open><summary><b>5. O que fazer com cada título</b><span id="rcS3"></span></summary><div class="tw" id="rcAcoes"></div><div class="dica-c" style="margin:-4px 0 14px">Ajustar no CA, conciliar recebimento já identificado e baixar resíduos tiram do vencido sem cobrar o cliente. "Localizar recebimento" são títulos que a planilha de vendas ou o WhatsApp dão como pagos: o dinheiro precisa ser achado no extrato antes de qualquer cobrança.</div></details>
+    <div class="rc-grupo">Conta Azul em tempo real <span>pela data de hoje</span></div>
+    <details class="rc-sec" open><summary><b>Atraso por idade</b><span id="rcSIdade"></span></summary><div id="rcIdade" style="padding-bottom:14px"></div></details>
+    <details class="rc-sec"><summary><b>Maiores atrasos por cliente</b><span>com o atraso mais antigo de cada um</span></summary><div class="tw" id="rcPessoas"></div></details>
+    <details class="rc-sec"><summary><b>Próximos recebimentos</b><span id="rcSProx"></span></summary><div class="tw" id="rcProx"></div></details>
+    <details class="rc-sec"><summary><b>Receitas por categoria</b><span id="rcCatSub">Competência</span></summary><div id="rcCat" style="padding-bottom:14px"></div></details>
     </div>
     <div id="rcAnal" hidden>
-    <details class="rc-sec" open><summary><b>6. Títulos em aberto</b><span id="rcS6"></span></summary>
+    <details class="rc-sec rc-comp" open><summary><b>6. Títulos em aberto</b><span id="rcS6"></span></summary>
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:6px 0 10px"><select id="rcSit"><option value="">Todas as situações</option><option value="v">Vencidos</option><option value="a">A vencer</option></select><select id="rcAc"><option value="">Todas as ações</option></select><span class="dica-c">Clique na ação, observação, decisão ou responsável para editar.</span><div class="exp" data-exp="rcTit" style="margin-left:auto"><button class="bt2" type="button" aria-haspopup="true" aria-expanded="false">⬇ Exportar ▾</button><div class="exp-m" hidden><button type="button" data-fmt="xlsx">Excel (.xlsx)</button><button type="button" data-fmt="pdf">PDF</button><button type="button" data-fmt="csv">CSV</button></div></div></div>
-      <div class="tw" id="rcTit" style="max-height:72vh;overflow:auto"></div></details>
-    <details class="rc-sec"><summary><b>7. Recebimentos sem cliente identificado (DNI)</b><span id="rcS7"></span></summary><div style="display:flex;margin:6px 0 4px"><div class="exp" data-exp="rcDni" style="margin-left:auto"><button class="bt2" type="button" aria-haspopup="true" aria-expanded="false">⬇ Exportar ▾</button><div class="exp-m" hidden><button type="button" data-fmt="xlsx">Excel (.xlsx)</button><button type="button" data-fmt="pdf">PDF</button><button type="button" data-fmt="csv">CSV</button></div></div></div>
+      <div class="tw" id="rcTit" style="max-height:46vh;overflow:auto"></div></details>
+    <details class="rc-sec rc-comp"><summary><b>7. Recebimentos sem cliente identificado (DNI)</b><span id="rcS7"></span></summary><div style="display:flex;margin:6px 0 4px"><div class="exp" data-exp="rcDni" style="margin-left:auto"><button class="bt2" type="button" aria-haspopup="true" aria-expanded="false">⬇ Exportar ▾</button><div class="exp-m" hidden><button type="button" data-fmt="xlsx">Excel (.xlsx)</button><button type="button" data-fmt="pdf">PDF</button><button type="button" data-fmt="csv">CSV</button></div></div></div>
       <div class="dica-c" style="margin:6px 0">Depósitos e créditos sem conciliação. "Possível título" é indício (mesmo valor e data compatível), não confirmação. <label><input type="checkbox" id="rcDniTodos"> mostrar os conciliados</label></div>
-      <div class="tw" id="rcDni" style="max-height:60vh;overflow:auto"></div></details>
+      <div class="tw" id="rcDni" style="max-height:40vh;overflow:auto"></div></details>
     </div>
   </section>
 
@@ -1239,7 +1254,7 @@ table.matriz td.vz{color:var(--line2)}
 
 <div class="tip" id="tip" hidden></div>
 <div class="det-fundo" id="detFundo" hidden></div>
-<aside class="det" id="det" hidden role="dialog" aria-modal="true" aria-labelledby="detTit"><header><div><h3 id="detTit">—</h3><div class="sub" id="detSub"></div></div><button class="fe" id="detFechar" type="button" aria-label="Fechar">×</button></header><div class="bar"><input id="detBusca" type="search" placeholder="Buscar nesta lista"><span class="tot" id="detTot"></span><div class="exp" data-exp="det"><button class="bt2" type="button" aria-haspopup="true" aria-expanded="false">Exportar ▾</button><div class="exp-m" hidden><button type="button" data-fmt="xlsx">Excel (.xlsx)</button><button type="button" data-fmt="pdf">PDF</button><button type="button" data-fmt="csv">CSV</button></div></div></div><div class="corpo" id="detCorpo"></div></aside>
+<aside class="det" id="det" hidden role="dialog" aria-modal="true" aria-labelledby="detTit"><header><div><span class="eyebrow">Detalhamento</span><h3 id="detTit">—</h3><div class="sub" id="detSub"></div></div><button class="fe" id="detFechar" type="button" aria-label="Fechar">×</button></header><div class="bar"><input id="detBusca" type="search" placeholder="Buscar nesta lista"><span class="tot" id="detTot"></span><div class="exp" data-exp="det"><button class="bt2" type="button" aria-haspopup="true" aria-expanded="false">Exportar ▾</button><div class="exp-m" hidden><button type="button" data-fmt="xlsx">Excel (.xlsx)</button><button type="button" data-fmt="pdf">PDF</button><button type="button" data-fmt="csv">CSV</button></div></div></div><div class="corpo" id="detCorpo"></div></aside>
 
 <script>
 (function(){
@@ -1257,8 +1272,9 @@ const nomeMes=(m)=>{const[a,b]=m.split('-');return MES_L[+b-1]+' de '+a};
 const somaMes=(m,n)=>{const[a,b]=m.split('-').map(Number);const d=new Date(Date.UTC(a,b-1+n,1));return d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0')};
 function delta(a,b,inv){ if(!b) return '<span class="delta eq">sem base</span>'; const d=(a-b)/b; const c=Math.abs(d)<.005?'eq':(d>0)!==!!inv?'up':'down'; return `<span class="delta ${c}">${d>0?'▲':d<0?'▼':'■'} ${pct(Math.abs(d))}</span>`; }
 
-const VERSAO='v82';
+const VERSAO='v83';
 const VERSOES=[
+ {v:'v83',data:'11/11/2026',tit:'Contas a receber na ordem da planilha e nova janela de detalhe',arq:'painel-visu-v83.zip',itens:["Contas a receber na mesma ordem da planilha: 1. Posição geral, 2. Vencidos por faixa, 3. A vencer por semana (hoje, resto da semana e semanas até o fim do mês, como na planilha), 4. Maiores saldos e, por último, 5. O que fazer com cada título, com a linha Vencido a cobrar de fato e a explicação das ações.", "Voltaram as informações da Conta Azul em tempo real, em blocos que abrem e fecham: Atraso por idade (com a inadimplência), Maiores atrasos por cliente, Próximos recebimentos (7 e 30 dias) e Receitas por categoria.", "Analítico mais compacto: Títulos em aberto e DNI ocupam menos altura, com letra menor e cabeçalho fixo.", "Nova janela de detalhamento em todo o painel (Comercial, Financeiro e demais páginas): centralizada, no padrão visual do painel, com busca, totais em destaque, situação colorida e linha de total no rodapé."]},
  {v:'v82',data:'11/11/2026',tit:'Contas a receber: Sintético e Analítico, com exportação',arq:'painel-visu-v82.zip',itens:["Contas a receber reorganizada em uma coluna só, sem quadros lado a lado, com duas visões: Sintético (igual à planilha: posição geral, faixas de atraso, o que fazer, a vencer por semana e maiores saldos) e Analítico (títulos em aberto e recebimentos sem cliente identificado — DNI).", "Clique em qualquer linha do Sintético (ou nos quadros do topo) para ver os títulos daquele grupo com as descrições, observações e a descrição da Conta Azul; a lista tem busca, ordenação e exportação.", "Botão Base 10/11 (planilha) para conferir com a planilha do Tiago na mesma data base.", "Exportar relatório (Excel) com as abas Resumo, Títulos em aberto, Maiores saldos e DNI; e Exportar (Excel, PDF ou CSV) em Maiores saldos, Títulos em aberto e DNI.", "A página não usa mais o mês do topo: mostra toda a carteira em aberto. A data base só muda o que está vencido e os dias de atraso."]},
  {v:'v81',data:'11/11/2026',tit:'Contas a receber com gestão da cobrança',arq:'painel-visu-v81.zip',itens:["Financeiro → Contas a receber: nova Gestão da cobrança, no formato da planilha da Seja Expert (10/11): posição geral (vencidos × a vencer), vencidos por faixa de atraso, a vencer por semana, o que fazer com cada título (ação) e os 15 maiores saldos vencidos por cliente. Filtros por vendedor, cliente e data de referência (recalcula os atrasos).", "Títulos em aberto: lista de todos os títulos da Conta Azul com dias de atraso, venda, parcela, vencimento, valor, recebido, em aberto e vendedor (pelo código do pedido). Ação, observações, decisão na reunião e responsável são editáveis (ADM, diretores e financeiro) e ficam guardados. Já vêm preenchidos com a análise da planilha de 10/11; os títulos novos recebem uma ação sugerida (em cinza). Exportar para Excel.", "Recebimentos sem cliente identificado (DNI): os 95 depósitos e créditos sem conciliação da planilha, com o possível título e a marcação de conciliado."]},
  {v:'v80',data:'10/11/2026',tit:'Subtotal com pagamentos, falta receber, planilha e sistema',arq:'painel-visu-v80.zip',itens:["Subtotal da Planilha de vendas completo: soma também o 1º, o 2º e o 3º pagamento (como aparecem na grade: o anotado ou, em branco, o recebido na Conta Azul), a linha 1º + 2º pagamento, o Falta receber e as colunas Planilha (pedido), Sistema (Conta Azul) e a diferença entre elas."]},
@@ -2036,6 +2052,19 @@ function pgCaixa(){
 function pgReceber(){
   if(precisaFin('rcKpis')) return;
   desenharCobranca();
+  const f=E.fin, r=f.receber, m=mesFin();
+  const mx=Math.max(...r.idade.map(x=>x.valor),1);
+  const FX=[[1,15],[16,30],[31,60],[61,90],[91,1e9]];
+  $('rcIdade').innerHTML=`<div class="rank fx">${r.idade.map((x,i)=>`<div class="r"${D(()=>detAbertos('Atraso de '+x.faixa,y=>y[0]==='r'&&y[1]<hojeISO()&&diasAtr(y[1])>=FX[i][0]&&diasAtr(y[1])<=FX[i][1]))}><span class="nm" style="font-weight:500">${x.faixa}</span><span class="tr"><i style="width:${x.valor?Math.max(x.valor/mx*100,2):0}%;background:${['var(--amber)','var(--orange)','var(--s2)','var(--red)','var(--red)'][i]}"></i></span><span class="vl">${brl(x.valor)} <span style="color:var(--ink3);font-weight:500">· ${x.qtd}</span></span></div>`).join('')}</div><div class="nota">Quanto mais antigo o atraso, menor a chance de recebimento. Atrasos acima de 90 dias pedem negociação ou protesto.</div>`;
+  const hoje=Date.now()-3*3600e3;
+  $('rcPessoas').innerHTML=r.atraso_por_pessoa.length?`<table><thead><tr><th>Cliente</th><th class="v">Parcelas</th><th class="v">Mais antiga</th><th class="v">Em atraso</th></tr></thead><tbody>${r.atraso_por_pessoa.map(x=>`<tr${D(()=>detAbertos('Em atraso: '+x.pessoa,y=>y[0]==='r'&&y[1]<hojeISO()&&(y[2]||'—')===x.pessoa))}><td class="el lk">${esc(x.pessoa)}</td><td class="v">${x.qtd}</td><td class="v"><span class="pill ${(hoje-Date.parse(x.mais_antigo))/864e5>60?'p-no':'p-mid'}">${Math.round((hoje-Date.parse(x.mais_antigo))/864e5)} d</span></td><td class="v neg">${brl2(x.valor)}</td></tr>`).join('')}</tbody></table>`:'<div class="vazio">Nenhum recebimento em atraso.</div>';
+  $('rcProx').innerHTML=r.proximos.length?`<table><thead><tr><th>Vencimento</th><th>Cliente</th><th class="v">Valor</th></tr></thead><tbody>${r.proximos.map(x=>`<tr${D(()=>detAbertos('A receber: '+(x.pessoa||x.descricao),y=>y[0]==='r'&&y[2]===x.pessoa))}><td class="num">${x.vencimento.split('-').reverse().join('/')}</td><td class="el">${esc(x.pessoa||x.descricao)}</td><td class="v">${brl2(x.aberto)}</td></tr>`).join('')}</tbody></table>`:'<div class="vazio">Nada a vencer.</div>';
+  $('rcCatSub').textContent=`Competência · ${nomeMes(m)}`;
+  const cats=f.receitas_categoria.map(x=>({nome:x.nome,val:x.valores[m]||0,t:x.total})).filter(x=>x.val>0).sort((a,b)=>b.val-a.val);
+  const tot=cats.reduce((s2,x)=>s2+x.val,0)||1;
+  rankTab('rcCat',cats,{nome:'Categoria',valor:'Receita',cab:['Part.'],extra:(g)=>[pct(g.val/tot)],vazio:'Sem receitas no mês.',limite:8,abrir:(g)=>detLanc(g.nome+' · '+nomeMes(m),l=>l[1]==='r'&&l[0]===m&&l[2]===g.nome)});
+  $('rcSIdade').textContent=`${brl(r.atrasado)} em atraso hoje · inadimplência ${f.inadimplencia==null?'—':pct(f.inadimplencia)} (atraso ÷ tudo que venceu em 90 dias)`;
+  $('rcSProx').textContent=`7 dias: ${brl(r.prox7.valor)} · 30 dias: ${brl(r.prox30.valor)}`;
 }
 
 // ---------- contas a receber · gestão da cobrança (v81) ----------
@@ -2051,6 +2080,10 @@ function titulosRc(){ const ref=$('rcRef').value||hojeISO(), vi=vendaInfo(), g=R
 RC.vis='s';
 document.querySelectorAll('[data-rcv]').forEach(b=>b.onclick=()=>{ RC.vis=b.dataset.rcv; document.querySelectorAll('[data-rcv]').forEach(x=>x.classList.toggle('on',x===b)); $('rcSint').hidden=RC.vis!=='s'; $('rcAnal').hidden=RC.vis!=='a'; });
 const somaA=(a)=>a.reduce((s2,t)=>s2+t.aberto,0);
+function semanasRc(ref){ const d=(iso,n)=>new Date(Date.parse(iso+'T12:00:00Z')+n*864e5).toISOString().slice(0,10), dm=(iso)=>iso.slice(8,10)+'/'+iso.slice(5,7);
+  const fimMes=new Date(Date.UTC(+ref.slice(0,4),+ref.slice(5,7),0)).toISOString().slice(0,10), out=[['Hoje ('+dm(ref)+')',ref,ref]];
+  let x=d(ref,1); while(x<=fimMes){ const dow=new Date(x+'T12:00:00Z').getUTCDay(); let y=d(x,(7-dow)%7); if(y>fimMes||d(y,3)>fimMes) y=fimMes; out.push([x===y?dm(x):`${x.slice(8,10)} a ${dm(y)}`,x,y]); x=d(y,1); }
+  out.push(['Depois de '+dm(fimMes),d(fimMes,1),'9999-12-31']); return out; }
 function grupoRc(){ const ref=$('rcRef').value, dia=(n)=>new Date(Date.parse(ref)+n*864e5).toISOString().slice(0,10);
   const q=semA($('rcCli').value||''), todos=titulosRc(), ts=todos.filter(t=>(!$('rcVend').value||t.vendedor===$('rcVend').value)&&(!q||semA(t.cliente).includes(q)));
   const V=ts.filter(t=>t.vencido), A=ts.filter(t=>!t.vencido);
@@ -2058,7 +2091,7 @@ function grupoRc(){ const ref=$('rcRef').value, dia=(n)=>new Date(Date.parse(ref
   return {ref,todos,ts,V,A,
     fx:['1 a 30 dias','31 a 60 dias','61 a 90 dias','Mais de 90 dias'].map(f=>[f,V.filter(t=>t.faixa===f)]),
     acs:(RC.g.acoes||[]).map(a=>[a,ts.filter(t=>t.acao===a)]),
-    sem:[['Hoje ('+dataBR(ref).slice(0,5)+')',ref,ref],[`${dataBR(dia(1)).slice(0,5)} a ${dataBR(dia(7)).slice(0,5)}`,dia(1),dia(7)],[`${dataBR(dia(8)).slice(0,5)} a ${dataBR(dia(14)).slice(0,5)}`,dia(8),dia(14)],[`${dataBR(dia(15)).slice(0,5)} a ${dataBR(dia(30)).slice(0,5)}`,dia(15),dia(30)],['Depois de '+dataBR(dia(30)).slice(0,5),dia(31),'9999']].map(([r,a,b])=>[r,A.filter(t=>t.venc>=a&&t.venc<=b)]),
+    sem:semanasRc(ref).map(([r,x,y])=>[r,A.filter(t=>t.venc>=x&&t.venc<=y)]),
     top:[...pc.entries()].sort((a,b)=>somaA(b[1])-somaA(a[1])).slice(0,15),
     cobrar:V.filter(t=>['Cobrar cliente','Confirmar com o comercial'].includes(t.acao))}; }
 async function desenharCobranca(){
@@ -2079,7 +2112,7 @@ async function desenharCobranca(){
     ['Vencido a cobrar de fato',brl(somaA(G.cobrar)),`<span>Cobrar cliente + Confirmar com o comercial</span>`,G.cobrar.length?'alerta':'','',()=>abrirGrupoRc(G.cobrar,'Vencido a cobrar de fato'),'Parte do vencido que é cobrança de verdade (ação Cobrar cliente ou Confirmar com o comercial). O resto do vencido é ajuste na Conta Azul, conciliação de recebimento já identificado ou baixa de resíduo.']]);
   tab('rcPos',['Situação','Títulos','Valor em aberto','% da carteira'],[[['Vencidos',int(V.length),brl(somaA(V)),pct(somaA(V)/tot)],V,'Títulos vencidos'],[['A vencer',int(A.length),brl(somaA(A)),pct(somaA(A)/tot)],A,'Títulos a vencer']],['Total em aberto',int(ts.length),brl(somaA(ts)),'100%']);
   tab('rcFx',['Faixa','Títulos','Valor em aberto','% dos vencidos'],G.fx.map(([f,g])=>[[f,int(g.length),brl(somaA(g)),pct(somaA(g)/totV)],g,'Vencidos · '+f]),['Total vencido',int(V.length),brl(somaA(V)),'100%']);
-  tab('rcAcoes',['Ação sugerida','Títulos vencidos','Vencido','A vencer'],G.acs.map(([a,g])=>[[a,int(g.filter(t=>t.vencido).length),brl(somaA(g.filter(t=>t.vencido))),brl(somaA(g.filter(t=>!t.vencido)))],g,'Ação · '+a]),['Total',int(V.length),brl(somaA(V)),brl(somaA(A))]);
+  tab('rcAcoes',['Ação sugerida','Títulos vencidos','Vencido','A vencer'],G.acs.map(([a,g])=>[[a,int(g.filter(t=>t.vencido).length),brl(somaA(g.filter(t=>t.vencido))),brl(somaA(g.filter(t=>!t.vencido)))],g,'Ação · '+a]).concat([[['<b>Vencido a cobrar de fato</b> <span style="color:var(--ink3)">(cobrar + confirmar com o comercial)</span>',int(G.cobrar.length),'<b>'+brl(somaA(G.cobrar))+'</b>',''],G.cobrar,'Vencido a cobrar de fato']]),['Total',int(V.length),brl(somaA(V)),brl(somaA(A))]);
   tab('rcSem',['Período','Títulos','Valor em aberto','% a vencer'],G.sem.map(([r,g])=>[[r,int(g.length),brl(somaA(g)),pct(somaA(g)/totA)],g,'A vencer · '+r]),['Total a vencer',int(A.length),brl(somaA(A)),'100%']);
   const tt=G.top.reduce((a,[,g])=>a+somaA(g),0);
   tab('rcTop',['Cliente','Títulos vencidos','Vencido','% dos vencidos'],G.top.map(([c,g])=>[[esc(c),int(g.length),brl(somaA(g)),pct(somaA(g)/totV)],g,'Cliente · '+c]),['Total dos 15 maiores',int(G.top.reduce((a,[,g])=>a+g.length,0)),brl(tt),pct(tt/totV)]);
@@ -2117,15 +2150,15 @@ async function exportarReceber(){
   const aoa=[['Contas a receber · Visu'],[`Data base ${dataBR(G.ref)}${$('rcVend').value?' · vendedor '+$('rcVend').value:''}${$('rcCli').value?' · cliente "'+$('rcCli').value+'"':''} · exportado em ${new Date().toLocaleString('pt-BR')}`],[]], fm=[];
   const bloco=(tit,cab,linhas,rod)=>{ aoa.push([tit]); aoa.push(cab); linhas.forEach(l=>{ fm.push(aoa.length); aoa.push(l); }); if(rod){ fm.push(aoa.length); aoa.push(rod); } aoa.push([]); };
   bloco('1. Posição geral',['Situação','Títulos','Valor em aberto','% da carteira'],[['Vencidos',V.length,somaA(V),somaA(V)/tt],['A vencer',A.length,somaA(A),somaA(A)/tt]],['Total em aberto',ts.length,somaA(ts),1]);
-  aoa.splice(aoa.length-1,0,['Vencido a cobrar de fato (Cobrar cliente + Confirmar com o comercial)','',somaA(G.cobrar)]); fm.push(aoa.length-2);
   bloco('2. Vencidos por faixa de atraso',['Faixa','Títulos','Valor em aberto','% dos vencidos'],G.fx.map(([f,g])=>[f,g.length,somaA(g),somaA(g)/tv]),['Total vencido',V.length,somaA(V),1]);
-  bloco('3. O que fazer com cada título',['Ação sugerida','Títulos vencidos','Vencido','A vencer'],G.acs.map(([a,g])=>[a,g.filter(t=>t.vencido).length,somaA(g.filter(t=>t.vencido)),somaA(g.filter(t=>!t.vencido))]),['Total',V.length,somaA(V),somaA(A)]);
-  bloco('4. A vencer por semana',['Período','Títulos','Valor em aberto','% a vencer'],G.sem.map(([r,g])=>[r,g.length,somaA(g),somaA(g)/ta]),['Total a vencer',A.length,somaA(A),1]);
+  bloco('3. A vencer por semana',['Período','Títulos','Valor em aberto','% a vencer'],G.sem.map(([r,g])=>[r,g.length,somaA(g),somaA(g)/ta]),['Total a vencer',A.length,somaA(A),1]);
   const t15=G.top.reduce((a,[,g])=>a+somaA(g),0);
-  bloco('5. Maiores saldos vencidos por cliente',['Cliente','Títulos vencidos','Vencido','% dos vencidos'],G.top.map(([c,g])=>[c,g.length,somaA(g),somaA(g)/tv]),['Total dos 15 maiores',G.top.reduce((a,[,g])=>a+g.length,0),t15,t15/tv]);
+  bloco('4. Maiores saldos vencidos por cliente',['Cliente','Títulos vencidos','Vencido','% dos vencidos'],G.top.map(([c,g])=>[c,g.length,somaA(g),somaA(g)/tv]),['Total dos 15 maiores',G.top.reduce((a,[,g])=>a+g.length,0),t15,t15/tv]);
+  bloco('5. O que fazer com cada título',['Ação sugerida','Títulos vencidos','Vencido','A vencer'],G.acs.map(([a,g])=>[a,g.filter(t=>t.vencido).length,somaA(g.filter(t=>t.vencido)),somaA(g.filter(t=>!t.vencido))]),['Total',V.length,somaA(V),somaA(A)]);
+  aoa.splice(aoa.length-1,0,['Vencido a cobrar de fato (cobrar + confirmar com o comercial)',G.cobrar.length,somaA(G.cobrar),null]); fm.push(aoa.length-2);
   const ws=XL.utils.aoa_to_sheet(aoa); fm.forEach(r=>{ const c=ws[XL.utils.encode_cell({r,c:2})]; if(c&&c.t==='n') c.z=R; });
   // coluna D: % nos blocos 1, 2, 4 e 5; R$ no bloco 3 (A vencer)
-  let blocoAtual=''; aoa.forEach((l,r)=>{ if(/^\d\. /.test(l[0]||'')&&l.length===1) blocoAtual=l[0][0]; const d=ws[XL.utils.encode_cell({r,c:3})]; if(d&&d.t==='n') d.z=blocoAtual==='3'?R:'0.0%'; });
+  let blocoAtual=''; aoa.forEach((l,r)=>{ if(/^\d\. /.test(l[0]||'')&&l.length===1) blocoAtual=l[0][0]; const d=ws[XL.utils.encode_cell({r,c:3})]; if(d&&d.t==='n') d.z=blocoAtual==='5'?R:'0.0%'; });
   ws['!cols']=[{wch:62},{wch:16},{wch:18},{wch:18}];
   const wb=XL.utils.book_new(); XL.utils.book_append_sheet(wb,ws,'Resumo');
   const folha=(nome,cols,rows)=>{ const a=[cols.map(c=>c.rot),...rows.map(r=>cols.map((c,i)=>{ const v=r[i]; if(v==null||v==='') return null; if(c.t==='data') return new Date(String(v).slice(0,10)+'T12:00:00'); return v; }))];
@@ -2305,8 +2338,10 @@ function desenharDet(){
   let ls=q?DET.linhas.filter(l=>l.some(v=>String(v??'').toLowerCase().includes(q))):DET.linhas.slice();
   if(DET.ord>=0){ const i=DET.ord, a=DET.asc?1:-1; ls.sort((x,y)=>{ const p=x[i],r=y[i]; return (typeof p==='number'&&typeof r==='number'?p-r:String(p??'').localeCompare(String(r??''),'pt-BR'))*a; }); }
   const it=C.findIndex(c=>c.total), tot=it>=0?ls.reduce((s2,l)=>s2+(+l[it]||0),0):null;
-  $('detTot').innerHTML=`<b>${int(ls.length)}</b> ${ls.length===1?'linha':'linhas'}${tot!=null?` · total <b>${brl2(tot)}</b>`:''}`;
-  $('detCorpo').innerHTML=ls.length?`<table><thead><tr>${C.map((c,i)=>`<th data-o="${i}" class="${['brl','int','pct'].includes(c.t)?'v':''} ${DET.ord===i?'ord'+(DET.asc?' asc':''):''}">${c.rot}</th>`).join('')}</tr></thead><tbody>${ls.slice(0,800).map(l=>`<tr>${C.map((c,i)=>`<td class="${['brl','int','pct'].includes(c.t)?'v':''} ${c.t==='brl'&&l[i]<0?'neg':''} ${c.wr?'wr':''}">${fmtDet(l[i],c.t)}</td>`).join('')}</tr>`).join('')}</tbody></table>${ls.length>800?`<div class="nota">Mostrando 800 de ${int(ls.length)} linhas. Use a busca ou exporte (Excel, PDF ou CSV) para ver tudo.</div>`:''}`:'<div class="vazio">Nada encontrado.</div>';
+  $('detTot').innerHTML=`<span class="ch"><b>${int(ls.length)}</b> ${ls.length===1?'linha':'linhas'}</span>${tot!=null?`<span class="ch">${esc(C[it].rot)} <b>${brl2(tot)}</b></span>`:''}`;
+  const NUMD=['brl','int','pct'], pil=(v)=>/^(Vencido|Em atraso|Atrasado)$/i.test(v)?`<span class="pd no">${esc(v)}</span>`:/^(A vencer|Recebido|Pago|Em dia)$/i.test(v)?`<span class="pd ok">${esc(v)}</span>`:fmtDet(v,'');
+  const somas=C.map((c,i)=>c.t==='brl'?ls.reduce((a,l)=>a+(+l[i]||0),0):null);
+  $('detCorpo').innerHTML=ls.length?`<table><thead><tr>${C.map((c,i)=>`<th data-o="${i}" class="${NUMD.includes(c.t)?'v':''} ${DET.ord===i?'ord'+(DET.asc?' asc':''):''}">${c.rot}</th>`).join('')}</tr></thead><tbody>${ls.slice(0,800).map(l=>`<tr>${C.map((c,i)=>{ const v=l[i], vz=v==null||v===''; return `<td class="${NUMD.includes(c.t)?'v':''} ${c.t==='brl'&&v<0?'neg':''} ${c.wr||/Observ|Descri|Decis/.test(c.rot)?'wr':''} ${vz?'vz':''}">${!c.t&&i===0?pil(v):fmtDet(v,c.t)}</td>`; }).join('')}</tr>`).join('')}</tbody><tfoot><tr>${C.map((c,i)=>`<td class="${NUMD.includes(c.t)?'v':''}">${i===0?'Total · '+int(ls.length):somas[i]!=null&&C.filter(x=>x.t==='brl').length<=4?brl2(somas[i]):''}</td>`).join('')}</tr></tfoot></table>${ls.length>800?`<div class="nota">Mostrando 800 de ${int(ls.length)} linhas. Use a busca ou exporte (Excel, PDF ou CSV) para ver tudo.</div>`:''}`:'<div class="vazio">Nada encontrado.</div>';
   $('detCorpo').querySelectorAll('th[data-o]').forEach(th=>th.addEventListener('click',()=>{ const i=+th.dataset.o; if(DET.ord===i) DET.asc=!DET.asc; else {DET.ord=i;DET.asc=false;} desenharDet(); }));
 }
 function fecharDet(){ $('det').hidden=true; $('detFundo').hidden=true; document.body.style.overflow=''; }

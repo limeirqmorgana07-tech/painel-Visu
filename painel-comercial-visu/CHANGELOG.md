@@ -2,6 +2,12 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v83 — 11/11/2026 — Contas a receber na ordem da planilha e nova janela de detalhe
+- Contas a receber na mesma ordem da planilha: 1. Posição geral, 2. Vencidos por faixa, 3. A vencer por semana (hoje, resto da semana e semanas até o fim do mês, como na planilha), 4. Maiores saldos e, por último, 5. O que fazer com cada título, com a linha Vencido a cobrar de fato e a explicação das ações.
+- Voltaram as informações da Conta Azul em tempo real, em blocos que abrem e fecham: Atraso por idade (com a inadimplência), Maiores atrasos por cliente, Próximos recebimentos (7 e 30 dias) e Receitas por categoria.
+- Analítico mais compacto: Títulos em aberto e DNI ocupam menos altura, com letra menor e cabeçalho fixo.
+- Nova janela de detalhamento em todo o painel (Comercial, Financeiro e demais páginas): centralizada, no padrão visual do painel, com busca, totais em destaque, situação colorida e linha de total no rodapé.
+
 ## v82 — 11/11/2026 — Contas a receber: Sintético e Analítico, com exportação
 - Contas a receber reorganizada em uma coluna só, sem quadros lado a lado, com duas visões: Sintético (igual à planilha: posição geral, faixas de atraso, o que fazer, a vencer por semana e maiores saldos) e Analítico (títulos em aberto e recebimentos sem cliente identificado — DNI).
 - Clique em qualquer linha do Sintético (ou nos quadros do topo) para ver os títulos daquele grupo com as descrições, observações e a descrição da Conta Azul; a lista tem busca, ordenação e exportação.
