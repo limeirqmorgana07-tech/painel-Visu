@@ -27,6 +27,13 @@ export const CAMPOS = {
 };
 // travados para o vendedor 24 h depois do lançamento (o resto, como cliente e novo × recompra, ele revisa sempre)
 export const CAMPOS_VALOR = ['data', 'codigo', 'tipo_produto', 'material', 'especificacao', 'cor', 'quantidade', 'valor_unit', 'total'];
+// v84: obrigatórios ao criar o pedido (e ao alterar pedido lançado pelo painel)
+export const OBRIG_CAB = { data: 'Data da venda', cliente: 'Cliente', nome_pedido: 'Nome do pedido (Trello)', vendedor: 'Vendedor', tipo_venda: 'Tipo de venda', novo_recompra: 'Novo ou recompra', segmento: 'Segmento', forma_pagamento: 'Forma de pagamento', parcelas: 'Parcelas', prazo_entrega: 'Prazo de entrega' };
+export const OBRIG_ITEM = { tipo_produto: 'Tipo de produto', material: 'Material', especificacao: 'Especificação', cor: 'Cor', quantidade: 'Quantidade', valor_unit: 'Valor/und' };
+const vazioObrig = (r, c) => { const v = r?.[c]; return v == null || v === '' || ((c === 'quantidade' || c === 'valor_unit') && !(Number(v) > 0)); };
+export function faltandoObrig(r) { return [...Object.keys(OBRIG_CAB), ...Object.keys(OBRIG_ITEM)].filter((c) => vazioObrig(r, c)).map((c) => OBRIG_CAB[c] || OBRIG_ITEM[c]); }
+// campos financeiros e de premiação: a gestão atualiza mesmo em pedido antigo incompleto
+const CAMPOS_FIN = ['pag1', 'data_pag1', 'pag2', 'data_pag2', 'pag3', 'banco_pag', 'pago_100', 'pagador', 'observacao', 'pct_premiacao', 'mes_premiacao', 'obs_premiacao', 'frete', 'parcelas_pers'];
 const HORAS_EDICAO = Number(process.env.HORAS_EDICAO_PEDIDO || 24);
 const GESTAO = new Set(['adm', 'diretor', 'financeiro']);
 
@@ -314,6 +321,9 @@ export async function criarPedido(corpo, u) {
   if (!complementoDe && !corpo?.mesmo_pedido && [...mem.values()].some((r) => !r.excluido && r.codigo === codigo)) throw new Error(`O código ${codigo} já existe. Para acrescentar peças a ele use "Acréscimo"; para um pedido novo deixe o código em branco (o painel gera o próximo).`);
   const regs = itens.filter((i) => i && (i.tipo_produto || i.quantidade || i.total || i.valor_unit)).map((i, k) => novoRegistro({ ...cab, ...i, codigo }, u, { ordem: k, ...(complementoDe ? { complemento_de: complementoDe } : {}) }));
   if (!regs.length) throw new Error('Inclua pelo menos um item (tipo de produto, quantidade e valor).');
+  const faltaCab = Object.keys(OBRIG_CAB).filter((c) => vazioObrig(regs[0], c)).map((c) => OBRIG_CAB[c]);
+  if (faltaCab.length) throw new Error('Preencha os campos obrigatórios do pedido: ' + faltaCab.join(', ') + '.');
+  regs.forEach((r, k) => { const f = Object.keys(OBRIG_ITEM).filter((c) => vazioObrig(r, c)).map((c) => OBRIG_ITEM[c]); if (f.length) throw new Error(`Item ${k + 1}: preencha ${f.join(', ')}.`); });
   regs.forEach((r) => mem.set(r.id, r));
   await gravar(regs);
   await registrarLog(regs.map((r) => ({ ...quem(u), acao: complementoDe ? 'complemento' : 'criou', registro: r.id, codigo: r.codigo, cliente: r.cliente,
@@ -338,6 +348,9 @@ export async function alterar(id, mudancas, u) {
     const t = r2(novo.quantidade * novo.valor_unit); if (t !== r.total) { novo.total = t; log.push({ campo: 'total', antes: r.total, depois: t }); }
   }
   if (!log.length) return r;
+  const apagou = log.filter((x) => (OBRIG_CAB[x.campo] || OBRIG_ITEM[x.campo]) && vazioObrig(novo, x.campo));
+  if (apagou.length) throw new Error(`${apagou.map((x) => OBRIG_CAB[x.campo] || OBRIG_ITEM[x.campo]).join(', ')}: campo obrigatório, não pode ficar em branco.`);
+  if (r.origem === 'painel' && log.some((x) => !CAMPOS_FIN.includes(x.campo))) { const f = faltandoObrig(novo); if (f.length) throw new Error('Para salvar, complete os campos obrigatórios desta linha: ' + f.join(', ') + '.'); }
   novo.mes = (novo.data || '').slice(0, 7) || novo.mes;
   Object.assign(novo, { alterado_em: agoraISO(), alterado_por: u?.nome || '' });
   mem.set(id, novo);

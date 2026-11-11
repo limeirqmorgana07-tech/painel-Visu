@@ -2,6 +2,17 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v85 — 11/11/2026 — Hora do registro e confirmação na Conta Azul
+- Planilha de vendas com duas colunas novas no fim: Registrado em (dia e hora em que o pedido foi lançado no painel, e por quem, ao passar o mouse) e Conta Azul (situação do pedido na Conta Azul).
+- Situações na Conta Azul: Confirmado na CA (o painel achou a venda com o mesmo número), Enviado · confirmando, Aguardando envio (mostra o próximo horário: 09:30, 14:00 ou 17:30), Erro no envio (com o motivo) e Envio desligado.
+- Novo quadro Na Conta Azul: quantos pedidos do painel já estão confirmados na Conta Azul, quantos aguardam envio e quantos deram erro.
+
+## v84 — 11/11/2026 — Campos obrigatórios no pedido de venda
+- Pedido de venda com campos obrigatórios: o vendedor (e qualquer perfil) só salva o pedido com data, cliente, nome do pedido (Trello), vendedor, tipo de venda, novo ou recompra, segmento, forma de pagamento, parcelas e prazo de entrega preenchidos.
+- Cada item exige tipo de produto, material, especificação, cor, quantidade e valor/und.
+- Os campos que faltam ficam marcados em vermelho e a mensagem diz exatamente o que preencher, tanto na linha da planilha quanto no formulário.
+- Ao alterar um pedido, nenhum campo obrigatório pode ser apagado. Pedidos lançados pelo painel precisam estar completos para salvar uma alteração; pagamentos e premiação continuam podendo ser atualizados pela gestão mesmo em pedido antigo incompleto.
+
 ## v83 — 11/11/2026 — Contas a receber na ordem da planilha e nova janela de detalhe
 - Contas a receber na mesma ordem da planilha: 1. Posição geral, 2. Vencidos por faixa, 3. A vencer por semana (hoje, resto da semana e semanas até o fim do mês, como na planilha), 4. Maiores saldos e, por último, 5. O que fazer com cada título, com a linha Vencido a cobrar de fato e a explicação das ações.
 - Voltaram as informações da Conta Azul em tempo real, em blocos que abrem e fecham: Atraso por idade (com a inadimplência), Maiores atrasos por cliente, Próximos recebimentos (7 e 30 dias) e Receitas por categoria.
