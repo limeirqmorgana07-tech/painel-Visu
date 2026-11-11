@@ -2,6 +2,20 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v88 — 11/11/2026 — Selo CA ✓ em todos os pedidos do mês
+- Selo CA ✓ também nos pedidos que vieram da planilha: ao lado dos ícones de cada pedido do mês, CA ✓ quando a venda com o mesmo número está na Conta Azul (passe o mouse para ver o valor) e CA ? quando não foi encontrada.
+- A coluna de ações da Planilha de vendas não corta mais os selos.
+
+## v87 — 11/11/2026 — Ficha do pedido e confirmação imediata na Conta Azul
+- Ficha do pedido: o botão 🔍 em cada pedido abre tudo dele numa janela só, com dados do pedido, itens, condição de pagamento com as parcelas exatamente como vão para a Conta Azul, soma das parcelas, situação na Conta Azul, recebimentos, comprovantes e histórico.
+- Quando as parcelas personalizadas não fecham com o total do pedido, a ficha mostra em vermelho a diferença e como corrigir.
+- Conta Azul: o pedido passa a Confirmado na CA assim que a Conta Azul devolve o número da venda criada no envio; não fica mais esperando a próxima leitura.
+- Depois do Enviar agora, o painel relê as vendas da Conta Azul sozinho.
+
+## v86 — 11/11/2026 — Botão Atualizar funcionando
+- Botão Atualizar (no alto do painel) corrigido: agora busca de novo as vendas, os pedidos, o financeiro, as contas a receber e o extrato, e redesenha a página em que você está, sem precisar do F5.
+- Enquanto atualiza, o botão mostra Atualizando… e, no fim, avisa a hora da atualização (ou o motivo, se algo falhar).
+
 ## v85 — 11/11/2026 — Hora do registro e confirmação na Conta Azul
 - Planilha de vendas com duas colunas novas no fim: Registrado em (dia e hora em que o pedido foi lançado no painel, e por quem, ao passar o mouse) e Conta Azul (situação do pedido na Conta Azul).
 - Situações na Conta Azul: Confirmado na CA (o painel achou a venda com o mesmo número), Enviado · confirmando, Aguardando envio (mostra o próximo horário: 09:30, 14:00 ou 17:30), Erro no envio (com o motivo) e Envio desligado.
