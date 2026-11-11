@@ -100,6 +100,7 @@ async function carregar() {
   mem = m;
   await consolidarClientes().catch((e) => console.warn('[pedidos] consolidar clientes:', e.message));
   await limparPct0().catch((e) => console.warn('[pedidos] premiação 0%:', e.message));
+  await corrigir0044().catch((e) => console.warn('[pedidos] 0044112026:', e.message));
   await recuperarObsCliente().catch((e) => console.warn('[pedidos] obs. do cliente:', e.message));
   return mem;
 }
@@ -123,6 +124,25 @@ async function recuperarObsCliente() {
 // Até a v60, salvar o campo Premiação % (manual) em branco gravava 0% (ex.: Cabo Branco, Milena, out/2026),
 // e o pedido deixava de pagar premiação. Uma vez só: volta esses 0% para em branco (segue a faixa do mês).
 // Depois disso, um 0% gravado de propósito é mantido.
+// v93: pedido 0044112026 (R$ 3.750) tinha parcelas personalizadas somando R$ 1.100 e não subiu para a Conta Azul.
+// Combinado com a Visu em 11/11/2026: entrada = R$ 1.100 (na data da 1ª parcela lançada) e pagamento final = o resto, no prazo de entrega.
+async function corrigir0044() {
+  if (await lerKV('migr_0044_v93').catch(() => null)) return 0;
+  const ls = [...mem.values()].filter((r) => !r.excluido && String(r.codigo || '').replace(/^0+/, '') === '44112026' && r.origem === 'painel');
+  const r0 = ls[0], total = r2(ls.reduce((a, r) => a + (Number(r.total) || 0), 0)), pers = r0?.parcelas_pers || [];
+  const soma = r2(pers.reduce((a, p) => a + (Number(p.valor) || 0), 0));
+  if (!r0 || r0.ca_venda_id || String(r0.parcelas) !== 'P' || Math.abs(soma - 1100) > 0.05 || !(total > 1100)) { await salvarKV('migr_0044_v93', { em: agoraISO(), n: 0, motivo: 'condição não encontrada' }); return 0; }
+  const d1 = pers.map((p) => p.data).filter(Boolean).sort()[0] || r0.data;
+  const dFim = r0.prazo_entrega && r0.prazo_entrega >= d1 ? r0.prazo_entrega : new Date(Date.parse(d1 + 'T12:00:00Z') + 30 * 864e5).toISOString().slice(0, 10);
+  const novaPers = [{ valor: 1100, data: d1 }, { valor: r2(total - 1100), data: dFim }];
+  const novos = ls.map((r) => ({ ...r, parcelas: 'P', parcelas_pers: novaPers, ca_erro: '', alterado_em: agoraISO(), alterado_por: 'Ajuste de parcelas (entrada + final)' }));
+  for (const n of novos) mem.set(n.id, n);
+  await gravar(novos);
+  await registrarLog(novos.slice(0, 1).map((n) => ({ ...quem(null), usuario: 'Ajuste de parcelas (entrada + final)', acao: 'alterou', registro: n.id, codigo: n.codigo, cliente: n.cliente || '', mudancas: [{ campo: 'parcelas_pers', antes: pers.map((p) => `${p.valor} em ${p.data}`).join(' + '), depois: `entrada 1100 em ${d1} + final ${novaPers[1].valor} em ${dFim}` }] })));
+  await salvarKV('migr_0044_v93', { em: agoraISO(), n: novos.length });
+  console.log('[pedidos] 0044112026: parcelas ajustadas para entrada + final');
+  return novos.length;
+}
 async function limparPct0() {
   if (await lerKV('migr_pct0_v63').catch(() => null)) return 0;
   const alvo = [...mem.values()].filter((r) => r.pct_premiacao === 0);
@@ -403,9 +423,21 @@ export async function anexar(id, a, u) {
   if (a.tipo === 'nf' && !podeEditarTudo(u)) throw new Error('A nota fiscal é anexada pela gestão.');
   if (a.tipo === 'comprovante' && (!podeLancar(u) || !ehDoVendedor(u, r))) throw new Error('Só o vendedor do pedido ou a gestão anexa o comprovante.');
   const item = { id: a.id, tipo: a.tipo, nome: String(a.nome || 'arquivo').slice(0, 120), mime: a.mime, tamanho: a.tamanho, por: u?.nome || '', por_id: u?.id || '', em: agoraISO() };
+  // v93: comprovante com valor e data do pagamento: o painel abate do saldo e o financeiro dá a baixa na Conta Azul
+  if (a.tipo === 'comprovante' && Number(a.valor) > 0) Object.assign(item, { valor: r2(a.valor), data_pag: /^\d{4}-\d{2}-\d{2}$/.test(a.data_pag || '') ? a.data_pag : agoraISO().slice(0, 10), baixa_ca: false });
   const novo = { ...r, anexos: [...(r.anexos || []), item] };
   mem.set(id, novo); await gravar([novo]);
   await registrarLog([{ ...quem(u), acao: 'anexou', registro: id, codigo: r.codigo, cliente: r.cliente, mudancas: [], detalhe: `${a.tipo === 'nf' ? 'Nota fiscal' : 'Comprovante de pagamento'}: ${item.nome}` }]);
+  return novo;
+}
+export async function marcarBaixaComprovante(id, aid, feita, u) {
+  await carregar();
+  if (!podeEditarTudo(u)) throw new Error('Só a gestão ou o financeiro marca a baixa.');
+  const r = mem.get(id); const a = r?.anexos?.find((x) => x.id === aid);
+  if (!a) throw new Error('Comprovante não encontrado.');
+  const novo = { ...r, anexos: r.anexos.map((x) => (x.id === aid ? { ...x, baixa_ca: !!feita, baixa_por: u?.nome || '', baixa_em: agoraISO() } : x)) };
+  mem.set(id, novo); await gravar([novo]);
+  await registrarLog([{ ...quem(u), acao: 'alterou', registro: id, codigo: r.codigo, cliente: r.cliente, mudancas: [{ campo: 'baixa do comprovante', antes: a.baixa_ca ? 'feita' : 'pendente', depois: feita ? 'feita' : 'pendente' }], detalhe: `Comprovante ${a.nome} · R$ ${Number(a.valor || 0).toFixed(2)}` }]);
   return novo;
 }
 export async function removerAnexo(id, aid, u) {

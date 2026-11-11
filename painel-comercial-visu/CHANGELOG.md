@@ -2,6 +2,12 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v93 — 11/11/2026 — Pagamento complementar pelo comprovante e ajuste do 0044112026
+- Pedido 0044112026 ajustado sozinho ao subir a versão: pagamento de entrada de R$ 1.100 (na data da 1ª parcela lançada) e pagamento final com o restante no prazo de entrega. O erro some e ele vai para a Conta Azul no próximo envio (ou no Enviar agora).
+- Comprovante com valor e data: ao anexar um comprovante de pagamento novo (ex.: pagamento complementar), o vendedor informa o valor e a data. O painel abate do saldo do pedido na hora (Falta receber com ⏳) e o pagamento aparece para o financeiro.
+- Contas a receber → Analítico → 8. Pagamentos informados pelos vendedores: lista o que aguarda baixa na Conta Azul; depois de dar a baixa lá, o financeiro clica em Baixa feita.
+- A ficha do pedido (🔍) mostra os pagamentos informados e o saldo do pedido.
+
 ## v92 — 11/11/2026 — Personalizado: entrada, complementar e pagamento final
 - Condição de pagamento Personalizado com nomes: Pagamento de entrada, Pagamento complementar (um ou mais, se houver) e Pagamento final (saldo). O botão + Pagamento complementar entra antes do pagamento final.
 - Os mesmos nomes aparecem na célula Parcelas, na ficha do pedido e na descrição de cada parcela enviada à Conta Azul.

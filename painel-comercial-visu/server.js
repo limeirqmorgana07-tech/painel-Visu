@@ -457,8 +457,9 @@ app.post('/api/pedidos/:id/anexos', exigeLogin, exigePedidos, express.raw({ type
   if (tipo === 'comprovante' && !pedidos.ehDoVendedor(req.usuario, r)) throw new Error('Só o vendedor do pedido ou a gestão anexa o comprovante.');
   const nome = String(req.query.nome || 'arquivo').slice(0, 120), mime = String(req.headers['content-type'] || '').split(';')[0].trim().toLowerCase();
   const g = await anexos.guardarArquivo({ registro: r.id, codigo: r.codigo, tipo, nome, mime, bytes: Buffer.isBuffer(req.body) ? req.body : null, por: req.usuario.nome });
-  return { registro: await pedidos.anexar(r.id, { id: g.id, tipo, nome, mime, tamanho: g.tamanho }, req.usuario) };
+  return { registro: await pedidos.anexar(r.id, { id: g.id, tipo, nome, mime, tamanho: g.tamanho, valor: Number(req.query.valor) || 0, data_pag: String(req.query.data || '') }, req.usuario) };
 }));
+app.post('/api/pedidos/:id/anexos/:aid/baixa', exigeLogin, exigePedidos, resp(async (req) => ({ registro: await pedidos.marcarBaixaComprovante(req.params.id, req.params.aid, req.body?.feita !== false, req.usuario) })));
 app.delete('/api/pedidos/:id/anexos/:aid', exigeLogin, exigePedidos, resp(async (req) => { const r = await pedidos.removerAnexo(req.params.id, req.params.aid, req.usuario); await anexos.apagarArquivo(req.params.aid); return { registro: r }; }));
 app.get('/api/anexos/:aid', exigeLogin, async (req, res) => {
   try {
