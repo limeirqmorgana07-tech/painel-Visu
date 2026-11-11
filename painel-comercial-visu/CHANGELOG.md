@@ -2,11 +2,6 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
-## v85 — 11/11/2026 — Hora do registro e confirmação na Conta Azul
-- Planilha de vendas com duas colunas novas no fim: Registrado em (dia e hora em que o pedido foi lançado no painel, e por quem, ao passar o mouse) e Conta Azul (situação do pedido na Conta Azul).
-- Situações na Conta Azul: Confirmado na CA (o painel achou a venda com o mesmo número), Enviado · confirmando, Aguardando envio (mostra o próximo horário: 09:30, 14:00 ou 17:30), Erro no envio (com o motivo) e Envio desligado.
-- Novo quadro Na Conta Azul: quantos pedidos do painel já estão confirmados na Conta Azul, quantos aguardam envio e quantos deram erro.
-
 ## v84 — 11/11/2026 — Campos obrigatórios no pedido de venda
 - Pedido de venda com campos obrigatórios: o vendedor (e qualquer perfil) só salva o pedido com data, cliente, nome do pedido (Trello), vendedor, tipo de venda, novo ou recompra, segmento, forma de pagamento, parcelas e prazo de entrega preenchidos.
 - Cada item exige tipo de produto, material, especificação, cor, quantidade e valor/und.
