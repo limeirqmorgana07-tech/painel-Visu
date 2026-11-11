@@ -2,6 +2,11 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v92 — 11/11/2026 — Personalizado: entrada, complementar e pagamento final
+- Condição de pagamento Personalizado com nomes: Pagamento de entrada, Pagamento complementar (um ou mais, se houver) e Pagamento final (saldo). O botão + Pagamento complementar entra antes do pagamento final.
+- Os mesmos nomes aparecem na célula Parcelas, na ficha do pedido e na descrição de cada parcela enviada à Conta Azul.
+- Inclui tudo da v91 (pedidos entram aprovados na Conta Azul) e das versões anteriores.
+
 ## v91 — 11/11/2026 — Pedidos entram aprovados na Conta Azul
 - Pedidos do painel entram na Conta Azul já APROVADOS (não mais em andamento): eles chegam aprovados pela gestão, que cota e aprova no CRM. Assim contam nos aprovados da Conta Azul e liberam a emissão da NF-e.
 - Aprovação no painel continua só para mudança de valor e quantidade depois do prazo de 24 h; acréscimos e ajustes dentro das 24 h seguem direto.

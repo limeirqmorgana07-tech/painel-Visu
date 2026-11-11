@@ -869,10 +869,10 @@ table.matriz td.vz{color:var(--line2)}
     <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px;flex-wrap:wrap"><span class="dica-c" id="loteMsg" style="margin-right:auto"></span><button class="bt2" type="button" id="loteCancelar">Fechar</button><button class="bt2 pri" type="button" id="loteEnviar" disabled>Anexar</button></div></div>
 </div>
 <datalist id="dlPedidosLote"></datalist>
-<div id="persModal" class="pol" role="dialog" aria-modal="true" aria-labelledby="persTit" hidden style="width:min(520px,96vw);z-index:1002">
-  <div class="pol-hd"><div><div class="eyebrow">Condição de pagamento</div><h3 id="persTit">Parcelas personalizadas</h3><div class="sub">Informe o valor e a data de cada parcela. A soma precisa bater com o total do pedido.</div></div></div>
+<div id="persModal" class="pol" role="dialog" aria-modal="true" aria-labelledby="persTit" hidden style="width:min(640px,96vw);z-index:1002">
+  <div class="pol-hd"><div><div class="eyebrow">Condição de pagamento</div><h3 id="persTit">Parcelas personalizadas</h3><div class="sub">Pagamento de entrada, pagamentos complementares (se houver) e pagamento final (saldo). Informe o valor e a data de cada um; a soma precisa bater com o total do pedido.</div></div></div>
   <div class="pol-corpo"><div id="persCorpo"></div><div class="e" id="persErro"></div>
-    <div style="display:flex;gap:8px;justify-content:space-between;margin-top:14px;flex-wrap:wrap"><button class="bt2" type="button" id="persMais">+ Parcela</button><span><button class="bt2" type="button" id="persCancelar">Cancelar</button> <button class="bt2 pri" type="button" id="persSalvar">Salvar parcelas</button></span></div></div>
+    <div style="display:flex;gap:8px;justify-content:space-between;margin-top:14px;flex-wrap:wrap"><button class="bt2" type="button" id="persMais">+ Pagamento complementar</button><span><button class="bt2" type="button" id="persCancelar">Cancelar</button> <button class="bt2 pri" type="button" id="persSalvar">Salvar parcelas</button></span></div></div>
 </div>
 <div id="pfModal" class="pol" role="dialog" aria-modal="true" aria-labelledby="pfTit" hidden style="width:min(980px,96vw);z-index:1000">
   <div class="pol-hd"><div><div class="eyebrow">Comercial · Ficha do pedido</div><h3 id="pfTit">Pedido</h3><div class="sub" id="pfSub"></div></div><button class="bt2" type="button" id="pfFechar" aria-label="Fechar">✕</button></div>
@@ -1296,8 +1296,9 @@ const nomeMes=(m)=>{const[a,b]=m.split('-');return MES_L[+b-1]+' de '+a};
 const somaMes=(m,n)=>{const[a,b]=m.split('-').map(Number);const d=new Date(Date.UTC(a,b-1+n,1));return d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0')};
 function delta(a,b,inv){ if(!b) return '<span class="delta eq">sem base</span>'; const d=(a-b)/b; const c=Math.abs(d)<.005?'eq':(d>0)!==!!inv?'up':'down'; return `<span class="delta ${c}">${d>0?'▲':d<0?'▼':'■'} ${pct(Math.abs(d))}</span>`; }
 
-const VERSAO='v91';
+const VERSAO='v92';
 const VERSOES=[
+ {v:'v92',data:'11/11/2026',tit:'Personalizado: entrada, complementar e pagamento final',arq:'painel-visu-v92.zip',itens:["Condição de pagamento Personalizado com nomes: Pagamento de entrada, Pagamento complementar (um ou mais, se houver) e Pagamento final (saldo). O botão + Pagamento complementar entra antes do pagamento final.", "Os mesmos nomes aparecem na célula Parcelas, na ficha do pedido e na descrição de cada parcela enviada à Conta Azul.", "Inclui tudo da v91 (pedidos entram aprovados na Conta Azul) e das versões anteriores."]},
  {v:'v91',data:'11/11/2026',tit:'Pedidos entram aprovados na Conta Azul',arq:'painel-visu-v91.zip',itens:["Pedidos do painel entram na Conta Azul já APROVADOS (não mais em andamento): eles chegam aprovados pela gestão, que cota e aprova no CRM. Assim contam nos aprovados da Conta Azul e liberam a emissão da NF-e.", "Aprovação no painel continua só para mudança de valor e quantidade depois do prazo de 24 h; acréscimos e ajustes dentro das 24 h seguem direto.", "Versão consolidada: inclui tudo da v86 à v90 (Atualizar, ficha do pedido, selo CA, Ver como exato, Acessos ao painel)."]},
  {v:'v90',data:'11/11/2026',tit:'Acessos ao painel (só ADM)',arq:'painel-visu-v90.zip',itens:["Nova página Acessos ao painel (Administração), só para ADM: quem entrou, quando, de qual dispositivo e quais páginas abriu.", "Mostra quantas pessoas acessaram e quantas entraram hoje, quem mais acessa (acessos, logins, dias com acesso, último acesso, páginas mais abertas e dispositivo), quem nunca entrou, as páginas mais abertas e a lista dos últimos acessos, com filtro por período e pessoa e exportação em Excel, PDF ou CSV.", "A contagem começa a partir desta versão; antes dela só existe o último acesso de cada usuário."]},
  {v:'v89',data:'11/11/2026',tit:'Em andamento conta como aprovado e Ver como exato',arq:'painel-visu-v89.zip',itens:["Divergência: venda em andamento na Conta Azul deixa de aparecer como Não aprovado no sistema. O pedido já sai aprovado pelo gestor comercial e o painel envia como em andamento; com o valor igual, fica Batendo.", "Ver o painel como uma pessoa (ex.: um diretor) mostra exatamente o que ela vê: as páginas que você liberou para ela, os blocos do perfil e as mesmas funções (lançar, gestão, importar), lidos direto do servidor.", "Ver como Perfil segue a mesma regra do servidor (Aprovações para todos e Usuários e permissões para o diretor)."]},
@@ -2444,7 +2445,7 @@ function sitCA(r,v){ if(r.origem!=='painel') return v?['ok','Na Conta Azul','Ven
 // v87: parcelas como vão para a Conta Azul (mesma regra do servidor)
 function parcelasPrevistas(r,total){ const r2=(x)=>Math.round(x*100)/100, d=r.data||hojeISO(), mais=(iso,n)=>{ const x=new Date(iso+'T12:00:00Z'); x.setUTCDate(x.getUTCDate()+n); return x.toISOString().slice(0,10); };
   const n=String(r.parcelas||'2');
-  if(n==='P') return (r.parcelas_pers||[]).filter(p=>p.valor>0).map((p,i,a)=>({data:p.data||d,valor:r2(p.valor),desc:`Parcela ${i+1} de ${a.length}`}));
+  if(n==='P') return (r.parcelas_pers||[]).filter(p=>p.valor>0).map((p,i,a)=>({data:p.data||d,valor:r2(p.valor),desc:nomeParcPers(i,a.length)}));
   const k=Math.max(1,Math.min(12,parseInt(n,10)||2));
   if(k===1) return [{data:d,valor:r2(total),desc:'À vista'}];
   if(k===2){ const p1=r2(total/2); return [{data:d,valor:p1,desc:'Parcela 1 (50%)'},{data:r.prazo_entrega&&r.prazo_entrega>=d?r.prazo_entrega:mais(d,30),valor:r2(total-p1),desc:'Parcela 2 (50%)'}]; }
@@ -2610,7 +2611,7 @@ function pgRegistro(){
   // grade
   vis.sort((a,b)=>(a.data||a.mes||'').localeCompare(b.data||b.mes||'')||cbase(a.codigo).localeCompare(cbase(b.codigo))||String(a.codigo).localeCompare(String(b.codigo))||(a.ordem||0)-(b.ordem||0));
   const LIM=1500, mostra=vis.slice(0,LIM);
-  const fmtPers=(r)=>{ const ps=r.parcelas_pers||[]; return ps.length?`Personalizado · ${ps.length}x`:'Personalizado (preencher)'; };
+  const fmtPers=(r)=>{ const ps=r.parcelas_pers||[]; return ps.length?(ps.length===1?'Personalizado · pagamento único':`Personalizado · entrada${ps.length>2?` + ${ps.length-2} complementar${ps.length>3?'es':''}`:''} + final`):'Personalizado (preencher)'; };
   const fmt=(c,t,v)=>t==='mes'?(v?MES_C[+String(v).slice(5,7)-1]+'/'+String(v).slice(0,4):''):c==='parcelas'?esc(ROT_PARC[String(v||2)]||v):v===''||v==null||(t!=='bool'&&t!=='num'&&t!=='brl'&&t!=='pag'&&!v)?'':t==='data'?dataBR(v):t==='brl'||t==='pag'?(+v?brl2(+v):''):t==='num'?(+v?int(+v)===String(+v)?int(+v):(+v).toLocaleString('pt-BR'):''):t==='bool'?(v?'Sim':'Não'):c==='parcelas'?esc(ROT_PARC[String(v)]||v):c==='novo_recompra'?ROT_NR[v]||v:c==='mes'?(v?MES_C[+v.slice(5)-1]+'/'+v.slice(0,4):''):esc(v);
   let ant='', html='';
   for(const r of mostra){
@@ -2627,7 +2628,7 @@ function pgRegistro(){
         if(+v&&(r.pag_ca||[]).includes(i+1)) cont+=`<span class="ca" title="preenchido pela Conta Azul">CA</span>`;
         if(prim||+v) extra=` data-pg="${esc(r.codigo)}|${i}|${+v||0}|${r.id}"`; }
       if(c==='pago_100'&&r.codigo&&prim) extra=` data-pgall="${esc(r.codigo)}"`;
-      if(c==='parcelas'&&String(v)==='P'){ const ps=r.parcelas_pers||[]; cont=esc(fmtPers(r)); extra+=` title="${esc(ps.map((x,i)=>`${i+1}ª ${brl2(x.valor)}${x.data?' em '+dataBR(x.data):''}`).join(' · ')||'Clique para montar as parcelas')}"`; }
+      if(c==='parcelas'&&String(v)==='P'){ const ps=r.parcelas_pers||[]; cont=esc(fmtPers(r)); extra+=` title="${esc(ps.map((x,i)=>`${nomeParcPers(i,ps.length)}: ${brl2(x.valor)}${x.data?' em '+dataBR(x.data):''}`).join(' · ')||'Clique para montar as parcelas')}"`; }
       if(c==='falta_receber'){ if(prim&&g){ const fr=faltaPed(r.codigo,g.t); cont=fr.semCA?`<span style="color:var(--ink3)" title="Ainda sem parcelas na Conta Azul">${brl2(fr.falta)}</span>`:fr.falta<=0.01?'<span style="color:var(--green,#16643a);font-weight:700" title="Tudo recebido na Conta Azul">quitado</span>':`<b title="Total ${brl2(g.t)} − recebido na Conta Azul ${brl2(fr.pago)}">${brl2(fr.falta)}</b>`; cls.push('v'); } else cont=''; }
       if(trv&&trv!=='x'&&P.lancar) { cls.push('lk'); extra+=` data-lkc="${c}" title="${esc(trv)}${['valor_unit','quantidade','total'].includes(c)&&!P.gestao?' Clique para pedir a alteração de preço à gestão.':''}"`; }
       else if(t!=='ro'&&!viva&&P.lancar) extra+=` data-c="${c}"`;
@@ -2812,15 +2813,17 @@ const PERS={};
 // grade: monta as parcelas do pedido e grava em todas as linhas dele
 function editarPers(r){ const linhas=regsPed().filter(x=>x.codigo===r.codigo&&!x.excluido), tot=linhas.reduce((a,x)=>a+(+x.total||0),0);
   abrirPers(tot,r.parcelas_pers,async(l)=>{ for(const x of linhas){ const res=await api('/api/pedidos/'+x.id,{method:'PATCH',body:JSON.stringify({mudancas:{parcelas:'P',parcelas_pers:l}})}); Object.assign(x,res.registro); } depoisPedido(); toast(`Parcelas personalizadas salvas no pedido ${r.codigo}.`); pgRegistro(); }); }
+// v92: nomes dos pagamentos da condição personalizada (entrada, complementar, final)
+function nomeParcPers(i,n){ if(n<=1) return 'Pagamento único'; if(i===0) return 'Pagamento de entrada'; if(i===n-1) return 'Pagamento final (saldo)'; return n>3?`Pagamento complementar ${i}`:'Pagamento complementar'; }
 function abrirPers(totalPed,lista,aoSalvar){ PERS.total=+totalPed||0; PERS.l=(lista&&lista.length?lista:[{valor:'',data:''},{valor:'',data:''}]).map(x=>({...x})); PERS.ok=aoSalvar; desenharPers(); $('persModal').hidden=false; }
 function desenharPers(){ const soma=PERS.l.reduce((a,x)=>a+(+x.valor||0),0), dif=PERS.total-soma;
-  $('persCorpo').innerHTML=PERS.l.map((x,i)=>`<div style="display:flex;gap:8px;margin-top:8px;align-items:center"><b style="width:28px">${i+1}ª</b><input data-pv="${i}" type="number" min="0" step="0.01" placeholder="Valor (R$)" value="${x.valor}" style="width:140px"><input data-pd="${i}" type="date" value="${x.data||''}" style="width:160px"><button class="bt2 del" type="button" data-px="${i}">✕</button></div>`).join('')
+  $('persCorpo').innerHTML=PERS.l.map((x,i)=>`<div style="display:flex;gap:8px;margin-top:8px;align-items:center;flex-wrap:wrap"><b style="width:175px;font-size:13px">${nomeParcPers(i,PERS.l.length)}</b><input data-pv="${i}" type="number" min="0" step="0.01" placeholder="Valor (R$)" value="${x.valor}" style="width:130px" aria-label="Valor: ${nomeParcPers(i,PERS.l.length)}"><input data-pd="${i}" type="date" value="${x.data||''}" style="width:150px" aria-label="Data: ${nomeParcPers(i,PERS.l.length)}"><button class="bt2 del" type="button" data-px="${i}">✕</button></div>`).join('')
     +`<div style="margin-top:12px">Total do pedido: <b>${brl2(PERS.total)}</b> · soma das parcelas: <b>${brl2(soma)}</b> · ${Math.abs(dif)<=0.05?'<span style="color:var(--green,#16643a);font-weight:700">confere ✓</span>':`<span style="color:#9b1c1c;font-weight:700">${dif>0?'faltam '+brl2(dif):'passou '+brl2(-dif)}</span>`}</div>`;
   $('persCorpo').querySelectorAll('[data-pv]').forEach(e=>e.oninput=()=>{ PERS.l[+e.dataset.pv].valor=e.value; const t=$('persCorpo').lastElementChild; desenharParcSoma(); });
   $('persCorpo').querySelectorAll('[data-pd]').forEach(e=>e.onchange=()=>PERS.l[+e.dataset.pd].data=e.value);
   $('persCorpo').querySelectorAll('[data-px]').forEach(b=>b.onclick=()=>{ PERS.l.splice(+b.dataset.px,1); if(!PERS.l.length) PERS.l.push({valor:'',data:''}); desenharPers(); }); }
 function desenharParcSoma(){ const soma=PERS.l.reduce((a,x)=>a+(+x.valor||0),0), dif=PERS.total-soma, el=$('persCorpo').lastElementChild; el.innerHTML=`Total do pedido: <b>${brl2(PERS.total)}</b> · soma das parcelas: <b>${brl2(soma)}</b> · ${Math.abs(dif)<=0.05?'<span style="color:var(--green,#16643a);font-weight:700">confere ✓</span>':`<span style="color:#9b1c1c;font-weight:700">${dif>0?'faltam '+brl2(dif):'passou '+brl2(-dif)}</span>`}`; }
-$('persMais').onclick=()=>{ if(PERS.l.length<24){ PERS.l.push({valor:'',data:''}); desenharPers(); } };
+$('persMais').onclick=()=>{ if(PERS.l.length<24){ PERS.l.splice(Math.max(1,PERS.l.length-1),0,{valor:'',data:''}); desenharPers(); } };
 $('persCancelar').onclick=()=>{ $('persModal').hidden=true; PERS.cancelar?.(); };
 $('persSalvar').onclick=async()=>{ const l=PERS.l.map(x=>({valor:Math.round((+x.valor||0)*100)/100,data:x.data||''})).filter(x=>x.valor>0); const soma=l.reduce((a,x)=>a+x.valor,0);
   if(!l.length) return $('persErro').textContent='Informe ao menos uma parcela.'; if(PERS.total&&Math.abs(soma-PERS.total)>0.05) return $('persErro').textContent=`As parcelas somam ${brl2(soma)} e o pedido é ${brl2(PERS.total)}.`; if(l.some(x=>!x.data)) return $('persErro').textContent='Informe a data de cada parcela.';

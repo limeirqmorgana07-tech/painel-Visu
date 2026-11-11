@@ -21,6 +21,8 @@ export function parcelas5050(total, data, prazo) {
   return [{ data_vencimento: data, valor: p1, descricao: 'Parcela 1 (50%)' }, { data_vencimento: v2, valor: p2, descricao: 'Parcela 2 (50%)' }];
 }
 
+// v92: nomes da condição personalizada, iguais aos do painel
+export const nomeParcPers = (i, n) => (n <= 1 ? 'Pagamento único' : i === 0 ? 'Pagamento de entrada' : i === n - 1 ? 'Pagamento final (saldo)' : n > 3 ? `Pagamento complementar ${i}` : 'Pagamento complementar');
 // condição do pedido: 1 = à vista (na data da venda), 2 = 50% + 50% (padrão), 3 ou mais = parcelas iguais a cada 30 dias
 export function parcelasPedido(n, total, data, prazo, pers = []) {
   // personalizado: as parcelas como o vendedor montou (valor e data de cada uma); precisam somar o total do pedido
@@ -29,7 +31,7 @@ export function parcelasPedido(n, total, data, prazo, pers = []) {
     if (!ps.length) throw new Error('Parcelas personalizadas não preenchidas.');
     const soma = r2(ps.reduce((a2, p) => a2 + p.valor, 0));
     if (Math.abs(soma - total) > 0.05) throw new Error(`As parcelas personalizadas somam ${soma.toFixed(2)} e o pedido é ${total.toFixed(2)}.`);
-    return ps.map((p, i) => ({ data_vencimento: p.data || data, valor: r2(p.valor), descricao: `Parcela ${i + 1} de ${ps.length}` }));
+    return ps.map((p, i) => ({ data_vencimento: p.data || data, valor: r2(p.valor), descricao: nomeParcPers(i, ps.length) }));
   }
   n = Math.max(1, Math.min(12, parseInt(n, 10) || 2));
   if (n === 2) return parcelas5050(total, data, prazo);
