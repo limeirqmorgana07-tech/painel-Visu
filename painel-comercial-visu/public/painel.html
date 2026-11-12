@@ -189,6 +189,10 @@ td.ed{white-space:nowrap}
 .rkh-d{text-align:right}
 @media (max-width:700px){.rkh-l{grid-template-columns:100px 1fr 40px;gap:8px}}
 @media (max-width:700px){.rk-l{grid-template-columns:30px 1fr 110px 44px;gap:8px}.rk-b{display:none}}
+.ac-filtro{padding:14px 16px}.ac-f{display:flex;gap:10px;flex-wrap:wrap;align-items:end}.ac-f .f{display:flex;flex-direction:column;gap:3px}.ac-f label{font-size:11px;color:var(--ink3)}.ac-f input,.ac-f select{padding:7px 9px;border:1px solid var(--line2);border-radius:8px;background:var(--panel);font:inherit;font-size:13px;color:var(--ink)}
+#acKpis{grid-template-columns:repeat(5,minmax(0,1fr))}@media (max-width:900px){#acKpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.ac-g2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:14px}@media (max-width:900px){.ac-g2{grid-template-columns:1fr}}
+.gq svg{display:block}.gq text{font-size:11px;fill:var(--ink3)}.gq .gv{font-size:11px;fill:var(--ink2);font-weight:600}.gq .gn{font-size:12px;fill:var(--ink)}
 .obr-vz{border-color:var(--red)!important;box-shadow:0 0 0 3px color-mix(in srgb,var(--red) 18%,transparent)!important}
 .rc-sec tr.clk{cursor:pointer}.rc-sec tr.clk:hover td{background:var(--line)}
 #rcTit td.ed{cursor:pointer}#rcTit td.ed:hover{background:var(--line)}#rcTit td{vertical-align:top}#rcTit .sv{color:#9b1c1c;font-weight:700}#rcTit .sa{color:#16643a}
@@ -1263,17 +1267,19 @@ table.matriz td.vz{color:var(--line2)}
   </section>
 
   <section data-pagina="acessos" hidden>
-    <div class="aviso" style="margin-bottom:14px"><span>Só os administradores veem esta página. Conta cada entrada no painel (login), cada vez que alguém abre o painel e as páginas que abriu. Aberturas repetidas em poucos minutos contam uma vez.</span></div>
-    <div class="rc-bar" style="display:flex;gap:10px;flex-wrap:wrap;align-items:end;margin-bottom:14px">
-      <div class="f"><label for="acDias">Período</label><select id="acDias"><option value="1">Hoje</option><option value="7" selected>Últimos 7 dias</option><option value="30">Últimos 30 dias</option><option value="90">Últimos 90 dias</option></select></div>
+    <div class="card ac-filtro"><div class="ac-f">
+      <div class="f"><label for="acDe">De</label><input type="date" id="acDe"></div>
+      <div class="f"><label for="acAte">Até</label><input type="date" id="acAte"></div>
       <div class="f"><label for="acPessoa">Pessoa</label><select id="acPessoa"><option value="">Todas</option></select></div>
+      <div class="f"><label for="acTipo">Tipo</label><select id="acTipo"><option value="">Tudo</option><option value="login">Entradas (login)</option><option value="abriu">Abriu o painel</option><option value="pagina">Páginas abertas</option></select></div>
+      <button class="bt2 pri" type="button" id="acAplicar">Aplicar</button><button class="bt2" type="button" data-acr="7">Últimos 7 dias</button><button class="bt2" type="button" data-acr="30">Últimos 30 dias</button><button class="bt2" type="button" data-acr="tudo">Todo o histórico</button>
       <div class="exp" data-exp="acessos" style="margin-left:auto"><button class="bt2" type="button" aria-haspopup="true" aria-expanded="false">⬇ Exportar ▾</button><div class="exp-m" hidden><button type="button" data-fmt="xlsx">Excel (.xlsx)</button><button type="button" data-fmt="pdf">PDF</button><button type="button" data-fmt="csv">CSV</button></div></div>
-    </div>
-    <div class="kpis" id="acKpis"></div>
-    <div class="card" style="margin-top:14px"><div class="hd"><div><h3>Histórico de acessos</h3><div class="sub" id="acGrafSub">Por dia, no período</div></div><div class="leg"><span><i style="background:var(--navy)"></i>Acessos</span><span><i style="background:var(--orange);height:3px"></i>Pessoas diferentes</span></div></div><div id="acGraf"></div></div>
-    <div class="card" style="margin-top:14px"><div class="hd"><div><h3>Quem mais acessa</h3><div class="sub">Por pessoa, no período · último acesso de todos os usuários cadastrados</div></div></div><div class="tw" id="acPessoas"></div></div>
-    <div class="card" style="margin-top:14px"><div class="hd"><div><h3>Páginas mais abertas</h3><div class="sub">No período</div></div></div><div class="tw" id="acPaginas"></div></div>
-    <div class="card" style="margin-top:14px"><div class="hd"><div><h3>Últimos acessos</h3><div class="sub">Do mais recente para o mais antigo (até 500 linhas; exporte para ver tudo)</div></div></div><div class="tw" id="acLista" style="max-height:60vh;overflow:auto"></div></div>
+    </div><div class="dica-c" style="margin-top:8px">Só os administradores veem esta página. Conta as entradas no painel (login), cada vez que alguém abre o painel e as páginas que abre; aberturas repetidas em poucos minutos contam uma vez.</div></div>
+    <div class="kpis" id="acKpis" style="margin-top:14px"></div>
+    <div class="ac-g2"><div class="card"><div class="hd"><div><h3>Uso por dia</h3></div></div><div id="acDia" class="gq"></div></div><div class="card"><div class="hd"><div><h3>Horários de maior uso</h3></div></div><div id="acHora" class="gq"></div></div></div>
+    <div class="ac-g2"><div class="card"><div class="hd"><div><h3>Quem mais usou</h3></div></div><div id="acQuem" class="gq"></div></div><div class="card"><div class="hd"><div><h3>Páginas mais abertas</h3></div></div><div id="acPags" class="gq"></div></div></div>
+    <div class="card" style="margin-top:14px"><div class="hd"><div><h3>Por pessoa</h3><div class="sub">No período · inclui quem não acessou</div></div></div><div class="tw" id="acPessoas"></div></div>
+    <div class="card" style="margin-top:14px"><div class="hd"><div><h3>Registro de acessos</h3><div class="sub">Os 300 mais recentes do filtro (exporte para ver tudo)</div></div></div><div class="tw" id="acLista" style="max-height:420px;overflow:auto"></div></div>
   </section>
   <section data-pagina="usuarios" hidden>
     
@@ -1323,8 +1329,9 @@ const nomeMes=(m)=>{const[a,b]=m.split('-');return MES_L[+b-1]+' de '+a};
 const somaMes=(m,n)=>{const[a,b]=m.split('-').map(Number);const d=new Date(Date.UTC(a,b-1+n,1));return d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0')};
 function delta(a,b,inv){ if(!b) return '<span class="delta eq">sem base</span>'; const d=(a-b)/b; const c=Math.abs(d)<.005?'eq':(d>0)!==!!inv?'up':'down'; return `<span class="delta ${c}">${d>0?'▲':d<0?'▼':'■'} ${pct(Math.abs(d))}</span>`; }
 
-const VERSAO='v102';
+const VERSAO='v103';
 const VERSOES=[
+ {v:'v103',data:'12/11/2026',tit:'Gráficos clean (modelo VD): Acessos e Ranking de vendas',arq:'painel-visu-v103.zip',itens:['Acessos ao painel no modelo do Controle de acesso da VD: filtros De/Até, Pessoa e Tipo, botões Últimos 7/30 dias e Todo o histórico.','KPIs (páginas abertas, entradas, pessoas, páginas diferentes, média por dia), Uso por dia, Horários de maior uso, Quem mais usou e Páginas mais abertas.','Tabelas Por pessoa (com quem não usou) e Registro de acessos.','Ranking de vendas refeito: barras finas, texto pequeno, do maior para o menor, 1º em laranja; clique na barra abre os pedidos.','Gráficos desenhados no tamanho real da tela — não ficam mais enormes.']},
  {v:'v102',data:'12/11/2026',tit:'Ranking de vendas em barras horizontais',arq:'painel-visu-v102.zip',itens:["Ranking de vendas refeito no padrão de dashboard: barras horizontais com os nomes um abaixo do outro, do maior para o menor, 1º colocado em laranja e os demais em uma só cor, valor no fim de cada barra e escala embaixo, sem enfeites.", "Botões Período (o mês ou período escolhido no topo) e Últimos 12 meses (histórico), e R$ / Pedidos. Passe o mouse para ver a participação e a posição no período anterior; clique para ver os pedidos.", "Inclui tudo da v101."]},
  {v:'v101',data:'12/11/2026',tit:'Financeiro também vendedor',arq:'painel-visu-v101.zip',itens:["Perfil Financeiro também pode ser vendedor: em Usuários e permissões, o campo Nome de vendedor aparece para Financeiro (como já era para Diretor e Comercial). Preenchido, os pedidos que a pessoa lança saem com o nome dela como vendedor e ela entra no ranking e na premiação.", "Inclui tudo da v100."]},
  {v:'v100',data:'12/11/2026',tit:'Categoria Receita Geral de Vendas travada, comprovante bloqueado e ranking novo',arq:'painel-visu-v100.zip',itens:["Categoria travada: toda venda que o painel envia para a Conta Azul entra com a categoria financeira Receita Geral de Vendas. Se a Conta Azul não encontrar essa categoria, a venda não é enviada e o motivo aparece na coluna Conta Azul.", "Comprovante: valor diferente das parcelas do pedido, acima do saldo ou arquivo repetido agora bloqueia o vendedor (não há mais Anexar mesmo assim para ele): é preciso corrigir o valor. Só a gestão pode anexar nesses casos. Data estranha continua só como aviso.", "Ranking de vendas em barras horizontais (padrão de dashboard): nomes um abaixo do outro, do maior para o menor, 1º colocado em laranja de destaque, demais em uma só cor, valor no fim da barra e escala embaixo. Botões Período / Últimos 12 meses (histórico) e R$ / Pedidos.", "Inclui o perfil PCP (v98) e a correção de comprovante (v99)."]},
@@ -1617,6 +1624,21 @@ function pgGeral(j){
   graficoEvolucao(meses.map(m=>({m,s:resumo(linhas([m]))})),peRef().valor);
   rankingVendas(j,meses);
 }
+// v103: gráficos "clean" (modelo VD): desenhados na largura real do quadro, altura fixa e texto pequeno — não incham em tela grande
+const larg=(el)=>Math.max(260,Math.floor(el.clientWidth||el.parentElement?.clientWidth||600));
+function gLinha(el,pts,{h=230,fmt=int}={}){ const W=larg(el),L=40,R=16,T=10,B=24,w=W-L-R,hh=h-T-B,n=pts.length||1; const {passo,topo}=escala(Math.max(...pts.map(p=>p.v),1)); const y=v=>T+hh-(v/topo)*hh, x=i=>L+(n<=1?w/2:i*w/(n-1));
+  let g=''; for(let v=0;v<=topo+1e-6;v+=passo) g+=`<line x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${L-6}" y="${y(v)+4}" text-anchor="end">${fmt(v)}</text>`;
+  const cada=Math.ceil(n/Math.max(2,Math.floor(w/52))); pts.forEach((p,i)=>{ if(i%cada===0) g+=`<text x="${x(i)}" y="${h-6}" text-anchor="${i===0?'start':'middle'}">${esc(p.rot)}</text>`; });
+  const pl=pts.map((p,i)=>`${x(i)},${y(p.v)}`).join(' ');
+  el.innerHTML=`<svg width="${W}" height="${h}" role="img">${g}<polygon points="${L},${y(0)} ${pl} ${x(n-1)},${y(0)}" fill="var(--s1)" opacity=".14"/><polyline points="${pl}" fill="none" stroke="var(--s1)" stroke-width="2"/>${pts.map((p,i)=>`<g><title>${esc(p.tip||p.rot+': '+fmt(p.v))}</title><circle cx="${x(i)}" cy="${y(p.v)}" r="${n>40?2:3}" fill="var(--s1)"/><rect x="${x(i)-w/n/2}" y="${T}" width="${w/n}" height="${hh}" fill="transparent"/></g>`).join('')}</svg>`; }
+function gColunas(el,pts,{h=230,fmt=int}={}){ const W=larg(el),L=40,R=10,T=10,B=24,w=W-L-R,hh=h-T-B,n=pts.length||1; const {passo,topo}=escala(Math.max(...pts.map(p=>p.v),1)); const y=v=>T+hh-(v/topo)*hh, slot=w/n, bw=Math.max(2,Math.min(slot*.68,26));
+  let g=''; for(let v=0;v<=topo+1e-6;v+=passo) g+=`<line x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${L-6}" y="${y(v)+4}" text-anchor="end">${fmt(v)}</text>`;
+  el.innerHTML=`<svg width="${W}" height="${h}" role="img">${g}${pts.map((p,i)=>`<g><title>${esc(p.tip||p.rot+': '+fmt(p.v))}</title><rect x="${L+i*slot+(slot-bw)/2}" y="${y(p.v)}" width="${bw}" height="${Math.max(0,y(0)-y(p.v))}" fill="${p.cor||'var(--s1)'}"/>${i%Math.ceil(26/slot)===0?`<text x="${L+i*slot+slot/2}" y="${h-8}" text-anchor="middle">${esc(p.rot)}</text>`:''}</g>`).join('')}</svg>`; }
+function gBarrasH(el,itens,{fmt=int,rowH=24,barH=13,labelW=150,valores=true,destaque=false,onClick=null}={}){ const W=larg(el),R=valores?90:14,T=6,B=22,n=itens.length||1,h=T+n*rowH+B,w=W-labelW-R; const {passo,topo}=escala(Math.max(...itens.map(p=>p.v),1)); const x=v=>labelW+(v/topo)*w;
+  let g=''; for(let v=0;v<=topo+1e-6;v+=passo) g+=`<line x1="${x(v)}" x2="${x(v)}" y1="${T}" y2="${h-B}" stroke="var(--line)"/><text x="${x(v)}" y="${h-6}" text-anchor="middle">${fmt(v)}</text>`;
+  el.innerHTML=`<svg width="${W}" height="${h}" role="img">${g}${itens.map((p,i)=>{ const yc=T+i*rowH+rowH/2, um=destaque&&i===0, nm=String(p.rot); return `<g data-i="${i}"${onClick?' style="cursor:pointer"':''}><title>${esc(p.tip||nm+': '+fmt(p.v))}</title><rect x="0" y="${yc-rowH/2}" width="${W}" height="${rowH}" fill="transparent"/><text class="gn" x="${labelW-8}" y="${yc+4}" text-anchor="end"${um?' style="font-weight:700"':''}>${esc(nm.length>22?nm.slice(0,21)+'…':nm)}</text><rect x="${labelW}" y="${yc-barH/2}" width="${Math.max(2,x(p.v)-labelW)}" height="${barH}" fill="${p.cor||(um?'var(--orange)':'var(--s1)')}"/>${valores?`<text class="gv" x="${x(p.v)+6}" y="${yc+4}"${um?' style="fill:var(--orange)"':''}>${fmt(p.v)}</text>`:''}</g>`; }).join('')}</svg>`;
+  if(onClick) el.querySelectorAll('g[data-i]').forEach(gg=>gg.onclick=()=>onClick(itens[+gg.dataset.i])); }
+let _rsz; window.addEventListener('resize',()=>{ clearTimeout(_rsz); _rsz=setTimeout(()=>{ if(['vendas','acessos'].includes(E.pagina)) desenhar(); },250); });
 // v99: ranking de vendas por vendedor no período e histórico dos últimos 12 meses
 const CORES_RK=['var(--s1)','var(--s2)','var(--s3)','#8A2E9A','#D7245F','#5A6B7B'];
 // v102: ranking em barras horizontais (padrão de dashboard): nomes à esquerda, do maior para o menor, 1º em destaque, valor no fim da barra
@@ -1627,17 +1649,9 @@ function rankingVendas(j,meses){ const val=(E.rkv||'valor')==='valor', doze=E.rk
   const tot=lista.reduce((s2,x)=>s2+med(x.r),0)||1;
   $('rkVSub').textContent=`${doze?`${nomeMes(meses[0])} a ${nomeMes(meses[meses.length-1])}`:j.rot} · ${val?'faturamento':'pedidos'} por vendedor, do maior para o menor`;
   if(!lista.length){ $('rkVBarras').innerHTML='<div class="vazio">Sem vendas no período com esses filtros.</div>'; return; }
-  const n=lista.length, LB=190, R=120, W=760, bh=26, gap=12, T=8, B=26, H=T+n*(bh+gap)-gap+B, w=W-LB-R;
-  const {passo,topo}=escala(med(lista[0].r)), x=(v)=>LB+(v/topo)*w;
-  let g=''; for(let v=0;v<=topo+1e-6;v+=passo) g+=`<line x1="${x(v)}" x2="${x(v)}" y1="${T-4}" y2="${H-B+4}" stroke="var(--line)"/><text x="${x(v)}" y="${H-6}" text-anchor="middle">${val?curto(v):int(v)}</text>`;
-  const barras=lista.map((it,i)=>{ const v=med(it.r), y0=T+i*(bh+gap), um=i===0, pa=ant.get(it.nome);
-    const tip=`${i+1}º ${it.nome}: ${val?brl(v):int(v)+' pedidos'} · ${pct(v/tot)} do total${doze?'':pa?` · no período anterior: ${pa}º`:' · sem vendas no período anterior'}`;
-    return `<g class="rkg" data-i="${i}" style="cursor:pointer"><title>${esc(tip)}</title><rect x="0" y="${y0-gap/2}" width="${W}" height="${bh+gap}" fill="transparent"/>
-      <text x="${LB-12}" y="${y0+bh/2+4.5}" text-anchor="end" style="font-size:13px;font-weight:${um?700:500};fill:var(--ink)">${esc(it.nome.length>24?it.nome.slice(0,23)+'…':it.nome)}</text>
-      <rect x="${LB}" y="${y0}" width="${Math.max(2,x(v)-LB)}" height="${bh}" rx="3" fill="${um?'var(--orange)':'var(--s1)'}" opacity="${um?1:.75}"/>
-      <text x="${x(v)+8}" y="${y0+bh/2+4.5}" style="font-size:12.5px;font-weight:700;fill:${um?'var(--orange)':'var(--ink)'}">${fmt(v)}</text></g>`; }).join('');
-  $('rkVBarras').innerHTML=`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Ranking de vendas por vendedor">${g}<line x1="${LB}" x2="${LB}" y1="${T-4}" y2="${H-B+4}" stroke="var(--line2)"/>${barras}</svg><div class="dica-c" style="margin-top:4px">Clique na barra para ver os pedidos do vendedor · passe o mouse para ver a participação${doze?'':' e a posição no período anterior'}.</div>`;
-  $('rkVBarras').querySelectorAll('.rkg').forEach(el=>el.onclick=()=>{ const it=lista[+el.dataset.i]; detPedidos('Vendas de '+it.nome,base.filter(l=>(l.v||NAO_VEND)===it.nome)); }); }
+  $('rkVBarras').classList.add('gq');
+  gBarrasH($('rkVBarras'),lista.map((it,i)=>{ const v=med(it.r), pa=ant.get(it.nome); return {rot:it.nome,v,nome:it.nome,tip:`${i+1}º ${it.nome}: ${val?brl(v):int(v)+' pedidos'} · ${pct(v/tot)} do total${doze?'':pa?` · no período anterior: ${pa}º`:' · sem vendas no período anterior'} · clique para ver os pedidos`}; }),
+    {fmt:val?curto:int,destaque:true,labelW:Math.min(180,Math.max(110,larg($('rkVBarras'))*.22)),onClick:(it)=>detPedidos('Vendas de '+it.nome,base.filter(l=>(l.v||NAO_VEND)===it.nome))}); }
 document.querySelectorAll('[data-rkp]').forEach(b=>b.addEventListener('click',()=>{ E.rkp=b.dataset.rkp; document.querySelectorAll('[data-rkp]').forEach(x=>x.setAttribute('aria-pressed',x===b)); desenhar(); }));
 document.querySelectorAll('[data-rkv]').forEach(b=>b.addEventListener('click',()=>{ E.rkv=b.dataset.rkv; document.querySelectorAll('[data-rkv]').forEach(x=>x.setAttribute('aria-pressed',x===b)); desenhar(); }));
 
@@ -4019,39 +4033,35 @@ function previaApi(url,op){ const m=op.method||'GET'; if(url.startsWith('/api/pe
 const AC={d:null,dias:null};
 const TIPO_AC={login:'Entrou (login)',abriu:'Abriu o painel',pagina:'Abriu a página'};
 async function pgAcessos(){
-  const dias=$('acDias').value; if(!AC.d||AC.dias!==dias){ $('acLista').innerHTML='<div class="vazio">Carregando…</div>'; try{ AC.d=await api('/api/acessos?dias='+dias); AC.dias=dias; }catch(e){ $('acLista').innerHTML=`<div class="aviso erro">${esc(e.message)}</div>`; return; } }
-  const pes=$('acPessoa').value, us=AC.d.usuarios||[];
+  if(!AC.d){ $('acLista').innerHTML='<div class="vazio">Carregando…</div>'; try{ AC.d=await api('/api/acessos?dias=365'); }catch(e){ $('acLista').innerHTML=`<div class="aviso erro">${esc(e.message)}</div>`; return; } }
+  const hj=hojeISO(), diaL=(iso)=>new Date(iso).toLocaleDateString('sv-SE',{timeZone:'America/Sao_Paulo'}), horaL=(iso)=>+new Date(iso).toLocaleString('en-US',{timeZone:'America/Sao_Paulo',hour:'2-digit',hourCycle:'h23'});
+  const todos=AC.d.acessos||[], prim=todos.length?diaL(todos[todos.length-1].em):hj;
+  if(!$('acDe').value){ $('acDe').value=new Date(Date.parse(hj+'T12:00:00Z')-6*864e5).toISOString().slice(0,10); $('acAte').value=hj; }
+  const de=$('acDe').value||prim, ate=$('acAte').value||hj, pes=$('acPessoa').value, tipo=$('acTipo').value, us=AC.d.usuarios||[];
   $('acPessoa').innerHTML='<option value="">Todas</option>'+us.map(u=>`<option value="${esc(u.id)}"${u.id===pes?' selected':''}>${esc(u.nome)}</option>`).join('');
-  const ls=(AC.d.acessos||[]).filter(x=>!pes||x.usuario_id===pes); AC.ls=ls;
-  const hoje=hojeISO(), diaL=(iso)=>new Date(iso).toLocaleDateString('sv-SE',{timeZone:'America/Sao_Paulo'});
-  const pessoas=new Map(); ls.forEach(x=>{ const g=pessoas.get(x.usuario_id)||{nome:x.nome,perfil:x.perfil,n:0,login:0,dias:new Set(),ult:x.em,disp:new Map(),pags:new Map()}; g.n++; if(x.tipo==='login') g.login++; g.dias.add(diaL(x.em)); if(x.em>g.ult) g.ult=x.em; g.disp.set(x.disp,(g.disp.get(x.disp)||0)+1); if(x.tipo==='pagina'&&x.pagina) g.pags.set(x.pagina,(g.pags.get(x.pagina)||0)+1); pessoas.set(x.usuario_id,g); });
-  const hojeN=new Set(ls.filter(x=>diaL(x.em)===hoje).map(x=>x.usuario_id)).size;
-  $('acKpis').innerHTML=kpiHtml([['Pessoas que acessaram',int(pessoas.size),`<span>de ${int(us.length)} usuários cadastrados</span>`,'dest','',null,''],['Acessaram hoje',int(hojeN),'<span>pessoas diferentes</span>','','',null,''],['Entradas (login)',int(ls.filter(x=>x.tipo==='login').length),'<span>no período</span>','','',null,''],['Páginas abertas',int(ls.filter(x=>x.tipo==='pagina').length),'<span>no período</span>','','',null,'']]);
-  graficoAcessos(ls,dias);
-  const rank=[...pessoas.entries()].sort((a,b)=>b[1].n-a[1].n);
-  const semAc=us.filter(u=>!pessoas.has(u.id)&&(!pes||u.id===pes));
-  const nomePg=(p)=>ITEM[p]?.rot||p;
-  $('acPessoas').innerHTML=`<table><thead><tr><th>Pessoa</th><th>Perfil</th><th class="v">Acessos</th><th class="v">Logins</th><th class="v">Dias com acesso</th><th>Último acesso</th><th>Mais abre</th><th>Dispositivo</th></tr></thead><tbody>${rank.map(([id,g])=>{ const top=[...g.pags.entries()].sort((a,b)=>b[1]-a[1]).slice(0,2).map(([p])=>nomePg(p)).join(', '), dv=[...g.disp.entries()].sort((a,b)=>b[1]-a[1])[0]?.[0]||''; return `<tr><td><b>${esc(g.nome)}</b></td><td>${esc(PERF[g.perfil]||g.perfil)}</td><td class="v">${int(g.n)}</td><td class="v">${int(g.login)}</td><td class="v">${int(g.dias.size)}</td><td>${dh(g.ult)}</td><td>${esc(top)}</td><td>${esc(dv)}</td></tr>`; }).join('')}${semAc.map(u=>`<tr style="opacity:.6"><td>${esc(u.nome)}</td><td>${esc(PERF[u.perfil]||u.perfil)}</td><td class="v">0</td><td class="v">0</td><td class="v">0</td><td>${u.ultimo_acesso?dh(u.ultimo_acesso)+' <span class="dica-c">(antes do período)</span>':'<span class="dica-c">nunca entrou</span>'}</td><td></td><td></td></tr>`).join('')}</tbody></table>`;
-  const pg=new Map(); ls.filter(x=>x.tipo==='pagina'&&x.pagina).forEach(x=>{ const g=pg.get(x.pagina)||{n:0,p:new Set()}; g.n++; g.p.add(x.usuario_id); pg.set(x.pagina,g); });
-  $('acPaginas').innerHTML=pg.size?`<table><thead><tr><th>Página</th><th class="v">Vezes aberta</th><th class="v">Pessoas</th></tr></thead><tbody>${[...pg.entries()].sort((a,b)=>b[1].n-a[1].n).map(([p,g])=>`<tr><td>${esc(nomePg(p))}</td><td class="v">${int(g.n)}</td><td class="v">${int(g.p.size)}</td></tr>`).join('')}</tbody></table>`:vazio('Ainda sem páginas registradas no período (o registro começa nesta versão).');
-  $('acLista').innerHTML=ls.length?`<table><thead><tr><th>Data e hora</th><th>Pessoa</th><th>Perfil</th><th>O quê</th><th>Página</th><th>Dispositivo</th><th>IP</th></tr></thead><tbody>${ls.slice(0,500).map(x=>`<tr><td style="white-space:nowrap">${dh(x.em)}</td><td>${esc(x.nome)}</td><td>${esc(PERF[x.perfil]||x.perfil)}</td><td>${esc(TIPO_AC[x.tipo]||x.tipo)}</td><td>${esc(x.pagina?nomePg(x.pagina):'')}</td><td>${esc(x.disp||'')}</td><td style="color:var(--ink3)">${esc(x.ip||'')}</td></tr>`).join('')}</tbody></table>`:vazio('Nenhum acesso registrado no período. O registro começa a contar a partir desta versão.');
+  const ls=todos.filter(x=>{ const d=diaL(x.em); return d>=de&&d<=ate&&(!pes||x.usuario_id===pes)&&(!tipo||x.tipo===tipo); }); AC.ls=ls;
+  const nDias=Math.max(1,Math.round((Date.parse(ate)-Date.parse(de))/864e5)+1), pags=ls.filter(x=>x.tipo==='pagina'), nomePg=(p)=>ITEM[p]?.rot||p;
+  const pessoas=new Map(); ls.forEach(x=>{ const g=pessoas.get(x.usuario_id)||{nome:x.nome,perfil:x.perfil,n:0,pag:0,login:0,dias:new Set(),ult:x.em,disp:new Map(),pags:new Map()}; g.n++; if(x.tipo==='pagina'){ g.pag++; if(x.pagina) g.pags.set(x.pagina,(g.pags.get(x.pagina)||0)+1); } if(x.tipo==='login') g.login++; g.dias.add(diaL(x.em)); if(x.em>g.ult) g.ult=x.em; g.disp.set(x.disp,(g.disp.get(x.disp)||0)+1); pessoas.set(x.usuario_id,g); });
+  const pgs=new Map(); pags.forEach(x=>x.pagina&&pgs.set(x.pagina,(pgs.get(x.pagina)||0)+1));
+  $('acKpis').innerHTML=kpiHtml([['Páginas abertas',int(pags.length),'<span>no período</span>','','',null,''],['Entradas (login)',int(ls.filter(x=>x.tipo==='login').length),'<span>no período</span>','','',null,''],['Pessoas que usaram',int(pessoas.size),`<span>de ${int(us.length)} cadastradas</span>`,'','',null,''],['Páginas diferentes',int(pgs.size),'<span>no período</span>','','',null,''],['Média por dia',(ls.length/nDias).toLocaleString('pt-BR',{maximumFractionDigits:1}),'<span>acessos</span>','','',null,'']]);
+  if(!ls.length){ ['acDia','acHora','acQuem','acPags'].forEach(id=>$(id).innerHTML=vazio('Sem acessos no filtro (a contagem começou na v90).')); }
+  else {
+    const dias=[]; for(let d=de; d<=ate; d=new Date(Date.parse(d+'T12:00:00Z')+864e5).toISOString().slice(0,10)) dias.push(d);
+    const pd=new Map(); ls.forEach(x=>{ const d=diaL(x.em); pd.set(d,(pd.get(d)||0)+1); });
+    gLinha($('acDia'),dias.map(d=>({rot:d.slice(8,10)+'/'+d.slice(5,7),v:pd.get(d)||0,tip:`${dataBR(d)}: ${int(pd.get(d)||0)} acessos`})));
+    const ph=Array(24).fill(0); ls.forEach(x=>ph[horaL(x.em)]++);
+    gColunas($('acHora'),ph.map((v,i)=>({rot:i+'h',v,tip:`${i}h: ${int(v)} acessos`})));
+    const rq=[...pessoas.values()].sort((a,b)=>b.n-a.n).slice(0,12);
+    gBarrasH($('acQuem'),rq.map(g=>({rot:g.nome,v:g.n,tip:`${g.nome}: ${int(g.n)} acessos · ${int(g.pag)} páginas · ${int(g.login)} logins`})),{labelW:140});
+    const rp=[...pgs.entries()].sort((a,b)=>b[1]-a[1]).slice(0,12);
+    if(rp.length) gBarrasH($('acPags'),rp.map(([p,v])=>({rot:nomePg(p),v,cor:'#16A0C8'})),{labelW:160}); else $('acPags').innerHTML=vazio('Sem páginas abertas no filtro.');
+  }
+  const rank=[...pessoas.entries()].sort((a,b)=>b[1].n-a[1].n), semAc=us.filter(u=>!pessoas.has(u.id)&&(!pes||u.id===pes));
+  $('acPessoas').innerHTML=`<table><thead><tr><th>Pessoa</th><th>Perfil</th><th class="v">Páginas</th><th class="v">Logins</th><th class="v">Dias</th><th>Último uso</th><th>Mais abre</th><th>Dispositivo</th></tr></thead><tbody>${rank.map(([id,g])=>`<tr><td>${esc(g.nome)}</td><td>${esc(PERF[g.perfil]||g.perfil)}</td><td class="v">${int(g.pag)}</td><td class="v">${int(g.login)}</td><td class="v">${int(g.dias.size)}</td><td>${dh(g.ult)}</td><td>${esc([...g.pags.entries()].sort((a,b)=>b[1]-a[1]).slice(0,2).map(([p])=>nomePg(p)).join(', '))}</td><td>${esc([...g.disp.entries()].sort((a,b)=>b[1]-a[1])[0]?.[0]||'')}</td></tr>`).join('')}</tbody></table>${semAc.length?`<div class="dica-c" style="margin-top:8px"><b>Sem nenhum uso no período:</b> ${semAc.map(u=>esc(u.nome)+(u.ultimo_acesso?` (último ${dh(u.ultimo_acesso)})`:' (nunca entrou)')).join(', ')}</div>`:''}`;
+  $('acLista').innerHTML=ls.length?`<table><thead><tr><th>Quando</th><th>Pessoa</th><th>Tipo</th><th>Página</th><th>Dispositivo</th></tr></thead><tbody>${ls.slice(0,300).map(x=>`<tr><td style="white-space:nowrap">${dh(x.em)}</td><td>${esc(x.nome)}</td><td>${esc(TIPO_AC[x.tipo]||x.tipo)}</td><td>${esc(x.pagina?nomePg(x.pagina):'')}</td><td>${esc(x.disp||'')}</td></tr>`).join('')}</tbody></table>`:vazio('Nenhum acesso no filtro.');
 }
-// v94: gráfico do histórico de acessos (por dia; em "Hoje", por hora)
-function graficoAcessos(ls,dias){ const tz='America/Sao_Paulo', porHora=+dias===1;
-  const chave=(iso)=>porHora?+new Date(iso).toLocaleString('en-US',{timeZone:tz,hour:'2-digit',hourCycle:'h23'}):new Date(iso).toLocaleDateString('sv-SE',{timeZone:tz});
-  let cats=[]; if(porHora) cats=Array.from({length:24},(_,i)=>i); else { const hj=hojeISO(); for(let i=+dias-1;i>=0;i--) cats.push(new Date(Date.parse(hj+'T12:00:00Z')-i*864e5).toISOString().slice(0,10)); }
-  const m=new Map(cats.map(c=>[c,{n:0,login:0,p:new Set(),nomes:new Map()}])); ls.forEach(x=>{ const g=m.get(chave(x.em)); if(!g) return; g.n++; if(x.tipo==='login') g.login++; g.p.add(x.usuario_id); g.nomes.set(x.nome,(g.nomes.get(x.nome)||0)+1); });
-  const serie=cats.map(c=>({c,...m.get(c)})), W=760,H=250,L=40,R=12,T=16,B=34,w=W-L-R,h=H-T-B,n=serie.length;
-  const max=Math.max(...serie.map(x=>x.n),1), {passo,topo}=escala(max), y=(v)=>T+h-(v/topo)*h, slot=w/n, bw=Math.max(Math.min(slot*.62,34),2);
-  let g=''; for(let v=0;v<=topo+1e-6;v+=passo) g+=`<line x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${L-8}" y="${y(v)+4}" text-anchor="end">${int(v)}</text>`;
-  const cada=Math.ceil(n/15), rot=(c)=>porHora?`${String(c).padStart(2,'0')}h`:`${c.slice(8,10)}/${c.slice(5,7)}`;
-  const bars=serie.map((x,i)=>{ const cx=L+i*slot+slot/2, top=[...x.nomes.entries()].sort((a,b)=>b[1]-a[1]).slice(0,6).map(([nm,q])=>`${nm} (${q})`).join(', ');
-    const tip=`${porHora?rot(x.c)+' de hoje':dataBR(x.c)}: ${int(x.n)} ${x.n===1?'acesso':'acessos'} · ${int(x.p.size)} ${x.p.size===1?'pessoa':'pessoas'}${x.login?` · ${int(x.login)} login${x.login>1?'s':''}`:''}${top?'\n'+top:''}`;
-    return `<g><title>${esc(tip)}</title><rect x="${L+i*slot}" y="${T}" width="${slot}" height="${h}" fill="transparent"/>${x.n?`<rect x="${cx-bw/2}" y="${y(x.n)}" width="${bw}" height="${Math.max(y(0)-y(x.n),1)}" rx="2" fill="var(--navy)" opacity=".85"/>`:''}${x.n&&n<=31?`<text x="${cx}" y="${y(x.n)-5}" text-anchor="middle" style="font-size:10px;fill:var(--ink3)">${int(x.n)}</text>`:''}${i%cada===0?`<text x="${cx}" y="${H-12}" text-anchor="middle">${rot(x.c)}</text>`:''}</g>`; }).join('');
-  const pts=serie.map((x,i)=>[L+i*slot+slot/2,y(x.p.size)]), linha=`<polyline points="${pts.map(p=>p.join(',')).join(' ')}" fill="none" stroke="var(--orange)" stroke-width="2.5" stroke-linejoin="round" pointer-events="none"/>${n<=45?pts.map(([px,py],i)=>serie[i].p.size?`<circle cx="${px}" cy="${py}" r="3.5" fill="var(--orange)" pointer-events="none"/>`:'').join(''):''}`;
-  $('acGrafSub').textContent=porHora?'Por hora, hoje · passe o mouse para ver quem acessou':`Por dia, nos últimos ${dias} dias · passe o mouse para ver quem acessou`;
-  $('acGraf').innerHTML=ls.length?`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Histórico de acessos ao painel">${g}${bars}${linha}</svg>`:vazio('Ainda sem acessos registrados no período (a contagem começou na v90).'); }
-$('acDias').onchange=()=>pgAcessos(); $('acPessoa').onchange=()=>pgAcessos();
+$('acAplicar').onclick=()=>pgAcessos(); $('acPessoa').onchange=()=>pgAcessos(); $('acTipo').onchange=()=>pgAcessos();
+document.querySelectorAll('[data-acr]').forEach(b=>b.onclick=()=>{ const hj=hojeISO(), r=b.dataset.acr; $('acAte').value=hj; $('acDe').value=r==='tudo'?(()=>{ const t=AC.d?.acessos||[]; return t.length?new Date(t[t.length-1].em).toLocaleDateString('sv-SE',{timeZone:'America/Sao_Paulo'}):hj; })():new Date(Date.parse(hj+'T12:00:00Z')-(+r-1)*864e5).toISOString().slice(0,10); pgAcessos(); });
 async function pgUsuarios(){
   try{ const d=await api('/api/usuarios'); US.lista=d.usuarios; US.banco=d.banco; US.permitidos=d.perfis_permitidos||Object.keys(PERF); }catch(e){ $('usLista').innerHTML=`<div class="aviso erro">${esc(e.message)}</div>`; return; }
   const BS=US.banco_status||{};

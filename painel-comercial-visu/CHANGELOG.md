@@ -2,6 +2,11 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v103 — 12/11/2026 — Gráficos clean (modelo VD): Acessos e Ranking de vendas
+- Acessos ao painel refeito no modelo da VD (filtros, KPIs, uso por dia, horários, quem mais usou, páginas, por pessoa, registro).
+- Ranking de vendas com barras finas e texto pequeno; 1º em destaque.
+- Gráficos medidos na largura real (sem ampliar com a tela) e redesenhados ao redimensionar.
+
 ## v102 — 12/11/2026 — Ranking de vendas em barras horizontais
 - Ranking de vendas refeito no padrão de dashboard: barras horizontais com os nomes um abaixo do outro, do maior para o menor, 1º colocado em laranja e os demais em uma só cor, valor no fim de cada barra e escala embaixo, sem enfeites.
 - Botões Período (o mês ou período escolhido no topo) e Últimos 12 meses (histórico), e R$ / Pedidos. Passe o mouse para ver a participação e a posição no período anterior; clique para ver os pedidos.
