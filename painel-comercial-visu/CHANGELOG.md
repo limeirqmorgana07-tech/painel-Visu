@@ -2,6 +2,10 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v97 — 12/11/2026 — Páginas do perfil valem para todos do perfil
+- Tudo o que está marcado no perfil (ex.: Diretor) passa a aparecer para cada pessoa do perfil, inclusive quem tinha páginas escolhidas uma a uma (Treinamento e Planilha de vendas não apareciam para os diretores por isso).
+- Para tirar uma página de uma pessoa específica, desmarque em Usuários e permissões → Permissões da pessoa: vale exatamente o que ficar marcado.
+
 ## v96 — 12/11/2026 — Permissões por pessoa exatas
 - Permissões por pessoa valem exatamente como marcadas: antes, uma página marcada na pessoa sumia se não estivesse no perfil dela (por isso a Planilha de vendas não aparecia para os diretores). Agora qualquer página pode ser marcada; as que estão fora do padrão do perfil aparecem como extra.
 - Ao mudar as páginas de um perfil (ex.: Diretor), a mudança vale também para quem tem páginas escolhidas uma a uma.

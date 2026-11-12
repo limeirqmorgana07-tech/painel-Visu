@@ -166,10 +166,11 @@ app.post('/api/perfis', exigeAdm, async (req, res) => {
 });
 lerKV('perfis_paginas').then(async (o) => {
   definirPerfis(o);
-  // v96: listas salvas antes guardavam só o que estava dentro do perfil; mantém o que cada um via e libera a Planilha de vendas aos diretores cujo perfil a tem
-  if (!(await lerKV('migr_paginas_v96').catch(() => null))) {
-    const n = await usuarios.ajustarPaginas((u) => { if (u.perfil === 'adm' || !Array.isArray(u.paginas)) return undefined; const base = padraoDe(u.perfil); const ef = base.filter((p) => u.paginas.includes(p)); if (u.perfil === 'diretor' && base.includes('registro')) ef.push('registro'); return ef; }).catch(() => 0);
-    await salvarKV('migr_paginas_v96', { em: new Date().toISOString(), n });
+  // v97: tudo o que está marcado no perfil passa a valer para cada pessoa do perfil (as listas antigas, salvas pessoa a pessoa,
+  // escondiam páginas marcadas depois no perfil, como Planilha de vendas e Treinamento para os diretores). Exclusões por pessoa se refazem em Permissões.
+  if (!(await lerKV('migr_paginas_v97').catch(() => null))) {
+    const n = await usuarios.ajustarPaginas((u) => { if (u.perfil === 'adm' || !Array.isArray(u.paginas)) return undefined; const base = padraoDe(u.perfil); const novas = base.filter((p) => !u.paginas.includes(p)); return novas.length ? [...u.paginas, ...novas] : undefined; }).catch(() => 0);
+    await salvarKV('migr_paginas_v97', { em: new Date().toISOString(), n });
   }
 }).catch(() => {});
 // o que cada perfil vê dentro do Painel executivo e do Quadro de indicadores
