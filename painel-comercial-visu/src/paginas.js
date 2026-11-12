@@ -42,6 +42,7 @@ export function definirPerfis(o) {
 export const perfisPersonalizados = () => ({ ...personalizado, _v31: true, _v43: true, _v56: true, _v73: true });
 export const padraoDe = (perfil) => (perfil === 'adm' ? TODAS : padraoDe0(perfil).filter((p) => p !== 'acessos'));
 const padraoDe0 = (perfil) => (perfil === 'diretor' && personalizado.diretor?.length ? [...personalizado.diretor, 'usuarios'] : personalizado[perfil]?.length ? personalizado[perfil] : PADRAO_BASE[perfil] || []);
+export const liberaveis = () => [...LIBERAVEIS];
 export const PADRAO = new Proxy({}, { get: (_, k) => padraoDe(k), ownKeys: () => Object.keys(PADRAO_BASE), getOwnPropertyDescriptor: () => ({ enumerable: true, configurable: true }) });
 export const padroesOriginais = () => ({ ...PADRAO_BASE });
 
@@ -50,7 +51,8 @@ export function paginasDe(u) {
   if (!u) return [];
   const base = padraoDe(u.perfil);
   if (u.perfil === 'adm' || !Array.isArray(u.paginas)) return base;
-  const r = base.filter((p) => u.paginas.includes(p) || (u.perfil === 'diretor' && p === 'usuarios') || p === 'aprovacoes');
+  // v96: a escolha feita na pessoa vale exatamente como marcada (antes era recortada pelo perfil e páginas marcadas sumiam)
+  const r = TODAS.filter((p) => (LIBERAVEIS.includes(p) && u.paginas.includes(p)) || (u.perfil === 'diretor' && p === 'usuarios') || p === 'aprovacoes');
   return r.length ? r : base.slice(0, 1);
 }
 // Blocos das páginas de Gestão (Painel executivo e Quadro de indicadores): o ADM escolhe o que cada perfil enxerga.

@@ -2,6 +2,11 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v96 — 12/11/2026 — Permissões por pessoa exatas
+- Permissões por pessoa valem exatamente como marcadas: antes, uma página marcada na pessoa sumia se não estivesse no perfil dela (por isso a Planilha de vendas não aparecia para os diretores). Agora qualquer página pode ser marcada; as que estão fora do padrão do perfil aparecem como extra.
+- Ao mudar as páginas de um perfil (ex.: Diretor), a mudança vale também para quem tem páginas escolhidas uma a uma.
+- Ao subir esta versão, cada pessoa mantém o que já via, e os diretores passam a ver a Planilha de vendas quando o perfil Diretor a tem.
+
 ## v95 — 11/11/2026 — Treinamento atualizado
 - Vídeo de treinamento atualizado (5 minutos): campos obrigatórios, condição personalizada (entrada, complementar e pagamento final), comprovante de pagamento complementar com valor e data, pedido aprovado e Confirmado na Conta Azul e ficha do pedido (🔍).
 - Passo a passo escrito do Treinamento atualizado com as mesmas mudanças.

@@ -153,14 +153,25 @@ app.post('/api/perfis', exigeAdm, async (req, res) => {
   const atual = perfisPersonalizados();
   const { perfil, paginas } = req.body || {};
   if (!['diretor', 'comercial', 'financeiro', 'consultor', 'vendedor'].includes(perfil)) return res.status(400).json({ erro: 'Perfil inválido.' });
+  const antes = padraoDe(perfil);
   if (paginas === null) delete atual[perfil];
   else if (Array.isArray(paginas) && paginas.length) atual[perfil] = paginas.map(String);
   else return res.status(400).json({ erro: 'Deixe pelo menos uma página marcada.' });
   definirPerfis(atual);
   await salvarKV('perfis_paginas', perfisPersonalizados());
-  res.json({ ok: true, perfil, paginas: padraoDe(perfil) });
+  // v96: o que entrou ou saiu do perfil vale também para quem tem páginas escolhidas uma a uma
+  const depois = padraoDe(perfil), entrou = depois.filter((p) => !antes.includes(p)), saiu = antes.filter((p) => !depois.includes(p));
+  if (entrou.length || saiu.length) await usuarios.ajustarPaginas((u) => (u.perfil === perfil && Array.isArray(u.paginas) ? [...u.paginas.filter((p) => !saiu.includes(p)), ...entrou] : undefined)).catch(() => {});
+  res.json({ ok: true, perfil, paginas: depois });
 });
-lerKV('perfis_paginas').then((o) => definirPerfis(o)).catch(() => {});
+lerKV('perfis_paginas').then(async (o) => {
+  definirPerfis(o);
+  // v96: listas salvas antes guardavam só o que estava dentro do perfil; mantém o que cada um via e libera a Planilha de vendas aos diretores cujo perfil a tem
+  if (!(await lerKV('migr_paginas_v96').catch(() => null))) {
+    const n = await usuarios.ajustarPaginas((u) => { if (u.perfil === 'adm' || !Array.isArray(u.paginas)) return undefined; const base = padraoDe(u.perfil); const ef = base.filter((p) => u.paginas.includes(p)); if (u.perfil === 'diretor' && base.includes('registro')) ef.push('registro'); return ef; }).catch(() => 0);
+    await salvarKV('migr_paginas_v96', { em: new Date().toISOString(), n });
+  }
+}).catch(() => {});
 // o que cada perfil vê dentro do Painel executivo e do Quadro de indicadores
 app.post('/api/blocos', exigeAdm, async (req, res) => {
   const { perfil, blocos } = req.body || {};

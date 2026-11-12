@@ -49,6 +49,13 @@ async function carregar() {
 }
 async function gravar(lista) { cache = lista; await salvarKV(CHAVE, lista); }
 
+// v96: ajusta a lista de páginas de cada pessoa (fn devolve a nova lista ou undefined para não mexer)
+export async function ajustarPaginas(fn) {
+  const lista = await carregar(); let n = 0;
+  for (const u of lista) { const nova = fn(u); if (Array.isArray(nova)) { u.paginas = [...new Set(nova)]; u.ver = (u.ver || 0) + 1; n++; } }
+  if (n) await gravar(lista);
+  return n;
+}
 export async function listar() { return (await carregar()).map(limpo); }
 export async function porId(id) { return (await carregar()).find((u) => u.id === id) || null; }
 
