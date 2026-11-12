@@ -2,6 +2,17 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v99 — 12/11/2026 — Correção de comprovante e ranking de vendas
+- Comprovante anexado por engano: antes de anexar, o painel alerta quando o valor não bate com as parcelas do pedido, passa do saldo, a data está estranha ou o mesmo arquivo já está em outro pedido; dá para cancelar ou anexar mesmo assim.
+- Corrigir / substituir comprovante: troque o arquivo errado pelo certo e/ou corrija valor e data do pagamento. O saldo do pedido é recalculado, o que era antes fica no histórico (↺ corrigido) e no Histórico de alterações. O vendedor corrige enquanto o financeiro não deu a baixa; depois disso, só a gestão — e o pagamento volta para conferir baixa na lista do financeiro.
+- Vendas: novo Ranking de vendas por vendedor (R$ ou pedidos), com posição, participação e subida ou descida em relação ao período anterior, e o histórico dos últimos 12 meses em gráfico (passe o mouse para ver a posição de cada um em cada mês).
+- Inclui o perfil PCP (v98).
+
+## v98 — 12/11/2026 — Perfil PCP
+- Novo perfil PCP (planejamento e controle da produção): mesmas páginas do vendedor (Planilha de vendas, Vendas, Produtos e mix, Clientes, Vendedores, Aprovações, Pedidos e entregas, Inconsistências e Treinamento), vendo os pedidos de todos os vendedores.
+- O PCP só consulta os pedidos (não lança nem edita) e pode aprovar ou recusar em Aprovações as alterações de preço e quantidade pedidas pelos vendedores.
+- Cadastre em Usuários e permissões → Novo usuário → Perfil PCP. As páginas do PCP podem ser ajustadas como nos outros perfis.
+
 ## v97 — 12/11/2026 — Páginas do perfil valem para todos do perfil
 - Tudo o que está marcado no perfil (ex.: Diretor) passa a aparecer para cada pessoa do perfil, inclusive quem tinha páginas escolhidas uma a uma (Treinamento e Planilha de vendas não apareciam para os diretores por isso).
 - Para tirar uma página de uma pessoa específica, desmarque em Usuários e permissões → Permissões da pessoa: vale exatamente o que ficar marcado.

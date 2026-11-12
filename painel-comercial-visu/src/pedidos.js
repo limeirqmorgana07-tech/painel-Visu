@@ -259,7 +259,9 @@ export function linhasDoPainel() {
 
 // ---------- permissões ----------
 export function podeEditarTudo(u) { return GESTAO.has(u?.perfil); }
-export const podeLancar = (u) => u?.perfil !== 'consultor';
+export const podeLancar = (u) => !['consultor', 'pcp'].includes(u?.perfil);
+// v98: quem aprova ou recusa alteração de preço e quantidade: a gestão e o PCP
+export const podeAprovar = (u) => podeEditarTudo(u) || u?.perfil === 'pcp';
 const dentroDoPrazo = (r) => Date.now() - Date.parse(r.criado_em || 0) < HORAS_EDICAO * 3600e3 && r.origem !== 'planilha';
 function bloqueio(u, r, campo) {
   if (podeEditarTudo(u)) return null;
@@ -398,14 +400,14 @@ export async function solicitarAlteracao(id, b, u) {
   return novo;
 }
 export async function responderSolicitacao(id, b, u) {
-  if (!podeEditarTudo(u)) throw new Error('Só a gestão aprova alteração de preço.');
+  if (!podeAprovar(u)) throw new Error('Só a gestão e o PCP aprovam alteração de preço.');
   await carregar();
   const r = mem.get(id);
   if (!r || r.excluido) throw new Error('Linha não encontrada.');
   const s0 = r.solicitacao; if (s0?.status !== 'pendente') throw new Error('Não há pedido de alteração aguardando nesta linha.');
   const obs = String(b?.obs || '').trim().slice(0, 500), aprovar = !!b?.aprovar;
   let atual = r;
-  if (aprovar) atual = await alterar(id, { quantidade: s0.quantidade, valor_unit: s0.valor_unit, total: s0.total }, u);
+  if (aprovar) atual = await alterar(id, { quantidade: s0.quantidade, valor_unit: s0.valor_unit, total: s0.total }, podeEditarTudo(u) ? u : { ...u, perfil: 'diretor' });
   const fim = { ...s0, status: aprovar ? 'aprovada' : 'recusada', resp_por: u?.nome || '', resp_em: agoraISO(), resp_obs: obs, ...(aprovar && r.ca_venda_id ? { ajustar_ca: true } : {}) };
   const novo = { ...(mem.get(id) || atual), solicitacao: fim, solicitacoes: [...(r.solicitacoes || []), fim].slice(-10) };
   mem.set(id, novo); await gravar([novo]);
@@ -422,7 +424,7 @@ export async function anexar(id, a, u) {
   if (!['comprovante', 'nf'].includes(a.tipo)) throw new Error('Tipo de anexo inválido.');
   if (a.tipo === 'nf' && !podeEditarTudo(u)) throw new Error('A nota fiscal é anexada pela gestão.');
   if (a.tipo === 'comprovante' && (!podeLancar(u) || !ehDoVendedor(u, r))) throw new Error('Só o vendedor do pedido ou a gestão anexa o comprovante.');
-  const item = { id: a.id, tipo: a.tipo, nome: String(a.nome || 'arquivo').slice(0, 120), mime: a.mime, tamanho: a.tamanho, por: u?.nome || '', por_id: u?.id || '', em: agoraISO() };
+  const item = { id: a.id, tipo: a.tipo, nome: String(a.nome || 'arquivo').slice(0, 120), mime: a.mime, tamanho: a.tamanho, hash: a.hash || '', por: u?.nome || '', por_id: u?.id || '', em: agoraISO() };
   // v93: comprovante com valor e data do pagamento: o painel abate do saldo e o financeiro dá a baixa na Conta Azul
   if (a.tipo === 'comprovante' && Number(a.valor) > 0) Object.assign(item, { valor: r2(a.valor), data_pag: /^\d{4}-\d{2}-\d{2}$/.test(a.data_pag || '') ? a.data_pag : agoraISO().slice(0, 10), baixa_ca: false });
   const novo = { ...r, anexos: [...(r.anexos || []), item] };
@@ -435,10 +437,54 @@ export async function marcarBaixaComprovante(id, aid, feita, u) {
   if (!podeEditarTudo(u)) throw new Error('Só a gestão ou o financeiro marca a baixa.');
   const r = mem.get(id); const a = r?.anexos?.find((x) => x.id === aid);
   if (!a) throw new Error('Comprovante não encontrado.');
-  const novo = { ...r, anexos: r.anexos.map((x) => (x.id === aid ? { ...x, baixa_ca: !!feita, baixa_por: u?.nome || '', baixa_em: agoraISO() } : x)) };
+  const novo = { ...r, anexos: r.anexos.map((x) => (x.id === aid ? { ...x, baixa_ca: !!feita, baixa_por: u?.nome || '', baixa_em: agoraISO(), ...(feita ? { conferir_baixa: false } : {}) } : x)) };
   mem.set(id, novo); await gravar([novo]);
   await registrarLog([{ ...quem(u), acao: 'alterou', registro: id, codigo: r.codigo, cliente: r.cliente, mudancas: [{ campo: 'baixa do comprovante', antes: a.baixa_ca ? 'feita' : 'pendente', depois: feita ? 'feita' : 'pendente' }], detalhe: `Comprovante ${a.nome} · R$ ${Number(a.valor || 0).toFixed(2)}` }]);
   return novo;
+}
+// v99: corrigir comprovante anexado por engano (arquivo, valor ou data), guardando o que era antes
+export function podeMexerComprovante(u, r, a) {
+  if (!a || a.tipo !== 'comprovante') throw new Error('Comprovante não encontrado.');
+  if (podeEditarTudo(u)) return true;
+  if (!podeLancar(u) || !ehDoVendedor(u, r)) throw new Error('Só o vendedor do pedido ou a gestão corrige o comprovante.');
+  if (a.baixa_ca) throw new Error('O financeiro já deu a baixa deste pagamento na Conta Azul: peça a correção ao financeiro.');
+  return true;
+}
+const dataOk = (d) => (/^\d{4}-\d{2}-\d{2}$/.test(String(d || '')) ? String(d) : '');
+async function trocarComprovante(id, aid, u, fn, acao) {
+  await carregar();
+  const r = mem.get(id); const a = r?.anexos?.find((x) => x.id === aid);
+  if (!r || r.excluido) throw new Error('Linha não encontrada.');
+  podeMexerComprovante(u, r, a);
+  const novoItem = fn(a);
+  const antes = { nome: a.nome, valor: a.valor ?? null, data_pag: a.data_pag || '', arquivo: a.id };
+  const depois = { nome: novoItem.nome, valor: novoItem.valor ?? null, data_pag: novoItem.data_pag || '', arquivo: novoItem.id };
+  const mudouBaixa = a.baixa_ca && (antes.valor !== depois.valor || antes.data_pag !== depois.data_pag || antes.arquivo !== depois.arquivo);
+  Object.assign(novoItem, { corrigido: true, corrigido_por: u?.nome || '', corrigido_em: agoraISO(), historico: [...(a.historico || []), { em: agoraISO(), por: u?.nome || '', acao, antes, depois, motivo: String(novoItem._motivo || '').slice(0, 200) }] });
+  delete novoItem._motivo;
+  if (mudouBaixa) Object.assign(novoItem, { baixa_ca: false, conferir_baixa: true });
+  const novo = { ...r, anexos: r.anexos.map((x) => (x.id === aid ? novoItem : x)) };
+  mem.set(id, novo); await gravar([novo]);
+  await registrarLog([{ ...quem(u), acao: acao === 'substituiu' ? 'substituiu comprovante' : 'corrigiu comprovante', registro: id, codigo: r.codigo, cliente: r.cliente,
+    mudancas: [...(antes.arquivo !== depois.arquivo ? [{ campo: 'arquivo do comprovante', antes: antes.nome, depois: depois.nome }] : []), ...(antes.valor !== depois.valor ? [{ campo: 'valor pago', antes: antes.valor, depois: depois.valor }] : []), ...(antes.data_pag !== depois.data_pag ? [{ campo: 'data do pagamento', antes: antes.data_pag, depois: depois.data_pag }] : [])],
+    detalhe: `Comprovante corrigido${novoItem.historico.at(-1).motivo ? ': ' + novoItem.historico.at(-1).motivo : ''}${mudouBaixa ? ' · a baixa já feita precisa ser conferida pelo financeiro' : ''}` }]);
+  return novo;
+}
+export async function substituirAnexo(id, aid, b, u) {
+  return trocarComprovante(id, aid, u, (a) => {
+    const valor = b.valor === undefined || b.valor === '' ? a.valor : Number(b.valor) > 0 ? r2(b.valor) : undefined;
+    const it = { ...a, id: b.id, nome: String(b.nome || 'arquivo').slice(0, 120), mime: b.mime, tamanho: b.tamanho, hash: b.hash || '', em: agoraISO(), _motivo: b.motivo, substituiu: [...(a.substituiu || []), a.id] };
+    if (valor) Object.assign(it, { valor, data_pag: dataOk(b.data_pag) || a.data_pag || agoraISO().slice(0, 10), baixa_ca: !!a.baixa_ca }); else { delete it.valor; delete it.data_pag; }
+    return it;
+  }, 'substituiu');
+}
+export async function corrigirAnexo(id, aid, b, u) {
+  return trocarComprovante(id, aid, u, (a) => {
+    const v = Number(b.valor); const it = { ...a, _motivo: b.motivo };
+    if (v > 0) Object.assign(it, { valor: r2(v), data_pag: dataOk(b.data_pag) || a.data_pag || agoraISO().slice(0, 10), baixa_ca: !!a.baixa_ca });
+    else { delete it.valor; delete it.data_pag; delete it.baixa_ca; }
+    return it;
+  }, 'corrigiu');
 }
 export async function removerAnexo(id, aid, u) {
   await carregar();

@@ -152,7 +152,7 @@ app.get('/api/eu', exigeLogin, async (req, res, next) => { acessos.registrar(req
 app.post('/api/perfis', exigeAdm, async (req, res) => {
   const atual = perfisPersonalizados();
   const { perfil, paginas } = req.body || {};
-  if (!['diretor', 'comercial', 'financeiro', 'consultor', 'vendedor'].includes(perfil)) return res.status(400).json({ erro: 'Perfil inválido.' });
+  if (!['diretor', 'comercial', 'financeiro', 'consultor', 'vendedor', 'pcp'].includes(perfil)) return res.status(400).json({ erro: 'Perfil inválido.' });
   const antes = padraoDe(perfil);
   if (paginas === null) delete atual[perfil];
   else if (Array.isArray(paginas) && paginas.length) atual[perfil] = paginas.map(String);
@@ -176,7 +176,7 @@ lerKV('perfis_paginas').then(async (o) => {
 // o que cada perfil vê dentro do Painel executivo e do Quadro de indicadores
 app.post('/api/blocos', exigeAdm, async (req, res) => {
   const { perfil, blocos } = req.body || {};
-  if (!['diretor', 'comercial', 'financeiro', 'consultor', 'vendedor'].includes(perfil)) return res.status(400).json({ erro: 'Perfil inválido.' });
+  if (!['diretor', 'comercial', 'financeiro', 'consultor', 'vendedor', 'pcp'].includes(perfil)) return res.status(400).json({ erro: 'Perfil inválido.' });
   const atual = blocosPersonalizados();
   if (blocos === null) delete atual[perfil]; else if (Array.isArray(blocos)) atual[perfil] = blocos.map(String); else return res.status(400).json({ erro: 'Lista de blocos inválida.' });
   definirBlocos(atual); await salvarKV('perfis_blocos', blocosPersonalizados());
@@ -207,7 +207,7 @@ app.post('/api/visual', exigeAdm, async (req, res) => {
   res.json({ ok: true, t, d, m });
 });
 // Usuários: o ADM gerencia todos; os diretores criam e cuidam do acesso dos vendedores (e do Comercial e consultores externos)
-const PERFIS_DIRETOR = ['vendedor', 'comercial', 'consultor'];
+const PERFIS_DIRETOR = ['vendedor', 'comercial', 'consultor', 'pcp'];
 function exigeGestorUsuarios(req, res, next) {
   exigeLogin(req, res, () => {
     if (['adm', 'diretor'].includes(req.usuario.perfil)) return next();
@@ -232,7 +232,7 @@ app.get('/api/usuarios/:id/visao', exigeAdm, async (req, res) => {
     const u = (await usuarios.listar()).find((x) => x.id === req.params.id);
     if (!u) return res.status(404).json({ erro: 'Usuário não encontrado.' });
     res.json({ paginas: paginasDe(u), blocos: blocosDe(u.perfil), vendedor: u.perfil === 'vendedor' ? u.vendedor || '' : '',
-      pode: { lancar: pedidos.podeLancar(u), gestao: pedidos.podeEditarTudo(u), importar: pedidos.podeEditarTudo(u), fonte: u.perfil === 'adm' } });
+      pode: { lancar: pedidos.podeLancar(u), aprovar: pedidos.podeAprovar(u), gestao: pedidos.podeEditarTudo(u), importar: pedidos.podeEditarTudo(u), fonte: u.perfil === 'adm' } });
   } catch (e) { res.status(500).json({ erro: e.message }); }
 });
 app.post('/api/usuarios', exigeGestorUsuarios, async (req, res) => {
@@ -455,7 +455,7 @@ app.get('/api/pedidos', exigeLogin, exigePedidos, resp(async (req) => {
   notasCA.atualizarNotas(vendasContaAzulEmCache());
   const [registros, cfg, cads, notas_ca] = await Promise.all([pedidos.listar(), pedidos.configPedidos(), cadastros.listarCadastros(), notasCA.notasPorCodigo().catch(() => ({}))]);
   return { registros, config: cfg, cadastros: cads, pagamentos, notas_ca, campos_valor: pedidos.CAMPOS_VALOR, proximo_codigo: pedidos.proximoCodigo(new Date(Date.now() - 3 * 3600e3).toISOString().slice(0, 10)), codigos_externos: pedidos.codigosExternosLista(), horas_edicao: Number(process.env.HORAS_EDICAO_PEDIDO || 24),
-    vendedor: req.usuario.perfil === 'vendedor' ? req.usuario.vendedor || '' : '', vendedor_padrao: req.usuario.vendedor || '', whatsapp_aprovacao: (await pedidos.configPedidos()).whatsapp_aprovacao || [], pode: { lancar: pedidos.podeLancar(req.usuario), gestao: pedidos.podeEditarTudo(req.usuario), importar: pedidos.podeEditarTudo(req.usuario), fonte: req.usuario.perfil === 'adm' },
+    vendedor: req.usuario.perfil === 'vendedor' ? req.usuario.vendedor || '' : '', vendedor_padrao: req.usuario.vendedor || '', whatsapp_aprovacao: (await pedidos.configPedidos()).whatsapp_aprovacao || [], pode: { lancar: pedidos.podeLancar(req.usuario), aprovar: pedidos.podeAprovar(req.usuario), gestao: pedidos.podeEditarTudo(req.usuario), importar: pedidos.podeEditarTudo(req.usuario), fonte: req.usuario.perfil === 'adm' },
     planilha_conectada: planilhaConfigurada() || config.demo, eu: { id: req.usuario.id, nome: req.usuario.nome, perfil: req.usuario.perfil, vendedor: req.usuario.vendedor || '' } };
 }));
 app.get('/api/pedidos/proximo-codigo', exigeLogin, exigePedidos, resp(async (req) => { await pedidos.listar(); await codigosExternos(); return { codigo: req.query.de ? pedidos.proximoComplemento(req.query.de) : pedidos.proximoCodigo(req.query.data) }; }));
@@ -469,8 +469,19 @@ app.post('/api/pedidos/:id/anexos', exigeLogin, exigePedidos, express.raw({ type
   if (tipo === 'comprovante' && !pedidos.ehDoVendedor(req.usuario, r)) throw new Error('Só o vendedor do pedido ou a gestão anexa o comprovante.');
   const nome = String(req.query.nome || 'arquivo').slice(0, 120), mime = String(req.headers['content-type'] || '').split(';')[0].trim().toLowerCase();
   const g = await anexos.guardarArquivo({ registro: r.id, codigo: r.codigo, tipo, nome, mime, bytes: Buffer.isBuffer(req.body) ? req.body : null, por: req.usuario.nome });
-  return { registro: await pedidos.anexar(r.id, { id: g.id, tipo, nome, mime, tamanho: g.tamanho, valor: Number(req.query.valor) || 0, data_pag: String(req.query.data || '') }, req.usuario) };
+  const hash = crypto.createHash('sha256').update(req.body).digest('hex');
+  return { registro: await pedidos.anexar(r.id, { id: g.id, tipo, nome, mime, tamanho: g.tamanho, hash, valor: Number(req.query.valor) || 0, data_pag: String(req.query.data || '') }, req.usuario) };
 }));
+// v99: comprovante errado: substituir o arquivo (mantém o histórico) e corrigir valor e data do pagamento
+app.post('/api/pedidos/:id/anexos/:aid/substituir', exigeLogin, exigePedidos, express.raw({ type: () => true, limit: '6mb' }), resp(async (req) => {
+  const r = await pedidos.registro(req.params.id); if (!r) throw new Error('Linha não encontrada.');
+  pedidos.podeMexerComprovante(req.usuario, r, (r.anexos || []).find((x) => x.id === req.params.aid));
+  const nome = String(req.query.nome || 'arquivo').slice(0, 120), mime = String(req.headers['content-type'] || '').split(';')[0].trim().toLowerCase();
+  const g = await anexos.guardarArquivo({ registro: r.id, codigo: r.codigo, tipo: 'comprovante', nome, mime, bytes: Buffer.isBuffer(req.body) ? req.body : null, por: req.usuario.nome });
+  const hash = crypto.createHash('sha256').update(req.body).digest('hex');
+  return { registro: await pedidos.substituirAnexo(r.id, req.params.aid, { id: g.id, nome, mime, tamanho: g.tamanho, hash, valor: req.query.valor, data_pag: req.query.data, motivo: req.query.motivo }, req.usuario) };
+}));
+app.post('/api/pedidos/:id/anexos/:aid/corrigir', exigeLogin, exigePedidos, resp(async (req) => ({ registro: await pedidos.corrigirAnexo(req.params.id, req.params.aid, req.body || {}, req.usuario) })));
 app.post('/api/pedidos/:id/anexos/:aid/baixa', exigeLogin, exigePedidos, resp(async (req) => ({ registro: await pedidos.marcarBaixaComprovante(req.params.id, req.params.aid, req.body?.feita !== false, req.usuario) })));
 app.delete('/api/pedidos/:id/anexos/:aid', exigeLogin, exigePedidos, resp(async (req) => { const r = await pedidos.removerAnexo(req.params.id, req.params.aid, req.usuario); await anexos.apagarArquivo(req.params.aid); return { registro: r }; }));
 app.get('/api/anexos/:aid', exigeLogin, async (req, res) => {

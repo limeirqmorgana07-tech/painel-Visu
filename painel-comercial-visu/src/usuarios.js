@@ -5,7 +5,7 @@ import crypto from 'node:crypto';
 import { config } from './config.js';
 import { lerKV, salvarKV, statusBanco } from './tokenStore.js';
 
-export const PERFIS = { adm: 'ADM', diretor: 'Diretor', comercial: 'Comercial', financeiro: 'Financeiro', consultor: 'Consultor externo', vendedor: 'Vendedor' };
+export const PERFIS = { adm: 'ADM', diretor: 'Diretor', comercial: 'Comercial', financeiro: 'Financeiro', consultor: 'Consultor externo', vendedor: 'Vendedor', pcp: 'PCP' };
 const CHAVE = 'usuarios';
 const VALIDADE_CONVITE_DIAS = 7;
 

@@ -23,6 +23,8 @@ const PADRAO_BASE = {
   consultor: [...COM],
   // perfil Vendedor (v32): lança e revisa as próprias vendas na Planilha de vendas e vê as inconsistências dele
   vendedor: ['registro', ...COM, 'aprovacoes', 'inconsistencias', 'treinamento'],
+  // v98: PCP (planejamento e controle da produção): as páginas do vendedor, vê todos os pedidos, só consulta e aprova alterações
+  pcp: ['registro', ...COM, 'aprovacoes', 'inconsistencias', 'treinamento'],
 };
 // O ADM pode mudar o que cada perfil vê (vale para todas as pessoas daquele perfil). Guardado na chave perfis_paginas.
 let personalizado = {};
@@ -71,7 +73,7 @@ export const BLOCOS = [
   { id: 'vendedores.premiacao', pag: 'vendedores', nome: 'Vendedores: premiação, bônus e apuração (valores de cada vendedor)', fin: false },
 ];
 const TODOS_BLOCOS = BLOCOS.map((b) => b.id), SO_COMERCIAL = BLOCOS.filter((b) => !b.fin && b.id !== 'vendedores.premiacao').map((b) => b.id);
-const BLOCOS_PADRAO = { diretor: TODOS_BLOCOS, financeiro: TODOS_BLOCOS, comercial: SO_COMERCIAL, consultor: SO_COMERCIAL, vendedor: SO_COMERCIAL };
+const BLOCOS_PADRAO = { diretor: TODOS_BLOCOS, financeiro: TODOS_BLOCOS, comercial: SO_COMERCIAL, consultor: SO_COMERCIAL, vendedor: SO_COMERCIAL, pcp: SO_COMERCIAL };
 let blocosPers = {};
 export function definirBlocos(o) {
   blocosPers = {};
