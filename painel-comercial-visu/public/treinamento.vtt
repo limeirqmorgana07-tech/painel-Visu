@@ -25,62 +25,74 @@ Se o cliente não estiver na lista, clique no mais laranja ao lado do campo. Inf
 Digitou um cliente que já comprou? O painel avisa que é cliente da carteira e marca recompra sozinho. Se o nome for parecido com um cliente que já existe, ele mostra o nome certo para você escolher, e ninguém cadastra o mesmo cliente duas vezes.
 
 7
-00:01:22.600 --> 00:01:37.660
-Preencha o vendedor, o tipo de venda, o tipo de produto, o material, a cor, a quantidade e o valor por unidade. Dica: o Enter passa para o próximo campo, igual ao Tab. O total é calculado sozinho.
+00:01:22.600 --> 00:01:45.172
+Preencha a linha do pedido. Os campos com asterisco são obrigatórios: nome do pedido, tipo de venda, segmento, forma de pagamento, parcelas, prazo de entrega e, em cada item, produto, material, especificação, cor, quantidade e valor. Se faltar algum, ele fica em vermelho e o pedido não salva.
 
 8
-00:01:38.960 --> 00:01:53.492
+00:01:46.470 --> 00:02:01.002
 No campo Parcelas, o padrão é duas vezes: cinquenta por cento mais cinquenta por cento. Se o cliente pagar tudo de uma vez, escolha à vista. Se forem mais pagamentos, escolha três vezes ou mais.
 
 9
-00:01:54.790 --> 00:02:03.850
-Pedido com mais de um item? Clique em Item do mesmo pedido e preencha a linha de baixo. Tudo fica com o mesmo código e o mesmo cliente.
+00:02:02.300 --> 00:02:15.272
+Condição diferente? Escolha Personalizado e monte o pagamento de entrada, os pagamentos complementares, se houver, e o pagamento final. A soma precisa bater com o total do pedido.
 
 10
-00:02:05.150 --> 00:02:11.642
-Confira o total e clique em Salvar pedido. Pronto: o pedido entra no registro de vendas.
+00:02:16.570 --> 00:02:25.630
+Pedido com mais de um item? Clique em Item do mesmo pedido e preencha a linha de baixo. Tudo fica com o mesmo código e o mesmo cliente.
 
 11
-00:02:12.940 --> 00:02:25.360
-Nas primeiras vinte e quatro horas, você corrige quantidade e valores clicando na célula. Depois disso, o pedido fica fechado, com o cadeado na linha, e só a gestão altera.
+00:02:26.930 --> 00:02:33.422
+Confira o total e clique em Salvar pedido. Pronto: o pedido entra no registro de vendas.
 
 12
-00:02:26.660 --> 00:02:36.896
-Precisa mudar o preço de um pedido fechado? Clique no cifrão no começo da linha, informe o novo valor por unidade e o motivo, e envie para aprovação.
+00:02:34.720 --> 00:02:47.140
+Nas primeiras vinte e quatro horas, você corrige quantidade e valores clicando na célula. Depois disso, o pedido fica fechado, com o cadeado na linha, e só a gestão altera.
 
 13
-00:02:38.200 --> 00:02:46.660
-Depois de enviar, clique em Avisar no WhatsApp: abre o seu WhatsApp com a mensagem pronta para a diretoria. É só enviar.
+00:02:48.440 --> 00:02:58.676
+Precisa mudar o preço de um pedido fechado? Clique no cifrão no começo da linha, informe o novo valor por unidade e o motivo, e envie para aprovação.
 
 14
-00:02:47.960 --> 00:02:58.796
-A diretoria vê os pedidos em Comercial, Aprovações, com o número no menu. Ela aprova ou recusa, e o valor aprovado muda no pedido e fica no histórico.
+00:02:59.980 --> 00:03:08.440
+Depois de enviar, clique em Avisar no WhatsApp: abre o seu WhatsApp com a mensagem pronta para a diretoria. É só enviar.
 
 15
-00:03:00.100 --> 00:03:10.672
-O cliente pediu mais peças depois de vinte e quatro horas? Use o pedido complementar: clique no círculo com o sinal de mais, no começo da linha do pedido.
+00:03:09.740 --> 00:03:20.576
+A diretoria vê os pedidos em Comercial, Aprovações, com o número no menu. Ela aprova ou recusa, e o valor aprovado muda no pedido e fica no histórico.
 
 16
-00:03:11.970 --> 00:03:22.902
-Abre o acréscimo com o mesmo cliente e o mesmo número, com final menos um. Preencha só as peças acrescentadas e salve. O próximo acréscimo será o menos dois.
+00:03:21.880 --> 00:03:32.452
+O cliente pediu mais peças depois de vinte e quatro horas? Use o pedido complementar: clique no círculo com o sinal de mais, no começo da linha do pedido.
 
 17
-00:03:24.200 --> 00:03:32.948
-O complementar aparece logo abaixo do pedido original. Na Conta Azul ele vai com o mesmo número, e a conferência junta os dois.
+00:03:33.750 --> 00:03:44.682
+Abre o acréscimo com o mesmo cliente e o mesmo número, com final menos um. Preencha só as peças acrescentadas e salve. O próximo acréscimo será o menos dois.
 
 18
-00:03:34.250 --> 00:03:41.462
-Os pedidos da planilha também têm o mais e o círculo com mais. Ao alterar, o pedido passa para o painel.
+00:03:45.980 --> 00:03:54.728
+O complementar aparece logo abaixo do pedido original. Na Conta Azul ele vai com o mesmo número, e a conferência junta os dois.
 
 19
-00:03:42.760 --> 00:03:55.756
-Nos horários de atualização, o pedido vai para a Conta Azul como venda em andamento, e aparece a marca CA. Quando o pagamento é baixado, o primeiro e o segundo pagamento são preenchidos sozinhos.
+00:03:56.030 --> 00:04:03.242
+Os pedidos da planilha também têm o mais e o círculo com mais. Ao alterar, o pedido passa para o painel.
 
 20
-00:03:57.060 --> 00:04:04.512
-Este passo a passo fica sempre no menu Comercial, em Treinamento. Qualquer dúvida, fale com a gestão.
+00:04:04.540 --> 00:04:18.568
+O cliente fez um pagamento a mais, como um pagamento complementar? Clique no clipe do pedido, informe o valor e a data e anexe o comprovante. O saldo do pedido cai na hora e o financeiro dá a baixa na Conta Azul.
 
 21
-00:04:05.810 --> 00:04:14.390
+00:04:19.870 --> 00:04:32.914
+Nos horários de envio, o pedido vai para a Conta Azul já aprovado. No fim da linha, você vê a hora em que o pedido foi registrado e a situação na Conta Azul: confirmado na CA é a certeza de que ele subiu.
+
+22
+00:04:34.210 --> 00:04:43.942
+Para ver tudo de um pedido, clique na lupa no começo da linha: itens, parcelas, situação na Conta Azul, recebimentos e comprovantes.
+
+23
+00:04:45.240 --> 00:04:52.692
+Este passo a passo fica sempre no menu Comercial, em Treinamento. Qualquer dúvida, fale com a gestão.
+
+24
+00:04:53.990 --> 00:05:02.570
 Todos os pedidos pelo painel: mais agilidade para o comercial e mais controle para a gestão e o financeiro. Bons lançamentos!
 

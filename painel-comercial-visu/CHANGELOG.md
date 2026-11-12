@@ -2,6 +2,10 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v95 — 11/11/2026 — Treinamento atualizado
+- Vídeo de treinamento atualizado (5 minutos): campos obrigatórios, condição personalizada (entrada, complementar e pagamento final), comprovante de pagamento complementar com valor e data, pedido aprovado e Confirmado na Conta Azul e ficha do pedido (🔍).
+- Passo a passo escrito do Treinamento atualizado com as mesmas mudanças.
+
 ## v94 — 11/11/2026 — Gráfico do histórico de acessos
 - Acessos ao painel: novo gráfico Histórico de acessos, com os acessos por dia (barras) e as pessoas diferentes que entraram (linha). Em Hoje, mostra por hora.
 - Passe o mouse em cada dia para ver o total, os logins e quem acessou. Segue os filtros de período e de pessoa.
