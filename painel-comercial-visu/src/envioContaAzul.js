@@ -43,7 +43,21 @@ export function parcelasPedido(n, total, data, prazo, pers = []) {
 export const opcaoCondicao = (n, pers = []) => { if (n === 'P') { const k = (pers || []).filter((p) => p.valor > 0).length; return k <= 1 ? 'À vista' : `${k}x`; } n = parseInt(n, 10) || 2; return n === 1 ? 'À vista' : `${n}x`; };
 
 // monta o corpo da venda de um pedido (todas as linhas com o mesmo código)
-export function corpoVenda(linhas, { idCliente, idVendedor, produtoDe }) {
+// v100: toda venda do painel entra na Conta Azul com a categoria financeira "Receita Geral de Vendas" (regra travada)
+export const CATEGORIA_VENDA = 'Receita Geral de Vendas';
+let catCache = null;
+export async function idCategoriaVenda() {
+  if (catCache && Date.now() - catCache.em < 6 * 3600e3) return catCache.id;
+  const alvo = sem(CATEGORIA_VENDA); let id = null;
+  const procura = (lista) => { for (const c of lista || []) { if (c && sem(c.nome || c.descricao) === alvo && c.id) return c.id; const f = procura(c?.subitens || c?.categorias_financeiras || c?.filhos); if (f) return f; } return null; };
+  for (const [url, q] of [['/v1/categorias', { busca: CATEGORIA_VENDA, tipo: 'RECEITA', pagina: 1, tamanho_pagina: 50 }], ['/v1/categorias', { busca: CATEGORIA_VENDA }], ['/v1/financeiro/categorias-dre', {}]]) {
+    try { const r = await ca.get(url, q); id = procura(r?.itens || r?.items || (Array.isArray(r) ? r : [])); if (id) break; } catch {}
+  }
+  if (!id) throw new Error(`Categoria "${CATEGORIA_VENDA}" não encontrada na Conta Azul: a venda não foi enviada. Confira se a categoria existe com esse nome.`);
+  catCache = { id, em: Date.now() };
+  return id;
+}
+export function corpoVenda(linhas, { idCliente, idVendedor, produtoDe, idCategoria }) {
   const c = linhas[0];
   const total = r2(linhas.reduce((s, l) => s + (Number(l.total) || r2((Number(l.quantidade) || 0) * (Number(l.valor_unit) || 0))), 0));
   const itens = linhas.map((l) => ({
@@ -64,6 +78,7 @@ export function corpoVenda(linhas, { idCliente, idVendedor, produtoDe }) {
     observacoes: [/-\d+$/.test(c.codigo) ? `Pedido complementar ${c.codigo} (acréscimo ao pedido ${pedidos.codigoBase(c.codigo)}) lançado no Painel de Gestão Visu` : `Pedido ${c.codigo} lançado no Painel de Gestão Visu`, c.nome_pedido ? `Pedido (Trello): ${c.nome_pedido}` : '', c.lote ? `Lote / obs.: ${c.lote}` : '', c.observacao || ''].filter(Boolean).join(' · ').slice(0, 1000),
   };
   if (idVendedor) corpo.id_vendedor = idVendedor;
+  if (idCategoria) corpo.id_categoria = idCategoria;
   return corpo;
 }
 
@@ -118,7 +133,8 @@ export async function enviarPedidos(u, { codigos = null } = {}) {
         }
         const prodIds = new Map();
         for (const l of linhas) prodIds.set(sem(l.tipo_produto), await produtoId(l.tipo_produto));
-        const corpo = corpoVenda(linhas, { idCliente, idVendedor: vendPorNome(c.vendedor), produtoDe: (n) => prodIds.get(sem(n)) });
+        const idCategoria = config.demo ? 'demo-categoria' : await idCategoriaVenda();
+        const corpo = corpoVenda(linhas, { idCliente, idVendedor: vendPorNome(c.vendedor), produtoDe: (n) => prodIds.get(sem(n)), idCategoria });
         const v = config.demo ? { id: 'demo-venda-' + numero } : await ca.criarVenda(corpo);
         await pedidos.marcarEnvioCA(ids, { ca_venda_id: v.id || 'enviado', ca_enviado_em: new Date().toISOString(), ca_erro: '', ca_total: corpo.condicao_pagamento.parcelas.reduce((s, p) => s + p.valor, 0) }, u);
         res.enviados.push(cod);

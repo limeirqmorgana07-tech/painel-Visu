@@ -2,6 +2,21 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v102 — 12/11/2026 — Ranking de vendas em barras horizontais
+- Ranking de vendas refeito no padrão de dashboard: barras horizontais com os nomes um abaixo do outro, do maior para o menor, 1º colocado em laranja e os demais em uma só cor, valor no fim de cada barra e escala embaixo, sem enfeites.
+- Botões Período (o mês ou período escolhido no topo) e Últimos 12 meses (histórico), e R$ / Pedidos. Passe o mouse para ver a participação e a posição no período anterior; clique para ver os pedidos.
+- Inclui tudo da v101.
+
+## v101 — 12/11/2026 — Financeiro também vendedor
+- Perfil Financeiro também pode ser vendedor: em Usuários e permissões, o campo Nome de vendedor aparece para Financeiro (como já era para Diretor e Comercial). Preenchido, os pedidos que a pessoa lança saem com o nome dela como vendedor e ela entra no ranking e na premiação.
+- Inclui tudo da v100.
+
+## v100 — 12/11/2026 — Categoria Receita Geral de Vendas travada, comprovante bloqueado e ranking novo
+- Categoria travada: toda venda que o painel envia para a Conta Azul entra com a categoria financeira Receita Geral de Vendas. Se a Conta Azul não encontrar essa categoria, a venda não é enviada e o motivo aparece na coluna Conta Azul.
+- Comprovante: valor diferente das parcelas do pedido, acima do saldo ou arquivo repetido agora bloqueia o vendedor (não há mais Anexar mesmo assim para ele): é preciso corrigir o valor. Só a gestão pode anexar nesses casos. Data estranha continua só como aviso.
+- Ranking de vendas em barras horizontais (padrão de dashboard): nomes um abaixo do outro, do maior para o menor, 1º colocado em laranja de destaque, demais em uma só cor, valor no fim da barra e escala embaixo. Botões Período / Últimos 12 meses (histórico) e R$ / Pedidos.
+- Inclui o perfil PCP (v98) e a correção de comprovante (v99).
+
 ## v99 — 12/11/2026 — Correção de comprovante e ranking de vendas
 - Comprovante anexado por engano: antes de anexar, o painel alerta quando o valor não bate com as parcelas do pedido, passa do saldo, a data está estranha ou o mesmo arquivo já está em outro pedido; dá para cancelar ou anexar mesmo assim.
 - Corrigir / substituir comprovante: troque o arquivo errado pelo certo e/ou corrija valor e data do pagamento. O saldo do pedido é recalculado, o que era antes fica no histórico (↺ corrigido) e no Histórico de alterações. O vendedor corrige enquanto o financeiro não deu a baixa; depois disso, só a gestão — e o pagamento volta para conferir baixa na lista do financeiro.
