@@ -4,7 +4,7 @@ O mesmo histórico aparece no painel, na página **Controle → Versões**, e a 
 
 ## v103 — 12/11/2026 — Gráficos clean (modelo VD): Acessos e Ranking de vendas
 - Acessos ao painel refeito no modelo da VD (filtros, KPIs, uso por dia, horários, quem mais usou, páginas, por pessoa, registro).
-- Ranking de vendas com barras finas e texto pequeno; 1º em destaque.
+- Ranking de vendas com barras finas e texto pequeno, sempre do maior para o menor; 1º em destaque; botões Top 5 / Top 10 / Equipe inteira.
 - Gráficos medidos na largura real (sem ampliar com a tela) e redesenhados ao redimensionar.
 
 ## v102 — 12/11/2026 — Ranking de vendas em barras horizontais
