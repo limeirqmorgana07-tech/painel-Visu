@@ -303,11 +303,33 @@ export function normalizarParcela(p, tipo) {
   };
 }
 
+// v106: desde 13/11/2026 a Conta Azul recusa intervalo de vencimento maior que 365 dias ("excede o limite máximo
+// permitido de 365 dias"). Quebramos a janela em pedaços de até 365 dias e juntamos o resultado, sem repetir parcela.
+const iso10 = (d) => d.toISOString().slice(0, 10);
+function janelas365(de, ate) {
+  const out = []; let ini = new Date(de + 'T00:00:00Z'); const fim = new Date(ate + 'T00:00:00Z');
+  while (ini <= fim) { const f = new Date(Math.min(fim.getTime(), ini.getTime() + 364 * 864e5)); out.push([iso10(ini), iso10(f)]); ini = new Date(f.getTime() + 864e5); }
+  return out;
+}
+async function porJanelas(caminho, de, ate, params) {
+  const vistos = new Set(), tudo = [];
+  for (const [d, a] of janelas365(de, ate)) {
+    const itens = await todasAsPaginas(caminho, { ...params, data_vencimento_de: d, data_vencimento_ate: a });
+    for (const it of itens) { const k = it?.id ?? JSON.stringify(it); if (vistos.has(k)) continue; vistos.add(k); tudo.push(it); }
+  }
+  return tudo;
+}
+// sem vencimento informado: janela de 2 anos antes e depois do filtro de competência/pagamento (ou 2018–2035 sem filtro)
+function janelaPadrao(filtros) {
+  const ds = [filtros.competencia_de, filtros.competencia_ate, filtros.pagamento_de, filtros.pagamento_ate].filter(Boolean).sort();
+  if (!ds.length) return ['2018-01-01', '2035-12-31'];
+  return [iso10(new Date(Date.parse(ds[0] + 'T00:00:00Z') - 730 * 864e5)), iso10(new Date(Date.parse(ds[ds.length - 1] + 'T00:00:00Z') + 730 * 864e5))];
+}
+
 // data de vencimento é obrigatória na API; usamos uma janela larga e filtramos por competência ou pagamento
 export async function buscarParcelas(tipo, filtros = {}) {
-  const brutas = await todasAsPaginas(CAMINHO_PARCELAS[tipo], {
-    data_vencimento_de: filtros.vencimento_de || '2018-01-01',
-    data_vencimento_ate: filtros.vencimento_ate || '2035-12-31',
+  const [pd, pa] = janelaPadrao(filtros);
+  const brutas = await porJanelas(CAMINHO_PARCELAS[tipo], filtros.vencimento_de || pd, filtros.vencimento_ate || pa, {
     data_competencia_de: filtros.competencia_de,
     data_competencia_ate: filtros.competencia_ate,
     data_pagamento_de: filtros.pagamento_de,
@@ -377,10 +399,7 @@ export async function buscarSaldos() {
 }
 
 export async function buscarContasAReceber(de, ate) {
-  const brutas = await todasAsPaginas('/v1/financeiro/eventos-financeiros/contas-a-receber/buscar', {
-    data_vencimento_de: de,
-    data_vencimento_ate: ate,
-  });
+  const brutas = await porJanelas('/v1/financeiro/eventos-financeiros/contas-a-receber/buscar', de, ate, {});
   return brutas.map(normalizarReceber);
 }
 

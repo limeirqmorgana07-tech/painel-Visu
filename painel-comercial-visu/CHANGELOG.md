@@ -2,6 +2,9 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v106 — 13/11/2026 — Financeiro volta a carregar
+- Conta Azul passou a limitar o intervalo de vencimento a 365 dias; buscas de receber/pagar agora são feitas em blocos de até 365 dias.
+
 ## v105 — 13/11/2026 — Indicadores do mês no topo de Vendas
 - KPIs (faturamento, pedidos, ticket com variação; meta com barra), evolução diária com linha da meta, vendas por canal (tipo de venda), ranking de vendedores, produtos e clientes.
 - Demais cartões e gráficos da página Vendas mantidos abaixo.
