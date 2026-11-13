@@ -7,7 +7,7 @@ import { planilhaConfigurada, lerPlanilha, sem, clienteBase, separarLoteNome } f
 import { gerarDemoPlanilha, gerarDemoContaAzul } from './demo.js';
 import { lerAtributos } from './produtos.js';
 import { lerKV, salvarKV } from './tokenStore.js';
-import { fontePainel, fonteMista, planilhaEmUso, linhasDoPainel, prepararFonte, chaveCodigo, restoDoNome } from './pedidos.js';
+import { configPedidos, fontePainel, fonteMista, planilhaEmUso, linhasDoPainel, prepararFonte, chaveCodigo, restoDoNome } from './pedidos.js';
 
 const chave = (s) => sem(s).replace(/[^a-z0-9]+/g, ' ').trim();
 // nome de vendedor num padrão só: "DANIEL SILVA", "daniel silva" e "Daniel Silva" viram "Daniel Silva"
@@ -325,6 +325,7 @@ async function montar(bruto) {
     regras: {
       ponto_equilibrio: config.pontoEquilibrio || null,
       meta: config.metaMensal || null,
+      ...(await (async () => { const c = await configPedidos().catch(() => ({})); const m = c.metas_ano || {}; return { meta_ano_cons: m.cons ?? 2000000, meta_ano_alvo: m.alvo ?? 3000000 }; })()),
       comissao_inicio: config.comissaoInicio,
       comissao_teto: config.comissaoTeto,
       comissao_faixas: await faixasComissao(),

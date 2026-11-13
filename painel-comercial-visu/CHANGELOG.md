@@ -2,6 +2,10 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v107 — 13/11/2026 — Metas de faturamento na página Vendas
+- Cadastro das metas anuais (conservadora e alvo) pela ADM; linhas da meta por mês na Evolução mensal e acumulado do ano com barras.
+- Meta do mês usa a conservadora ÷ 12. Cartões de baixo da página Vendas no estilo dos de cima.
+
 ## v106 — 13/11/2026 — Financeiro volta a carregar
 - Conta Azul passou a limitar o intervalo de vencimento a 365 dias; buscas de receber/pagar agora são feitas em blocos de até 365 dias.
 

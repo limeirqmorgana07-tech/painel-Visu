@@ -556,6 +556,8 @@ app.post('/api/pedidos/planilha-uso', exigeAdm, resp(async (req) => {
   depoisDeMudar(); await dadosDeVendas(true).catch(() => {});
   return { ...c, importadas };
 }));
+// v107: metas anuais de faturamento (conservadora e alvo), editadas pela ADM na página Vendas
+app.post('/api/metas', exigeAdm, resp(async (req) => { const n = (v) => Math.max(0, Math.round(Number(v) || 0)); const cons = n(req.body?.cons), alvo = n(req.body?.alvo); if (!cons && !alvo) throw new Error('Informe pelo menos uma meta.'); const c = await pedidos.salvarConfigPedidos({ metas_ano: { cons, alvo } }, req.usuario); return { metas_ano: c.metas_ano }; }));
 app.post('/api/pedidos/config', exigeAdm, resp(async (req) => { const f = ['painel', 'misto'].includes(req.body?.fonte) ? req.body.fonte : 'planilha'; const r = await pedidos.salvarConfigPedidos({ fonte: f, corte: f === 'misto' ? (/^\d{4}-\d{2}$/.test(req.body?.corte || '') ? req.body.corte : '2026-11') : undefined }, req.usuario); depoisDeMudar(); return r; }));
 // WhatsApp da diretoria para o aviso de pedido de aprovação (o vendedor abre o WhatsApp com a mensagem pronta)
 app.post('/api/pedidos/whatsapp', exigeLogin, resp(async (req) => {

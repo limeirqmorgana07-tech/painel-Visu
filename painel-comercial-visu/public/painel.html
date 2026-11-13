@@ -189,6 +189,10 @@ td.ed{white-space:nowrap}
 .rkh-d{text-align:right}
 @media (max-width:700px){.rkh-l{grid-template-columns:100px 1fr 40px;gap:8px}}
 @media (max-width:700px){.rk-l{grid-template-columns:30px 1fr 110px 44px;gap:8px}.rk-b{display:none}}
+.meta-ed{display:flex;gap:10px;flex-wrap:wrap;align-items:end;margin:4px 0 10px;padding:10px 12px;border:1px solid var(--line2);border-radius:10px;background:var(--bg)}.meta-ed .f{display:flex;flex-direction:column;gap:3px}.meta-ed label{font-size:11px;color:var(--ink3)}.meta-ed input{padding:7px 9px;border:1px solid var(--line2);border-radius:8px;font:inherit;font-size:13px;width:170px;background:var(--panel);color:var(--ink)}
+.meta-ano{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:10px}.meta-ano .ma{font-size:12px;color:var(--ink2)}.meta-ano .ma b{color:var(--ink)}.meta-ano .im-bar{margin:5px 0 0}
+[data-pagina="vendas"] #kpis .kpi{border-radius:12px;padding:14px 16px;box-shadow:0 1px 2px rgba(0,0,0,.04)}[data-pagina="vendas"] #kpis .kpi::before{display:none}
+[data-pagina="vendas"] #kpis .kpi .l{font-size:12px;font-weight:400;letter-spacing:0;text-transform:none}[data-pagina="vendas"] #kpis .kpi .v{font-family:inherit;font-size:26px;font-weight:800;letter-spacing:-.5px}[data-pagina="vendas"] #kpis .kpi .s{font-size:11.5px;color:var(--ink3)}
 .im-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}@media (max-width:900px){.im-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .im-k{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px;box-shadow:0 1px 2px rgba(0,0,0,.04)}.im-k[tabindex]{cursor:pointer}
 .im-k .l{font-size:12px;color:var(--ink3)}.im-k .v{font-size:26px;font-weight:800;color:var(--ink);margin:4px 0 2px;letter-spacing:-.5px}.im-k .s{font-size:11.5px;color:var(--ink3)}.im-k .s span{margin-left:4px}
@@ -990,8 +994,9 @@ table.matriz td.vz{color:var(--line2)}
     <div class="g2" style="margin-top:16px">
       <div class="card">
         <div class="hd"><div><h3>Evolução mensal<span class="req">R1 · R3 · C1</span></h3><div class="sub" id="evolSub">—</div></div>
-          <div class="seg" role="group" aria-label="Medida do gráfico"><button type="button" data-evol="valor" aria-pressed="true">R$</button><button type="button" data-evol="pedidos" aria-pressed="false">Pedidos</button></div></div>
-        <div id="evolucao"></div>
+          <div style="display:flex;gap:8px;align-items:center"><button type="button" class="bt2" id="metaBt" hidden>🎯 Metas</button><div class="seg" role="group" aria-label="Medida do gráfico"><button type="button" data-evol="valor" aria-pressed="true">R$</button><button type="button" data-evol="pedidos" aria-pressed="false">Pedidos</button></div></div></div>
+        <div id="metaEd" class="meta-ed" hidden><div class="f"><label for="metaCons">Meta conservadora e factível (ano)</label><input id="metaCons" inputmode="decimal" placeholder="2.000.000"></div><div class="f"><label for="metaAlvo">Meta alvo e desafiadora (ano)</label><input id="metaAlvo" inputmode="decimal" placeholder="3.000.000"></div><button type="button" class="bt2 pri" id="metaSalvar">Salvar metas</button><button type="button" class="bt2" id="metaFechar">Cancelar</button><div class="dica-c" style="flex-basis:100%">Metas do ano. No gráfico viram a meta por mês (valor ÷ 12).</div></div>
+        <div id="evolucao"></div><div id="metaAno" class="meta-ano"></div>
         <div class="leg"><span><i style="background:var(--s2)"></i>Novos</span><span><i style="background:var(--s1)"></i>Recompra</span><span><i style="background:var(--sNone)"></i>Sem classificação</span><span id="legPE" hidden><i style="background:var(--ink2);height:2px"></i>Ponto de equilíbrio</span></div>
         <details class="tabela"><summary>Ver em tabela</summary><div class="tw" id="evolTabela"></div></details>
       </div>
@@ -1347,8 +1352,9 @@ const nomeMes=(m)=>{const[a,b]=m.split('-');return MES_L[+b-1]+' de '+a};
 const somaMes=(m,n)=>{const[a,b]=m.split('-').map(Number);const d=new Date(Date.UTC(a,b-1+n,1));return d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0')};
 function delta(a,b,inv){ if(!b) return '<span class="delta eq">sem base</span>'; const d=(a-b)/b; const c=Math.abs(d)<.005?'eq':(d>0)!==!!inv?'up':'down'; return `<span class="delta ${c}">${d>0?'▲':d<0?'▼':'■'} ${pct(Math.abs(d))}</span>`; }
 
-const VERSAO='v106';
+const VERSAO='v107';
 const VERSOES=[
+ {v:'v107',data:'13/11/2026',tit:'Metas de faturamento na página Vendas',arq:'painel-visu-v107.zip',itens:['Botão 🎯 Metas (ADM) na Evolução mensal para cadastrar a meta conservadora e a meta alvo do ano (padrão: R$ 2 milhões e R$ 3 milhões).','No gráfico mensal, linhas tracejadas da meta por mês: conservadora (verde) e alvo (laranja).','Abaixo do gráfico, o acumulado do ano contra as duas metas, com barra de progresso.','O cartão Meta do mês, no topo, usa a meta conservadora ÷ 12 e mostra a alvo.','Cartões de baixo da página Vendas no mesmo estilo dos de cima.']},
  {v:'v106',data:'13/11/2026',tit:'Financeiro volta a carregar (limite de 365 dias da Conta Azul)',arq:'painel-visu-v106.zip',itens:['A Conta Azul passou a recusar buscas de contas a receber e a pagar com intervalo de vencimento maior que 365 dias, o que derrubava o DRE e as páginas do financeiro. O painel agora busca em blocos de até 365 dias e junta o resultado.']},
  {v:'v105',data:'13/11/2026',tit:'Indicadores do mês no topo de Vendas',arq:'painel-visu-v105.zip',itens:['Topo da página Vendas no modelo "Indicadores do mês": Faturamento, Pedidos e Ticket médio com a variação contra o mês anterior, e Meta do mês com barra de progresso (sem meta cadastrada, usa o ponto de equilíbrio).','Evolução das vendas dia a dia (curva com área) e a linha tracejada da meta por dia.','Vendas por canal (rosca pelo tipo de venda).','Ranking de vendedores, Produtos mais vendidos e Clientes que mais compram em barras finas; clique abre os pedidos.','Os demais cartões (clientes novos, peças, clientes, preço médio, projeção), a Evolução mensal, Novos x recompra e o Ranking de vendas continuam logo abaixo, como estavam.','Inclui a v104 (pagamento complementar) e a v103 (gráficos clean, pódio).']},
  {v:'v104',data:'13/11/2026',tit:'Pagamento complementar com valor livre',arq:'painel-visu-v104.zip',itens:['Comprovante com valor diferente das parcelas não bloqueia mais: entra como pagamento complementar, abate do saldo final e mostra um aviso para conferir.','Continua bloqueado (só a gestão libera): valor maior que o saldo do pedido e o mesmo arquivo já anexado em outro pedido.','Na ficha do pedido, nova tabela "Parcelas com os pagamentos complementares": entrada, complementar(es) e o pagamento final já recalculado.','Texto do anexo: informar sempre o valor do comprovante.','Inclui tudo da v103 (gráficos clean, pódio e posições do ranking).']},
@@ -1679,9 +1685,9 @@ function gRosca(el,itens,{fmt=curto,onClick=null}={}){ const W=larg(el),tot=iten
   if(onClick) el.querySelectorAll('path[data-i]').forEach(p=>p.onclick=()=>onClick(itens[+p.dataset.i])); }
 function indicadoresMes(j,cards,a,b,lsK){
   const imk=(c,extra='')=>{ const [l,v,s2,,,fn]=c; return `<div class="im-k"${fn?D(fn)+' tabindex="0"':''}><div class="l">${esc(l)}</div><div class="v num">${v}</div><div class="s">${s2||''}</div>${extra}</div>`; };
-  const R=E.dados.regras||{}, metaM=+R.meta||0, nM=(j.atual||[]).length||1, meta=metaM*nM, pe=E.periodo==='mes'?peRef().valor:0;
-  const alvo=meta||pe, rotA=meta?(nM>1?'Meta do período':'Meta do mês'):'Ponto de equilíbrio', pc=alvo?a.fat/alvo:0;
-  const cMeta=`<div class="im-k"><div class="l">${rotA}</div><div class="v num">${alvo?pct(pc):'—'}</div><div class="im-bar"><i style="width:${Math.min(100,pc*100)}%;${pc>=1?'background:var(--green)':''}"></i></div><div class="s"><span>${alvo?`${brl(a.fat)} de ${brl(alvo)}${pc<1?` · faltam ${brl(alvo-a.fat)}`:' · atingida'}`:'meta não cadastrada (Regras do painel)'}</span></div></div>`;
+  const R=E.dados.regras||{}, metaM=+R.meta||(R.meta_ano_cons?R.meta_ano_cons/12:0), nM=(j.atual||[]).length||1, meta=metaM*nM, pe=E.periodo==='mes'?peRef().valor:0;
+  const alvo=meta||pe, rotA=meta?(nM>1?'Meta do período':'Meta do mês')+(!+R.meta&&R.meta_ano_cons?' (conservadora)':''):'Ponto de equilíbrio', pc=alvo?a.fat/alvo:0;
+  const cMeta=`<div class="im-k"><div class="l">${rotA}</div><div class="v num">${alvo?pct(pc):'—'}</div><div class="im-bar"><i style="width:${Math.min(100,pc*100)}%;${pc>=1?'background:var(--green)':''}"></i></div><div class="s"><span>${alvo?`${brl(a.fat)} de ${brl(alvo)}${pc<1?` · faltam ${brl(alvo-a.fat)}`:' · atingida'}${meta&&!+R.meta&&R.meta_ano_alvo?` · alvo ${curto(R.meta_ano_alvo/12*nM)}`:''}`:'meta não cadastrada (🎯 Metas, na Evolução mensal)'}</span></div></div>`;
   $('imKpis').innerHTML=imk(cards[0])+imk(cards[1])+imk(cards[2])+cMeta;
   const ls=lsK.filter(l=>!l.cs);
   if(!ls.length){ ['imDia','imCanal','imVend','imProd','imCli'].forEach(id=>$(id).innerHTML='<div class="vazio">Sem vendas detalhadas no período.</div>'); $('imDiaLeg').innerHTML=''; return; }
@@ -1740,11 +1746,17 @@ document.querySelectorAll('[data-rkv]').forEach(b=>b.addEventListener('click',()
 
 function escala(max){ const bruto=max/4||1; const p=Math.pow(10,Math.floor(Math.log10(bruto))); const st=[1,2,2.5,5,10].map(s=>s*p).find(s=>s>=bruto)||10*p; return {passo:st,topo:Math.ceil(max/st)*st||st}; }
 
-function graficoEvolucao(serie,pe){
+const numBR=(t)=>{ t=String(t||'').replace(/[^\d,.-]/g,''); if(/,\d{1,2}$/.test(t)) t=t.replace(/\./g,'').replace(',','.'); else t=t.replace(/[.,]/g,''); return Math.round(+t||0); };
+function metasUI(){ const adm=E.eu?.perfil==='adm'; $('metaBt').hidden=!adm; }
+$('metaBt').onclick=()=>{ const RG=E.dados?.regras||{}; $('metaCons').value=RG.meta_ano_cons?int(RG.meta_ano_cons):''; $('metaAlvo').value=RG.meta_ano_alvo?int(RG.meta_ano_alvo):''; $('metaEd').hidden=false; };
+$('metaFechar').onclick=()=>$('metaEd').hidden=true;
+$('metaSalvar').onclick=async()=>{ try{ const r=await api('/api/metas',{method:'POST',body:JSON.stringify({cons:numBR($('metaCons').value),alvo:numBR($('metaAlvo').value)})}); E.dados.regras.meta_ano_cons=r.metas_ano.cons; E.dados.regras.meta_ano_alvo=r.metas_ano.alvo; $('metaEd').hidden=true; toast('Metas salvas.'); desenhar(); }catch(e){ toast(e.message,true); } };
+function graficoEvolucao(serie,pe){ metasUI();
   const val=E.evol==='valor', W=760,H=270,L=58,R=12,T=18,B=30,w=W-L-R,h=H-T-B,n=serie.length;
   const get=(s,k)=>val?s.nr[k].t:s.nr[k].p, tot=(s)=>val?s.fat:s.pedidos;
   const usePE=!!(val&&pe&&!Object.values(E.filtros).some(Boolean));
-  const max=Math.max(...serie.map(x=>tot(x.s)),usePE?pe:0,1); const {passo,topo}=escala(max);
+  const RG=E.dados.regras||{}, semF=val&&!Object.values(E.filtros).some(Boolean), mC=semF&&RG.meta_ano_cons?RG.meta_ano_cons/12:0, mA=semF&&RG.meta_ano_alvo?RG.meta_ano_alvo/12:0;
+  const max=Math.max(...serie.map(x=>tot(x.s)),usePE?pe:0,mC,mA,1); const {passo,topo}=escala(max);
   const y=(v)=>T+h-(v/topo)*h, slot=w/n, bw=Math.min(slot*.62,40);
   let g='';
   for(let v=0;v<=topo+1e-6;v+=passo) g+=`<line x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)"/><text x="${L-8}" y="${y(v)+4}" text-anchor="end">${val?curto(v):int(v)}</text>`;
@@ -1755,13 +1767,19 @@ function graficoEvolucao(serie,pe){
     return `<g class="bm" data-i="${i}" style="cursor:pointer"><rect x="${L+i*slot}" y="${T}" width="${slot}" height="${h}" fill="transparent"/>${out}${rot}
       <text x="${cx}" y="${H-10}" text-anchor="middle" style="${sel?'fill:var(--ink);font-weight:700':''}">${MES_C[+x.m.slice(5)-1]}</text>${sel?`<rect x="${cx-bw/2}" y="${H-5}" width="${bw}" height="3" rx="1.5" fill="var(--orange)"/>`:''}</g>`; }).join('');
   const peL=usePE?`<line x1="${L}" x2="${W-R}" y1="${y(pe)}" y2="${y(pe)}" stroke="var(--ink2)" stroke-width="1.5" stroke-dasharray="3 4" pointer-events="none"/>`:'';
+  const mL=(v,cor,rot)=>v?`<line x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}" stroke="${cor}" stroke-width="1.6" stroke-dasharray="6 4" pointer-events="none"/>`:'';
+  const metasL=mL(mC,'var(--green)','Meta conservadora')+mL(mA,'var(--orange)','Meta alvo');
+  { let lm=$('legMeta'); if(!lm){ lm=document.createElement('span'); lm.id='legMeta'; lm.style.display='contents'; $('legPE').after(lm); } lm.innerHTML=(mC?`<span><i style="background:var(--green);height:2px"></i>Meta conservadora (${curto(mC)}/mês)</span>`:'')+(mA?`<span><i style="background:var(--orange);height:2px"></i>Meta alvo (${curto(mA)}/mês)</span>`:''); }
   $('legPE').hidden=!usePE; if(usePE) $('legPE').innerHTML=`<i style="background:var(--ink2);height:2px"></i>Ponto de equilíbrio (${brl(pe)})`;
   $('evolSub').textContent=`${val?'Faturamento':'Pedidos'} dos 12 meses até ${nomeMes(E.mes)} · clique num mês para abri-lo`;
-  $('evolucao').innerHTML=`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Evolução mensal de ${val?'faturamento':'pedidos'}">${g}${barras}${peL}</svg>`;
+  $('evolucao').innerHTML=`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Evolução mensal de ${val?'faturamento':'pedidos'}">${g}${barras}${peL}${metasL}</svg>`;
   $('evolucao').querySelectorAll('.bm').forEach(el=>{ const x=serie[+el.dataset.i];
     el.addEventListener('mousemove',e=>dica(e,`<b>${nomeMes(x.m)}</b><br>Faturamento ${brl(x.s.fat)} · ${pl(x.s.pedidos,'pedido','pedidos')}<br>Novos ${brl(x.s.nr.novo.t)} (${pl(x.s.nr.novo.p,'pedido','pedidos')})<br>Recompra ${brl(x.s.nr.recompra.t)} (${pl(x.s.nr.recompra.p,'pedido','pedidos')})<br>Ticket médio ${brl(x.s.ticket)}`));
     el.addEventListener('mouseleave',semDica);
     el.addEventListener('click',()=>{ semDica(); E.mes=x.m; $('fMes').value=x.m; desenhar(); }); });
+  (()=>{ const el=$('metaAno'); if(!semF||!(RG.meta_ano_cons||RG.meta_ano_alvo)){ el.innerHTML=''; return; } const ano=E.mes.slice(0,4), ms=[]; for(let k=1;k<=+E.mes.slice(5);k++) ms.push(ano+'-'+String(k).padStart(2,'0')); const ac=resumo(linhas(ms)).fat;
+    const b=(meta,cor,rot)=>meta?`<div class="ma">${rot}: <b>${pct(ac/meta)}</b> de ${brl(meta)} · ${ac>=meta?'atingida':'faltam '+brl(meta-ac)}<div class="im-bar"><i style="width:${Math.min(100,ac/meta*100)}%;background:${cor}"></i></div></div>`:'';
+    el.innerHTML=`<div class="ma" style="grid-column:1/-1">Acumulado de ${ano} até ${nomeMes(E.mes)}: <b>${brl(ac)}</b></div>`+b(RG.meta_ano_cons,'var(--green)','Meta conservadora')+b(RG.meta_ano_alvo,'var(--orange)','Meta alvo'); })();
   $('evolTabela').innerHTML=`<table><thead><tr><th>Mês</th><th class="v">Faturamento</th><th class="v">Pedidos</th><th class="v">Ticket</th><th class="v">Novos</th><th class="v">Recompra</th></tr></thead><tbody>${serie.map(x=>`<tr><td>${nomeMes(x.m)}</td><td class="v">${brl(x.s.fat)}</td><td class="v">${int(x.s.pedidos)}</td><td class="v">${brl(x.s.ticket)}</td><td class="v">${brl(x.s.nr.novo.t)}</td><td class="v">${brl(x.s.nr.recompra.t)}</td></tr>`).join('')}</tbody></table>`;
 }
 
