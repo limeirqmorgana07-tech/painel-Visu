@@ -2,6 +2,10 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v105 — 13/11/2026 — Indicadores do mês no topo de Vendas
+- KPIs (faturamento, pedidos, ticket com variação; meta com barra), evolução diária com linha da meta, vendas por canal (tipo de venda), ranking de vendedores, produtos e clientes.
+- Demais cartões e gráficos da página Vendas mantidos abaixo.
+
 ## v104 — 13/11/2026 — Pagamento complementar com valor livre
 - Valor diferente das parcelas vira pagamento complementar (aviso, sem bloqueio); acima do saldo e arquivo repetido continuam bloqueados.
 - Ficha do pedido mostra as parcelas com os complementares e o pagamento final recalculado.
