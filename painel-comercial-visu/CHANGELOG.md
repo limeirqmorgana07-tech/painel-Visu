@@ -2,9 +2,14 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v104 — 13/11/2026 — Pagamento complementar com valor livre
+- Valor diferente das parcelas vira pagamento complementar (aviso, sem bloqueio); acima do saldo e arquivo repetido continuam bloqueados.
+- Ficha do pedido mostra as parcelas com os complementares e o pagamento final recalculado.
+- Texto do anexo: informar sempre o valor.
+
 ## v103 — 12/11/2026 — Gráficos clean (modelo VD): Acessos e Ranking de vendas
 - Acessos ao painel refeito no modelo da VD (filtros, KPIs, uso por dia, horários, quem mais usou, páginas, por pessoa, registro).
-- Ranking de vendas com barras finas e texto pequeno, sempre do maior para o menor; 1º em destaque; botões Top 5 / Top 10 / Equipe inteira; pódio do Top 3 com medalhas; tipo de gráfico: Barras, Colunas ou Linha (evolução).
+- Ranking de vendas com barras finas e texto pequeno, sempre do maior para o menor; 1º em destaque; botões Top 5 / Top 10 / Equipe inteira; pódio do Top 3 com medalhas e cartões com a posição dos demais (4º em diante); tipo de gráfico: Barras, Colunas ou Linha (evolução).
 - Gráficos medidos na largura real (sem ampliar com a tela) e redesenhados ao redimensionar.
 
 ## v102 — 12/11/2026 — Ranking de vendas em barras horizontais
