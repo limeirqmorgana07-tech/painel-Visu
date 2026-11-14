@@ -3323,10 +3323,11 @@ function linhasInconsistencias(ls,b,ca,desde,noMes,vendSel,baseTodas){
   const g=gruposCod(ls), temCA=!!E.dados?.conta_azul;
   // v108: pedido complementar (código-1, -2…) lançado só na Conta Azul conta junto com o pedido principal
   const gAll=gruposCod(baseTodas||ls), comps=new Map(); if(temCA) (E.dados.conta_azul.vendas||[]).forEach(v=>{ if(!['APROVADO','FATURADO'].includes(v.s)) return; const c=codDoNumero(v.n); if(!c.includes('-')) return; if(gAll.has(ckey(c))) return; const km=ckey(c.split('-')[0]); if(!gAll.has(km)) return; (comps.get(km)||comps.set(km,[]).get(km)).push({...v,cod:c}); });
+  const compOk=new Map(); out.compOk=compOk;
   const compTxt=(arr)=>arr.map(v=>`complementar ${v.cod} ${brl2(v.t)}`).join(' + ');
   if(temCA){
     for(const [k,x] of g){ if((x.mes||'')<desde) continue; let st=statusCod(x.codigo,x.t,x.mes,ca); const v=ca.get(k), base={data:x.data,codigo:x.codigo,cliente:x.cliente,vendedor:x.vendedor||'',total:x.t,_sp:x.regs[0]?._sp}, cp=comps.get(k)||[], tCp=cp.reduce((a,c)=>a+c.t,0);
-      if(st[0]==='dif'&&cp.length&&v&&Math.abs(v.t+tCp-x.t)<=1) st=['ok'];
+      if(st[0]==='dif'&&cp.length&&v&&Math.abs(v.t+tCp-x.t)<=1){ st=['ok']; compOk.set(k,{tC:tCp,cp}); }
       if(st[0]==='dif') push('dif',base,{sis:v.t+tCp,dif:v.t+tCp-x.t,falta:'Conta Azul '+brl2(v.t)+(cp.length?' + '+compTxt(cp)+' = '+brl2(v.t+tCp):'')});
       else if(['so_painel','cancelado','nao_aprov'].includes(st[0])) push('soP',base,{sis:v?v.t:'',dif:v?v.t-x.t:'',falta:v?SIT_CA[v.s]||v.s:'não existe na Conta Azul'});
       if(x.mes>=desde&&st[0]!=='dif'){ const ps=parcelasDe(x.codigo); if(ps.length){ const difs=[]; ['pag1','pag2'].forEach((c,i)=>{ const pc=ps[i]; if(!pc) return; const vs=x.regs.map(r=>+r[c]||0).filter(v=>v>0); if(!vs.length) return; const soma=vs.reduce((a,v)=>a+v,0), alvo=pc.pago||pc.valor;
@@ -3394,8 +3395,8 @@ function pgInconsistencias(){
   const rotT=(t)=>t==='ok'?'Batendo com a Conta Azul':t==='soS'?'Venda no sistema sem pedido '+(b==='painel'?'no painel':'na planilha'):TI(t)[1];
   const porT=new Map(TIPOS_INC.map(t=>[t[0],[]])); todas.forEach(x=>porT.get(x.tipo).push(x));
   // pedidos que batem com a Conta Azul (para ver o que já está certo)
-  const okRows=[]; if(temCA){ const caM=mapaCA(); for(const x of gruposCod(ls).values()){ if((x.mes||'')<(desde<DESDE_COD?DESDE_COD:desde)) continue; const st=statusCod(x.codigo,x.t,x.mes,caM); if(st[0]!=='ok') continue; const v=caM.get(ckey(x.codigo)); const ps=parcelasDe(x.codigo), rec=ps.reduce((a,p)=>a+(+p.pago||0),0);
-    okRows.push({tipo:'ok',data:x.data,codigo:x.codigo,cliente:x.cliente,vendedor:x.vendedor||'',plan:x.t,sis:v.t,dif:'',sp:x.regs[0]?._sp,falta:(SIT_CA[v.s]||v.s)+(x.n>1?` · ${x.n} itens`:'')+(ps.length?` · recebido ${brl2(rec)} de ${pl(ps.length,'parcela','parcelas')}`:'')}); } }
+  const okRows=[]; if(temCA){ const caM=mapaCA(); for(const x of gruposCod(ls).values()){ if((x.mes||'')<(desde<DESDE_COD?DESDE_COD:desde)) continue; const st=statusCod(x.codigo,x.t,x.mes,caM), co=todas.compOk?.get(ckey(x.codigo)); if(st[0]!=='ok'&&!co) continue; const v=caM.get(ckey(x.codigo)); const ps=parcelasDe(x.codigo).concat(co?co.cp.flatMap(c=>parcelasDe(c.cod)):[]), rec=ps.reduce((a,p)=>a+(+p.pago||0),0);
+    okRows.push({tipo:'ok',data:x.data,codigo:x.codigo,cliente:x.cliente,vendedor:x.vendedor||'',plan:x.t,sis:v.t+(co?co.tC:0),dif:'',sp:x.regs[0]?._sp,falta:(SIT_CA[v.s]||v.s)+(co?` · com ${co.cp.map(c=>'complementar '+c.cod+' '+brl2(c.t)).join(' + ')}`:'')+(x.n>1?` · ${x.n} itens`:'')+(ps.length?` · recebido ${brl2(rec)} de ${pl(ps.length,'parcela','parcelas')}`:'')}); } }
   porT.set('ok',okRows);
   if(PED.inTipo&&!porT.get(PED.inTipo)?.length) PED.inTipo='';
   $('inTipoSel').innerHTML=`<option value="">Todas as inconsistências (${int(todas.length)})</option>`+TIPOS_INC.filter(t=>porT.get(t[0]).length).map(t=>`<option value="${t[0]}">${esc(rotT(t[0]))} (${int(porT.get(t[0]).length)})</option>`).join('')+(temCA?`<option value="ok">✓ Pedidos batendo com a Conta Azul (${int(okRows.length)})</option>`:''); $('inTipoSel').value=PED.inTipo||'';
