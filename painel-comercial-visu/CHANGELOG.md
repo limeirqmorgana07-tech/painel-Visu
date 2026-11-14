@@ -2,6 +2,9 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v108 — 14/11/2026 — Pagamento ou entrega em branco considera o sistema
+- A inconsistência só aparece se o dado falta na planilha e também no painel (mesmo código) e a venda não tem parcelas na Conta Azul.
+
 ## v107 — 13/11/2026 — Metas de faturamento na página Vendas
 - Cadastro das metas anuais (conservadora e alvo) pela ADM; linhas da meta por mês na Evolução mensal e acumulado do ano com barras.
 - Meta do mês usa a conservadora ÷ 12. Cartões de baixo da página Vendas no estilo dos de cima.
