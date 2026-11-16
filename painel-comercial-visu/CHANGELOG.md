@@ -2,6 +2,9 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v111 — 16/11/2026 — Complementar sem hífen
+- Planilha × sistema reconhece código complementar digitado sem hífen (0081020261 → 0008102026-1).
+
 ## v110 — 16/11/2026 — Complementar de pedido Personalizado
 - Complementar que herda o Personalizado do principal vai numa parcela só (Pagamento complementar), vencendo no pagamento final do principal.
 
