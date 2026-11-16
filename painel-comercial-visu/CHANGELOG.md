@@ -2,6 +2,11 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v109 — 16/11/2026 — Cliente novo vai sempre para a Conta Azul
+- Cadastro de cliente no painel sempre cria na Conta Azul; o id devolvido é lido de qualquer formato ou buscado pelo nome.
+- Envio: erro "Cliente da venda não encontrado com o ID informado" → procura pelo nome, cadastra se preciso e reenvia.
+- Ignora clientes inativos/excluídos.
+
 ## v108 — 14/11/2026 — Pagamento ou entrega em branco considera o sistema
 - A inconsistência só aparece se o dado falta na planilha e também no painel (mesmo código) e a venda não tem parcelas na Conta Azul.
 

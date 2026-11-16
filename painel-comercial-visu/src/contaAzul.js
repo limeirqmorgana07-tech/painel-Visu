@@ -155,7 +155,24 @@ export async function criarCliente({ nome, tipo, documento, email, telefone }) {
   if (email) corpo.email = String(email).trim().slice(0, 100);
   if (telefone) corpo.telefone_celular = String(telefone).trim();
   const r = await post('/v1/pessoas', corpo);
-  return { id: r?.id || null, nome: r?.nome || corpo.nome };
+  // v109: o id pode vir em formatos diferentes; se não vier, procura a pessoa recém-criada pelo nome
+  let id = r?.id || r?.uuid || r?.pessoa?.id || r?.data?.id || null;
+  if (!id) id = (await buscarClientePorNome(corpo.nome).catch(() => null))?.id || null;
+  if (!id) throw new Error(`A Conta Azul não devolveu o código do cliente "${corpo.nome}".`);
+  return { id, nome: r?.nome || corpo.nome };
+}
+// v109: procura um cliente ativo pelo nome exato (sem acento/maiúscula) direto na Conta Azul
+const semAc = (s) => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
+export async function buscarClientePorNome(nome) {
+  const k = semAc(nome); if (!k) return null;
+  for (const params of [{ busca: nome }, { nome }, { termo: nome }]) {
+    try {
+      const r = await get('/v1/pessoas', { ...params, pagina: 1, tamanho_pagina: 50 });
+      const ls = listaDe(r).filter((p) => semAc(nomeDe(p) || p.nome) === k && p.ativo !== false && !/inativ|exclu/i.test(String(p.situacao || p.status || '')));
+      if (ls.length) return { id: ls[0].id || ls[0].uuid, nome: nomeDe(ls[0]) || ls[0].nome };
+    } catch { /* tenta o próximo parâmetro */ }
+  }
+  return null;
 }
 
 // Lê todas as páginas de uma listagem
@@ -356,7 +373,7 @@ export async function buscarClientes() {
   for (const [caminho, params] of [['/v1/pessoas', { tipo_perfil: 'Cliente' }], ['/v1/pessoa', { tipo_perfil: 'Cliente' }], ['/v1/pessoas', {}]]) {
     try {
       const lista = await todasAsPaginas(caminho, params, 500, 20);
-      if (lista.length) return lista.map((p) => ({ id: p.id || p.uuid || null, nome: nomeDe(p) || p.nome || '', documento: p.documento || p.cpf || p.cnpj || '', perfis: p.perfis || p.tipo_perfil || '' }))
+      if (lista.length) return lista.filter((p) => p.ativo !== false && !/inativ|exclu/i.test(String(p.situacao || p.status || ''))).map((p) => ({ id: p.id || p.uuid || null, nome: nomeDe(p) || p.nome || '', documento: p.documento || p.cpf || p.cnpj || '', perfis: p.perfis || p.tipo_perfil || '' }))
         .filter((p) => p.nome && (!p.perfis || /client/i.test(JSON.stringify(p.perfis))));
     } catch { /* tenta o próximo caminho */ }
   }

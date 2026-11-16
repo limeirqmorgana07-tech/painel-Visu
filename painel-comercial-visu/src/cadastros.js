@@ -12,6 +12,8 @@ const sem = (s) => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLo
 
 export async function listarCadastros() { return carregar(); }
 
+export async function listarClientes() { return (await carregar()).cliente || []; }
+export async function marcarClienteCA(nome, id) { const d = await carregar(); const it = (d.cliente || []).find((x) => sem(x.nome) === sem(nome)); if (!it || it.ca_id === id) return; it.ca_id = id; it.ca_em = new Date().toISOString(); delete it.ca_erro; await salvarKV(CHAVE, d); }
 export async function incluirCadastro(b, u) {
   const campo = b?.campo;
   if (!CAMPOS_CAD.includes(campo)) throw new Error('Campo inválido.');
@@ -23,7 +25,7 @@ export async function incluirCadastro(b, u) {
   let conta_azul = null;
   if (campo === 'cliente') {
     Object.assign(item, { tipo: b.tipo === 'Física' ? 'Física' : 'Jurídica', documento: String(b.documento || '').trim(), email: String(b.email || '').trim(), telefone: String(b.telefone || '').trim() });
-    if (b.conta_azul && !item.ca_id) {
+    if (!item.ca_id) { // v109: cliente novo vai sempre para a Conta Azul
       if (config.demo) conta_azul = { ok: true, id: 'demo-' + Date.now(), demo: true };
       else if (!(await ca.statusConexao().catch(() => ({}))).conectado) conta_azul = { ok: false, erro: 'A Conta Azul não está conectada: o cliente ficou só no painel.' };
       else {

@@ -4,6 +4,7 @@
 // Só vão os pedidos lançados no painel (os importados da planilha já são lançados na Conta Azul pela equipe).
 // Pedido complementar (código com -1, -2…): vai como venda própria, com o sufixo colado no número (0021112026-1 → 211120261).
 import * as ca from './contaAzul.js';
+import * as cadastros from './cadastros.js';
 import { config } from './config.js';
 import * as pedidos from './pedidos.js';
 
@@ -108,6 +109,7 @@ export async function enviarPedidos(u, { codigos = null } = {}) {
     const clientes = config.demo ? [] : await ca.buscarClientes().catch(() => []);
     const vendedores = config.demo ? [] : await ca.buscarVendedores().catch(() => []);
     const cliPorNome = new Map(clientes.filter((c) => c.id).map((c) => [sem(c.nome), c.id]));
+    const cadPorNome = new Map((await cadastros.listarClientes().catch(() => [])).map((x) => [sem(x.nome), x]));
     const vendPorNome = (n) => { const k = sem(n); if (!k) return null; const v = vendedores.find((x) => sem(x.nome) === k) || vendedores.find((x) => sem(x.nome).split(' ')[0] === k.split(' ')[0]); return v?.id || null; };
     const numerosCA = new Set();
     if (!config.demo) { const de = alvo.map(([, ls]) => ls[0].data).sort()[0]; (await ca.buscarVendas(de, new Date().toISOString().slice(0, 10)).catch(() => [])).forEach((v) => v.numero != null && numerosCA.add(String(v.numero))); }
@@ -126,16 +128,27 @@ export async function enviarPedidos(u, { codigos = null } = {}) {
       try {
         if (numerosCA.has(numero)) { await pedidos.marcarEnvioCA(ids, { ca_venda_id: 'ja-existia', ca_erro: '', ca_obs: 'Já existia venda com este número na Conta Azul' }, u); res.ja_existiam.push(cod); continue; }
         const c = linhas[0];
-        let idCliente = cliPorNome.get(sem(c.cliente));
-        if (!idCliente) {
-          if (config.demo) idCliente = 'demo-cli';
-          else { const novo = await ca.criarCliente({ nome: c.cliente, tipo: c.tipo_venda === 'B2C' ? 'Física' : 'Jurídica' }); idCliente = novo.id; cliPorNome.set(sem(c.cliente), idCliente); }
-        }
+        // v109: cliente novo do painel vai obrigatoriamente para a Conta Azul (com os dados do cadastro do painel)
+        const cad = cadPorNome.get(sem(c.cliente));
+        const novoCliente = async () => { const n = await ca.criarCliente({ nome: c.cliente, tipo: cad?.tipo || (c.tipo_venda === 'B2C' ? 'Física' : 'Jurídica'), documento: cad?.documento, email: cad?.email, telefone: cad?.telefone }); cliPorNome.set(sem(c.cliente), n.id); await cadastros.marcarClienteCA(c.cliente, n.id).catch(() => {}); return n.id; };
+        let idCliente = cliPorNome.get(sem(c.cliente)) || cad?.ca_id || null;
+        if (!idCliente) idCliente = config.demo ? 'demo-cli' : ((await ca.buscarClientePorNome(c.cliente).catch(() => null))?.id || await novoCliente());
         const prodIds = new Map();
         for (const l of linhas) prodIds.set(sem(l.tipo_produto), await produtoId(l.tipo_produto));
         const idCategoria = config.demo ? 'demo-categoria' : await idCategoriaVenda();
         const corpo = corpoVenda(linhas, { idCliente, idVendedor: vendPorNome(c.vendedor), produtoDe: (n) => prodIds.get(sem(n)), idCategoria });
-        const v = config.demo ? { id: 'demo-venda-' + numero } : await ca.criarVenda(corpo);
+        let v;
+        if (config.demo) v = { id: 'demo-venda-' + numero };
+        else {
+          try { v = await ca.criarVenda(corpo); }
+          catch (e) {
+            if (!/cliente/i.test(e.message) || !/n[ãa]o encontrad/i.test(e.message)) throw e;
+            // o código guardado não vale mais na Conta Azul: procura de novo pelo nome; se não existir, cadastra e tenta outra vez
+            cliPorNome.delete(sem(c.cliente));
+            corpo.id_cliente = (await ca.buscarClientePorNome(c.cliente).catch(() => null))?.id || await novoCliente();
+            v = await ca.criarVenda(corpo);
+          }
+        }
         await pedidos.marcarEnvioCA(ids, { ca_venda_id: v.id || 'enviado', ca_enviado_em: new Date().toISOString(), ca_erro: '', ca_total: corpo.condicao_pagamento.parcelas.reduce((s, p) => s + p.valor, 0) }, u);
         res.enviados.push(cod);
       } catch (e) {

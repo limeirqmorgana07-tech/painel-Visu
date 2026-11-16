@@ -1352,8 +1352,9 @@ const nomeMes=(m)=>{const[a,b]=m.split('-');return MES_L[+b-1]+' de '+a};
 const somaMes=(m,n)=>{const[a,b]=m.split('-').map(Number);const d=new Date(Date.UTC(a,b-1+n,1));return d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0')};
 function delta(a,b,inv){ if(!b) return '<span class="delta eq">sem base</span>'; const d=(a-b)/b; const c=Math.abs(d)<.005?'eq':(d>0)!==!!inv?'up':'down'; return `<span class="delta ${c}">${d>0?'▲':d<0?'▼':'■'} ${pct(Math.abs(d))}</span>`; }
 
-const VERSAO='v108';
+const VERSAO='v109';
 const VERSOES=[
+ {v:'v109',data:'16/11/2026',tit:'Cliente novo vai sempre para a Conta Azul',arq:'painel-visu-v109.zip',itens:['Cliente cadastrado no painel é cadastrado na Conta Azul na hora (a opção de não cadastrar saiu), com tipo, CPF/CNPJ, e-mail e telefone.','No envio do pedido, se a Conta Azul responder "Cliente da venda não encontrado com o ID informado", o painel procura o cliente de novo pelo nome; se não achar, cadastra e reenvia a venda sozinho.','Clientes inativos ou excluídos na Conta Azul não são mais usados no envio.','Inclui o ajuste dos complementares (Planilha de vendas e Inconsistências contam igual).']},
  {v:'v108',data:'14/11/2026',tit:'Pagamento ou entrega em branco considera o sistema',arq:'painel-visu-v108.zip',itens:['Inconsistências · Pedido complementar (código-1, -2…) lançado só na Conta Azul conta junto com o pedido principal: se principal + complementar batem com a planilha, nem o complementar nem a diferença aparecem; se não batem, aparece uma linha só com a diferença.','Inconsistências · Pagamento ou entrega em branco: se a forma de pagamento ou o prazo de entrega já estão no pedido do painel com o mesmo código, ou se a venda já tem parcelas na Conta Azul, a linha não aparece mais. No Personalizado, a data do pagamento final (saldo) vale como prazo de entrega. Só sobra o que falta na planilha e também no sistema.']},
  {v:'v107',data:'13/11/2026',tit:'Metas de faturamento na página Vendas',arq:'painel-visu-v107.zip',itens:['Botão 🎯 Metas (ADM) na Evolução mensal para cadastrar a meta conservadora e a meta alvo do ano (padrão: R$ 2 milhões e R$ 3 milhões).','No gráfico mensal, linhas tracejadas da meta por mês: conservadora (verde) e alvo (laranja).','Abaixo do gráfico, o acumulado do ano contra as duas metas, com barra de progresso.','O cartão Meta do mês, no topo, usa a meta conservadora ÷ 12 e mostra a alvo.','Cartões de baixo da página Vendas no mesmo estilo dos de cima.']},
  {v:'v106',data:'13/11/2026',tit:'Financeiro volta a carregar (limite de 365 dias da Conta Azul)',arq:'painel-visu-v106.zip',itens:['A Conta Azul passou a recusar buscas de contas a receber e a pagar com intervalo de vencimento maior que 365 dias, o que derrubava o DRE e as páginas do financeiro. O painel agora busca em blocos de até 365 dias e junta o resultado.']},
@@ -2693,8 +2694,15 @@ function statusCod(cod,tot,mes,ca){
   if(v.s==='CANCELADO') return ['cancelado','Cancelado no sistema'];
   // v89: venda em andamento conta como aprovada (o pedido já é aprovado pelo gestor comercial ao ser lançado; o painel envia como em andamento)
   if(v.s!=='APROVADO'&&v.s!=='FATURADO'&&v.s!=='EM_ANDAMENTO') return ['nao_aprov','Não aprovado no sistema'];
-  return Math.abs((v.t||0)-tot)<=1?['ok','Batendo']:['dif','Valor diferente'];
+  if(Math.abs((v.t||0)-tot)<=1) return ['ok','Batendo'];
+  // v108: pedido complementar (código-1, -2…) lançado só na Conta Azul soma com o principal
+  const cp=compsCA(cod), tC=cp.reduce((x,c)=>x+c.t,0); if(cp.length&&Math.abs((v.t||0)+tC-tot)<=1) return ['ok','Batendo (com complementar)',cp];
+  return ['dif','Valor diferente'];
 }
+// complementares da Conta Azul de um código, que não têm linha própria na planilha nem no painel
+const COMPC={ref:null,cods:null,por:null};
+function compsCA(cod){ const vs=E.dados?.conta_azul?.vendas||[]; if(COMPC.ref!==vs||COMPC.n!==regsPed().length){ const cods=new Set(); (E.dados.linhas||[]).forEach(l=>{ if(l.cd) cods.add(ckey(l.cd)); }); regsPed().forEach(r=>{ if(r.codigo&&!r.excluido) cods.add(ckey(r.codigo)); }); const por=new Map(); vs.forEach(v=>{ if(!['APROVADO','FATURADO','EM_ANDAMENTO'].includes(v.s)) return; const c=codDoNumero(v.n); if(!c.includes('-')||cods.has(ckey(c))) return; const km=ckey(c.split('-')[0]); (por.get(km)||por.set(km,[]).get(km)).push({...v,cod:c}); }); Object.assign(COMPC,{ref:vs,n:regsPed().length,cods,por}); }
+  return COMPC.por.get(ckey(cod))||[]; }
 const ST_CL={ok:'st-ok',dif:'st-dif',so_painel:'st-so',so_sistema:'st-so',cancelado:'st-dif',nao_aprov:'st-so',sem:'st-na',antes:'st-na',semca:'st-na'};
 function pendPed(r){ const p=REQ_PED.filter(c=>!r[c]); if((r.mes||'')>='2026-09'&&!r.codigo) p.push('codigo'); if(/\blote\s*\d/i.test(r.cliente||'')) p.push('cliente'); if(r.possivel_duplicado) p.push('duplicado'); return p; }
 const meuVend=()=>PED.d?.vendedor||'';
@@ -3328,6 +3336,7 @@ function linhasInconsistencias(ls,b,ca,desde,noMes,vendSel,baseTodas){
   if(temCA){
     for(const [k,x] of g){ if((x.mes||'')<desde) continue; let st=statusCod(x.codigo,x.t,x.mes,ca); const v=ca.get(k), base={data:x.data,codigo:x.codigo,cliente:x.cliente,vendedor:x.vendedor||'',total:x.t,_sp:x.regs[0]?._sp}, cp=comps.get(k)||[], tCp=cp.reduce((a,c)=>a+c.t,0);
       if(st[0]==='dif'&&cp.length&&v&&Math.abs(v.t+tCp-x.t)<=1){ st=['ok']; compOk.set(k,{tC:tCp,cp}); }
+      if(st[0]==='ok'&&st[2]) compOk.set(k,{tC:st[2].reduce((q,c)=>q+c.t,0),cp:st[2]});
       if(st[0]==='dif') push('dif',base,{sis:v.t+tCp,dif:v.t+tCp-x.t,falta:'Conta Azul '+brl2(v.t)+(cp.length?' + '+compTxt(cp)+' = '+brl2(v.t+tCp):'')});
       else if(['so_painel','cancelado','nao_aprov'].includes(st[0])) push('soP',base,{sis:v?v.t:'',dif:v?v.t-x.t:'',falta:v?SIT_CA[v.s]||v.s:'não existe na Conta Azul'});
       if(x.mes>=desde&&st[0]!=='dif'){ const ps=parcelasDe(x.codigo); if(ps.length){ const difs=[]; ['pag1','pag2'].forEach((c,i)=>{ const pc=ps[i]; if(!pc) return; const vs=x.regs.map(r=>+r[c]||0).filter(v=>v>0); if(!vs.length) return; const soma=vs.reduce((a,v)=>a+v,0), alvo=pc.pago||pc.valor;
@@ -3487,7 +3496,7 @@ function abrirCadastro(campo,input){ CAD.campo=campo; CAD.input=input; CAD.forca
   $('cadCorpo').innerHTML=`<div class="f"><label for="cadNome">${cli?'Nome do cliente (sem lote)':'Nome'} *</label><input id="cadNome" value="${esc(nome)}" maxlength="200"></div>`+(cli?`
     <div class="dv-f2"><div class="f"><label for="cadTipo">Tipo de pessoa</label><select id="cadTipo"><option>Jurídica</option><option>Física</option></select></div><div class="f"><label for="cadDoc">CNPJ ou CPF</label><input id="cadDoc" inputmode="numeric" placeholder="opcional"></div></div>
     <div class="dv-f2"><div class="f"><label for="cadEmail">E-mail</label><input id="cadEmail" type="email" placeholder="opcional"></div><div class="f"><label for="cadTel">Telefone</label><input id="cadTel" inputmode="tel" placeholder="opcional"></div></div>
-    <label class="dv-chk" style="margin-top:10px;display:flex"><input type="checkbox" id="cadCA" checked> Cadastrar também na Conta Azul</label>`:'');
+    <input type="checkbox" id="cadCA" checked hidden><div class="dica-c" style="margin-top:10px">O cliente é cadastrado no painel <b>e na Conta Azul</b>. Se a Conta Azul estiver fora do ar, ele vai junto com o primeiro pedido.</div>`:'');
   $('cadErro').textContent=''; CAD.fundo=$('pdFundo').hidden; $('cadModal').hidden=false; $('pdFundo').hidden=false; setTimeout(()=>{ const x=$('cadNome'); x.focus(); x.select(); },40); }
 function fecharCadastro(){ $('cadModal').hidden=true; if(CAD.fundo&&$('pdModal').hidden) $('pdFundo').hidden=true; }
 document.addEventListener('click',e=>{ const b=e.target.closest('[data-add]'); if(!b) return; e.preventDefault(); abrirCadastro(b.dataset.add,b.closest('.pl-in')?.querySelector('input')); });
