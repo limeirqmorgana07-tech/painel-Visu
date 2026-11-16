@@ -2,6 +2,9 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v110 — 16/11/2026 — Complementar de pedido Personalizado
+- Complementar que herda o Personalizado do principal vai numa parcela só (Pagamento complementar), vencendo no pagamento final do principal.
+
 ## v109 — 16/11/2026 — Cliente novo vai sempre para a Conta Azul
 - Cadastro de cliente no painel sempre cria na Conta Azul; o id devolvido é lido de qualquer formato ou buscado pelo nome.
 - Envio: erro "Cliente da venda não encontrado com o ID informado" → procura pelo nome, cadastra se preciso e reenvia.

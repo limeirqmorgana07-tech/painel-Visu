@@ -68,6 +68,13 @@ export function corpoVenda(linhas, { idCliente, idVendedor, produtoDe, idCategor
     valor: r2(Number(l.valor_unit) || (Number(l.total) || 0) / (Number(l.quantidade) || 1)),
   }));
   const tp = tipoPagamento(c.forma_pagamento);
+  // v110: pedido complementar herda a condição Personalizado do principal, mas as parcelas são do principal (somam outro valor).
+  // Nesse caso o complementar vai numa parcela só, "Pagamento complementar", com vencimento no pagamento final do principal.
+  let nParc = c.parcelas, pers = c.parcelas_pers;
+  if (/-\d+$/.test(c.codigo) && nParc === 'P') {
+    const ps = (pers || []).filter((p) => p.valor > 0), soma = r2(ps.reduce((a2, p) => a2 + p.valor, 0));
+    if (!ps.length || Math.abs(soma - total) > 0.05) { nParc = 'P'; pers = [{ valor: total, data: ps.length ? ps[ps.length - 1].data || c.data : (c.prazo_entrega || c.data) }]; }
+  }
   const corpo = {
     id_cliente: idCliente,
     numero: pedidos.numeroParaCA(c.codigo),
@@ -75,7 +82,7 @@ export function corpoVenda(linhas, { idCliente, idVendedor, produtoDe, idCategor
     situacao: 'APROVADO',
     data_venda: c.data,
     itens,
-    condicao_pagamento: { opcao_condicao_pagamento: opcaoCondicao(c.parcelas, c.parcelas_pers), parcelas: parcelasPedido(c.parcelas, total, c.data, c.prazo_entrega, c.parcelas_pers), ...(tp ? { tipo_pagamento: tp } : {}) },
+    condicao_pagamento: { opcao_condicao_pagamento: opcaoCondicao(nParc, pers), parcelas: parcelasPedido(nParc, total, c.data, c.prazo_entrega, pers).map((p, i, arr) => (arr.length === 1 && /-\d+$/.test(c.codigo) && c.parcelas === 'P' ? { ...p, descricao: 'Pagamento complementar' } : p)), ...(tp ? { tipo_pagamento: tp } : {}) },
     observacoes: [/-\d+$/.test(c.codigo) ? `Pedido complementar ${c.codigo} (acréscimo ao pedido ${pedidos.codigoBase(c.codigo)}) lançado no Painel de Gestão Visu` : `Pedido ${c.codigo} lançado no Painel de Gestão Visu`, c.nome_pedido ? `Pedido (Trello): ${c.nome_pedido}` : '', c.lote ? `Lote / obs.: ${c.lote}` : '', c.observacao || ''].filter(Boolean).join(' · ').slice(0, 1000),
   };
   if (idVendedor) corpo.id_vendedor = idVendedor;
