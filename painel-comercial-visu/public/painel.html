@@ -2455,7 +2455,7 @@ function pgConciliacao(){
   const mesmoCli=(x,y)=>{ x=kc(x); y=kc(y); if(!x||!y) return false; if(x===y||x.startsWith(y+' ')||y.startsWith(x+' ')) return true; const wa=x.split(' '), wb=y.split(' '); return wa.length>1&&wb.length>1&&wa[0]===wb[0]&&wa[1]===wb[1]; };
   const dias=(x,y)=>Math.round((Date.parse(x)-Date.parse(y))/864e5);
   const porNum=new Map(); caD.vendas.forEach(v=>{ if(v.n==null) return; const k=ckey(cbase(codDoNumero(v.n))), j=porNum.get(k); if(!j) porNum.set(k,v); else if(EF.includes(v.s)&&v.d.slice(0,7)===j.d.slice(0,7)) porNum.set(k,{...j,t:j.t+v.t}); });
-  const pedPl=new Map(); plMes(m).forEach(l=>{ const cod=l.cd?cbase(codDoNumero(l.cd)||l.cd):''; // v111: complementar digitado sem hífen (0081020261 = 0008102026-1) casa com o pedido principal const k=cod?'c'+ckey(cod):'n'+kc(l.c)+'|'+(l.d||l.m); const g=pedPl.get(k)||{cod,cli:l.c,d:l.d||'',v:l.v,t:0,n:0}; if(l.d&&(!g.d||l.d<g.d)) g.d=l.d; g.t+=l.t; g.n++; pedPl.set(k,g); });
+  const pedPl=new Map(); plMes(m).forEach(l=>{ const cod=l.cd?cbase(codDoNumero(l.cd)||l.cd):''; /* v111: complementar digitado sem hífen (0081020261 = 0008102026-1) casa com o pedido principal */ const k=cod?'c'+ckey(cod):'n'+kc(l.c)+'|'+(l.d||l.m); const g=pedPl.get(k)||{cod,cli:l.c,d:l.d||'',v:l.v,t:0,n:0}; if(l.d&&(!g.d||l.d<g.d)) g.d=l.d; g.t+=l.t; g.n++; pedPl.set(k,g); });
   const codsPlMes=new Set([...pedPl.values()].filter(g=>g.cod).map(g=>ckey(g.cod)));
   const janela3=[somaMes(m,-1),m,somaMes(m,1)].flatMap(mm=>caMes(mm));
   const usadas=new Set(), R={ok:[],dif:[],outro:[],and:[],canc:[],nao:[],soS:[],sisOutro:[]};
