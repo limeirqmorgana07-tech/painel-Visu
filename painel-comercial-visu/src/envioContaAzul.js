@@ -144,6 +144,7 @@ export async function enviarPedidos(u, { codigos = null } = {}) {
         for (const l of linhas) prodIds.set(sem(l.tipo_produto), await produtoId(l.tipo_produto));
         const idCategoria = config.demo ? 'demo-categoria' : await idCategoriaVenda();
         const corpo = corpoVenda(linhas, { idCliente, idVendedor: vendPorNome(c.vendedor), produtoDe: (n) => prodIds.get(sem(n)), idCategoria });
+        { const errados = linhas.map((i, k) => [k + 1, pedidos.totalErrado(i)]).filter((x) => x[1]); if (errados.length) throw new Error('Corrigir no painel antes de enviar: ' + errados.map(([k, m]) => `item ${k}: ${m}`).join('; ') + '.'); }
         let v;
         if (config.demo) v = { id: 'demo-venda-' + numero };
         else {

@@ -31,6 +31,8 @@ export const CAMPOS_VALOR = ['data', 'codigo', 'tipo_produto', 'material', 'espe
 export const OBRIG_CAB = { data: 'Data da venda', cliente: 'Cliente', nome_pedido: 'Nome do pedido (Trello)', vendedor: 'Vendedor', tipo_venda: 'Tipo de venda', novo_recompra: 'Novo ou recompra', segmento: 'Segmento', forma_pagamento: 'Forma de pagamento', parcelas: 'Parcelas', prazo_entrega: 'Prazo de entrega' };
 export const OBRIG_ITEM = { tipo_produto: 'Tipo de produto', material: 'Material', especificacao: 'Especificação', cor: 'Cor', quantidade: 'Quantidade', valor_unit: 'Valor/und' };
 const vazioObrig = (r, c) => { const v = r?.[c]; return v == null || v === '' || ((c === 'quantidade' || c === 'valor_unit') && !(Number(v) > 0)); };
+// v113: o total do item precisa ser quantidade × valor/und — a Conta Azul recusa a venda quando não bate ("A soma das parcelas não corresponde ao valor total")
+export function totalErrado(r) { const q = Number(r?.quantidade) || 0, vu = Number(r?.valor_unit) || 0, t = Number(r?.total) || 0; if (!(q > 0 && vu > 0 && t > 0)) return ''; const c = Math.round(q * vu * 100) / 100; return Math.abs(c - t) > 0.05 ? `o total R$ ${t.toFixed(2).replace('.', ',')} não bate com ${q} × R$ ${vu.toFixed(2).replace('.', ',')} = R$ ${c.toFixed(2).replace('.', ',')}. Corrija a quantidade, o valor/und ou o total` : ''; }
 export function faltandoObrig(r) { return [...Object.keys(OBRIG_CAB), ...Object.keys(OBRIG_ITEM)].filter((c) => vazioObrig(r, c)).map((c) => OBRIG_CAB[c] || OBRIG_ITEM[c]); }
 // campos financeiros e de premiação: a gestão atualiza mesmo em pedido antigo incompleto
 const CAMPOS_FIN = ['pag1', 'data_pag1', 'pag2', 'data_pag2', 'pag3', 'banco_pag', 'pago_100', 'pagador', 'observacao', 'pct_premiacao', 'mes_premiacao', 'obs_premiacao', 'frete', 'parcelas_pers'];
@@ -345,7 +347,7 @@ export async function criarPedido(corpo, u) {
   if (!regs.length) throw new Error('Inclua pelo menos um item (tipo de produto, quantidade e valor).');
   const faltaCab = Object.keys(OBRIG_CAB).filter((c) => vazioObrig(regs[0], c)).map((c) => OBRIG_CAB[c]);
   if (faltaCab.length) throw new Error('Preencha os campos obrigatórios do pedido: ' + faltaCab.join(', ') + '.');
-  regs.forEach((r, k) => { const f = Object.keys(OBRIG_ITEM).filter((c) => vazioObrig(r, c)).map((c) => OBRIG_ITEM[c]); if (f.length) throw new Error(`Item ${k + 1}: preencha ${f.join(', ')}.`); });
+  regs.forEach((r, k) => { const f = Object.keys(OBRIG_ITEM).filter((c) => vazioObrig(r, c)).map((c) => OBRIG_ITEM[c]); if (f.length) throw new Error(`Item ${k + 1}: preencha ${f.join(', ')}.`); const te = totalErrado(r); if (te) throw new Error(`Item ${k + 1}: ${te}.`); });
   regs.forEach((r) => mem.set(r.id, r));
   await gravar(regs);
   await registrarLog(regs.map((r) => ({ ...quem(u), acao: complementoDe ? 'complemento' : 'criou', registro: r.id, codigo: r.codigo, cliente: r.cliente,
@@ -370,6 +372,7 @@ export async function alterar(id, mudancas, u) {
     const t = r2(novo.quantidade * novo.valor_unit); if (t !== r.total) { novo.total = t; log.push({ campo: 'total', antes: r.total, depois: t }); }
   }
   if (!log.length) return r;
+  if (r.origem === 'painel' && log.some((x) => ['quantidade', 'valor_unit', 'total'].includes(x.campo))) { const te = totalErrado(novo); if (te) throw new Error('Não salvei: ' + te + '.'); }
   const apagou = log.filter((x) => (OBRIG_CAB[x.campo] || OBRIG_ITEM[x.campo]) && vazioObrig(novo, x.campo));
   if (apagou.length) throw new Error(`${apagou.map((x) => OBRIG_CAB[x.campo] || OBRIG_ITEM[x.campo]).join(', ')}: campo obrigatório, não pode ficar em branco.`);
   if (r.origem === 'painel' && log.some((x) => !CAMPOS_FIN.includes(x.campo))) { const f = faltandoObrig(novo); if (f.length) throw new Error('Para salvar, complete os campos obrigatórios desta linha: ' + f.join(', ') + '.'); }

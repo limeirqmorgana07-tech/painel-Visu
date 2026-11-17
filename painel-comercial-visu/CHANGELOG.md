@@ -2,6 +2,10 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v113 — 17/11/2026 — Total do item = quantidade × valor
+- Validação ao criar/alterar pedido do painel e mensagem clara no envio.
+- CA ! só com valor diferente da Conta Azul.
+
 ## v112 — 17/11/2026 — Proteção dos dados nas atualizações
 - lerKV/salvarKV com banco configurado esperam o banco (até ~30 s) e lançam erro em vez de cair para arquivo/padrão.
 - Memórias (config de pedidos, usuários, cadastros, receber, divergências, extrato, acessos, vendedores) não guardam padrão quando a leitura falha.
