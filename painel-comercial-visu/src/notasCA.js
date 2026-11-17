@@ -24,7 +24,7 @@ function nota(it) {
   };
 }
 
-async function lerCache() { if (!cache) cache = (await lerKV(CHAVE).catch(() => null)) || { por_venda: {} }; return cache; }
+async function lerCache() { if (!cache) cache = (await lerKV(CHAVE)) || { por_venda: {} }; return cache; }
 
 // mapa código do pedido (sem zeros) → nota, para a Planilha de vendas
 export async function notasPorCodigo() {

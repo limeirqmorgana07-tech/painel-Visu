@@ -29,7 +29,7 @@ const limpo = (u) => ({ id: u.id, nome: u.nome, email: u.email || '', perfil: u.
 let cache = null;
 async function carregar() {
   if (cache) return cache;
-  let lista = await lerKV(CHAVE).catch(() => null);
+  let lista = await lerKV(CHAVE);
   if (!Array.isArray(lista)) {
     let base = INICIAIS;
     try { if (process.env.USUARIOS_JSON) base = JSON.parse(process.env.USUARIOS_JSON); } catch { console.warn('USUARIOS_JSON inválido; usando os perfis iniciais.'); }

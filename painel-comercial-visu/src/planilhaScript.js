@@ -8,7 +8,7 @@ import { lerKV, salvarKV } from './tokenStore.js';
 const CHAVE_KV = 'planilha_script';
 let memo = null; // { url, chave, ligado_em, por }
 
-export async function carregarScript() { if (!memo) memo = (await lerKV(CHAVE_KV).catch(() => null)) || {}; return memo; }
+export async function carregarScript() { if (!memo) memo = (await lerKV(CHAVE_KV)) || {}; return memo; }
 export const scriptConfigurado = () => !!(memo?.url && memo?.chave);
 export async function chaveScript() {
   await carregarScript();

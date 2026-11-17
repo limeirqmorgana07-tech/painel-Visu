@@ -168,7 +168,7 @@ lerKV('perfis_paginas').then(async (o) => {
   definirPerfis(o);
   // v97: tudo o que está marcado no perfil passa a valer para cada pessoa do perfil (as listas antigas, salvas pessoa a pessoa,
   // escondiam páginas marcadas depois no perfil, como Planilha de vendas e Treinamento para os diretores). Exclusões por pessoa se refazem em Permissões.
-  if (!(await lerKV('migr_paginas_v97').catch(() => null))) {
+  if (!(await lerKV('migr_paginas_v97').catch(() => 'sem-banco'))) {
     const n = await usuarios.ajustarPaginas((u) => { if (u.perfil === 'adm' || !Array.isArray(u.paginas)) return undefined; const base = padraoDe(u.perfil); const novas = base.filter((p) => !u.paginas.includes(p)); return novas.length ? [...u.paginas, ...novas] : undefined; }).catch(() => 0);
     await salvarKV('migr_paginas_v97', { em: new Date().toISOString(), n });
   }
@@ -183,6 +183,20 @@ app.post('/api/blocos', exigeAdm, async (req, res) => {
   res.json({ ok: true, perfil, blocos: blocosDe(perfil) });
 });
 lerKV('perfis_blocos').then((o) => definirBlocos(o)).catch(() => {});
+// v112: restaura a fonte combinada (planilha até outubro + pedidos do painel a partir de novembro), apagada por uma leitura do banco
+// que falhou num reinício. Também devolve a lista de WhatsApp da aprovação se ela tiver sumido. Roda uma vez.
+(async function restaurarFonteV112(t = 0) {
+  try {
+    if (await lerKV('migr_fonte_v112')) return;
+    const c = (await lerKV('pedidos_config')) || {};
+    const novo = {};
+    if (c.fonte !== 'misto' && c.fonte !== 'painel') { novo.fonte = 'misto'; novo.corte = c.corte || '2026-11'; }
+    if (!Array.isArray(c.whatsapp_aprovacao) || !c.whatsapp_aprovacao.length) novo.whatsapp_aprovacao = [{ nome: 'Egberto', numero: '83999344532' }, { nome: 'Adriano', numero: '83996274796' }, { nome: 'Murilo', numero: '83988094522' }];
+    if (Object.keys(novo).length) await pedidos.salvarConfigPedidos(novo, { nome: 'Restauração automática (v112)' });
+    await salvarKV('migr_fonte_v112', { em: new Date().toISOString(), antes: { fonte: c.fonte || null, corte: c.corte || null }, mudou: Object.keys(novo) });
+    if (Object.keys(novo).length) console.log('[v112] fonte restaurada:', JSON.stringify(novo));
+  } catch (e) { if (t < 20) setTimeout(() => restaurarFonteV112(t + 1), 30e3); else console.warn('[v112] não restaurou a fonte:', e.message); }
+})();
 
 // faixas de comissão: o ADM define (vale para todos); null volta ao padrão da especificação
 app.get('/api/comissao', exigeLogin, async (req, res) => res.json({ faixas: await faixasComissao(), padrao: FAIXAS_PADRAO() }));
@@ -391,7 +405,7 @@ app.get('/api/vendas', exigeLogin, async (req, res) => {
 // Não vendedores apontados na revisão de 22/10/2026 (Tiago): entram como inativos uma única vez; o ADM pode reativar.
 const NAO_VENDEDORES_PADRAO = ['Tiago - Financeiro', 'Escritório BPO', 'Morgana Limeira', 'Anderson Alves', 'Visu'];
 app.get('/api/vendedores', exigeLogin, async (req, res) => {
-  let cfg = (await lerKV('vendedores_config').catch(() => null)) || { inativos: [] };
+  let cfg = (await lerKV('vendedores_config')) || { inativos: [] };
   if (!cfg.revisao_2210) {
     const ja = new Set((cfg.inativos || []).map((x) => String(x).toLowerCase()));
     cfg = { ...cfg, inativos: [...(cfg.inativos || []), ...NAO_VENDEDORES_PADRAO.filter((x) => !ja.has(x.toLowerCase()))], revisao_2210: true };

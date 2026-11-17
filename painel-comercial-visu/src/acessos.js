@@ -3,7 +3,7 @@
 import { banco, lerKV, salvarKV } from './tokenStore.js';
 
 let tabelaOk = false, mem = null, memP = null;
-const carregarMem = async () => { if (!mem) mem = await (memP ||= lerKV('acessos').then((x) => x || []).catch(() => [])); return mem; };
+const carregarMem = async () => { if (!mem) mem = await (memP ||= lerKV('acessos').then((x) => x || []).catch((e) => { memP = null; throw e; })); return mem; };
 const recente = new Map(); // anti-repetição: mesma pessoa + mesmo evento em pouco tempo conta uma vez
 async function tabela() {
   const p = await banco().catch(() => null);

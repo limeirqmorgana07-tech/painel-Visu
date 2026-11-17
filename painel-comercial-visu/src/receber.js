@@ -18,7 +18,7 @@ function semente() {
 }
 
 export async function lerGestao() {
-  if (!memo) memo = (await lerKV(CHAVE).catch(() => null)) || semente();
+  if (!memo) memo = (await lerKV(CHAVE)) || semente();
   return memo;
 }
 

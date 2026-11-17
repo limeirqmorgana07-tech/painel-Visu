@@ -20,7 +20,7 @@ const estados = new Map();
 
 export async function carregarGoogle() {
   if (memo) return memo;
-  memo = (await lerKV(CHAVE).catch(() => null)) || null;
+  memo = (await lerKV(CHAVE)) || null;
   return memo;
 }
 export const googleConectado = () => !!memo?.refresh_token;

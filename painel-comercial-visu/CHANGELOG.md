@@ -2,6 +2,12 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v112 — 17/11/2026 — Proteção dos dados nas atualizações
+- lerKV/salvarKV com banco configurado esperam o banco (até ~30 s) e lançam erro em vez de cair para arquivo/padrão.
+- Memórias (config de pedidos, usuários, cadastros, receber, divergências, extrato, acessos, vendedores) não guardam padrão quando a leitura falha.
+- /api/vendas não usa mais a fonte padrão quando a configuração não foi lida.
+- Migração única restaura fonte misto (corte 2026-11) e lista de WhatsApp da aprovação.
+
 ## v111 — 16/11/2026 — Complementar sem hífen
 - Planilha × sistema reconhece código complementar digitado sem hífen (0081020261 → 0008102026-1).
 

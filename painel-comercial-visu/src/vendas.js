@@ -242,7 +242,7 @@ async function buscarFontes() {
       avisos.push(`Planilha indisponível (${e.message}). Mostrando as vendas da Conta Azul.`);
     }
   }
-  await prepararFonte().catch(() => {});
+  await prepararFonte(); // v112: sem a configuração e os pedidos do painel os números sairiam errados (só planilha): melhor mostrar o erro e tentar de novo
   return { origem, base, vendasCA, vendedoresCA, avisos, conectadoCA };
 }
 

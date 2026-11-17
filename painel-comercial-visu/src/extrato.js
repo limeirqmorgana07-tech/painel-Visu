@@ -7,7 +7,7 @@ import { sem, numero, dataISO, lerCSV } from './planilha.js';
 
 const CHAVE = 'extratos';
 let memo = null; // { contas: { [conta]: { lancamentos: [...], arquivos: [...] } } }
-async function carregar() { if (!memo) memo = (await lerKV(CHAVE).catch(() => null)) || { contas: {} }; return memo; }
+async function carregar() { if (!memo) memo = (await lerKV(CHAVE)) || { contas: {} }; return memo; }
 const r2 = (v) => Math.round((Number(v) || 0) * 100) / 100;
 const id = (...p) => crypto.createHash('sha1').update(p.join('|')).digest('hex').slice(0, 16);
 

@@ -77,7 +77,7 @@ export const SEMENTE = () => ({
 });
 
 export async function lerDivergencias() {
-  if (!memo) memo = (await lerKV(CHAVE).catch(() => null)) || SEMENTE();
+  if (!memo) memo = (await lerKV(CHAVE)) || SEMENTE();
   return memo;
 }
 

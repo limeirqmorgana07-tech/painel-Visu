@@ -127,7 +127,7 @@ async function recuperarObsCliente() {
 // v93: pedido 0044112026 (R$ 3.750) tinha parcelas personalizadas somando R$ 1.100 e não subiu para a Conta Azul.
 // Combinado com a Visu em 11/11/2026: entrada = R$ 1.100 (na data da 1ª parcela lançada) e pagamento final = o resto, no prazo de entrega.
 async function corrigir0044() {
-  if (await lerKV('migr_0044_v93').catch(() => null)) return 0;
+  if (await lerKV('migr_0044_v93').catch(() => 'sem-banco')) return 0;
   const ls = [...mem.values()].filter((r) => !r.excluido && String(r.codigo || '').replace(/^0+/, '') === '44112026' && r.origem === 'painel');
   const r0 = ls[0], total = r2(ls.reduce((a, r) => a + (Number(r.total) || 0), 0)), pers = r0?.parcelas_pers || [];
   const soma = r2(pers.reduce((a, p) => a + (Number(p.valor) || 0), 0));
@@ -144,7 +144,7 @@ async function corrigir0044() {
   return novos.length;
 }
 async function limparPct0() {
-  if (await lerKV('migr_pct0_v63').catch(() => null)) return 0;
+  if (await lerKV('migr_pct0_v63').catch(() => 'sem-banco')) return 0;
   const alvo = [...mem.values()].filter((r) => r.pct_premiacao === 0);
   const novos = alvo.map((r) => ({ ...r, pct_premiacao: null, alterado_em: agoraISO(), alterado_por: 'Correção premiação 0%' }));
   for (const n of novos) mem.set(n.id, n);
@@ -230,7 +230,7 @@ export async function historico({ codigo, usuario, acao, dias = 90, limite = 300
 
 // ---------- configuração: de onde os indicadores leem as vendas ----------
 let cfgMem = null;
-export async function configPedidos() { if (!cfgMem) cfgMem = (await lerKV('pedidos_config').catch(() => null)) || { fonte: 'planilha' }; return cfgMem; }
+export async function configPedidos() { if (!cfgMem) cfgMem = (await lerKV('pedidos_config')) || { fonte: 'planilha' }; return cfgMem; }
 export async function salvarConfigPedidos(c, usuario) {
   cfgMem = { ...(await configPedidos()), ...c, atualizado_em: agoraISO(), por: usuario?.nome || '' };
   await salvarKV('pedidos_config', cfgMem);
@@ -242,7 +242,7 @@ export const fontePainel = () => cfgMem?.fonte === 'painel' && !!mem && [...mem.
 export const fonteMista = () => (cfgMem?.fonte === 'misto' ? cfgMem.corte || '2026-11' : null);
 // enquanto a planilha do Google estiver em uso (até a gestão encerrar), as vendas lançadas nela depois do corte também entram no painel
 export const planilhaEmUso = () => !cfgMem?.planilha_encerrada;
-export async function prepararFonte() { await configPedidos(); await carregar().catch(() => {}); }
+export async function prepararFonte() { await configPedidos(); await carregar(); }
 export function linhasDoPainel() {
   return [...(mem?.values() || [])].filter((r) => !r.excluido && (r.total || r.quantidade)).map((r) => ({
     linha: r.linha_planilha || null, do_painel: true, pct_premiacao: r.pct_premiacao ?? null, mes_premiacao: r.mes_premiacao || '', obs_premiacao: r.obs_premiacao || '', data: r.data, mes: r.mes || (r.data || '').slice(0, 7), cliente: r.cliente || 'Sem cliente',
@@ -642,7 +642,7 @@ export async function importar({ de = '2026-01', ate = '9999-12', modo = 'novas'
 
 // ---------- pagamentos da Conta Azul (1º e 2º pagamento pelo código do pedido) ----------
 const pag = { quando: 0, dados: null, carregando: null, baixas: null, fila: Promise.resolve(), pendentes: 0 };
-async function cacheBaixas() { if (!pag.baixas) pag.baixas = (await lerKV('baixas_parcelas').catch(() => null)) || {}; return pag.baixas; }
+async function cacheBaixas() { if (!pag.baixas) pag.baixas = (await lerKV('baixas_parcelas')) || {}; return pag.baixas; }
 function agendarBaixas(parcelas) {
   const c = pag.baixas;
   const faltam = parcelas.filter((p) => p.pago > 0 && !c[p.id] && !String(p.id).startsWith('pc-')).slice(0, 300);

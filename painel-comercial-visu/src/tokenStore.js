@@ -35,6 +35,17 @@ async function db() {
 }
 // acesso direto ao Postgres (null sem DATABASE_URL), para tabelas próprias como a de pedidos
 export const banco = () => db();
+// v112: com banco configurado, ler/gravar dados do painel NUNCA cai para arquivo nem para valores padrão.
+// Antes, se o banco demorasse a responder logo depois de uma atualização (reinício), o painel lia "vazio", usava o padrão
+// (ex.: fonte só planilha, sem corte de novembro) e depois gravava esse padrão por cima do que estava salvo.
+async function dbObrigatorio() {
+  if (!limparUrl(config.databaseUrl)) return null;
+  for (let i = 0; i < 5; i++) {
+    const p = await db(); if (p) return p;
+    falhouEm = 0; await new Promise((r) => setTimeout(r, 2000 * (i + 1)));
+  }
+  throw new Error('Banco de dados indisponível no momento. Nada foi alterado: tente de novo em instantes.');
+}
 export async function statusBanco() { const p = await db(); return { configurado: !!limparUrl(config.databaseUrl), conectado: !!p, erro: erroBanco || null }; }
 
 export async function lerToken() {
@@ -72,7 +83,7 @@ export async function apagarToken() {
 
 // Armazenamento genérico (ex.: cache dos itens das vendas, para não buscar tudo de novo a cada reinício)
 export async function lerKV(chave) {
-  const p = await db();
+  const p = await dbObrigatorio();
   if (p) {
     const r = await p.query('SELECT dados FROM painel_kv WHERE chave = $1', [chave]);
     return r.rows[0]?.dados ?? null;
@@ -81,7 +92,7 @@ export async function lerKV(chave) {
 }
 
 export async function salvarKV(chave, dados) {
-  const p = await db();
+  const p = await dbObrigatorio();
   if (p) {
     await p.query(`INSERT INTO painel_kv (chave, dados, atualizado_em) VALUES ($1, $2, now())
       ON CONFLICT (chave) DO UPDATE SET dados = EXCLUDED.dados, atualizado_em = now()`, [chave, JSON.stringify(dados)]);

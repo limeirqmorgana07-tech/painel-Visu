@@ -7,7 +7,7 @@ import { config } from './config.js';
 const CHAVE = 'cadastros_novos';
 export const CAMPOS_CAD = ['cliente', 'tipo_produto', 'material', 'cor'];
 let memo = null;
-async function carregar() { if (!memo) memo = (await lerKV(CHAVE).catch(() => null)) || {}; for (const c of CAMPOS_CAD) memo[c] ||= []; return memo; }
+async function carregar() { if (!memo) memo = (await lerKV(CHAVE)) || {}; for (const c of CAMPOS_CAD) memo[c] ||= []; return memo; }
 const sem = (s) => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/\s+/g, ' ').trim();
 
 export async function listarCadastros() { return carregar(); }
