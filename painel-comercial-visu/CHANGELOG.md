@@ -2,6 +2,9 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v115 — 17/11/2026 — Receber e pagar no estilo Conta Azul
+- Cartões vencidos/hoje/a vencer/realizado/total e fluxo projetado com períodos diário a anual no topo das páginas.
+
 ## v114 — 17/11/2026 — Patrocínio (peças doadas) no pedido
 - Campo patrocinio_qtd por item; total = (qtd − patrocínio) × valor; Conta Azul recebe desconto (composicao_de_valor.desconto VALOR).
 - Vendedor: patrocínio fica pendente em Aprovações e o pedido não é enviado até a gestão aprovar; recusa zera o patrocínio e recalcula o total.
