@@ -2,6 +2,12 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v116 — 17/11/2026 — Notas fiscais no lugar dos pedidos duplicados
+- NF 184 (BDP Supermercado, venda 7409202623, R$ 23.630, 10/10) substitui 0088092026, 0007102026 e 0019102026.
+- NF 183 (Maria Edhuarda, venda 7409202622, R$ 4.034, 10/10) substitui 0085092026.
+- Produtos dos pedidos substituídos ficam no mix com data, número e valor da nota; sem as linhas na planilha, a NF entra pela Conta Azul.
+- 7409202623 deixa de ser lida como complementar -23 do 0074092026.
+
 ## v115 — 17/11/2026 — Receber e pagar no estilo Conta Azul
 - Cartões vencidos/hoje/a vencer/realizado/total e fluxo projetado com períodos diário a anual no topo das páginas.
 

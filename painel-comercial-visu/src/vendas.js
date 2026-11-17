@@ -288,6 +288,26 @@ async function montar(bruto) {
     if (itensCache.pendentes) avisos.push(`Buscando os produtos de ${itensCache.pendentes} vendas na Conta Azul. O mix de produtos se completa nos próximos minutos.`);
   }
 
+  // v116: nota fiscal que consolida pedidos da planilha (regra da gestão em 17/11/2026: "se houve nota no mesmo valor não há
+  // necessidade de estar em duplicidade"). Os pedidos substituídos saem; vale a NF da Conta Azul (data, número e valor da nota).
+  const nfs = await notasSubstitutas();
+  if (base?.linhas && nfs.length) {
+    const porNum = new Map((vendasCA || []).filter((v) => EFETIVAS.has(v.situacao)).map((v) => [chaveCodigo(v.numero), v]));
+    let resto = base.linhas;
+    for (const nf of nfs) {
+      const cods = new Set(nf.codigos.map(chaveCodigo)), v = porNum.get(chaveCodigo(nf.numero));
+      const subst = resto.filter((l) => cods.has(chaveCodigo(l.codigo_pedido || l.codigo || '')));
+      if (!subst.length && !v) continue;
+      resto = resto.filter((l) => !subst.includes(l));
+      const data = v?.data || nf.data, total = v ? v.total : nf.total, mes = data.slice(0, 7);
+      const marca = { data, mes, codigo_pedido: String(nf.numero), pedido: String(nf.numero), pedido_informado: true, nf: nf.nf, nf_de: nf.codigos.join(', '), cliente: clienteBase(v?.cliente || nf.cliente), cliente_original: v?.cliente || nf.cliente, do_painel: false, linha: undefined, pos_corte: false, duplicado: false };
+      const soma = subst.reduce((s2, l) => s2 + (Number(l.total) || 0), 0);
+      if (subst.length) { const f = soma && total ? total / soma : 1; resto.push(...subst.map((l) => ({ ...l, ...marca, total: (Number(l.total) || 0) * f }))); }
+      else resto.push({ ...marca, vendedor: v.vendedor || 'Sem vendedor', tipo_venda: '—', novo_recompra: '', pag1: 0, pag2: 0, pago_100: true, forma_pagamento: '', prazo_entrega: '', segmento: '', tipo_produto: '', material: '', especificacao: '', cor: '', produto: '', quantidade: 0, total });
+    }
+    base = { ...base, linhas: resto };
+    if (soPlanilha) { const fora = new Set(nfs.flatMap((n) => n.codigos.map(chaveCodigo))); soPlanilha = soPlanilha.filter((l) => !fora.has(chaveCodigo(l.codigo_pedido || l.codigo || ''))); }
+  }
   const linhas = base.linhas.filter((l) => l.total || l.quantidade);
   // novo × recompra em branco: o painel preenche pela carteira (cliente que já comprou antes = recompra; 1ª compra = novo).
   // A planilha do Google recebe o mesmo valor pelo botão "Preencher novo × recompra" e nos horários automáticos.
@@ -316,6 +336,7 @@ async function montar(bruto) {
     detalhe_desde: detalheCaDesde(),
     nr_fonte: origem === 'planilha' && base.mapa?.nr_tratado ? (base.mapa?.tratamento === 'painel' ? 'painel' : 'tratada') : undefined,
     de_para: origem === 'planilha' ? base.mapa?.de_para || null : null,
+    notas_fiscais: nfs.map((n) => ({ n: String(n.numero), nf: n.nf, de: n.codigos })),
     conta_azul_conectada: !!bruto.conectadoCA,
     modo_demo: !!config.demo,
     credenciais_conta_azul: !!(config.clientId && config.clientSecret),
@@ -343,6 +364,7 @@ async function montar(bruto) {
       ...(l.cliente_original && l.cliente_original !== l.cliente ? { co: l.cliente_original } : {}),
       ...(l.duplicado ? { du: 1 } : {}),
       ...(l.pos_corte ? { pv: 1 } : {}),
+      ...(l.nf ? { nf: l.nf, nfd: l.nf_de } : {}),
       ...(l.lote ? { lo: l.lote } : {}),
       ...(l.pct_premiacao != null ? { pp: l.pct_premiacao, op: l.obs_premiacao || '' } : {}),
       ...(l.mes_premiacao && l.mes_premiacao !== l.mes ? { mp: l.mes_premiacao, op: l.obs_premiacao || '' } : {}),
@@ -356,6 +378,19 @@ async function montar(bruto) {
       : null,
     qualidade: q,
   };
+}
+
+// v116: notas fiscais que substituem pedidos da planilha (a lista pode crescer pela configuração "notas_substitutas")
+const NF_PADRAO = [
+  { numero: '7409202623', nf: '184', cliente: 'BDP SUPERMERCADO', data: '2026-10-10', total: 23630, codigos: ['0088092026', '0007102026', '0019102026'] },
+  { numero: '7409202622', nf: '183', cliente: 'Maria Edhuarda da Costa Ferreira', data: '2026-10-10', total: 4034, codigos: ['0085092026'] },
+];
+async function notasSubstitutas() {
+  const c = await configPedidos().catch(() => ({}));
+  const extra = Array.isArray(c.notas_substitutas) ? c.notas_substitutas.filter((n) => n?.numero && Array.isArray(n.codigos)) : [];
+  const m = new Map(NF_PADRAO.map((n) => [chaveCodigo(n.numero), n]));
+  extra.forEach((n) => m.set(chaveCodigo(n.numero), { ...m.get(chaveCodigo(n.numero)), ...n }));
+  return [...m.values()];
 }
 
 export async function dadosDeVendas(forcar = false) {
