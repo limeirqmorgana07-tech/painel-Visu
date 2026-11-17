@@ -61,6 +61,8 @@ export async function idCategoriaVenda() {
 export function corpoVenda(linhas, { idCliente, idVendedor, produtoDe, idCategoria }) {
   const c = linhas[0];
   const total = r2(linhas.reduce((s, l) => s + (Number(l.total) || r2((Number(l.quantidade) || 0) * (Number(l.valor_unit) || 0))), 0));
+  // v114: peças de patrocínio vão no item (quantidade cheia) e o valor delas vira desconto da venda
+  const desconto = r2(linhas.reduce((s, l) => s + (Number(l.patrocinio_qtd) || 0) * (Number(l.valor_unit) || 0), 0));
   const itens = linhas.map((l) => ({
     id: produtoDe(l.tipo_produto),
     descricao: [l.tipo_produto, l.material, l.cor, l.especificacao].filter(Boolean).join(' · ').slice(0, 250),
@@ -85,6 +87,7 @@ export function corpoVenda(linhas, { idCliente, idVendedor, produtoDe, idCategor
     condicao_pagamento: { opcao_condicao_pagamento: opcaoCondicao(nParc, pers), parcelas: parcelasPedido(nParc, total, c.data, c.prazo_entrega, pers).map((p, i, arr) => (arr.length === 1 && /-\d+$/.test(c.codigo) && c.parcelas === 'P' ? { ...p, descricao: 'Pagamento complementar' } : p)), ...(tp ? { tipo_pagamento: tp } : {}) },
     observacoes: [/-\d+$/.test(c.codigo) ? `Pedido complementar ${c.codigo} (acréscimo ao pedido ${pedidos.codigoBase(c.codigo)}) lançado no Painel de Gestão Visu` : `Pedido ${c.codigo} lançado no Painel de Gestão Visu`, c.nome_pedido ? `Pedido (Trello): ${c.nome_pedido}` : '', c.lote ? `Lote / obs.: ${c.lote}` : '', c.observacao || ''].filter(Boolean).join(' · ').slice(0, 1000),
   };
+  if (desconto > 0) { corpo.composicao_de_valor = { frete: 0, desconto: { tipo: 'VALOR', valor: desconto } }; corpo.observacoes += ` · Patrocínio: ${linhas.reduce((s, l) => s + (Number(l.patrocinio_qtd) || 0), 0)} peças doadas (desconto R$ ${desconto.toFixed(2).replace('.', ',')})`; }
   if (idVendedor) corpo.id_vendedor = idVendedor;
   if (idCategoria) corpo.id_categoria = idCategoria;
   return corpo;
@@ -95,6 +98,7 @@ export function pendentesDeEnvio(regs, desde) {
   const g = new Map();
   for (const r of regs) {
     if (r.excluido || r.origem !== 'painel' || !r.codigo || r.ca_venda_id) continue;
+    if (regs.some((x) => !x.excluido && x.codigo === r.codigo && x.patrocinio_status === 'pendente')) continue; // v114: espera a gestão aprovar o patrocínio
     if (desde && (r.data || '') < desde) continue;
     (g.get(r.codigo) || g.set(r.codigo, []).get(r.codigo)).push(r);
   }

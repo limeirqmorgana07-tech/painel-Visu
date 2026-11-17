@@ -2,6 +2,10 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v114 — 17/11/2026 — Patrocínio (peças doadas) no pedido
+- Campo patrocinio_qtd por item; total = (qtd − patrocínio) × valor; Conta Azul recebe desconto (composicao_de_valor.desconto VALOR).
+- Vendedor: patrocínio fica pendente em Aprovações e o pedido não é enviado até a gestão aprovar; recusa zera o patrocínio e recalcula o total.
+
 ## v113 — 17/11/2026 — Total do item = quantidade × valor
 - Validação ao criar/alterar pedido do painel e mensagem clara no envio.
 - CA ! só com valor diferente da Conta Azul.

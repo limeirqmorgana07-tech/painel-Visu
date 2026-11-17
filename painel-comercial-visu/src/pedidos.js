@@ -22,17 +22,22 @@ const r2 = (v) => Math.round((Number(v) || 0) * 100) / 100;
 export const CAMPOS = {
   data: 'data', codigo: 'texto', cliente: 'texto', lote: 'texto', nome_pedido: 'texto', vendedor: 'texto', tipo_venda: 'texto',
   novo_recompra: 'nr', segmento: 'texto', tipo_produto: 'texto', material: 'texto', especificacao: 'texto', cor: 'texto',
-  quantidade: 'num', valor_unit: 'num', total: 'num', pag1: 'num', data_pag1: 'data', pag2: 'num', data_pag2: 'data', pag3: 'num', banco_pag: 'texto', pago_100: 'bool', prazo_entrega: 'data',
+  quantidade: 'num', valor_unit: 'num', patrocinio_qtd: 'num', total: 'num', pag1: 'num', data_pag1: 'data', pag2: 'num', data_pag2: 'data', pag3: 'num', banco_pag: 'texto', pago_100: 'bool', prazo_entrega: 'data',
   forma_pagamento: 'texto', parcelas: 'parc', parcelas_pers: 'parcp', frete: 'texto', pagador: 'texto', observacao: 'texto', pct_premiacao: 'pct', mes_premiacao: 'mesp', obs_premiacao: 'texto',
 };
 // travados para o vendedor 24 h depois do lançamento (o resto, como cliente e novo × recompra, ele revisa sempre)
-export const CAMPOS_VALOR = ['data', 'codigo', 'tipo_produto', 'material', 'especificacao', 'cor', 'quantidade', 'valor_unit', 'total'];
+export const CAMPOS_VALOR = ['data', 'codigo', 'tipo_produto', 'material', 'especificacao', 'cor', 'quantidade', 'valor_unit', 'patrocinio_qtd', 'total'];
 // v84: obrigatórios ao criar o pedido (e ao alterar pedido lançado pelo painel)
 export const OBRIG_CAB = { data: 'Data da venda', cliente: 'Cliente', nome_pedido: 'Nome do pedido (Trello)', vendedor: 'Vendedor', tipo_venda: 'Tipo de venda', novo_recompra: 'Novo ou recompra', segmento: 'Segmento', forma_pagamento: 'Forma de pagamento', parcelas: 'Parcelas', prazo_entrega: 'Prazo de entrega' };
 export const OBRIG_ITEM = { tipo_produto: 'Tipo de produto', material: 'Material', especificacao: 'Especificação', cor: 'Cor', quantidade: 'Quantidade', valor_unit: 'Valor/und' };
 const vazioObrig = (r, c) => { const v = r?.[c]; return v == null || v === '' || ((c === 'quantidade' || c === 'valor_unit') && !(Number(v) > 0)); };
 // v113: o total do item precisa ser quantidade × valor/und — a Conta Azul recusa a venda quando não bate ("A soma das parcelas não corresponde ao valor total")
-export function totalErrado(r) { const q = Number(r?.quantidade) || 0, vu = Number(r?.valor_unit) || 0, t = Number(r?.total) || 0; if (!(q > 0 && vu > 0 && t > 0)) return ''; const c = Math.round(q * vu * 100) / 100; return Math.abs(c - t) > 0.05 ? `o total R$ ${t.toFixed(2).replace('.', ',')} não bate com ${q} × R$ ${vu.toFixed(2).replace('.', ',')} = R$ ${c.toFixed(2).replace('.', ',')}. Corrija a quantidade, o valor/und ou o total` : ''; }
+// v114: peças de patrocínio (doadas) entram na quantidade mas não são cobradas: total = (quantidade − patrocínio) × valor/und; na Conta Azul viram desconto
+export const totalItem = (r) => Math.round(Math.max(0, (Number(r?.quantidade) || 0) - (Number(r?.patrocinio_qtd) || 0)) * (Number(r?.valor_unit) || 0) * 100) / 100;
+export function totalErrado(r) { const q = Number(r?.quantidade) || 0, pq = Number(r?.patrocinio_qtd) || 0, vu = Number(r?.valor_unit) || 0, t = Number(r?.total) || 0; if (pq > q && q > 0) return `o patrocínio (${pq} peças) é maior que a quantidade (${q})`; if (!(q > 0 && vu > 0 && t > 0)) return ''; const c = totalItem(r), f = (x) => x.toFixed(2).replace('.', ','); return Math.abs(c - t) > 0.05 ? `o total R$ ${f(t)} não bate com ${pq ? `(${q} − ${pq} de patrocínio)` : q} × R$ ${f(vu)} = R$ ${f(c)}. Corrija a quantidade, o valor/und, o patrocínio ou o total` : ''; }
+// v114: patrocínio lançado por vendedor precisa de aprovação da gestão (adm, diretor, financeiro); o pedido só vai para a Conta Azul depois de aprovado
+export const aprovaPatrocinioDireto = (u) => GESTAO.has(u?.perfil);
+function marcarPatrocinio(r, u) { if ((Number(r.patrocinio_qtd) || 0) > 0) Object.assign(r, { patrocinio_status: aprovaPatrocinioDireto(u) ? 'aprovado' : 'pendente', patrocinio_por: u?.nome || '', patrocinio_em: agoraISO(), ...(aprovaPatrocinioDireto(u) ? { patrocinio_aprov_por: u?.nome || '', patrocinio_aprov_em: agoraISO() } : { patrocinio_aprov_por: '', patrocinio_aprov_em: '' }) }); else { delete r.patrocinio_status; } }
 export function faltandoObrig(r) { return [...Object.keys(OBRIG_CAB), ...Object.keys(OBRIG_ITEM)].filter((c) => vazioObrig(r, c)).map((c) => OBRIG_CAB[c] || OBRIG_ITEM[c]); }
 // campos financeiros e de premiação: a gestão atualiza mesmo em pedido antigo incompleto
 const CAMPOS_FIN = ['pag1', 'data_pag1', 'pag2', 'data_pag2', 'pag3', 'banco_pag', 'pago_100', 'pagador', 'observacao', 'pct_premiacao', 'mes_premiacao', 'obs_premiacao', 'frete', 'parcelas_pers'];
@@ -318,7 +323,8 @@ function novoRegistro(dados, u, extra = {}) {
   const r = { id: crypto.randomUUID(), origem: 'painel' };
   for (const c of Object.keys(CAMPOS)) r[c] = limpar(c, dados[c]);
   const sl = separarLote(r.cliente); if (sl.lote && !r.lote) { r.cliente = sl.cliente; r.lote = sl.lote; }
-  if (!r.total && r.quantidade && r.valor_unit) r.total = r2(r.quantidade * r.valor_unit);
+  if ((!r.total || r.patrocinio_qtd) && r.quantidade && r.valor_unit) r.total = totalItem(r);
+  marcarPatrocinio(r, u);
   r.mes = (r.data || '').slice(0, 7) || dados.mes || '';
   Object.assign(r, { criado_em: agoraISO(), criado_por: u?.nome || 'Sistema', criado_por_id: u?.id || '', ...extra });
   return r;
@@ -368,19 +374,36 @@ export async function alterar(id, mudancas, u) {
     novo[c] = val; log.push({ campo: c, antes: r[c] ?? '', depois: val });
   }
   if (log.some((x) => x.campo === 'cliente')) { const sl = separarLote(novo.cliente); if (sl.lote) { novo.cliente = sl.cliente; if (!novo.lote) { novo.lote = sl.lote; log.push({ campo: 'lote', antes: r.lote || '', depois: sl.lote }); } } }
-  if (log.some((x) => x.campo === 'quantidade' || x.campo === 'valor_unit') && !log.some((x) => x.campo === 'total') && novo.quantidade && novo.valor_unit) {
-    const t = r2(novo.quantidade * novo.valor_unit); if (t !== r.total) { novo.total = t; log.push({ campo: 'total', antes: r.total, depois: t }); }
+  if (log.some((x) => x.campo === 'quantidade' || x.campo === 'valor_unit' || x.campo === 'patrocinio_qtd') && !log.some((x) => x.campo === 'total') && novo.quantidade && novo.valor_unit) {
+    const t = totalItem(novo); if (t !== r.total) { novo.total = t; log.push({ campo: 'total', antes: r.total, depois: t }); }
   }
   if (!log.length) return r;
   if (r.origem === 'painel' && log.some((x) => ['quantidade', 'valor_unit', 'total'].includes(x.campo))) { const te = totalErrado(novo); if (te) throw new Error('Não salvei: ' + te + '.'); }
   const apagou = log.filter((x) => (OBRIG_CAB[x.campo] || OBRIG_ITEM[x.campo]) && vazioObrig(novo, x.campo));
   if (apagou.length) throw new Error(`${apagou.map((x) => OBRIG_CAB[x.campo] || OBRIG_ITEM[x.campo]).join(', ')}: campo obrigatório, não pode ficar em branco.`);
   if (r.origem === 'painel' && log.some((x) => !CAMPOS_FIN.includes(x.campo))) { const f = faltandoObrig(novo); if (f.length) throw new Error('Para salvar, complete os campos obrigatórios desta linha: ' + f.join(', ') + '.'); }
+  if (log.some((x) => x.campo === 'patrocinio_qtd')) marcarPatrocinio(novo, u);
   novo.mes = (novo.data || '').slice(0, 7) || novo.mes;
   Object.assign(novo, { alterado_em: agoraISO(), alterado_por: u?.nome || '' });
   mem.set(id, novo);
   await gravar([novo]);
   await registrarLog([{ ...quem(u), acao: 'alterou', registro: id, codigo: novo.codigo, cliente: novo.cliente, mudancas: log }]);
+  return novo;
+}
+// v114: a gestão aprova ou recusa o patrocínio lançado pelo vendedor. Recusado, as peças voltam a ser cobradas (total = quantidade × valor/und)
+export async function responderPatrocinio(id, b, u) {
+  await carregar();
+  const r = mem.get(id);
+  if (!r || r.excluido) throw new Error('Linha não encontrada.');
+  if (!aprovaPatrocinioDireto(u)) throw new Error('Só a gestão (ADM, diretores e financeiro) aprova patrocínio.');
+  if (r.patrocinio_status !== 'pendente') throw new Error('Este patrocínio não está aguardando aprovação.');
+  const aprovar = !!b?.aprovar, obs = String(b?.observacao || '').trim().slice(0, 300);
+  const novo = { ...r, patrocinio_status: aprovar ? 'aprovado' : 'recusado', patrocinio_aprov_por: u?.nome || '', patrocinio_aprov_em: agoraISO(), patrocinio_obs: obs };
+  const log = [{ campo: 'patrocinio_status', antes: 'pendente', depois: novo.patrocinio_status }];
+  if (!aprovar) { log.push({ campo: 'patrocinio_qtd', antes: r.patrocinio_qtd, depois: 0 }); novo.patrocinio_recusado_qtd = r.patrocinio_qtd; novo.patrocinio_qtd = 0; const t = totalItem(novo); if (t !== r.total) { log.push({ campo: 'total', antes: r.total, depois: t }); novo.total = t; } }
+  mem.set(id, novo);
+  await gravar([novo]);
+  await registrarLog([{ ...quem(u), acao: aprovar ? 'aprovou patrocínio' : 'recusou patrocínio', registro: id, codigo: r.codigo, cliente: r.cliente, mudancas: log, detalhe: obs }]);
   return novo;
 }
 // ---------- alteração de preço depois do pedido fechado: o vendedor pede, a gestão aprova ----------
