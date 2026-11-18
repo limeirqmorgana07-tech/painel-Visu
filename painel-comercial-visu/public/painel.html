@@ -4272,7 +4272,7 @@ function pgFornecedores(){
   $('afKpis').innerHTML=kpiHtml([
     [t==='p'?'Total comprado':'Total vendido',brl(tot),`${delta(tot,totA,t==='p'?1:0)}<span>período anterior: ${brl(totA)}</span>`,'dest','',()=>detLanc(`${t==='p'?'Saídas':'Entradas'} · ${perRot}`,x=>x[1]===t&&ms.includes(x[0])&&fil(x),AF.reg==='caixa')],
     [t==='p'?'Fornecedores':'Clientes',int(rk.length),`<span>${int(novos)} sem movimento no período anterior</span>`,'','',null],
-    [`Maior ${quem}`,rk[0]?esc(rk[0].nome):'—',rk[0]?`<span>${brl(rk[0].v)} · ${pct(tot?rk[0].v/tot:0)} do total</span>`:'','','',rk[0]?()=>verP(rk[0]):null],
+    [`Maior ${quem}`,rk[0]?`<span style="font-size:20px;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(rk[0].nome)}">${esc(rk[0].nome)}</span>`:'—',rk[0]?`<span>${brl(rk[0].v)} · ${pct(tot?rk[0].v/tot:0)} do total</span>`:'','','',rk[0]?()=>verP(rk[0]):null],
     ['Concentração nos 5 maiores',pct(tot?top5/tot:0),`<span>${brl(top5)}</span>`,'','',null],
     [t==='p'?'Em aberto a pagar':'Em aberto a receber',brl(abT),`<span>dos ${t==='p'?'fornecedores':'clientes'} da lista</span>`,'','',()=>detAbertos(`Em aberto · ${t==='p'?'fornecedores':'clientes'}`,x=>x[0]===t&&g.has(x[2]||'(sem '+quem+')'))],
   ]);
