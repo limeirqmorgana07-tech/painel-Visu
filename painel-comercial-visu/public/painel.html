@@ -1359,8 +1359,9 @@ const nomeMes=(m)=>{const[a,b]=m.split('-');return MES_L[+b-1]+' de '+a};
 const somaMes=(m,n)=>{const[a,b]=m.split('-').map(Number);const d=new Date(Date.UTC(a,b-1+n,1));return d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0')};
 function delta(a,b,inv){ if(!b) return '<span class="delta eq">sem base</span>'; const d=(a-b)/b; const c=Math.abs(d)<.005?'eq':(d>0)!==!!inv?'up':'down'; return `<span class="delta ${c}">${d>0?'▲':d<0?'▼':'■'} ${pct(Math.abs(d))}</span>`; }
 
-const VERSAO='v116';
+const VERSAO='v117';
 const VERSOES=[
+ {v:'v117',data:'18/11/2026',tit:'Parcelas precisam bater com o total do pedido',arq:'painel-visu-v117.zip',itens:['Pedido 0082112026 (LAIS - WOLF): a parcela de R$ 1.000 ficou como pagamento de entrada e o restante entrou como pagamento final (saldo) no prazo de entrega, para subir para a Conta Azul.','O pedido não salva mais com parcelas personalizadas que não somam o total (lançamento novo e ajuste das parcelas).']},
  {v:'v116',data:'17/11/2026',tit:'Notas fiscais no lugar dos pedidos duplicados',arq:'painel-visu-v116.zip',itens:['NF 184 (BDP Supermercado, venda 7409202623, R$ 23.630, 10/10) passa a valer no lugar dos pedidos 0088092026, 0007102026 e 0019102026 da planilha.','NF 183 (Maria Edhuarda, venda 7409202622, R$ 4.034, 10/10) passa a valer no lugar do pedido 0085092026.','Os produtos dos pedidos substituídos continuam no mix, com a data, o número e o valor da nota; se as linhas forem apagadas da planilha, a NF entra sozinha pela Conta Azul.','A venda 7409202623 não é mais lida como complementar (-23) do pedido 0074092026.']},
  {v:'v115',data:'17/11/2026',tit:'Contas a receber e a pagar no estilo Conta Azul',arq:'painel-visu-v115.zip',itens:['No topo de Contas a receber e Contas a pagar: cartões Vencidos, Vencem hoje, A vencer, Recebidos/Pagos no mês e Total em aberto (clique abre a lista).','Fluxo de caixa projetado: entradas (a receber) × saídas (a pagar) e a linha do saldo projetado, partindo do saldo atual dos bancos; o 1º período inclui os vencidos. Clique numa barra para ver os títulos.','Visão Diária, Semanal, Mensal, Trimestral, Semestral e Anual (vale para as duas páginas); tabela com os números.','O que já existia nas duas páginas continua igual, logo abaixo.']},
  {v:'v114',data:'17/11/2026',tit:'Patrocínio (peças doadas) no pedido',arq:'painel-visu-v114.zip',itens:['Nova coluna Patrocínio (peças doadas) na linha do pedido: as peças entram na quantidade, mas não são cobradas. Total = (quantidade − patrocínio) × valor/und. Ex.: 200 camisas com 50 de patrocínio cobram 150.','Na Conta Azul, o item vai com a quantidade cheia e o valor das peças doadas vai como desconto da venda; o financeiro recebe exatamente o valor das peças cobradas.','Patrocínio lançado por vendedor vai para Aprovações (Patrocínio aguardando aprovação). A gestão (ADM, diretores e financeiro) aprova ou recusa; o pedido só vai para a Conta Azul depois. Recusado, as peças voltam a ser cobradas. Lançado pela gestão já entra aprovado.','Selo PATROC. na linha (? aguardando, ✕ recusado) e coluna Patrocínio na ficha do pedido.']},
@@ -3215,6 +3216,8 @@ async function carregarClientes(){ if(PED.cli&&Date.now()-PED.cli.t<5*60e3) retu
   const ROT={painel:'painel',planilha:'planilha',conta_azul:'vendas na Conta Azul',cadastro:'cadastro da Conta Azul'};
   $('dlCliente').innerHTML=PED.cli.l.slice(0,3000).map(c=>`<option value="${esc(c.nome)}" label="${esc(c.origens.map(o=>ROT[o]||o).join(' · ')+(c.ultima?' · última compra '+dataBR(c.ultima):''))}">`).join(''); return PED.cli.l; }
 function infoCliente(){ const c=semA($('pmCliente').value), x=(PED.cli?.l||[]).find(y=>semA(y.nome)===c); $('pmCliInfo').textContent=!c?(PED.cli?`${int(PED.cli.l.length)} clientes na lista${PED.cli.cad?` (${int(PED.cli.cad)} do cadastro da Conta Azul)`:''}: comece a digitar`:''):x?`${x.origens.includes('cadastro')?'Cadastrado na Conta Azul':'Já comprou'}${x.documento?' · '+x.documento:''}${x.ultima?' · última compra '+dataBR(x.ultima):''}`:'Cliente novo: não está na planilha nem na Conta Azul'; }
+const totPers=(itens)=>Math.round(itens.reduce((a,i)=>a+Math.max(0,(+i.quantidade||0)-(+i.patrocinio_qtd||0))*(+i.valor_unit||0),0)*100)/100;
+function persNaoBate(cab,itens){ if(String(cab.parcelas)!=='P') return ''; const t=totPers(itens), s=Math.round((cab.parcelas_pers||[]).reduce((a,x)=>a+(+x.valor||0),0)*100)/100; return Math.abs(t-s)>0.05?`As parcelas somam ${brl2(s)} e o pedido é ${brl2(t)}. O pedido só pode ser fechado com as parcelas batendo com o total: escolha Personalizado de novo no campo Parcelas e ajuste.`:''; }
 function abrirPedido(modo,base){
   PM.modo=modo; PM.base=base||null; const f=$('pdmForm'); f.reset(); $('pmNR').dataset.auto=''; $('pmErro').textContent=''; $('pmNRdica').textContent='';
   const conh=valoresConhecidos();
@@ -3241,6 +3244,7 @@ async function salvarPedido(e){
   if(cab.parcelas==='P'){ try{ cab.parcelas_pers=JSON.parse($('pmParcPers').value||'[]'); }catch(x){ cab.parcelas_pers=[]; } if(!cab.parcelas_pers.length) return err('Monte as parcelas personalizadas: escolha Personalizado de novo no campo Parcelas.'); }
   if(!itens.length) return err('Inclua pelo menos um item.');
   { const trs=[...$('pmItens').querySelectorAll('tr')].filter(tr=>[...tr.querySelectorAll('[data-k]')].some(i=>i.value.trim()&&i.value!=='0')); const fo=faltaObr(cab,itens); marcarObr($('pdmForm'),trs,fo); if(fo) return err(fo.msg); }
+  if(PM.modo==='novo'){ const pn=persNaoBate(cab,itens); if(pn) return err(pn); } /* v117 */
   if(PM.modo==='comp') cab.codigo='';
   $('pmSalvar').disabled=true;
   try{ const r=await api('/api/pedidos',{method:'POST',body:JSON.stringify({pedido:cab,itens,complemento_de:PM.modo==='comp'?PM.base.codigo:undefined,mesmo_pedido:PM.modo==='item'||undefined})});
@@ -3825,6 +3829,7 @@ $('plSalvar').onclick=async()=>{
   const itens=rows.map(r=>({tipo_produto:r.tipo_produto,material:r.material,especificacao:r.especificacao,quantidade:r.quantidade,cor:r.cor,valor_unit:r.valor_unit,observacao:r.observacao||cab.observacao,lote:r.lote||cab.lote})).filter(i=>i.tipo_produto||i.quantidade||i.valor_unit);
   if(String(cab.parcelas)==='P'){ if(!PL_PERS.l?.length) return err('Monte as parcelas personalizadas: escolha Personalizado de novo no campo Parcelas.'); cab.parcelas_pers=PL_PERS.l; }
   if(!itens.length) return err('Inclua pelo menos um item (tipo de produto, quantidade e valor/und).');
+  { const pn=persNaoBate(cab,itens); if(pn) return err(pn); } /* v117 */
   { const fo=faltaObr(cab,itens); marcarObr($('plCorpo'),trs.filter((tr,k)=>rows[k].tipo_produto||rows[k].quantidade||rows[k].valor_unit),fo); if(fo) return err(fo.msg); }
   $('plSalvar').disabled=true; err('');
   try{ const r=await api('/api/pedidos',{method:'POST',body:JSON.stringify({pedido:cab,itens})});

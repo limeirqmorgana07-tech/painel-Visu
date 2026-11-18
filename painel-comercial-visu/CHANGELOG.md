@@ -2,6 +2,10 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v117 — 18/11/2026 — Parcelas precisam bater com o total do pedido
+- 0082112026 (LAIS - WOLF): R$ 1.000 como entrada + restante como pagamento final (saldo) no prazo de entrega.
+- Pedido não salva com parcelas personalizadas que não somam o total.
+
 ## v116 — 17/11/2026 — Notas fiscais no lugar dos pedidos duplicados
 - NF 184 (BDP Supermercado, venda 7409202623, R$ 23.630, 10/10) substitui 0088092026, 0007102026 e 0019102026.
 - NF 183 (Maria Edhuarda, venda 7409202622, R$ 4.034, 10/10) substitui 0085092026.

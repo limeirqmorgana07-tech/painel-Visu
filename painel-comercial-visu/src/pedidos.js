@@ -108,6 +108,7 @@ async function carregar() {
   await consolidarClientes().catch((e) => console.warn('[pedidos] consolidar clientes:', e.message));
   await limparPct0().catch((e) => console.warn('[pedidos] premiação 0%:', e.message));
   await corrigir0044().catch((e) => console.warn('[pedidos] 0044112026:', e.message));
+  await corrigir0082().catch((e) => console.warn('[pedidos] 0082112026:', e.message));
   await recuperarObsCliente().catch((e) => console.warn('[pedidos] obs. do cliente:', e.message));
   return mem;
 }
@@ -148,6 +149,28 @@ async function corrigir0044() {
   await registrarLog(novos.slice(0, 1).map((n) => ({ ...quem(null), usuario: 'Ajuste de parcelas (entrada + final)', acao: 'alterou', registro: n.id, codigo: n.codigo, cliente: n.cliente || '', mudancas: [{ campo: 'parcelas_pers', antes: pers.map((p) => `${p.valor} em ${p.data}`).join(' + '), depois: `entrada 1100 em ${d1} + final ${novaPers[1].valor} em ${dFim}` }] })));
   await salvarKV('migr_0044_v93', { em: agoraISO(), n: novos.length });
   console.log('[pedidos] 0044112026: parcelas ajustadas para entrada + final');
+  return novos.length;
+}
+// v117: pedido 0082112026 (LAIS - WOLF) foi lançado com parcela única de R$ 1.000, menor que o total, e não subia para a Conta Azul.
+// Mesma regra do 0044112026: as parcelas lançadas ficam como entrada e o restante vira o pagamento final (saldo), no prazo de entrega.
+async function corrigir0082() {
+  if (await lerKV('migr_0082_v117').catch(() => 'sem-banco')) return 0;
+  const ls = [...mem.values()].filter((r) => !r.excluido && String(r.codigo || '').replace(/^0+/, '') === '82112026' && r.origem === 'painel');
+  const r0 = ls[0], total = r2(ls.reduce((a, r) => a + (Number(r.total) || 0), 0));
+  const pers = (r0?.parcelas_pers || []).filter((p) => Number(p.valor) > 0);
+  const soma = r2(pers.reduce((a, p) => a + (Number(p.valor) || 0), 0));
+  let base = pers;
+  // parcela única (À vista) com valor menor que o total não existe fora do Personalizado; se vier sem parcelas, não mexe
+  if (!r0 || r0.ca_venda_id || String(r0.parcelas) !== 'P' || !base.length || !(total - soma > 0.05)) { await salvarKV('migr_0082_v117', { em: agoraISO(), n: 0, motivo: 'condição não encontrada', parcelas: r0?.parcelas, soma, total }); return 0; }
+  const dUlt = base.map((p) => p.data).filter(Boolean).sort().pop() || r0.data;
+  const dFim = r0.prazo_entrega && r0.prazo_entrega > dUlt ? r0.prazo_entrega : new Date(Date.parse(dUlt + 'T12:00:00Z') + 30 * 864e5).toISOString().slice(0, 10);
+  const novaPers = [...base.map((p) => ({ valor: r2(p.valor), data: p.data || r0.data })), { valor: r2(total - soma), data: dFim }];
+  const novos = ls.map((r) => ({ ...r, parcelas: 'P', parcelas_pers: novaPers, ca_erro: '', alterado_em: agoraISO(), alterado_por: 'Ajuste de parcelas (entrada + final)' }));
+  for (const n of novos) mem.set(n.id, n);
+  await gravar(novos);
+  await registrarLog(novos.slice(0, 1).map((n) => ({ ...quem(null), usuario: 'Ajuste de parcelas (entrada + final)', acao: 'alterou', registro: n.id, codigo: n.codigo, cliente: n.cliente || '', mudancas: [{ campo: 'parcelas_pers', antes: base.map((p) => `${p.valor} em ${p.data}`).join(' + '), depois: novaPers.map((p) => `${p.valor} em ${p.data}`).join(' + ') }], detalhe: `Parcelas somavam R$ ${soma.toFixed(2)} e o pedido é R$ ${total.toFixed(2)}: o restante entrou como pagamento final (saldo).` })));
+  await salvarKV('migr_0082_v117', { em: agoraISO(), n: novos.length, total, soma });
+  console.log('[pedidos] 0082112026: parcelas ajustadas para entrada + final');
   return novos.length;
 }
 async function limparPct0() {
@@ -354,6 +377,14 @@ export async function criarPedido(corpo, u) {
   const faltaCab = Object.keys(OBRIG_CAB).filter((c) => vazioObrig(regs[0], c)).map((c) => OBRIG_CAB[c]);
   if (faltaCab.length) throw new Error('Preencha os campos obrigatórios do pedido: ' + faltaCab.join(', ') + '.');
   regs.forEach((r, k) => { const f = Object.keys(OBRIG_ITEM).filter((c) => vazioObrig(r, c)).map((c) => OBRIG_ITEM[c]); if (f.length) throw new Error(`Item ${k + 1}: preencha ${f.join(', ')}.`); const te = totalErrado(r); if (te) throw new Error(`Item ${k + 1}: ${te}.`); });
+  // v117: o pedido só fecha com as parcelas personalizadas somando o total (senão a Conta Azul recusa a venda)
+  if (!complementoDe && String(regs[0].parcelas) === 'P') {
+    const ja = corpo?.mesmo_pedido ? [...mem.values()].filter((r) => !r.excluido && r.codigo === codigo) : [];
+    const tot = r2([...ja, ...regs].reduce((a, r) => a + (Number(r.total) || 0), 0));
+    const pers = (corpo?.mesmo_pedido && ja[0]?.parcelas_pers?.length && !cab.parcelas_pers?.length ? ja[0].parcelas_pers : regs[0].parcelas_pers) || [];
+    const soma = r2(pers.reduce((a, p) => a + (Number(p.valor) || 0), 0));
+    if (!corpo?.mesmo_pedido && Math.abs(soma - tot) > 0.05) throw new Error(`As parcelas somam R$ ${soma.toFixed(2).replace('.', ',')} e o pedido é R$ ${tot.toFixed(2).replace('.', ',')}. O pedido só pode ser fechado com as parcelas batendo com o total: ajuste as parcelas em Parcelas → Personalizado.`);
+  }
   regs.forEach((r) => mem.set(r.id, r));
   await gravar(regs);
   await registrarLog(regs.map((r) => ({ ...quem(u), acao: complementoDe ? 'complemento' : 'criou', registro: r.id, codigo: r.codigo, cliente: r.cliente,
@@ -382,6 +413,11 @@ export async function alterar(id, mudancas, u) {
   const apagou = log.filter((x) => (OBRIG_CAB[x.campo] || OBRIG_ITEM[x.campo]) && vazioObrig(novo, x.campo));
   if (apagou.length) throw new Error(`${apagou.map((x) => OBRIG_CAB[x.campo] || OBRIG_ITEM[x.campo]).join(', ')}: campo obrigatório, não pode ficar em branco.`);
   if (r.origem === 'painel' && log.some((x) => !CAMPOS_FIN.includes(x.campo))) { const f = faltandoObrig(novo); if (f.length) throw new Error('Para salvar, complete os campos obrigatórios desta linha: ' + f.join(', ') + '.'); }
+  if (r.origem === 'painel' && !r.complemento_de && String(novo.parcelas) === 'P' && log.some((x) => x.campo === 'parcelas_pers')) {
+    const tot = r2([...mem.values()].filter((x) => !x.excluido && x.codigo && x.codigo === novo.codigo).reduce((a, x) => a + (Number(x.id === id ? novo.total : x.total) || 0), 0));
+    const soma = r2((novo.parcelas_pers || []).reduce((a, p) => a + (Number(p.valor) || 0), 0));
+    if (tot && Math.abs(soma - tot) > 0.05) throw new Error(`Não salvei: as parcelas somam R$ ${soma.toFixed(2).replace('.', ',')} e o pedido é R$ ${tot.toFixed(2).replace('.', ',')}. O pedido só pode ser fechado com as parcelas batendo com o total.`);
+  }
   if (log.some((x) => x.campo === 'patrocinio_qtd')) marcarPatrocinio(novo, u);
   novo.mes = (novo.data || '').slice(0, 7) || novo.mes;
   Object.assign(novo, { alterado_em: agoraISO(), alterado_por: u?.nome || '' });
