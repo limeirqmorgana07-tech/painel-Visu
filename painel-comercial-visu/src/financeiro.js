@@ -140,7 +140,7 @@ function indicadores(estrutura, lancs, meses) {
 
 
 // ---------- detalhamento: os lançamentos por trás de cada total (para abrir ao clicar no painel) ----------
-// Linha compacta: [mês, r|p, categoria, centro, pessoa, descrição, vencimento, valor, status, caminho na DRE, natureza]
+// Linha compacta: [mês, r|p, categoria, centro, pessoa, descrição, vencimento, valor, status, caminho na DRE, natureza, data do pagamento (v118), conta]
 function detalhar(parcelas, campoValor, campoMes, mapa) {
   const out = [];
   for (const p of parcelas) {
@@ -150,7 +150,7 @@ function detalhar(parcelas, campoValor, campoMes, mapa) {
       if (!v) continue;
       const caminho = mapa.get(c.id) || 'Lançamentos sem categoria na DRE';
       out.push([(p[campoMes] || '').slice(0, 7), p.tipo === 'receber' ? 'r' : 'p', c.nome, p.centros?.[0] || 'Sem centro de custo', p.pessoa || '', p.descricao || '', p.vencimento || '', v, p.status || '',
-        caminho.split(' > ').join('|'), natureza({ tipo: p.tipo, categoria_id: c.id, categoria: c.nome, valor: v }, mapa)]);
+        caminho.split(' > ').join('|'), natureza({ tipo: p.tipo, categoria_id: c.id, categoria: c.nome, valor: v }, mapa), p.data_pagamento || '', p.conta || '']);
     }
   }
   return out;
@@ -259,6 +259,30 @@ function montar(b, fonte) {
   };
 }
 
+// v118: fluxo de caixa diário e semanal precisa do dia do pagamento. Quando a listagem não traz a data, perguntamos à Conta Azul
+// dia a dia (últimos 35 dias) e semana a semana (as 12 semanas antes disso). Dias e semanas que já passaram ficam guardados.
+const cachePag = new Map(); // 'r|2026-11-03|2026-11-03' -> [ids]
+async function idsPagos(tipo, de, ate, fixo) {
+  const k = `${tipo}|${de}|${ate}`;
+  if (fixo && cachePag.has(k)) return cachePag.get(k);
+  const ls = await ca.buscarParcelas(tipo === 'r' ? 'receber' : 'pagar', { pagamento_de: de, pagamento_ate: ate });
+  const ids = ls.filter((x) => x.pago > 0).map((x) => x.id);
+  cachePag.set(k, ids); return ids;
+}
+async function refinarDatasPagamento(pagas, hoje) {
+  const semData = pagas.filter((x) => !x.data_pagamento && x.id);
+  if (!semData.length) return;
+  const h = iso(hoje), dia = (n) => iso(new Date(hoje.getTime() - n * 864e5));
+  const tarefas = [];
+  for (let n = 0; n < 35; n++) { const d = dia(n); for (const t of ['r', 'p']) tarefas.push({ t, de: d, ate: d, fixo: n > 2, data: d }); }
+  for (let w = 0; w < 12; w++) { const ate = dia(35 + w * 7), de = dia(41 + w * 7); for (const t of ['r', 'p']) tarefas.push({ t, de, ate, fixo: true, data: de, aprox: true }); }
+  const porId = new Map();
+  for (let i = 0; i < tarefas.length; i += 4) {
+    await Promise.all(tarefas.slice(i, i + 4).map(async (x) => { try { (await idsPagos(x.t, x.de, x.ate, x.fixo)).forEach((id) => { if (!porId.has(id) || !x.aprox) porId.set(id, x.data); }); } catch { /* segue com o vencimento */ } }));
+  }
+  for (const x of semData) { const d = porId.get(x.id); if (d && d.slice(0, 7) === x.mes_pag && d <= h) x.data_pagamento = d; }
+}
+
 async function carregarConta() {
   const meses = mesesAte(config.mesesHistorico);
   const ini = `${meses[0]}-01`, fim = fimDoMes(meses[meses.length - 1]);
@@ -277,6 +301,7 @@ async function carregarConta() {
     ]);
     pagas.push(...r.map((x) => ({ ...x, mes_pag: m })), ...p.map((x) => ({ ...x, mes_pag: m })));
   }
+  await refinarDatasPagamento(pagas, hoje).catch((e) => console.warn('[financeiro] datas de pagamento:', e.message));
   const [recAb, pagAb] = await Promise.all([
     ca.buscarParcelas('receber', { vencimento_de: iso(new Date(hoje.getTime() - 400 * 864e5)), vencimento_ate: iso(new Date(hoje.getTime() + 100 * 864e5)) }),
     ca.buscarParcelas('pagar', { vencimento_de: iso(new Date(hoje.getTime() - 400 * 864e5)), vencimento_ate: iso(new Date(hoje.getTime() + 100 * 864e5)) }),

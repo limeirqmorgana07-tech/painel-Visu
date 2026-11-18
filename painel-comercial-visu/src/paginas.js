@@ -5,13 +5,13 @@ export const MENU = [
   { grupo: 'Comercial', itens: [['registro', 'Planilha de vendas'], ['vendas', 'Vendas'], ['produtos', 'Produtos e mix'], ['clientes', 'Clientes'], ['vendedores', 'Vendedores e premiação'], ['aprovacoes', 'Aprovações'], ['pedidos', 'Pedidos e entregas'], ['treinamento', 'Treinamento']] },
   // reunião de 03/11/2026: conferência sistema × planilha num grupo próprio (a planilha é a referência das vendas)
   { grupo: 'Conferência', itens: [['inconsistencias', 'Inconsistências'], ['divergencias', 'Divergências'], ['historico', 'Histórico de alterações']] },
-  { grupo: 'Financeiro', itens: [['dre', 'DRE gerencial'], ['equilibrio', 'Margem e ponto de equilíbrio'], ['caixa', 'Fluxo de caixa'], ['receber', 'Contas a receber'], ['pagar', 'Contas a pagar'], ['extrato', 'Conciliação bancária']] },
+  { grupo: 'Financeiro', itens: [['dre', 'DRE gerencial'], ['equilibrio', 'Margem e ponto de equilíbrio'], ['caixa', 'Fluxo de caixa'], ['receber', 'Contas a receber'], ['pagar', 'Contas a pagar'], ['fornecedores', 'Análise de fornecedores'], ['extrato', 'Conciliação bancária']] },
   { grupo: 'Controle', itens: [['conciliacao', 'Planilha × sistema (mês)'], ['dados', 'Qualidade dos dados'], ['versoes', 'Versões do painel']] },
   { grupo: 'Administração', itens: [['usuarios', 'Usuários e permissões'], ['acessos', 'Acessos ao painel']] },
 ];
 export const TODAS = MENU.flatMap((g) => g.itens.map((i) => i[0]));
 const COM = ['vendas', 'produtos', 'clientes', 'vendedores', 'pedidos'];
-const FIN = ['dre', 'equilibrio', 'caixa', 'receber', 'pagar', 'extrato'];
+const FIN = ['dre', 'equilibrio', 'caixa', 'fornecedores', 'receber', 'pagar', 'extrato'];
 const PADRAO_BASE = {
   adm: TODAS,
   // diretores criam o acesso dos vendedores (09/11/2026)
@@ -35,13 +35,15 @@ const NOVAS_V43 = ['extrato'];
 const NOVAS_V56 = ['divergencias', 'treinamento'];
 // v73: Aprovações (Comercial) entra nas listas salvas antes, conforme o padrão do perfil
 const NOVAS_V73 = ['aprovacoes'];
+// v118: Análise de fornecedores (Financeiro) entra nas listas salvas antes, para quem já vê o Fluxo de caixa
+const NOVAS_V118 = ['fornecedores'];
 export function definirPerfis(o) {
   personalizado = {};
   // listas salvas antes da v31 não conheciam os 3 menus novos: entram conforme o padrão do perfil
-  const antiga = o && !o._v31, antes43 = o && !o._v43, antes56 = o && !o._v56, antes73 = o && !o._v73;
-  for (const [k, v] of Object.entries(o || {})) if (k !== 'adm' && PADRAO_BASE[k] && Array.isArray(v)) personalizado[k] = [...new Set([...v, ...(antiga ? NOVAS_V31.filter((p) => PADRAO_BASE[k].includes(p) && !v.includes(p)) : []), ...(antes43 ? NOVAS_V43.filter((p) => PADRAO_BASE[k].includes(p)) : []), ...(antes56 ? NOVAS_V56.filter((p) => PADRAO_BASE[k].includes(p)) : []), ...(antes73 ? NOVAS_V73.filter((p) => PADRAO_BASE[k].includes(p)) : [])])].filter((p) => LIBERAVEIS.includes(p));
+  const antiga = o && !o._v31, antes43 = o && !o._v43, antes56 = o && !o._v56, antes73 = o && !o._v73, antes118 = o && !o._v118;
+  for (const [k, v] of Object.entries(o || {})) if (k !== 'adm' && PADRAO_BASE[k] && Array.isArray(v)) personalizado[k] = [...new Set([...v, ...(antes118 && v.includes('caixa') ? NOVAS_V118 : []), ...(antiga ? NOVAS_V31.filter((p) => PADRAO_BASE[k].includes(p) && !v.includes(p)) : []), ...(antes43 ? NOVAS_V43.filter((p) => PADRAO_BASE[k].includes(p)) : []), ...(antes56 ? NOVAS_V56.filter((p) => PADRAO_BASE[k].includes(p)) : []), ...(antes73 ? NOVAS_V73.filter((p) => PADRAO_BASE[k].includes(p)) : [])])].filter((p) => LIBERAVEIS.includes(p));
 }
-export const perfisPersonalizados = () => ({ ...personalizado, _v31: true, _v43: true, _v56: true, _v73: true });
+export const perfisPersonalizados = () => ({ ...personalizado, _v31: true, _v43: true, _v56: true, _v73: true, _v118: true });
 export const padraoDe = (perfil) => (perfil === 'adm' ? TODAS : padraoDe0(perfil).filter((p) => p !== 'acessos'));
 const padraoDe0 = (perfil) => (perfil === 'diretor' && personalizado.diretor?.length ? [...personalizado.diretor, 'usuarios'] : personalizado[perfil]?.length ? personalizado[perfil] : PADRAO_BASE[perfil] || []);
 export const liberaveis = () => [...LIBERAVEIS];
@@ -54,7 +56,7 @@ export function paginasDe(u) {
   const base = padraoDe(u.perfil);
   if (u.perfil === 'adm' || !Array.isArray(u.paginas)) return base;
   // v96: a escolha feita na pessoa vale exatamente como marcada (antes era recortada pelo perfil e páginas marcadas sumiam)
-  const r = TODAS.filter((p) => (LIBERAVEIS.includes(p) && u.paginas.includes(p)) || (u.perfil === 'diretor' && p === 'usuarios') || p === 'aprovacoes');
+  const r = TODAS.filter((p) => (LIBERAVEIS.includes(p) && (u.paginas.includes(p) || (p === 'fornecedores' && u.paginas.includes('caixa')))) || (u.perfil === 'diretor' && p === 'usuarios') || p === 'aprovacoes');
   return r.length ? r : base.slice(0, 1);
 }
 // Blocos das páginas de Gestão (Painel executivo e Quadro de indicadores): o ADM escolhe o que cada perfil enxerga.

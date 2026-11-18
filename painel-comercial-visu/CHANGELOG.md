@@ -2,6 +2,10 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v118 — 18/11/2026 — Fluxo de caixa por categoria e Análise de fornecedores
+- Fluxo de caixa diário/semanal/mensal (realizado + previsto), entradas e saídas por categoria → fornecedor/cliente, busca e saldo nos bancos.
+- Nova página Análise de fornecedores (e clientes): ranking, categorias, concentração, variação e em aberto. Dados da Conta Azul.
+
 ## v117 — 18/11/2026 — Parcelas precisam bater com o total do pedido
 - 0082112026 (LAIS - WOLF): R$ 1.000 como entrada + restante como pagamento final (saldo) no prazo de entrega.
 - Pedido não salva com parcelas personalizadas que não somam o total.

@@ -1160,7 +1160,7 @@ table.matriz td.vz{color:var(--line2)}
   </section>
 
   <section data-pagina="caixa" hidden>
-    
+    <div id="fcWrap" style="margin-bottom:16px"></div>
     <div class="kpis" id="cxKpis"></div>
     <div class="g2" style="margin-top:16px">
       <div class="card"><div class="hd"><div><h3>Projeção semanal</h3><div class="sub" id="projSub">Saldo atual + contas a receber − contas a pagar pela data de vencimento</div></div></div><div id="projGraf"></div>
@@ -1169,6 +1169,22 @@ table.matriz td.vz{color:var(--line2)}
       <div class="card"><div class="hd"><div><h3>Saldos bancários</h3><div class="sub">Saldo atual de cada conta</div></div></div><div id="saldos"></div></div>
     </div>
     <div class="card" style="margin-top:16px"><div class="hd"><div><h3>Caixa realizado mês a mês</h3><div class="sub">Recebimentos e pagamentos efetivados</div></div></div><div class="tw" id="cxReal"></div></div>
+  </section>
+
+  <section data-pagina="fornecedores" hidden>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px">
+      <div class="seg" role="group" aria-label="Visão"><button type="button" data-aft="p" aria-pressed="true">Fornecedores</button><button type="button" data-aft="r" aria-pressed="false">Clientes</button></div>
+      <div class="seg" role="group" aria-label="Regime"><button type="button" data-afr="caixa" aria-pressed="true">Caixa (pago)</button><button type="button" data-afr="comp" aria-pressed="false">Competência</button></div>
+      <select id="afPer" aria-label="Período"><option value="1">Último mês</option><option value="3">Últimos 3 meses</option><option value="6" selected>Últimos 6 meses</option><option value="12">Últimos 12 meses</option><option value="ano">Ano atual</option></select>
+      <select id="afCat" aria-label="Categoria"></select>
+      <input id="afBusca" type="search" placeholder="Buscar fornecedor, cliente, categoria ou descrição" style="min-width:280px">
+    </div>
+    <div class="kpis" id="afKpis"></div>
+    <div class="g2" style="margin-top:16px">
+      <div class="card"><div class="hd"><div><h3>10 maiores</h3><div class="sub" id="afTopSub">—</div></div></div><div id="afTop" class="gq"></div></div>
+      <div class="card"><div class="hd"><div><h3>Por categoria</h3><div class="sub">Clique numa categoria para ver só os fornecedores dela</div></div></div><div class="tw" id="afCats" style="max-height:420px;overflow:auto"></div></div>
+    </div>
+    <div class="card" style="margin-top:16px"><div class="hd"><div><h3>Ranking</h3><div class="sub" id="afRankSub">—</div></div></div><div class="tw" id="afRank" style="max-height:70vh;overflow:auto"></div></div>
   </section>
 
   <section data-pagina="receber" hidden>
@@ -1359,8 +1375,9 @@ const nomeMes=(m)=>{const[a,b]=m.split('-');return MES_L[+b-1]+' de '+a};
 const somaMes=(m,n)=>{const[a,b]=m.split('-').map(Number);const d=new Date(Date.UTC(a,b-1+n,1));return d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0')};
 function delta(a,b,inv){ if(!b) return '<span class="delta eq">sem base</span>'; const d=(a-b)/b; const c=Math.abs(d)<.005?'eq':(d>0)!==!!inv?'up':'down'; return `<span class="delta ${c}">${d>0?'▲':d<0?'▼':'■'} ${pct(Math.abs(d))}</span>`; }
 
-const VERSAO='v117';
+const VERSAO='v118';
 const VERSOES=[
+ {v:'v118',data:'18/11/2026',tit:'Fluxo de caixa por categoria e Análise de fornecedores',arq:'painel-visu-v118.zip',itens:['Fluxo de caixa: visão diária, semanal e mensal no topo da página, com realizado (pela data do pagamento) e previsto (pelo vencimento); entradas e saídas por categoria, abrindo em fornecedor/cliente; busca por nome; saldo nos bancos ao fim de cada período; clique na célula para ver os lançamentos.','Nova página Financeiro → Análise de fornecedores: total comprado, maior fornecedor, concentração nos 5 maiores, em aberto a pagar, 10 maiores, por categoria e ranking com variação sobre o período anterior. Também mostra os clientes. Caixa ou competência, período e busca.','Tudo direto da Conta Azul.']},
  {v:'v117',data:'18/11/2026',tit:'Parcelas precisam bater com o total do pedido',arq:'painel-visu-v117.zip',itens:['Pedido 0082112026 (LAIS - WOLF): a parcela de R$ 1.000 ficou como pagamento de entrada e o restante entrou como pagamento final (saldo) no prazo de entrega, para subir para a Conta Azul.','O pedido não salva mais com parcelas personalizadas que não somam o total (lançamento novo e ajuste das parcelas).']},
  {v:'v116',data:'17/11/2026',tit:'Notas fiscais no lugar dos pedidos duplicados',arq:'painel-visu-v116.zip',itens:['NF 184 (BDP Supermercado, venda 7409202623, R$ 23.630, 10/10) passa a valer no lugar dos pedidos 0088092026, 0007102026 e 0019102026 da planilha.','NF 183 (Maria Edhuarda, venda 7409202622, R$ 4.034, 10/10) passa a valer no lugar do pedido 0085092026.','Os produtos dos pedidos substituídos continuam no mix, com a data, o número e o valor da nota; se as linhas forem apagadas da planilha, a NF entra sozinha pela Conta Azul.','A venda 7409202623 não é mais lida como complementar (-23) do pedido 0074092026.']},
  {v:'v115',data:'17/11/2026',tit:'Contas a receber e a pagar no estilo Conta Azul',arq:'painel-visu-v115.zip',itens:['No topo de Contas a receber e Contas a pagar: cartões Vencidos, Vencem hoje, A vencer, Recebidos/Pagos no mês e Total em aberto (clique abre a lista).','Fluxo de caixa projetado: entradas (a receber) × saídas (a pagar) e a linha do saldo projetado, partindo do saldo atual dos bancos; o 1º período inclui os vencidos. Clique numa barra para ver os títulos.','Visão Diária, Semanal, Mensal, Trimestral, Semestral e Anual (vale para as duas páginas); tabela com os números.','O que já existia nas duas páginas continua igual, logo abaixo.']},
@@ -1626,7 +1643,7 @@ function desenhar(){
   const S=$('simula'); if(E.verComo){ S.hidden=false; S.innerHTML=`<span>Visualizando o painel como <b>${esc(E.verComo.nome||PERF[E.verComo.perfil])}</b>. O menu mostra exatamente o que esse perfil vê.</span><button class="bt2" type="button" id="simSair">Voltar para ADM</button>`; $('simSair').onclick=()=>{ E.verComo=null; $('verComo').value=''; desenhar(); }; } else S.hidden=true;
   // se um quadro der erro com os dados reais, a página continua e o erro aparece no topo (em vez de sumir em silêncio)
   const errBox=$('erroPagina'); if(errBox) errBox.hidden=true;
-  try{ ({painel:pgVisao,indicadores:pgIndicadores,vendas:pgGeral,produtos:pgProdutos,clientes:pgClientes,vendedores:pgVendedores,pedidos:pgPedidos,registro:pgRegistro,aprovacoes:pgAprovacoes,conferencia:pgConferencia,inconsistencias:pgInconsistencias,extrato:pgExtrato,historico:pgHistorico,dre:pgDRE,equilibrio:pgEquilibrio,caixa:pgCx,receber:pgRc,pagar:pgPg,conciliacao:pgConciliacao,dados:pgDados,versoes:pgVersoes,divergencias:pgDivergencias,treinamento:()=>{},usuarios:pgUsuarios,acessos:pgAcessos})[E.pagina](j); try{ subtotalTabelas(document.querySelector(`section[data-pagina="${E.pagina}"]`)); }catch(e2){ console.warn('subtotais',e2); } }
+  try{ ({painel:pgVisao,indicadores:pgIndicadores,vendas:pgGeral,produtos:pgProdutos,clientes:pgClientes,vendedores:pgVendedores,pedidos:pgPedidos,registro:pgRegistro,aprovacoes:pgAprovacoes,conferencia:pgConferencia,inconsistencias:pgInconsistencias,extrato:pgExtrato,historico:pgHistorico,dre:pgDRE,equilibrio:pgEquilibrio,caixa:pgCx,fornecedores:pgFornecedores,receber:pgRc,pagar:pgPg,conciliacao:pgConciliacao,dados:pgDados,versoes:pgVersoes,divergencias:pgDivergencias,treinamento:()=>{},usuarios:pgUsuarios,acessos:pgAcessos})[E.pagina](j); try{ subtotalTabelas(document.querySelector(`section[data-pagina="${E.pagina}"]`)); }catch(e2){ console.warn('subtotais',e2); } }
   catch(e){ console.error(e); if(errBox){ errBox.hidden=false; errBox.innerHTML=`<span><b>Parte desta página não pôde ser montada.</b> Mande um print desta mensagem para a Seja Expert: <code>${esc(String(e&&e.message||e))}</code> (${esc(VERSAO)})</span>`; } }
 }
 
@@ -4003,7 +4020,7 @@ const MENU=[
   {grupo:'Gestão',ico:'<path d="M3 3h8v8H3zM13 3h8v5h-8zM13 10h8v11h-8zM3 13h8v8H3z"/>',itens:[['painel','Painel executivo','Vendas, resultado, caixa e o que pede decisão'],['indicadores','Quadro de indicadores','Comercial, resultado e caixa com tendência de 6 meses']]},
   {grupo:'Comercial',ico:'<path d="M3 4h2l2.4 11h11.2L21 7H7" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="9" cy="19" r="1.6"/><circle cx="17" cy="19" r="1.6"/>',itens:[['registro','Planilha de vendas','As mesmas colunas da planilha do comercial: os vendedores lançam e revisam as vendas aqui'],['vendas','Vendas','Pedidos, ticket médio e novas vendas × recompra (R1, R2, R3)'],['produtos','Produtos e mix','Tipo de produto, tecido e cor em peças ou R$ (R4) e curva ABC'],['clientes','Clientes','Curva ABC, faixas de valor, segmento e quem parou de comprar (C3, C5, C6)'],['vendedores','Vendedores e premiação','Faturamento, clientes novos, régua e apuração da premiação (C7, C8)'],['aprovacoes','Aprovações','Pedidos de alteração de preço dos vendedores para a diretoria aprovar'],['pedidos','Pedidos e entregas','Ciclo de pagamento e entregas das próximas semanas (C4)'],['treinamento','Treinamento','Passo a passo para lançar pedidos, usar o complementar e tirar dúvidas (vídeo com a Eva)']]},
   {grupo:'Conferência',ico:'<path d="M4 5h7v14H4zM13 5h7v14h-7z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M6.5 9h2M6.5 12h2M15.5 9h2M15.5 12h2" stroke="currentColor" stroke-width="1.8"/>',itens:[['inconsistencias','Inconsistências','Num lugar só: sistema × planilha pedido a pedido, colunas vazias, códigos e cadastro de clientes'],['divergencias','Divergências','Fechamento do mês: planilha × Conta Azul com observações e ações, e extrato × Conta Azul por conta'],['historico','Histórico de alterações','Quem lançou, alterou ou excluiu pedidos, e quando']]},
-  {grupo:'Financeiro',ico:'<circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 6v12M15 9c0-1.2-1.3-2-3-2s-3 .8-3 2 1.3 2 3 2 3 .8 3 2-1.3 2-3 2-3-.8-3-2" fill="none" stroke="currentColor" stroke-width="1.8"/>',itens:[['dre','DRE gerencial','Receita, custos, despesas e resultado por competência ou caixa'],['equilibrio','Margem e ponto de equilíbrio','Custos fixos × variáveis, margem de contribuição e ponto de equilíbrio (C1)'],['caixa','Fluxo de caixa','Saldo nos bancos, realizado e projeção de 13 semanas'],['receber','Contas a receber','Inadimplência por idade e por cliente'],['pagar','Contas a pagar','Despesas por categoria, centro de custo e fornecedor'],['extrato','Conciliação bancária','Extrato do banco × recebimentos e pagamentos baixados na Conta Azul']]},
+  {grupo:'Financeiro',ico:'<circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 6v12M15 9c0-1.2-1.3-2-3-2s-3 .8-3 2 1.3 2 3 2 3 .8 3 2-1.3 2-3 2-3-.8-3-2" fill="none" stroke="currentColor" stroke-width="1.8"/>',itens:[['dre','DRE gerencial','Receita, custos, despesas e resultado por competência ou caixa'],['equilibrio','Margem e ponto de equilíbrio','Custos fixos × variáveis, margem de contribuição e ponto de equilíbrio (C1)'],['caixa','Fluxo de caixa','Saldo nos bancos, realizado e projeção de 13 semanas'],['receber','Contas a receber','Inadimplência por idade e por cliente'],['pagar','Contas a pagar','Despesas por categoria, centro de custo e fornecedor'],['fornecedores','Análise de fornecedores','Quanto compramos de cada fornecedor (e vendemos a cada cliente), por categoria, da Conta Azul'],['extrato','Conciliação bancária','Extrato do banco × recebimentos e pagamentos baixados na Conta Azul']]},
   {grupo:'Controle',ico:'<path d="M6 2h9l4 4v16H6z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 11l2 2 4-4" fill="none" stroke="currentColor" stroke-width="2"/>',itens:[['conciliacao','Planilha × sistema (mês)','Ligação da planilha do Google e gravação dos pagamentos'],['dados','Qualidade dos dados','Colunas reconhecidas, campos em branco e grafias diferentes'],['versoes','Versões do painel','O que mudou em cada entrega'],]},
   {grupo:'Administração',ico:'<circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.6 2.7-6 6-6s6 2.4 6 6z"/><circle cx="17" cy="9" r="2.4"/><path d="M15.5 14.2c2.9.3 5.5 2.4 5.5 5.8h-4.5"/>',itens:[['usuarios','Usuários e permissões','Perfis, senhas temporárias e o que cada pessoa vê'],['acessos','Acessos ao painel','Quem entrou, quando e o que abriu · só ADM']]},
 ];
@@ -4011,7 +4028,7 @@ const TODAS=MENU.flatMap(g=>g.itens.map(i=>i[0]));
 const MESES_PAG=Object.fromEntries(TODAS.map(p=>[p,1]));
 const ITEM=Object.fromEntries(MENU.flatMap(g=>g.itens.map(i=>[i[0],{rot:i[1],ctx:i[2],grupo:g.grupo}])));
 const GRUPO_DE=Object.fromEntries(TODAS.map(p=>[p,ITEM[p].grupo]));
-const COMP=['vendas','produtos','clientes','vendedores','pedidos'], FINP=['dre','equilibrio','caixa','receber','pagar','extrato'];
+const COMP=['vendas','produtos','clientes','vendedores','pedidos'], FINP=['dre','equilibrio','caixa','fornecedores','receber','pagar','extrato'];
 const PADRAO={adm:TODAS,diretor:TODAS.filter(p=>p!=='acessos'),comercial:['registro',...COMP,'aprovacoes','inconsistencias','conciliacao','versoes','treinamento'],financeiro:['painel','indicadores','registro',...FINP,'inconsistencias','divergencias','historico','conciliacao','dados','versoes','treinamento'],consultor:[...COMP],vendedor:['registro',...COMP,'aprovacoes','inconsistencias','treinamento'],pcp:['registro',...COMP,'aprovacoes','inconsistencias','treinamento']};
 function paginasDe(u){ if(!u) return []; if(Array.isArray(u.paginasReais)) return u.paginasReais; const base=PADRAO[u.perfil]||[]; if(u.perfil==='adm'||!Array.isArray(u.paginas)) return base; const r=TODAS.filter(p=>(p!=='usuarios'&&p!=='acessos'&&u.paginas.includes(p))||(u.perfil==='diretor'&&p==='usuarios')||p==='aprovacoes'); return r.length?r:base.slice(0,1); }
 // páginas que aparecem agora (com o "Ver o painel como" do ADM)
@@ -4179,7 +4196,105 @@ function pgComercial(j){ pgGeral(j); pgProdutos(j); pgClientes(j); pgVendedores(
 // ---------- financeiro ----------
 const pgDRE=()=>{ if(comFin('finKpis')) pgFinanceiro(); };
 const pgEquilibrio=()=>{ if(comFin('mcTab')){ composicao(); mcTab(); semFiltro(()=>termometro('termo2','termoSub2')); } };
-const pgCx=()=>{ if(comFin('cxKpis')) pgCaixa(); };
+const pgCx=()=>{ if(comFin('cxKpis')){ if(!$('fcBox')) $('fcWrap').innerHTML=FC_HTML; ligarFC(); pgFluxoCat(); pgCaixa(); } };
+// ---------- v118: fluxo de caixa por categoria (diário, semanal, mensal) e análise de fornecedores, tudo da Conta Azul ----------
+// realizado = parcelas pagas (pela data do pagamento); previsto = parcelas em aberto (pelo vencimento, a partir de hoje)
+const FC={per:'dia',off:0,q:'',ab:{}};
+const dtPag=(x)=>{ if(x[11]) return x[11]; const v=x[6]||'', m=x[0]; if(v.slice(0,7)===m) return v; return v&&v<m+'-01'?m+'-01':isoD(Date.UTC(+m.slice(0,4),+m.slice(5,7),0,12)); };
+function colunasFC(per,off,hoje){ const out=[], MC=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+  if(per==='dia'){ const n=14, b=addD(hoje,-7+off*n); for(let i=0;i<n;i++){ const d=addD(b,i); out.push({ini:d,fim:d,rot:d.slice(8,10)+'/'+d.slice(5,7)}); } }
+  else if(per==='semana'){ const n=13, dw=(new Date(hoje+'T12:00:00Z').getUTCDay()+6)%7; let s=addD(hoje,-dw-8*7+off*n*7); for(let i=0;i<n;i++){ const f=addD(s,6); out.push({ini:s,fim:f,rot:s.slice(8,10)+'/'+s.slice(5,7)}); s=addD(s,7); } }
+  else { const n=9, y=+hoje.slice(0,4), mo=+hoje.slice(5,7)-1-6+off*n; for(let i=0;i<n;i++){ const a=y+Math.floor((mo+i)/12), m=((mo+i)%12+12)%12; out.push({ini:isoD(Date.UTC(a,m,1,12)),fim:isoD(Date.UTC(a,m+1,0,12)),rot:MC[m]+'/'+String(a).slice(2)}); } }
+  return out.map(c=>({...c,fut:c.ini>hoje,atual:c.ini<=hoje&&c.fim>=hoje})); }
+function movFC(){ const f=E.fin, hoje=hojeISO(), q=semA(FC.q);
+  const ok=(cat,pes)=>!q||semA(cat).includes(q)||semA(pes).includes(q);
+  const real=(f.det_caixa||[]).filter(x=>ok(x[2],x[4])).map(x=>({t:x[1],d:dtPag(x),cat:x[2]||'Sem categoria',pes:x[4]||'—',desc:x[5]||'',v:+x[7]||0,prev:false,aprox:!x[11]}));
+  const prev=(f.det_abertos||[]).filter(x=>x[1]>=hoje&&ok(x[4],x[2])).map(x=>({t:x[0],d:x[1],cat:x[4]||'Sem categoria',pes:x[2]||'—',desc:x[3]||'',v:+x[5]||0,prev:true}));
+  return real.filter(x=>x.d<=hoje).concat(prev); }
+function pgFluxoCat(){
+  const el=$('fcBox'); if(!el||!E.fin) return; const f=E.fin, hoje=hojeISO(), cols=colunasFC(FC.per,FC.off,hoje), movs=movFC();
+  const ini=cols[0].ini, fim=cols[cols.length-1].fim, noP=movs.filter(x=>x.d>=ini&&x.d<=fim), ci=(d)=>cols.findIndex(c=>d>=c.ini&&d<=c.fim);
+  const arv={r:new Map(),p:new Map()}, tot={r:cols.map(()=>0),p:cols.map(()=>0)};
+  noP.forEach(x=>{ const i=ci(x.d); if(i<0) return; const t=x.t==='r'?'r':'p'; tot[t][i]+=x.v; let c=arv[t].get(x.cat); if(!c){ c={v:cols.map(()=>0),s:0,p:new Map()}; arv[t].set(x.cat,c); } c.v[i]+=x.v; c.s+=x.v; let p=c.p.get(x.pes); if(!p){ p={v:cols.map(()=>0),s:0}; c.p.set(x.pes,p); } p.v[i]+=x.v; p.s+=x.v; });
+  // saldo nos bancos no fim de cada coluna: saldo de hoje − o que entrou/saiu depois (passado) ou + o previsto até lá (futuro)
+  const sHoje=+f.saldo_atual||0, todos=movFC(), liq=(x)=>x.t==='r'?x.v:-x.v;
+  const saldo=cols.map(c=>c.fim<hoje?sHoje-todos.filter(x=>!x.prev&&x.d>c.fim&&x.d<=hoje).reduce((a,x)=>a+liq(x),0):sHoje+todos.filter(x=>x.prev&&x.d<=c.fim).reduce((a,x)=>a+liq(x),0));
+  const res=cols.map((c,i)=>tot.r[i]-tot.p[i]);
+  const ab=FC.ab, cel=(v,cls='')=>`<td class="v ${cls} ${v<0?'neg':''}">${Math.abs(v)<0.005?'<span style="color:var(--ink3)">—</span>':brl(v)}</td>`;
+  const hcls=(c)=>c.atual?'sel':'';
+  let corpo='';
+  for(const [t,rot] of [['r','Entradas'],['p','Saídas']]){
+    const k0='g'+t, o0=ab[k0]!==false;
+    corpo+=`<tr class="tz"><td><button type="button" class="fc-tg" data-fk="${k0}" aria-expanded="${o0}">${o0?'▾':'▸'}</button> ${rot}</td>${tot[t].map((v,i)=>cel(v,hcls(cols[i]))).join('')}<td class="v"><b>${brl(tot[t].reduce((a,b)=>a+b,0))}</b></td></tr>`;
+    if(!o0) continue;
+    [...arv[t].entries()].sort((a,b)=>b[1].s-a[1].s).forEach(([cat,c])=>{ const k1=t+'|'+cat, o1=!!ab[k1];
+      corpo+=`<tr class="n1" data-fc="${esc(t+'||'+cat)}"><td><button type="button" class="fc-tg" data-fk="${esc(k1)}" aria-expanded="${o1}">${o1?'▾':'▸'}</button> ${esc(cat)}</td>${c.v.map((v,i)=>cel(v,hcls(cols[i]))).join('')}<td class="v">${brl(c.s)}</td></tr>`;
+      if(o1) [...c.p.entries()].sort((a,b)=>b[1].s-a[1].s).forEach(([pes,p])=>{ corpo+=`<tr class="n2" data-fc="${esc(t+'|'+pes+'|'+cat)}"><td>${esc(pes)}</td>${p.v.map((v,i)=>cel(v,hcls(cols[i]))).join('')}<td class="v">${brl(p.s)}</td></tr>`; }); });
+  }
+  corpo+=`<tr class="tz"><td>Resultado do período</td>${res.map((v,i)=>cel(v,hcls(cols[i]))).join('')}<td class="v"><b class="${res.reduce((a,b)=>a+b,0)<0?'neg':''}">${brl(res.reduce((a,b)=>a+b,0))}</b></td></tr>`;
+  corpo+=`<tr class="tz"><td>Saldo final nos bancos</td>${saldo.map((v,i)=>cel(v,hcls(cols[i]))).join('')}<td></td></tr>`;
+  const perRot={dia:'dia',semana:'semana',mes:'mês'}[FC.per];
+  el.querySelector('.fc-tab').innerHTML=`<table class="dre fc"><thead><tr><th>Categoria / ${FC.q?'filtro: '+esc(FC.q):'fornecedor e cliente'}</th>${cols.map(c=>`<th class="v ${hcls(c)}" title="${c.fut?'Previsto (em aberto, pelo vencimento)':c.atual?'Realizado até hoje + previsto até o fim do período':'Realizado (pago)'}">${esc(c.rot)}<br><small style="font-weight:500;color:var(--ink3)">${c.fut?'previsto':c.atual?'hoje':'realizado'}</small></th>`).join('')}<th class="v">Total</th></tr></thead><tbody>${corpo}</tbody></table>`;
+  gFluxo(el.querySelector('.fc-graf'),cols.map((c,i)=>({rot:c.rot,ent:tot.r[i],sai:tot.p[i],saldo:saldo[i]})));
+  el.querySelectorAll('.fc-graf g[data-i]').forEach(gg=>gg.onclick=()=>detFC(cols[+gg.dataset.i],null,null,null));
+  el.querySelector('.fc-sub').textContent=`${cols[0].ini.split('-').reverse().join('/')} a ${fim.split('-').reverse().join('/')} · visão por ${perRot} · realizado pela data do pagamento, previsto pelo vencimento (a partir de hoje; vencidos ficam em Contas a receber/pagar). Clique numa linha para abrir os fornecedores e numa célula para ver os lançamentos.`;
+  el.querySelectorAll('.fc-tg').forEach(b=>b.onclick=(e)=>{ e.stopPropagation(); const k=b.dataset.fk; ab[k]=k[0]==='g'?!(ab[k]!==false):!ab[k]; pgFluxoCat(); });
+  el.querySelectorAll('tr[data-fc] td.v').forEach((td,j)=>{ td.style.cursor='pointer'; td.onclick=()=>{ const tr=td.closest('tr'), [t,pes,cat]=tr.dataset.fc.split('|'), i=[...tr.children].indexOf(td)-1; detFC(i<cols.length?cols[i]:{ini,fim,rot:'todo o período'},t,cat||null,pes||null); }; });
+  el.querySelectorAll('tr.n1[data-fc] td:first-child').forEach(td=>{ td.style.cursor='pointer'; td.onclick=()=>td.querySelector('.fc-tg').click(); });
+  el.querySelectorAll('[data-fper]').forEach(b=>{ b.setAttribute('aria-pressed',String(b.dataset.fper===FC.per)); b.onclick=()=>{ FC.per=b.dataset.fper; FC.off=0; pgFluxoCat(); }; });
+}
+function detFC(c,t,cat,pes){ const ls=movFC().filter(x=>x.d>=c.ini&&x.d<=c.fim&&(!t||x.t===t)&&(!cat||x.cat===cat)&&(!pes||x.pes===pes));
+  abrirDet(`Fluxo de caixa · ${c.rot}${cat?' · '+cat:''}${pes?' · '+pes:''}`,'Realizado pela data do pagamento; previsto pelo vencimento (Conta Azul)',[{rot:'Data',t:'data'},{rot:'Situação'},{rot:'Tipo'},{rot:'Categoria'},{rot:'Cliente / fornecedor'},{rot:'Descrição',wr:1},{rot:'Valor',t:'brl',total:1}],
+    ls.map(x=>[x.d,x.prev?'A vencer':(x.t==='r'?'Recebido':'Pago'),x.t==='r'?'Entrada':'Saída',x.cat,x.pes,x.desc,x.t==='r'?x.v:-x.v])); }
+const FC_HTML=`<div id="fcBox" class="card"><div class="hd"><div><h3>Fluxo de caixa por categoria</h3><div class="sub fc-sub"></div></div><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><div class="seg" role="group" aria-label="Período">${[['dia','Diário'],['semana','Semanal'],['mes','Mensal']].map(([k,r])=>`<button type="button" data-fper="${k}" aria-pressed="false">${r}</button>`).join('')}</div><div class="seg" role="group" aria-label="Navegar"><button type="button" id="fcAnt" title="Período anterior">‹</button><button type="button" id="fcHoje">Hoje</button><button type="button" id="fcProx" title="Próximo período">›</button></div><input id="fcBusca" type="search" placeholder="Buscar fornecedor, cliente ou categoria" style="min-width:230px"></div></div><div class="leg" style="margin:0 0 6px"><span><i style="background:var(--s1)"></i>Entradas</span><span><i style="background:var(--s2)"></i>Saídas</span><span><i style="background:var(--ink);height:3px"></i>Saldo nos bancos</span></div><div class="fc-graf gq"></div><div class="tw fc-tab" style="margin-top:10px;max-height:70vh;overflow:auto"></div></div>`;
+function ligarFC(){ const el=$('fcBox'); if(!el||el.dataset.on) return; el.dataset.on='1'; $('fcAnt').onclick=()=>{ FC.off--; pgFluxoCat(); }; $('fcProx').onclick=()=>{ FC.off++; pgFluxoCat(); }; $('fcHoje').onclick=()=>{ FC.off=0; pgFluxoCat(); }; let tm; $('fcBusca').oninput=(e)=>{ clearTimeout(tm); tm=setTimeout(()=>{ FC.q=e.target.value.trim(); pgFluxoCat(); },250); }; }
+
+// ---------- análise de fornecedores (e clientes) ----------
+const AF={tipo:'p',per:'6',reg:'caixa',q:'',cat:''};
+function periodoAF(){ const ms=E.fin.meses, hoje=mesHojeBR(), ult=ms.filter(m=>m<=hoje), fimM=ult[ult.length-1]||ms[ms.length-1];
+  if(AF.per==='ano'){ const a=fimM.slice(0,4); return ms.filter(m=>m.startsWith(a)&&m<=fimM); }
+  const n=+AF.per||6, i=ms.indexOf(fimM); return ms.slice(Math.max(0,i-n+1),i+1); }
+function pgFornecedores(){
+  if(!comFin('afKpis')) return; const f=E.fin, ms=periodoAF(), n=ms.length, i0=f.meses.indexOf(ms[0]), antes=f.meses.slice(Math.max(0,i0-n),i0);
+  const src=(AF.reg==='caixa'?f.det_caixa:f.det_competencia)||[], t=AF.tipo, q=semA(AF.q), quem=t==='p'?'fornecedor':'cliente', Quem=t==='p'?'Fornecedor':'Cliente';
+  const base=src.filter(x=>x[1]===t), noP=base.filter(x=>ms.includes(x[0])), noA=base.filter(x=>antes.includes(x[0]));
+  const cats=[...new Set(noP.map(x=>x[2]||'Sem categoria'))].sort((a,b)=>a.localeCompare(b,'pt-BR'));
+  $('afCat').innerHTML='<option value="">Todas as categorias</option>'+cats.map(c=>`<option ${c===AF.cat?'selected':''}>${esc(c)}</option>`).join(''); if(AF.cat&&!cats.includes(AF.cat)) AF.cat='';
+  const fil=(x)=>(!AF.cat||(x[2]||'Sem categoria')===AF.cat)&&(!q||semA(x[4]).includes(q)||semA(x[2]).includes(q)||semA(x[5]).includes(q));
+  const P=noP.filter(fil), A=noA.filter(fil), nomeP=(x)=>x[4]||'(sem '+quem+')';
+  const g=new Map(); P.forEach(x=>{ const k=nomeP(x); let o=g.get(k); if(!o){ o={nome:k,v:0,n:0,cats:new Map(),ult:'',meses:{}}; g.set(k,o); } o.v+=+x[7]||0; o.n++; o.cats.set(x[2]||'Sem categoria',(o.cats.get(x[2]||'Sem categoria')||0)+(+x[7]||0)); const d=AF.reg==='caixa'?dtPag(x):(x[6]||x[0]); if(d>o.ult) o.ult=d; o.meses[x[0]]=(o.meses[x[0]]||0)+(+x[7]||0); });
+  const ga=new Map(); A.forEach(x=>ga.set(nomeP(x),(ga.get(nomeP(x))||0)+(+x[7]||0)));
+  const ab=new Map(); (f.det_abertos||[]).filter(x=>x[0]===t).forEach(x=>ab.set(x[2]||'(sem '+quem+')',(ab.get(x[2]||'(sem '+quem+')')||0)+(+x[5]||0)));
+  const rk=[...g.values()].sort((a,b)=>b.v-a.v), tot=rk.reduce((a,o)=>a+o.v,0), totA=A.reduce((a,x)=>a+(+x[7]||0),0), top5=rk.slice(0,5).reduce((a,o)=>a+o.v,0);
+  const abT=rk.reduce((a,o)=>a+(ab.get(o.nome)||0),0), novos=rk.filter(o=>!ga.has(o.nome)).length;
+  const perRot=`${nomeMes(ms[0])} a ${nomeMes(ms[n-1])}`;
+  const verP=(o)=>detLanc(`${Quem}: ${o.nome} · ${perRot}`,x=>x[1]===t&&ms.includes(x[0])&&nomeP(x)===o.nome&&(!AF.cat||(x[2]||'Sem categoria')===AF.cat),AF.reg==='caixa');
+  $('afKpis').innerHTML=kpiHtml([
+    [t==='p'?'Total comprado':'Total vendido',brl(tot),`${delta(tot,totA,t==='p'?1:0)}<span>período anterior: ${brl(totA)}</span>`,'dest','',()=>detLanc(`${t==='p'?'Saídas':'Entradas'} · ${perRot}`,x=>x[1]===t&&ms.includes(x[0])&&fil(x),AF.reg==='caixa')],
+    [t==='p'?'Fornecedores':'Clientes',int(rk.length),`<span>${int(novos)} sem movimento no período anterior</span>`,'','',null],
+    [`Maior ${quem}`,rk[0]?esc(rk[0].nome):'—',rk[0]?`<span>${brl(rk[0].v)} · ${pct(tot?rk[0].v/tot:0)} do total</span>`:'','','',rk[0]?()=>verP(rk[0]):null],
+    ['Concentração nos 5 maiores',pct(tot?top5/tot:0),`<span>${brl(top5)}</span>`,'','',null],
+    [t==='p'?'Em aberto a pagar':'Em aberto a receber',brl(abT),`<span>dos ${t==='p'?'fornecedores':'clientes'} da lista</span>`,'','',()=>detAbertos(`Em aberto · ${t==='p'?'fornecedores':'clientes'}`,x=>x[0]===t&&g.has(x[2]||'(sem '+quem+')'))],
+  ]);
+  gBarrasH($('afTop'),rk.slice(0,10).map(o=>({rot:o.nome,v:o.v,tip:`${o.nome}: ${brl2(o.v)} (${pct(tot?o.v/tot:0)})`,o})),{fmt:brl,labelW:190,destaque:true,onClick:(it)=>verP(it.o)});
+  $('afTopSub').textContent=`${perRot} · ${AF.reg==='caixa'?'pelo pagamento':'por competência'}${AF.cat?' · '+AF.cat:''}`;
+  // por categoria
+  const gc=new Map(); P.forEach(x=>{ const c=x[2]||'Sem categoria'; let o=gc.get(c); if(!o){ o={v:0,p:new Map()}; gc.set(c,o); } o.v+=+x[7]||0; o.p.set(nomeP(x),(o.p.get(nomeP(x))||0)+(+x[7]||0)); });
+  const rc=[...gc.entries()].sort((a,b)=>b[1].v-a[1].v);
+  $('afCats').innerHTML=rc.length?`<table><thead><tr><th>Categoria</th><th class="v">Total</th><th class="v">% do total</th><th class="v">${t==='p'?'Fornecedores':'Clientes'}</th><th>Principal ${quem}</th></tr></thead><tbody>${rc.map(([c,o])=>{ const pr=[...o.p.entries()].sort((a,b)=>b[1]-a[1])[0]; return `<tr data-afc="${esc(c)}" style="cursor:pointer"><td>${esc(c)}</td><td class="v">${brl2(o.v)}</td><td class="v">${pct(tot?o.v/tot:0)}</td><td class="v">${int(o.p.size)}</td><td>${esc(pr[0])} <span style="color:var(--ink3)">(${pct(o.v?pr[1]/o.v:0)})</span></td></tr>`; }).join('')}</tbody></table>`:'<div class="vazio">Sem lançamentos no período.</div>';
+  $('afCats').querySelectorAll('[data-afc]').forEach(tr=>tr.onclick=()=>{ AF.cat=tr.dataset.afc; pgFornecedores(); });
+  // ranking
+  $('afRank').innerHTML=rk.length?`<table><thead><tr><th class="v">#</th><th>${Quem}</th><th>Categoria principal</th><th class="v">Total</th><th class="v">% do total</th><th class="v">Lançamentos</th><th class="v">Média por lançamento</th><th class="v">Período anterior</th><th class="v">Variação</th><th>${AF.reg==='caixa'?'Último pagamento':'Última competência'}</th><th class="v">Em aberto</th></tr></thead><tbody>${rk.map((o,i)=>{ const pa=ga.get(o.nome)||0, va=pa?(o.v-pa)/pa:null, cp=[...o.cats.entries()].sort((a,b)=>b[1]-a[1])[0][0]; return `<tr data-afi="${i}" style="cursor:pointer"><td class="v">${i+1}º</td><td><b>${esc(o.nome)}</b></td><td>${esc(cp)}${o.cats.size>1?` <span style="color:var(--ink3)">+${o.cats.size-1}</span>`:''}</td><td class="v">${brl2(o.v)}</td><td class="v">${pct(tot?o.v/tot:0)}</td><td class="v">${int(o.n)}</td><td class="v">${brl2(o.v/o.n)}</td><td class="v">${pa?brl2(pa):'—'}</td><td class="v ${va!=null&&va>0&&t==='p'?'neg':''}">${va==null?'<span class="pill p-ok">novo</span>':(va>0?'+':'')+pct(va)}</td><td>${o.ult?(o.ult.length>7?o.ult.split('-').reverse().join('/'):nomeMes(o.ult)):'—'}</td><td class="v">${ab.get(o.nome)?brl2(ab.get(o.nome)):'—'}</td></tr>`; }).join('')}</tbody></table>`:'<div class="vazio">Nenhum lançamento encontrado com esse filtro.</div>';
+  $('afRank').querySelectorAll('[data-afi]').forEach(tr=>tr.onclick=()=>verP(rk[+tr.dataset.afi]));
+  $('afRankSub').textContent=`${pl(rk.length,quem,t==='p'?'fornecedores':'clientes')} · ${perRot} · comparado com ${antes.length?nomeMes(antes[0])+' a '+nomeMes(antes[antes.length-1]):'—'} · clique para ver os lançamentos`;
+  document.querySelectorAll('[data-aft]').forEach(b=>{ b.setAttribute('aria-pressed',String(b.dataset.aft===AF.tipo)); b.onclick=()=>{ AF.tipo=b.dataset.aft; AF.cat=''; pgFornecedores(); }; });
+  document.querySelectorAll('[data-afr]').forEach(b=>{ b.setAttribute('aria-pressed',String(b.dataset.afr===AF.reg)); b.onclick=()=>{ AF.reg=b.dataset.afr; pgFornecedores(); }; });
+  $('afPer').value=AF.per; $('afBusca').value!==AF.q&&document.activeElement!==$('afBusca')&&($('afBusca').value=AF.q);
+}
+$('afPer').onchange=(e)=>{ AF.per=e.target.value; pgFornecedores(); };
+$('afCat').onchange=(e)=>{ AF.cat=e.target.value; pgFornecedores(); };
+{ let tm; $('afBusca').oninput=(e)=>{ clearTimeout(tm); tm=setTimeout(()=>{ AF.q=e.target.value.trim(); pgFornecedores(); },250); }; }
+
 const pgRc=()=>{ if(comFin('rcKpis')) pgReceber(); };
 const pgPg=()=>{ if(comFin('pgKpis')) pgPagar(); };
 function composicao(){
