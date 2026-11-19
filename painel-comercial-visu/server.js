@@ -12,7 +12,7 @@ import * as anexos from './src/anexos.js';
 import * as receber from './src/receber.js';
 import * as notasCA from './src/notasCA.js';
 import * as acessos from './src/acessos.js';
-import { dadosFinanceiros } from './src/financeiro.js';
+import { dadosFinanceiros, amostraRateio } from './src/financeiro.js';
 import { planilhaConfigurada } from './src/planilha.js';
 import * as google from './src/google.js';
 import * as pscript from './src/planilhaScript.js';
@@ -419,6 +419,7 @@ app.post('/api/vendedores', exigeAdm, async (req, res) => {
   res.json({ inativos });
 });
 
+app.get('/api/financeiro/amostra', exigeLogin, async (req, res) => { if (req.usuario?.perfil !== 'adm') return res.status(403).json({ erro: 'só ADM' }); try { res.json(await amostraRateio()); } catch (e) { res.status(502).json({ erro: e.message }); } });
 app.get('/api/financeiro', exigeLogin, async (req, res) => {
   if (!veFinanceiro(req.usuario)) return res.status(403).json({ erro: 'seu perfil não tem acesso ao financeiro' });
   try { res.json(await dadosFinanceiros(req.query.forcar === '1')); }

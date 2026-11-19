@@ -2,6 +2,9 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v120 — 18/11/2026 — DRE e caixa pelo rateio da Conta Azul
+- Parcelas com várias categorias usam o valor de cada categoria (rateio), não a divisão igual.
+
 ## v119 — 18/11/2026 — Financeiro carrega sem esperar as datas de pagamento
 - Datas de pagamento buscadas em segundo plano; a primeira carga do financeiro não fica presa.
 

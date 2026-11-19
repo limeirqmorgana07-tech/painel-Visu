@@ -312,7 +312,7 @@ export function normalizarParcela(p, tipo) {
     total,
     pago,
     aberto: p.nao_pago !== undefined ? num(p.nao_pago) : Math.max(total - pago, 0),
-    categorias: (p.categorias || []).map((c) => ({ id: c.id, nome: c.nome })),
+    categorias: (p.categorias || []).map((c) => { const v = c.valor ?? c.valor_rateio ?? c.valor_categoria; return { id: c.id, nome: c.nome, ...(v != null && v !== '' ? { valor: num(v) } : {}) }; }),
     centros: (p.centros_custo || []).map((c) => c.nome),
     pessoa: nomeDe(p.cliente ?? p.fornecedor ?? p.contato) || '',
     data_pagamento: String(p.data_pagamento ?? p.data_ultimo_pagamento ?? p.data_quitacao ?? '').slice(0, 10),
@@ -344,6 +344,27 @@ function janelaPadrao(filtros) {
 }
 
 // data de vencimento é obrigatória na API; usamos uma janela larga e filtramos por competência ou pagamento
+// v120: rateio por categoria de uma parcela (a listagem traz só os nomes das categorias; o valor de cada uma vem no detalhe).
+// Leitura tolerante: procura no detalhe a lista de categorias com valor (rateio). Sem ela, devolve null.
+export async function detalheParcelaBruto(id) { return get(`/v1/financeiro/eventos-financeiros/parcelas/${id}`); }
+export function rateioDoDetalhe(d) {
+  let melhor = null;
+  const anda = (o, prof) => {
+    if (!o || typeof o !== 'object' || prof > 6) return;
+    if (Array.isArray(o)) {
+      const ok = o.length && o.every((x) => x && typeof x === 'object' && (x.id_categoria || x.categoria_id || x.categoria?.id || x.id_categoria_financeira) && (x.valor != null || x.valor_rateio != null));
+      if (ok && !melhor) melhor = o.map((x) => ({ id: x.id_categoria || x.categoria_id || x.categoria?.id || x.id_categoria_financeira, nome: x.nome_categoria || x.categoria?.nome || x.nome || '', valor: num(x.valor ?? x.valor_rateio) }));
+      o.forEach((x) => anda(x, prof + 1)); return;
+    }
+    for (const v of Object.values(o)) anda(v, prof + 1);
+  };
+  anda(d, 0);
+  return melhor;
+}
+export async function buscarParcelasBrutas(tipo, filtros = {}) {
+  const [pd, pa] = janelaPadrao(filtros);
+  return porJanelas(CAMINHO_PARCELAS[tipo], filtros.vencimento_de || pd, filtros.vencimento_ate || pa, { data_competencia_de: filtros.competencia_de, data_competencia_ate: filtros.competencia_ate });
+}
 export async function buscarParcelas(tipo, filtros = {}) {
   const [pd, pa] = janelaPadrao(filtros);
   const brutas = await porJanelas(CAMINHO_PARCELAS[tipo], filtros.vencimento_de || pd, filtros.vencimento_ate || pa, {

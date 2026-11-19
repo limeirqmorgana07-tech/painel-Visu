@@ -4,6 +4,7 @@
 import { config } from './config.js';
 import * as ca from './contaAzul.js';
 import { gerarDemoPlanilha } from './demo.js';
+import { lerKV, salvarKV } from './tokenStore.js';
 
 const iso = (d) => d.toISOString().slice(0, 10);
 const hojeBR = () => new Date(Date.now() - 3 * 3600e3);
@@ -25,15 +26,27 @@ function achatarDRE(itens, nivel = 0, out = []) {
   return out;
 }
 
-// valor com sinal (receita +, despesa −); parcela com várias categorias é dividida igualmente
+// v120: valor de cada categoria da parcela pelo rateio da Conta Azul (ex.: venda com desconto = receita bruta + desconto negativo).
+// Sem o rateio (ainda não buscado), divide igualmente como antes. O valor pago é distribuído na mesma proporção.
+function partes(p, campoValor, semCat) {
+  const base = Number(p[campoValor]) || 0;
+  const cats = p.categorias.length ? p.categorias : [{ id: null, nome: semCat }];
+  const rat = p.rateio?.length ? p.rateio : cats.length > 1 && cats.every((c) => c.valor != null) ? cats : null;
+  if (rat) {
+    const soma = rat.reduce((a, r) => a + (Number(r.valor) || 0), 0), ref = Math.abs(soma) > 0.009 ? soma : p.total;
+    const f = ref ? base / ref : 0;
+    return rat.map((r) => ({ id: r.id, nome: r.nome || cats.find((c) => c.id === r.id)?.nome || 'Sem categoria', v: (Number(r.valor) || 0) * f }));
+  }
+  return cats.map((c) => ({ id: c.id, nome: c.nome, v: base / cats.length }));
+}
+// valor com sinal (receita +, despesa −)
 function lancamentos(parcelas, campoValor, campoMes) {
   const out = [];
   for (const p of parcelas) {
-    const valor = p[campoValor] * (p.tipo === 'receber' ? 1 : -1);
-    if (!valor) continue;
-    const cats = p.categorias.length ? p.categorias : [{ id: null, nome: p.tipo === 'receber' ? 'Receitas sem categoria' : 'Despesas sem categoria' }];
+    const sinal = p.tipo === 'receber' ? 1 : -1;
+    if (!p[campoValor]) continue;
     const cc = p.centros?.length ? p.centros : ['Sem centro de custo'];
-    for (const c of cats) out.push({ tipo: p.tipo, mes: (p[campoMes] || '').slice(0, 7), categoria_id: c.id, categoria: c.nome, centro: cc[0], pessoa: p.pessoa, valor: valor / cats.length });
+    for (const c of partes(p, campoValor, p.tipo === 'receber' ? 'Receitas sem categoria' : 'Despesas sem categoria')) out.push({ tipo: p.tipo, mes: (p[campoMes] || '').slice(0, 7), categoria_id: c.id, categoria: c.nome, centro: cc[0], pessoa: p.pessoa, valor: c.v * sinal });
   }
   return out;
 }
@@ -98,7 +111,7 @@ function classificador(estrutura) {
   const anda = (itens, caminho) => {
     for (const it of itens || []) {
       const cam = [...caminho, it.descricao];
-      for (const c of it.categorias_financeiras || []) mapa.set(c.id, cam.join(' > '));
+      for (const c of it.categorias_financeiras || []) { mapa.set(c.id, cam.join(' > ')); (mapa.cod ||= new Map()).set(c.id, it.codigo || ''); }
       anda(it.subitens, cam);
     }
   };
@@ -140,17 +153,16 @@ function indicadores(estrutura, lancs, meses) {
 
 
 // ---------- detalhamento: os lançamentos por trás de cada total (para abrir ao clicar no painel) ----------
-// Linha compacta: [mês, r|p, categoria, centro, pessoa, descrição, vencimento, valor, status, caminho na DRE, natureza, data do pagamento (v118), conta]
+// Linha compacta: [mês, r|p, categoria, centro, pessoa, descrição, vencimento, valor, status, caminho na DRE, natureza, data do pagamento (v118), conta, código da DRE (v120)]
 function detalhar(parcelas, campoValor, campoMes, mapa) {
   const out = [];
   for (const p of parcelas) {
-    const cats = p.categorias.length ? p.categorias : [{ id: null, nome: 'Sem categoria' }];
-    for (const c of cats) {
-      const v = r2((p[campoValor] || 0) / cats.length);
+    for (const c of partes(p, campoValor, 'Sem categoria')) {
+      const v = r2(c.v);
       if (!v) continue;
       const caminho = mapa.get(c.id) || 'Lançamentos sem categoria na DRE';
       out.push([(p[campoMes] || '').slice(0, 7), p.tipo === 'receber' ? 'r' : 'p', c.nome, p.centros?.[0] || 'Sem centro de custo', p.pessoa || '', p.descricao || '', p.vencimento || '', v, p.status || '',
-        caminho.split(' > ').join('|'), natureza({ tipo: p.tipo, categoria_id: c.id, categoria: c.nome, valor: v }, mapa), p.data_pagamento || '', p.conta || '']);
+        caminho.split(' > ').join('|'), natureza({ tipo: p.tipo, categoria_id: c.id, categoria: c.nome, valor: v }, mapa), p.data_pagamento || '', p.conta || '', mapa.cod?.get(c.id) || '']);
     }
   }
   return out;
@@ -228,7 +240,9 @@ function montar(b, fonte) {
   const receber = contasEmAberto(abertos, 'receber', hoje);
   const pagar = contasEmAberto(abertos, 'pagar', hoje);
   const venc90 = vencidas90 || 0;
-  const linhaDRE = (l) => ({ descricao: l.descricao, codigo: l.codigo || '', nivel: l.nivel, totalizador: l.totalizador, valores: Object.fromEntries(Object.entries(l.valores).map(([k, v]) => [k, r2(v)])) });
+  const linhaDRE = (l) => ({ descricao: l.descricao, codigo: l.codigo || '', nivel: l.nivel, totalizador: l.totalizador, valores: Object.fromEntries(Object.entries(l.valores).map(([k, v]) => [k, r2(v)])),
+    // v120: categorias dentro de cada subgrupo (como na DRE gerencial da Conta Azul)
+    ...(l.detalhe && Object.keys(l.detalhe).length ? { categorias: Object.entries(l.detalhe).map(([nome, vs]) => ({ nome, valores: Object.fromEntries(Object.entries(vs).map(([k, v]) => [k, r2(v)])) })).filter((c) => Object.values(c.valores).some((v) => Math.abs(v) > 0.009)).sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR')) } : {}) });
   return {
     fonte,
     atualizado_em: new Date().toISOString(),
@@ -281,6 +295,32 @@ async function refinarDatasPagamento(pagas, hoje) {
     await Promise.all(tarefas.slice(i, i + 4).map(async (x) => { try { (await idsPagos(x.t, x.de, x.ate, x.fixo)).forEach((id) => { if (!porId.has(id) || !x.aprox) porId.set(id, x.data); }); } catch { /* segue com o vencimento */ } }));
   }
   for (const x of semData) { const d = porId.get(x.id); if (d && d.slice(0, 7) === x.mes_pag && d <= h) x.data_pagamento = d; }
+}
+
+// v120: rateio das parcelas com mais de uma categoria, buscado no detalhe da parcela e guardado (não muda depois de lançado)
+let rateioMemo = null;
+async function aplicarRateio(b) {
+  if (!rateioMemo) rateioMemo = (await lerKV('fin_rateio').catch(() => null)) || {};
+  const todas = [...b.comp, ...b.pagas, ...b.abertos], multi = new Map();
+  todas.forEach((p) => { if (p.id && p.categorias.length > 1 && !p.categorias.every((c) => c.valor != null)) multi.set(p.id, p); });
+  const falta = [...multi.values()].filter((p) => { const m = rateioMemo[p.id]; return !m || Math.abs((m.t || 0) - p.total) > 0.009; });
+  let novos = 0;
+  for (let i = 0; i < falta.length; i += 5) {
+    await Promise.all(falta.slice(i, i + 5).map(async (p) => { try { const r = ca.rateioDoDetalhe(await ca.detalheParcelaBruto(p.id)); rateioMemo[p.id] = { t: p.total, r: r ? r.map((x) => [x.id, x.valor, x.nome]) : null }; novos++; } catch { /* fica com a divisão igual */ } }));
+    if (novos && i % 50 === 0) await salvarKV('fin_rateio', rateioMemo).catch(() => {});
+  }
+  if (novos) await salvarKV('fin_rateio', rateioMemo).catch(() => {});
+  let aplic = 0;
+  todas.forEach((p) => { const m = rateioMemo[p.id]; if (m?.r?.length && p.categorias.length > 1) { p.rateio = m.r.map(([id, valor, nome]) => ({ id, valor, nome: nome || p.categorias.find((c) => c.id === id)?.nome || '' })); aplic++; } });
+  console.log(`[financeiro] rateio: ${multi.size} parcelas com mais de uma categoria, ${novos} buscadas agora, ${aplic} aplicadas`);
+  return aplic;
+}
+export async function amostraRateio() {
+  const d = new Date(Date.now() - 3 * 3600e3), m = iso(new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() - 1, 1))).slice(0, 7);
+  const br = await ca.buscarParcelasBrutas('receber', { competencia_de: `${m}-01`, competencia_ate: fimDoMes(m) });
+  const it = br.find((x) => (x.categorias || []).length > 1) || br[0];
+  const det = it ? await ca.detalheParcelaBruto(it.id).catch((e) => ({ erro: e.message })) : null;
+  return { mes: m, item_listagem: it, detalhe: det, rateio_lido: det ? ca.rateioDoDetalhe(det) : null, memo: rateioMemo ? Object.keys(rateioMemo).length : 0 };
 }
 
 async function carregarConta() {
@@ -392,6 +432,7 @@ export async function dadosFinanceiros(forcar = false) {
     .then((b) => {
       cache.quando = Date.now(); cache.dados = montar(b, 'conta_azul');
       // v118.1: o dia de cada pagamento é buscado depois, em segundo plano (antes atrasava a primeira carga do financeiro)
+      if (!cache.rateando) { cache.rateando = true; aplicarRateio(b).then((n) => { if (n) cache.dados = montar(b, 'conta_azul'); }).catch((e) => console.warn('[financeiro] rateio:', e.message)).finally(() => { cache.rateando = false; }); }
       if (!cache.refinando) { cache.refinando = true; refinarDatasPagamento(b.pagas, hojeBR()).then(() => { if (cache.quando && cache.dados?.fonte === 'conta_azul') cache.dados = montar(b, 'conta_azul'); }).catch((e) => console.warn('[financeiro] datas de pagamento:', e.message)).finally(() => { cache.refinando = false; }); }
       return cache.dados; })
     .finally(() => { cache.carregando = null; });
