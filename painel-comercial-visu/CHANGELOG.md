@@ -2,6 +2,10 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v122 — 18/11/2026 — Caixa sem recebimento repetido e complementar do Hero Box
+- Pagamentos do período numa consulta só, sem repetir parcela paga em partes.
+- Complementar do painel soma ao pedido da planilha nas Inconsistências.
+
 ## v121 — 18/11/2026 — DRE em grupos/subgrupos/categorias e caixa gerencial
 - DRE no formato da Conta Azul (códigos, níveis, competência e caixa); receita bruta e deduções negativas pelo rateio.
 - Caixa gerencial no Fluxo de caixa.

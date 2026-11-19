@@ -336,12 +336,23 @@ async function carregarConta() {
   ]);
   // regime de caixa: parcelas pagas em cada mês (a listagem não traz a data do pagamento, então buscamos mês a mês)
   const pagas = [];
-  for (const m of meses) {
+  // v122: uma consulta só para o período inteiro (a listagem traz a data do pagamento); mês a mês só se faltar a data
+  {
+    const [r, p] = await Promise.all([
+      ca.buscarParcelas('receber', { pagamento_de: ini, pagamento_ate: fim }),
+      ca.buscarParcelas('pagar', { pagamento_de: ini, pagamento_ate: fim }),
+    ]);
+    const todas = [...r, ...p];
+    if (todas.length && todas.every((x) => /^\d{4}-\d{2}-\d{2}$/.test(x.data_pagamento || ''))) pagas.push(...todas.filter((x) => x.data_pagamento >= ini && x.data_pagamento <= fim).map((x) => ({ ...x, mes_pag: x.data_pagamento.slice(0, 7) })));
+  }
+  if (!pagas.length) for (const m of meses) {
     const [r, p] = await Promise.all([
       ca.buscarParcelas('receber', { pagamento_de: `${m}-01`, pagamento_ate: fimDoMes(m) }),
       ca.buscarParcelas('pagar', { pagamento_de: `${m}-01`, pagamento_ate: fimDoMes(m) }),
     ]);
-    pagas.push(...r.map((x) => ({ ...x, mes_pag: m })), ...p.map((x) => ({ ...x, mes_pag: m })));
+    // v122: a mesma parcela paga em dois meses (parcial) aparecia nos dois com o valor pago inteiro; fica só uma vez
+    const vistos = new Set(pagas.map((x) => x.tipo + x.id));
+    pagas.push(...[...r, ...p].filter((x) => !vistos.has(x.tipo + x.id)).map((x) => ({ ...x, mes_pag: (x.data_pagamento || '').slice(0, 7) || m })));
   }
   const [recAb, pagAb] = await Promise.all([
     ca.buscarParcelas('receber', { vencimento_de: iso(new Date(hoje.getTime() - 400 * 864e5)), vencimento_ate: iso(new Date(hoje.getTime() + 100 * 864e5)) }),
