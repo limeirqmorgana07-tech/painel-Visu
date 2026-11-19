@@ -301,7 +301,6 @@ async function carregarConta() {
     ]);
     pagas.push(...r.map((x) => ({ ...x, mes_pag: m })), ...p.map((x) => ({ ...x, mes_pag: m })));
   }
-  await refinarDatasPagamento(pagas, hoje).catch((e) => console.warn('[financeiro] datas de pagamento:', e.message));
   const [recAb, pagAb] = await Promise.all([
     ca.buscarParcelas('receber', { vencimento_de: iso(new Date(hoje.getTime() - 400 * 864e5)), vencimento_ate: iso(new Date(hoje.getTime() + 100 * 864e5)) }),
     ca.buscarParcelas('pagar', { vencimento_de: iso(new Date(hoje.getTime() - 400 * 864e5)), vencimento_ate: iso(new Date(hoje.getTime() + 100 * 864e5)) }),
@@ -390,7 +389,11 @@ export async function dadosFinanceiros(forcar = false) {
   const vencido = Date.now() - cache.quando > Math.max(config.cacheSegundos, 600) * 1000;
   if (cache.dados && !vencido && !forcar) return cache.dados;
   cache.carregando ||= carregarConta()
-    .then((b) => { cache.quando = Date.now(); cache.dados = montar(b, 'conta_azul'); return cache.dados; })
+    .then((b) => {
+      cache.quando = Date.now(); cache.dados = montar(b, 'conta_azul');
+      // v118.1: o dia de cada pagamento é buscado depois, em segundo plano (antes atrasava a primeira carga do financeiro)
+      if (!cache.refinando) { cache.refinando = true; refinarDatasPagamento(b.pagas, hojeBR()).then(() => { if (cache.quando && cache.dados?.fonte === 'conta_azul') cache.dados = montar(b, 'conta_azul'); }).catch((e) => console.warn('[financeiro] datas de pagamento:', e.message)).finally(() => { cache.refinando = false; }); }
+      return cache.dados; })
     .finally(() => { cache.carregando = null; });
   if (cache.dados && !forcar) return cache.dados;
   return cache.carregando;

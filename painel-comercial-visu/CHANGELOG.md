@@ -2,6 +2,9 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v119 — 18/11/2026 — Financeiro carrega sem esperar as datas de pagamento
+- Datas de pagamento buscadas em segundo plano; a primeira carga do financeiro não fica presa.
+
 ## v118 — 18/11/2026 — Fluxo de caixa por categoria e Análise de fornecedores
 - Fluxo de caixa diário/semanal/mensal (realizado + previsto), entradas e saídas por categoria → fornecedor/cliente, busca e saldo nos bancos.
 - Nova página Análise de fornecedores (e clientes): ranking, categorias, concentração, variação e em aberto. Dados da Conta Azul.
