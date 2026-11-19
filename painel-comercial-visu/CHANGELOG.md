@@ -2,6 +2,10 @@
 
 O mesmo histórico aparece no painel, na página **Controle → Versões**, e a versão no ar aparece no rodapé.
 
+## v121 — 18/11/2026 — DRE em grupos/subgrupos/categorias e caixa gerencial
+- DRE no formato da Conta Azul (códigos, níveis, competência e caixa); receita bruta e deduções negativas pelo rateio.
+- Caixa gerencial no Fluxo de caixa.
+
 ## v120 — 18/11/2026 — DRE e caixa pelo rateio da Conta Azul
 - Parcelas com várias categorias usam o valor de cada categoria (rateio), não a divisão igual.
 

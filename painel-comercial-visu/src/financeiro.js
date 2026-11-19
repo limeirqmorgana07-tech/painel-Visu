@@ -300,16 +300,18 @@ async function refinarDatasPagamento(pagas, hoje) {
 // v120: rateio das parcelas com mais de uma categoria, buscado no detalhe da parcela e guardado (não muda depois de lançado)
 let rateioMemo = null;
 async function aplicarRateio(b) {
-  if (!rateioMemo) rateioMemo = (await lerKV('fin_rateio').catch(() => null)) || {};
+  if (!rateioMemo) rateioMemo = (await lerKV('fin_rateio2').catch(() => null)) || {};
+  // valor bruto de cada categoria; dedução (desconto, devolução, cancelamento) entra negativa, como na DRE da Conta Azul
+  const cl = classificador(b.estrutura || []), neg = (p, id, nome) => (p.tipo === 'receber' ? String(cl.cod?.get(id) || '').startsWith('02') || /desconto|devolu|cancelament/i.test(nome || '') : /desconto/i.test(nome || ''));
   const todas = [...b.comp, ...b.pagas, ...b.abertos], multi = new Map();
   todas.forEach((p) => { if (p.id && p.categorias.length > 1 && !p.categorias.every((c) => c.valor != null)) multi.set(p.id, p); });
   const falta = [...multi.values()].filter((p) => { const m = rateioMemo[p.id]; return !m || Math.abs((m.t || 0) - p.total) > 0.009; });
   let novos = 0;
   for (let i = 0; i < falta.length; i += 5) {
-    await Promise.all(falta.slice(i, i + 5).map(async (p) => { try { const r = ca.rateioDoDetalhe(await ca.detalheParcelaBruto(p.id)); rateioMemo[p.id] = { t: p.total, r: r ? r.map((x) => [x.id, x.valor, x.nome]) : null }; novos++; } catch { /* fica com a divisão igual */ } }));
-    if (novos && i % 50 === 0) await salvarKV('fin_rateio', rateioMemo).catch(() => {});
+    await Promise.all(falta.slice(i, i + 5).map(async (p) => { try { const r = ca.rateioDoDetalhe(await ca.detalheParcelaBruto(p.id)); rateioMemo[p.id] = { t: p.total, r: r ? r.map((x) => [x.id, neg(p, x.id, x.nome) ? -Math.abs(x.valor) : x.valor, x.nome]) : null }; novos++; } catch { /* fica com a divisão igual */ } }));
+    if (novos && i % 50 === 0) await salvarKV('fin_rateio2', rateioMemo).catch(() => {});
   }
-  if (novos) await salvarKV('fin_rateio', rateioMemo).catch(() => {});
+  if (novos) await salvarKV('fin_rateio2', rateioMemo).catch(() => {});
   let aplic = 0;
   todas.forEach((p) => { const m = rateioMemo[p.id]; if (m?.r?.length && p.categorias.length > 1) { p.rateio = m.r.map(([id, valor, nome]) => ({ id, valor, nome: nome || p.categorias.find((c) => c.id === id)?.nome || '' })); aplic++; } });
   console.log(`[financeiro] rateio: ${multi.size} parcelas com mais de uma categoria, ${novos} buscadas agora, ${aplic} aplicadas`);

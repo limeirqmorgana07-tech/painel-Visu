@@ -353,7 +353,7 @@ export function rateioDoDetalhe(d) {
     if (!o || typeof o !== 'object' || prof > 6) return;
     if (Array.isArray(o)) {
       const ok = o.length && o.every((x) => x && typeof x === 'object' && (x.id_categoria || x.categoria_id || x.categoria?.id || x.id_categoria_financeira) && (x.valor != null || x.valor_rateio != null));
-      if (ok && !melhor) melhor = o.map((x) => ({ id: x.id_categoria || x.categoria_id || x.categoria?.id || x.id_categoria_financeira, nome: x.nome_categoria || x.categoria?.nome || x.nome || '', valor: num(x.valor ?? x.valor_rateio) }));
+      if (ok && !melhor) melhor = o.map((x) => ({ id: x.id_categoria || x.categoria_id || x.categoria?.id || x.id_categoria_financeira, nome: x.nome_categoria || x.categoria?.nome || x.nome || '', valor: num(x.valor_bruto ?? x.valor ?? x.valor_rateio), liquido: num(x.valor ?? x.valor_rateio) }));
       o.forEach((x) => anda(x, prof + 1)); return;
     }
     for (const v of Object.values(o)) anda(v, prof + 1);

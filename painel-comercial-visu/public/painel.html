@@ -298,6 +298,10 @@ tr.aberto .dv-tg::before{transform:rotate(90deg)}
 /* financeiro e conciliação */
 .dre td{padding:7px 8px}
 .dre tr.tz td{font-weight:700;background:var(--bg)}
+.dre tr.dg td{font-weight:600}
+.fc-tg{border:0;background:none;cursor:pointer;color:var(--ink2);font-size:12px;padding:0 4px}
+.cxg-res{display:grid;gap:4px;padding:10px 14px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}
+.cxg-lin{display:flex;gap:12px;align-items:baseline}.cxg-lin b{min-width:130px;text-align:right;font-variant-numeric:tabular-nums}.cxg-lin span{color:var(--ink2);font-size:13px}
 .dre tr.n1 td:first-child{padding-left:24px;color:var(--ink2)}
 .dre tr.n2 td:first-child{padding-left:40px;color:var(--ink3);font-size:12.5px}
 .dre td.sel,.dre th.sel{background:var(--orangeSoft)}
@@ -1149,7 +1153,7 @@ table.matriz td.vz{color:var(--line2)}
       <div class="card"><div class="hd"><div><h3>Receita, despesas e resultado</h3><div class="sub" id="finEvolSub">Últimos meses</div></div></div><div id="finEvol"></div>
         <div class="leg"><span><i style="background:var(--s1)"></i>Receita</span><span><i style="background:var(--s2)"></i>Despesas</span><span><i style="background:var(--ink);height:3px"></i>Resultado</span><span><i style="background:var(--ink2);height:2px"></i>Ponto de equilíbrio</span></div></div>
       </div>
-    <div class="card" style="margin-top:16px"><div class="hd"><div><h3>DRE gerencial</h3><div class="sub" id="dreSub">—</div></div></div><div class="tw"><table class="dre" id="dre"></table></div></div>
+    <div class="card" style="margin-top:16px"><div class="hd"><div><h3>DRE gerencial</h3><div class="sub" id="dreSub">Valores da Conta Azul pelo rateio de cada categoria · clique num valor para ver os lançamentos</div></div><div class="seg" role="group" aria-label="Nível"><button type="button" data-dniv="1" aria-pressed="false">Grupos</button><button type="button" data-dniv="2" aria-pressed="false">Subgrupos</button><button type="button" data-dniv="3" aria-pressed="true">Categorias</button></div></div><div class="tw"><table class="dre" id="dre"></table></div></div>
   </section>
 
   <section data-pagina="equilibrio" hidden>
@@ -1160,7 +1164,7 @@ table.matriz td.vz{color:var(--line2)}
   </section>
 
   <section data-pagina="caixa" hidden>
-    <div id="fcWrap" style="margin-bottom:16px"></div>
+    <div id="cxgWrap"></div><div id="fcWrap" style="margin-bottom:16px"></div>
     <div class="kpis" id="cxKpis"></div>
     <div class="g2" style="margin-top:16px">
       <div class="card"><div class="hd"><div><h3>Projeção semanal</h3><div class="sub" id="projSub">Saldo atual + contas a receber − contas a pagar pela data de vencimento</div></div></div><div id="projGraf"></div>
@@ -1375,8 +1379,9 @@ const nomeMes=(m)=>{const[a,b]=m.split('-');return MES_L[+b-1]+' de '+a};
 const somaMes=(m,n)=>{const[a,b]=m.split('-').map(Number);const d=new Date(Date.UTC(a,b-1+n,1));return d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0')};
 function delta(a,b,inv){ if(!b) return '<span class="delta eq">sem base</span>'; const d=(a-b)/b; const c=Math.abs(d)<.005?'eq':(d>0)!==!!inv?'up':'down'; return `<span class="delta ${c}">${d>0?'▲':d<0?'▼':'■'} ${pct(Math.abs(d))}</span>`; }
 
-const VERSAO='v120';
+const VERSAO='v121';
 const VERSOES=[
+ {v:'v121',data:'18/11/2026',tit:'DRE em grupos, subgrupos e categorias e caixa gerencial',arq:'painel-visu-v121.zip',itens:['DRE gerencial igual à da Conta Azul: códigos (01, 01.1, 01T…), Grupos, Subgrupos e Categorias, abrir e fechar por linha, competência e caixa.','Receita pelo valor bruto e descontos/devoluções negativos, pelo rateio de cada venda.','Fluxo de caixa: novo Caixa gerencial (saldo inicial, entradas e saídas por grupo, saldo final), de um mês ou de um período.']},
  {v:'v120',data:'18/11/2026',tit:'DRE e caixa pelo rateio da Conta Azul',arq:'painel-visu-v120.zip',itens:['Lançamento com mais de uma categoria (ex.: venda com desconto incondicional) passa a usar o valor de cada categoria da Conta Azul, e não mais a divisão igual. Corrige a DRE e o caixa (receita, deduções, custos e despesas).']},
  {v:'v119',data:'18/11/2026',tit:'Financeiro carrega sem esperar as datas de pagamento',arq:'painel-visu-v119.zip',itens:['O financeiro volta a carregar na hora: o dia de cada pagamento (para o fluxo diário e semanal) é buscado na Conta Azul em segundo plano e entra na próxima atualização.']},
  {v:'v118',data:'18/11/2026',tit:'Fluxo de caixa por categoria e Análise de fornecedores',arq:'painel-visu-v118.zip',itens:['Fluxo de caixa: visão diária, semanal e mensal no topo da página, com realizado (pela data do pagamento) e previsto (pelo vencimento); entradas e saídas por categoria, abrindo em fornecedor/cliente; busca por nome; saldo nos bancos ao fim de cada período; clique na célula para ver os lançamentos.','Nova página Financeiro → Análise de fornecedores: total comprado, maior fornecedor, concentração nos 5 maiores, em aberto a pagar, 10 maiores, por categoria e ranking com variação sobre o período anterior. Também mostra os clientes. Caixa ou competência, período e busca.','Tudo direto da Conta Azul.']},
@@ -2245,13 +2250,7 @@ function pgFinanceiro(){
   $('finEvolSub').textContent=cx?'Entradas e saídas de caixa por mês':'Receita e despesas por competência';
   $('finEvol').querySelectorAll('.fm').forEach(el=>{ const mm=el.dataset.m; el.addEventListener('mousemove',e=>dica(e,`<b>${nomeMes(mm)}</b><br>${cx?'Entradas':'Receita'} ${brl(rec(mm))}<br>${cx?'Saídas':'Despesas'} ${brl(des(mm))}<br>${cx?'Saldo':'Resultado'} ${brl(res(mm))}`)); el.addEventListener('mouseleave',semDica); el.addEventListener('click',()=>{semDica();E.mes=mm;if([...$('fMes').options].some(o=>o.value===mm))$('fMes').value=mm;desenhar();}); });
   $('saldos').innerHTML=f.saldos?.length?`<div class="tw"><table><tbody>${f.saldos.map(c=>`<tr><td class="el">${esc(c.nome)}</td><td class="v ${c.saldo<0?'neg':''}">${c.saldo==null?'—':brl2(c.saldo)}</td></tr>`).join('')}<tr class="tot"><td>Total</td><td class="v">${brl2(f.saldos.reduce((s2,c)=>s2+(c.saldo||0),0))}</td></tr></tbody></table></div>`:'<div class="vazio">Nenhuma conta financeira encontrada.</div>';
-  // DRE: 6 meses até o selecionado
-  const idx=f.meses.indexOf(m), cols=f.meses.slice(Math.max(0,idx-5),idx+1);
-  $('dreSub').textContent=`Regime de competência · ${nomeMes(cols[0])} a ${nomeMes(m)}`+(f.sem_categoria?` · ${int(f.sem_categoria)} lançamentos sem categoria`:'');
-  const dre=cx?(f.dre_caixa||f.dre):f.dre, baseRec=(c)=>Math.abs(dre[0]?.valores[c]||0);
-  $('dreSub').textContent=`${cx?'Regime de caixa (pelo pagamento)':'Regime de competência'} · ${nomeMes(cols[0])} a ${nomeMes(m)}`+(f.sem_categoria?` · ${int(f.sem_categoria)} lançamentos sem categoria`:'');
-  $('dre').innerHTML=`<thead><tr><th>Conta</th>${cols.map(c=>`<th class="v ${c===m?'sel':''}">${MES_C[+c.slice(5)-1]}/${c.slice(2,4)}</th>`).join('')}<th class="v">% receita</th></tr></thead><tbody>${dre.map(l=>`<tr class="${l.totalizador?'tz':''} n${Math.min(l.nivel,2)}"><td>${esc(l.descricao)}</td>${cols.map(c=>`<td class="v ${c===m?'sel':''} ${l.valores[c]<0?'neg':''} ${!l.totalizador&&l.valores[c]?'lk':''}"${!l.totalizador&&l.valores[c]?D(()=>detLanc(l.descricao+' · '+nomeMes(c),x=>x[0]===c&&x[9].split('|')[l.nivel]===l.descricao,cx)):''}>${brl(l.valores[c])}</td>`).join('')}<td class="v">${baseRec(m)?pct(l.valores[m]/baseRec(m)):'—'}</td></tr>`).join('')}</tbody>`;
-
+  desenharDRE(f,m,cx); // v121: grupos, subgrupos e categorias, como na DRE gerencial da Conta Azul
 }
 
 
@@ -4198,7 +4197,7 @@ function pgComercial(j){ pgGeral(j); pgProdutos(j); pgClientes(j); pgVendedores(
 // ---------- financeiro ----------
 const pgDRE=()=>{ if(comFin('finKpis')) pgFinanceiro(); };
 const pgEquilibrio=()=>{ if(comFin('mcTab')){ composicao(); mcTab(); semFiltro(()=>termometro('termo2','termoSub2')); } };
-const pgCx=()=>{ if(comFin('cxKpis')){ if(!$('fcBox')) $('fcWrap').innerHTML=FC_HTML; ligarFC(); pgFluxoCat(); pgCaixa(); } };
+const pgCx=()=>{ if(comFin('cxKpis')){ if(!$('cxgBox')) $('cxgWrap').innerHTML=CXG_HTML; ligarCxg(); pgCaixaGerencial(); if(!$('fcBox')) $('fcWrap').innerHTML=FC_HTML; ligarFC(); pgFluxoCat(); pgCaixa(); } };
 // ---------- v118: fluxo de caixa por categoria (diário, semanal, mensal) e análise de fornecedores, tudo da Conta Azul ----------
 // realizado = parcelas pagas (pela data do pagamento); previsto = parcelas em aberto (pelo vencimento, a partir de hoje)
 const FC={per:'dia',off:0,q:'',ab:{}};
@@ -4250,6 +4249,73 @@ function detFC(c,t,cat,pes){ const ls=movFC().filter(x=>x.d>=c.ini&&x.d<=c.fim&&
     ls.map(x=>[x.d,x.prev?'A vencer':(x.t==='r'?'Recebido':'Pago'),x.t==='r'?'Entrada':'Saída',x.cat,x.pes,x.desc,x.t==='r'?x.v:-x.v])); }
 const FC_HTML=`<div id="fcBox" class="card"><div class="hd"><div><h3>Fluxo de caixa por categoria</h3><div class="sub fc-sub"></div></div><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><div class="seg" role="group" aria-label="Período">${[['dia','Diário'],['semana','Semanal'],['mes','Mensal']].map(([k,r])=>`<button type="button" data-fper="${k}" aria-pressed="false">${r}</button>`).join('')}</div><div class="seg" role="group" aria-label="Navegar"><button type="button" id="fcAnt" title="Período anterior">‹</button><button type="button" id="fcHoje">Hoje</button><button type="button" id="fcProx" title="Próximo período">›</button></div><input id="fcBusca" type="search" placeholder="Buscar fornecedor, cliente ou categoria" style="min-width:230px"></div></div><div class="leg" style="margin:0 0 6px"><span><i style="background:var(--s1)"></i>Entradas</span><span><i style="background:var(--s2)"></i>Saídas</span><span><i style="background:var(--ink);height:3px"></i>Saldo nos bancos</span></div><div class="fc-graf gq"></div><div class="tw fc-tab" style="margin-top:10px;max-height:70vh;overflow:auto"></div></div>`;
 function ligarFC(){ const el=$('fcBox'); if(!el||el.dataset.on) return; el.dataset.on='1'; $('fcAnt').onclick=()=>{ FC.off--; pgFluxoCat(); }; $('fcProx').onclick=()=>{ FC.off++; pgFluxoCat(); }; $('fcHoje').onclick=()=>{ FC.off=0; pgFluxoCat(); }; let tm; $('fcBusca').oninput=(e)=>{ clearTimeout(tm); tm=setTimeout(()=>{ FC.q=e.target.value.trim(); pgFluxoCat(); },250); }; }
+
+// ---------- v121: DRE gerencial no formato da Conta Azul (grupos, subgrupos e categorias) e caixa gerencial ----------
+const DREV={niv:3,ab:{}};
+function desenharDRE(f,m,cx){
+  const idx=f.meses.indexOf(m), cols=f.meses.slice(Math.max(0,idx-5),idx+1), dre=(cx?(f.dre_caixa||f.dre):f.dre).filter(l=>!/^Lançamentos sem categoria/.test(l.descricao));
+  const fora=(cx?(f.dre_caixa||f.dre):f.dre).find(l=>/^Lançamentos sem categoria/.test(l.descricao));
+  const baseRec=(c)=>Math.abs(dre.find(l=>l.codigo==='01')?.valores[c]||dre[0]?.valores[c]||0);
+  let ult=''; const rot=(l)=>{ if(l.codigo){ ult=l.codigo.split('.')[0]; return l.codigo+' '+l.descricao; } return (ult?ult+'T ':'')+l.descricao; };
+  const linhas=[]; let g0='', s0='';
+  dre.forEach(l=>{ const r=rot(l);
+    if(l.totalizador){ linhas.push({t:'tz',r,l}); return; }
+    if(l.nivel===0){ g0=l.codigo||l.descricao; linhas.push({t:'g',r,l,k:g0}); }
+    else { s0=l.codigo||l.descricao; linhas.push({t:'s',r,l,k:s0,pai:g0}); (l.categorias||[]).forEach(c=>linhas.push({t:'c',r:c.nome,l:c,pai:s0,avo:g0,cod:l.codigo})); } });
+  const abG=(k)=>DREV.ab['g|'+k]??(DREV.niv>=2), abS=(k)=>DREV.ab['s|'+k]??(DREV.niv>=3);
+  const vis=(x)=>{ if(x.t==='tz'||x.t==='g') return true; if(x.t==='s') return abG(x.pai); return abG(x.avo)&&abS(x.pai); };
+  const temFilhos=(x)=>x.t==='g'?linhas.some(y=>y.t==='s'&&y.pai===x.k):x.t==='s'?linhas.some(y=>y.t==='c'&&y.pai===x.k):false;
+  const aberto=(x)=>x.t==='g'?abG(x.k):x.t==='s'?abS(x.k):false;
+  const filtro=(x,c)=>x.t==='g'?(y=>y[0]===c&&(y[13]||'').split('.')[0]===x.l.codigo):x.t==='s'?(y=>y[0]===c&&y[13]===x.l.codigo):(y=>y[0]===c&&y[13]===x.cod&&y[2]===x.r);
+  const tot=(v)=>cols.reduce((a,c)=>a+(v[c]||0),0);
+  $('dre').innerHTML=`<thead><tr><th>DRE · ${cx?'regime de caixa':'regime de competência'}</th>${cols.map(c=>`<th class="v ${c===m?'sel':''}">${MES_C[+c.slice(5)-1]}/${c.slice(2,4)}</th>`).join('')}<th class="v">Total</th><th class="v">% receita (${MES_C[+m.slice(5)-1]})</th></tr></thead><tbody>${linhas.filter(vis).map((x,i)=>{ const v=x.l.valores, tf=temFilhos(x), ab=aberto(x);
+    const tg=tf?`<button type="button" class="fc-tg" data-dk="${x.t}|${esc(x.k)}" aria-expanded="${ab}">${ab?'▾':'▸'}</button> `:'';
+    return `<tr class="${x.t==='tz'?'tz':x.t==='g'?'dg':x.t==='s'?'n1':'n2'}"><td>${tg}${esc(x.r)}</td>${cols.map(c=>{ const lk=x.t!=='tz'&&Math.abs(v[c]||0)>0.009; return `<td class="v ${c===m?'sel':''} ${(v[c]||0)<0?'neg':''} ${lk?'lk':''}" ${lk?`data-di="${linhas.indexOf(x)}" data-dc="${c}"`:''}>${Math.abs(v[c]||0)<0.005?'<span style="color:var(--ink3)">—</span>':brl2(v[c])}</td>`; }).join('')}<td class="v ${tot(v)<0?'neg':''}">${brl2(tot(v))}</td><td class="v">${baseRec(m)?pct((v[m]||0)/baseRec(m)):'—'}</td></tr>`; }).join('')}${fora?`<tr class="n2"><td colspan="${cols.length+3}" style="color:var(--ink3);white-space:normal">Fora da DRE (categorias que a Conta Azul não liga à DRE, como transferências, empréstimos, investimentos e depósitos a identificar): ${brl2(fora.valores[m]||0)} em ${nomeMes(m)}. Aparecem no Caixa gerencial.</td></tr>`:''}</tbody>`;
+  $('dre').querySelectorAll('.fc-tg').forEach(b=>b.onclick=(e)=>{ e.stopPropagation(); const [t,k]=b.dataset.dk.split('|'); DREV.ab[t+'|'+k]=!(t==='g'?abG(k):abS(k)); pgFinanceiro(); });
+  $('dre').querySelectorAll('td[data-di]').forEach(td=>td.onclick=()=>{ const x=linhas[+td.dataset.di], c=td.dataset.dc; detLanc(x.r+' · '+nomeMes(c),filtro(x,c),cx); });
+  document.querySelectorAll('[data-dniv]').forEach(b=>{ b.setAttribute('aria-pressed',String(+b.dataset.dniv===DREV.niv)); b.onclick=()=>{ DREV.niv=+b.dataset.dniv; DREV.ab={}; pgFinanceiro(); }; });
+}
+
+// caixa gerencial (demonstrativo do período): saldo inicial + entradas − saídas = saldo final, como no relatório da Seja Expert
+const CXG={de:null,ate:null,ab:{}};
+const CXG_IN=[['e1','Recebimento de vendas do mês',(x,c)=>/^0[12](\.|$)/.test(c)&&!/antes de agosto/i.test(x[2])],['e2','Recebimento de vendas anteriores a agosto',(x)=>/antes de agosto/i.test(x[2])],['e3','Depósitos não identificados',(x)=>/pendente de identifica|a identificar/i.test(x[2])],['e5','Aportes dos sócios',(x)=>/aporte/i.test(x[2])],['e4','Outras entradas (rendimentos, reembolsos, fretes)',()=>true]];
+const CXG_OUT=[['s1','Matéria-prima, insumos e serviços de produção',(x,c)=>c.startsWith('03.1')],['s2','Folha de pagamento e encargos',(x,c)=>c.startsWith('03.3')||c.startsWith('04.4')],['s3','Estrutura da fábrica (aluguel, energia, manutenção)',(x,c)=>c.startsWith('03.2')],['s4','Despesas comerciais, administrativas e viagens',(x,c)=>['04.1','04.2','04.3','04.5'].some(k=>c.startsWith(k))],['s5','Impostos',(x,c)=>c.startsWith('02.1')||c.startsWith('06')],['s6','Descontos e cancelamentos',(x,c)=>c.startsWith('02.2')||c.startsWith('02.3')],['s7','Juros, tarifas e outras despesas financeiras',(x,c)=>c.startsWith('05')],['s8','Máquinas, equipamentos e investimentos',(x)=>/investiment|imobilizad/i.test(x[2])],['s9','Consórcios e empréstimos',(x)=>/cons[oó]rcio|empr[eé]stimo|aporte/i.test(x[2])],['s10','Outras saídas',()=>true]];
+function saldoBancosEm(d){ const f=E.fin, hoje=hojeISO(), sb=(f.saldos||[]).filter(c=>c.tipo!=='CARTAO_CREDITO').reduce((a,c)=>a+(+c.saldo||0),0);
+  if(d>=hoje) return sb; return sb-(f.det_caixa||[]).filter(x=>{ const dp=dtPag(x); return dp>d&&dp<=hoje; }).reduce((a,x)=>a+(x[1]==='r'?1:-1)*(+x[7]||0),0); }
+function pgCaixaGerencial(){
+  const el=$('cxgBox'); if(!el||!E.fin) return; const f=E.fin, ms=f.meses.filter(mm=>mm<=mesHojeBR());
+  if(!CXG.ate||!ms.includes(CXG.ate)) CXG.ate=ms.includes(mesFin())?mesFin():ms[ms.length-1]; if(!CXG.de||!ms.includes(CXG.de)||CXG.de>CXG.ate) CXG.de=CXG.ate;
+  const opt=(v)=>ms.map(mm=>`<option value="${mm}" ${mm===v?'selected':''}>${nomeMes(mm)}</option>`).join('');
+  $('cxgDe').innerHTML=opt(CXG.de); $('cxgAte').innerHTML=opt(CXG.ate);
+  const ini=CXG.de+'-01', fim=isoD(Date.UTC(+CXG.ate.slice(0,4),+CXG.ate.slice(5,7),0,12)), hoje=hojeISO(), fimR=fim<hoje?fim:hoje, dAnt=addD(ini,-1);
+  const ls=(f.det_caixa||[]).filter(x=>{ const d=dtPag(x); return d>=ini&&d<=fimR; });
+  const grupo=(x,G)=>{ const c=x[13]||''; return G.find(g=>g[2](x,c))[0]; };
+  const ent=ls.filter(x=>x[1]==='r'), sai=ls.filter(x=>x[1]==='p');
+  const montar=(xs,G,sinal)=>G.map(([k,rot])=>{ const its=xs.filter(x=>grupo(x,G)===k); const cats=new Map(); its.forEach(x=>cats.set(x[2],(cats.get(x[2])||0)+sinal*(+x[7]||0))); return {k,rot,v:its.reduce((a,x)=>a+sinal*(+x[7]||0),0),its,cats:[...cats.entries()].sort((a,b)=>Math.abs(b[1])-Math.abs(a[1]))}; }).filter(g=>Math.abs(g.v)>0.009);
+  const GE=montar(ent,CXG_IN,1), GS=montar(sai,CXG_OUT,-1), tE=GE.reduce((a,g)=>a+g.v,0), tS=GS.reduce((a,g)=>a+g.v,0);
+  const sI=saldoBancosEm(dAnt), sF=saldoBancosEm(fimR), dif=sF-(sI+tE+tS);
+  const dBR2=(d)=>d.split('-').reverse().slice(0,2).join('/');
+  el.querySelector('.cxg-res').innerHTML=`<div class="cxg-lin"><b>${brl2(sI)}</b><span>saldo nas contas no início do período (${dBR2(dAnt)})</span></div><div class="cxg-lin"><b>${brl2(tE)}</b><span>entraram nas contas</span></div><div class="cxg-lin"><b class="neg">${brl2(-tS)}</b><span>saíram das contas</span></div><div class="cxg-lin"><b style="color:${tE+tS>=0?'var(--green,#16643a)':'var(--red)'}">${brl2(tE+tS)}</b><span>${tE+tS>=0?'sobraram':'faltaram'} no período</span></div><div class="cxg-lin"><b>${brl2(sF)}</b><span>saldo nas contas em ${dBR2(fimR)}</span></div>`;
+  el.querySelector('.cxg-kpis').innerHTML=kpiHtml([
+    [`Saldo inicial · ${dBR2(dAnt)}`,brl2(sI),'<span>contas bancárias e aplicação</span>','','',()=>abrirDet('Saldos bancários','Saldo atual de cada conta (sem cartões de crédito)',[{rot:'Conta'},{rot:'Tipo'},{rot:'Saldo hoje',t:'brl',total:1}],(f.saldos||[]).filter(c=>c.tipo!=='CARTAO_CREDITO').map(c=>[c.nome,c.tipo,c.saldo]))],
+    ['Entradas',brl2(tE),`<span>${int(ent.length)} movimentos</span>`,'','',()=>detCxg('Entradas',ent)],
+    ['Saídas',`<span class="neg">${brl2(tS)}</span>`,`<span>${int(sai.length)} movimentos</span>`,'','',()=>detCxg('Saídas',sai)],
+    [`Saldo final · ${dBR2(fimR)}`,brl2(sF),`<span>${tE+tS>=0?'+':''}${brl2(tE+tS)} no período</span>`,'dest','',null]]);
+  const lin=(g,sinal,T)=>{ const o=!!CXG.ab[g.k]; return `<tr class="n1"><td><button type="button" class="fc-tg" data-ck="${g.k}" aria-expanded="${o}">${o?'▾':'▸'}</button> ${esc(g.rot)}</td><td class="v lk ${g.v<0?'neg':''}" data-cg="${g.k}">${brl2(g.v)}</td><td class="v">${pct(T?Math.abs(g.v)/Math.abs(T):0)}</td></tr>`+(o?g.cats.map(([c,v])=>`<tr class="n2"><td>${esc(c)}</td><td class="v lk ${v<0?'neg':''}" data-cg="${g.k}" data-cc="${esc(c)}">${brl2(v)}</td><td class="v">${pct(g.v?v/g.v:0)}</td></tr>`).join(''):''); };
+  el.querySelector('.cxg-tab').innerHTML=`<table class="dre"><thead><tr><th>Movimento</th><th class="v">Valor (R$)</th><th class="v">% do grupo</th></tr></thead><tbody>
+    <tr class="tz"><td>Saldo inicial das contas em ${dBR2(dAnt)}</td><td class="v">${brl2(sI)}</td><td></td></tr>
+    <tr class="tz"><td>(+) Entradas</td><td class="v">${brl2(tE)}</td><td></td></tr>${GE.map(g=>lin(g,1,tE)).join('')}
+    <tr class="tz"><td>(−) Saídas</td><td class="v neg">${brl2(tS)}</td><td></td></tr>${GS.map(g=>lin(g,-1,tS)).join('')}
+    ${Math.abs(dif)>0.5?`<tr class="n2"><td style="white-space:normal">Movimentos sem título na Conta Azul (transferências, cartões e ajustes de saldo)</td><td class="v ${dif<0?'neg':''}">${brl2(dif)}</td><td></td></tr>`:''}
+    <tr class="tz"><td>Saldo final das contas em ${dBR2(fimR)}</td><td class="v">${brl2(sF)}</td><td></td></tr></tbody></table>`;
+  const todos=[...GE,...GS];
+  el.querySelectorAll('.cxg-tab .fc-tg').forEach(b=>b.onclick=()=>{ CXG.ab[b.dataset.ck]=!CXG.ab[b.dataset.ck]; pgCaixaGerencial(); });
+  el.querySelectorAll('.cxg-tab [data-cg]').forEach(td=>td.onclick=()=>{ const g=todos.find(x=>x.k===td.dataset.cg), c=td.dataset.cc; detCxg(g.rot+(c?' · '+c:''),c?g.its.filter(x=>x[2]===c):g.its); });
+  el.querySelector('.cxg-sub').textContent=`Movimentos realizados (pagos e recebidos) de ${dBR2(ini)} a ${dBR2(fimR)}, pela data do pagamento na Conta Azul · clique no valor para ver os lançamentos e em ▸ para abrir as categorias`;
+}
+function detCxg(tit,xs){ abrirDet('Caixa gerencial · '+tit,'Realizado pela data do pagamento (Conta Azul)',[{rot:'Pago em',t:'data'},{rot:'Tipo'},{rot:'Categoria'},{rot:'Cliente / fornecedor'},{rot:'Descrição',wr:1},{rot:'Valor',t:'brl',total:1}],xs.map(x=>[dtPag(x),x[1]==='r'?'Entrada':'Saída',x[2],x[4],x[5],(x[1]==='r'?1:-1)*(+x[7]||0)])); }
+const CXG_HTML=`<div id="cxgBox" class="card" style="margin-bottom:16px"><div class="hd"><div><h3>Caixa gerencial</h3><div class="sub cxg-sub"></div></div><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><label style="font-size:12px;color:var(--ink2)">De <select id="cxgDe"></select></label><label style="font-size:12px;color:var(--ink2)">até <select id="cxgAte"></select></label></div></div><div class="cxg-res"></div><div class="kpis cxg-kpis" style="margin-top:12px"></div><div class="tw cxg-tab" style="margin-top:14px"></div></div>`;
+function ligarCxg(){ const el=$('cxgBox'); if(!el||el.dataset.on) return; el.dataset.on='1'; $('cxgDe').onchange=(e)=>{ CXG.de=e.target.value; if(CXG.de>CXG.ate) CXG.ate=CXG.de; pgCaixaGerencial(); }; $('cxgAte').onchange=(e)=>{ CXG.ate=e.target.value; if(CXG.de>CXG.ate) CXG.de=CXG.ate; pgCaixaGerencial(); }; }
 
 // ---------- análise de fornecedores (e clientes) ----------
 const AF={tipo:'p',per:'6',reg:'caixa',q:'',cat:''};
